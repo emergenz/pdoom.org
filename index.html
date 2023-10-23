@@ -11,31 +11,39 @@
         margin: 0;
         padding: 0;
         height: 100%;
-      }
-      body {
         overflow: hidden;
-        font-family: 'Libre Baskerville', serif;
-        font-size: x-large;
-      }
-      #title {
-        margin-top: 20px;
-        font-size: 2em;
-        text-align: center;
-      }
-      #description {
-        text-align: center;
-        margin-bottom: 20px;
       }
       #threejs-container {
-        position: relative;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+      }
+      #title, #description {
+        position: absolute;
+        z-index: 2;
+        color: white;  /* Choose color according to the Three.js scene for contrast */
+      }
+      #title {
+        top: 10%;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 6em;
+      }
+      #description {
+        bottom: 10%;
+        left: 5%;
+        font-size: 2em;
       }
 		</style>
 		<script type="module" crossorigin src="/assets/index-b1e8026c.js"></script>
 	</head>
 	<body>
     
+    <div id="threejs-container"></div>
     <div id="title">p(doom)</div>
     <div id="description">A grassroots initiative on A(G)I research disregarding dumb societal gatekeeping mechanisms.</div>
-    <div id="threejs-container"></div>
 	</body>
 </html>
