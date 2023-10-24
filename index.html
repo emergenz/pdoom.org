@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>p(doom)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"> 
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville&display=swap" rel="stylesheet">
+		<style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+      #threejs-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+      }
+      #title, #description {
+        position: absolute;
+        z-index: 2;
+        color: white;  /* Choose color according to the Three.js scene for contrast */
+      }
+      #title {
+        top: 10%;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 6em;
+      }
+      #description {
+        bottom: 10%;
+        left: 5%;
+        font-size: 2em;
+      }
+      #description a {
+        color: white;
+        text-decoration: none;
+      }
+		</style>
+		<script type="module" crossorigin src="/assets/index-b1e8026c.js"></script>
+	</head>
+	<body>
+    
+    <div id="threejs-container"></div>
+    <div id="title">p(doom)</div>
+    <div id="description">A grassroots initiative on <a href="./gatekeeping.html">A(G)I research<a> disregarding dumb societal gatekeeping mechanisms.</div>
+	</body>
+</html>
