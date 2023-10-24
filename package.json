@@ -6,7 +6,6 @@
     "vite": "^4.5.0"
   },
   "scripts": {
-    "gh-deploy": "git push origin :gh-pages && git subtree push --prefix dist origin gh-pages",
-    "gh-deploy-init": "git push origin && git subtree push --prefix dist origin gh-pages"
+    "build": "vite build && cp CNAME dist/"
   }
 }
