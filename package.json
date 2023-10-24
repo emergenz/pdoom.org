@@ -6,6 +6,6 @@
     "vite": "^4.5.0"
   },
   "scripts": {
-    "build": "vite build && for file in *.html; do if [ \"$file\" != \"index.html\" ]; then cp \"$file\" dist/; fi; done"
+    "build": "vite build && cp CNAME dist/ && for file in *.html; do if [ \"$file\" != \"index.html\" ]; then cp \"$file\" dist/; fi; done"
   }
 }
