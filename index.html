@@ -3,15 +3,18 @@
 	<head>
 		<meta charset="utf-8">
 		<title>p(doom)</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com"> 
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
-    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital@0;1&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="favicon.png">
 		<style>
       html, body {
         margin: 0;
         padding: 0;
         height: 100%;
         overflow: hidden;
+        font-family: 'Lora', serif;
+        color: #e8e8e8;
       }
       #threejs-container {
         position: absolute;
@@ -22,17 +25,14 @@
         z-index: 1;
       }
       #title, #description {
-        position: absolute;
         z-index: 2;
-        color: white;  /* Choose color according to the Three.js scene for contrast */
       }
       #title {
-        top: 10%;
-        left: 50%;
-        transform: translateX(-50%);
         font-size: 6em;
+        font-style: italic;
       }
       #description {
+        position: absolute;
         bottom: 10%;
         left: 5%;
         font-size: 2em;
@@ -40,12 +40,29 @@
       #description a {
         color: white;
       }
+      #logo {
+        width: 150px;
+        z-index: 3;
+        margin-right: 20px;
+      }
+      #header-container {
+        position: absolute;
+        top: 10%;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        z-index: 2;
+      }
 		</style>
 	</head>
 	<body>
     <script type="module" src="/main.js"></script>
     <div id="threejs-container"></div>
-    <div id="title">p(doom)</div>
+    <div id="header-container">
+      <img id="logo" src="logo.png" alt="Your Logo">
+      <div id="title">p(doom)</div>
+    </div>
     <div id="description"><a href="https://forms.gle/DEjETmquYhfijWNa8">Join</a> the grassroots initiative on <a href="./gatekeeping.html">A(G)I research<a> disregarding dumb societal gatekeeping mechanisms.</div>
 	</body>
 </html>
