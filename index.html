@@ -35,10 +35,14 @@
         position: absolute;
         bottom: 10%;
         left: 5%;
+        right: 5%;
         font-size: 2em;
       }
       #description a {
         color: white;
+      }
+      #links a {
+        margin-right: 0px; /* Space between the links */
       }
       #logo {
         width: 150px;
@@ -48,12 +52,13 @@
       #header-container {
         position: absolute;
         top: 10%;
-        left: 50%;
-        transform: translateX(-50%);
+        left: 10%;
+        transform: translateX(-10%);
         display: flex;
         align-items: center;
         z-index: 2;
       }
+
 		</style>
 		<script type="module" crossorigin src="/assets/index-b1e8026c.js"></script>
 	</head>
@@ -61,9 +66,15 @@
     
     <div id="threejs-container"></div>
     <div id="header-container">
-      <img id="logo" src="/assets/logo-d5c89b6e.png" alt="Your Logo">
+      <img id="logo" src="/assets/logo-d5c89b6e.png" alt="p(doom)">
       <div id="title">p(doom)</div>
     </div>
-    <div id="description"><a href="https://forms.gle/DEjETmquYhfijWNa8">Join</a> the grassroots initiative on <a href="./gatekeeping.html">A(G)I research<a> disregarding dumb societal gatekeeping mechanisms.</div>
+    <div id="description">
+      Pioneering truly open research on the path to AGI.
+      <div id="links">
+        <a href="about.html" id="about-link">About.</a>
+        <a href="https://forms.gle/DEjETmquYhfijWNa8" id="join-link">Join.</a>
+      </div>
+    </div>
 	</body>
 </html>
