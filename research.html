@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>p(doom)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital@0;1&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="favicon.png">
+	<style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Lora', serif;
+      color: #e8e8e8;
+    }
+    #main-container {
+      display: flex;
+      flex-direction: column; /* Stack elements vertically */
+      color: #171717;
+      margin-left: 5%;
+      margin-right: 5%;
+    }
+    #title, #description {
+      z-index: 2;
+    }
+    #title {
+      font-size: 6em;
+      font-style: italic;
+    }
+    #content {
+      bottom: 10%;
+      margin-bottom: 1em;
+      font-size: 1.5em;
+    }
+    #content a {
+      color: #171717;
+    }
+    #links a {
+      margin-right: 20px; /* Space between the links */
+    }
+    #logo {
+      width: 150px;
+      margin-right: 20px;
+    }
+    #header-container {
+      display: flex;
+      align-items: center;
+    }
+	</style>
+	</head>
+	<body>
+    <div id="main-container">
+        <div id="header-container">
+        <img id="logo" src="logo.png" alt="p(doom)">
+        <div id="title">research</div>
+        </div>
+        <div id="content">
+            <hr>
+                ACT: <u>A</u>daptive <u>C</u>ompute <u>T</u>ransformer.
+            <br>
+            <br>
+            Large language models exhibit remarkable reasoning capabilities with scale. However, a fundamental flaw of current-generation transformer-based language models is their uniform allocation of compute per token. A vanilla transformer (and all currently used variations thereof) generates each token after one (and only one) forward-pass through the network. Intuitively this means that at inference time the network 'thinks' for the same amount of time before each token generation. While this is not an inherent limitation on the reasoning capabilities of transformer models, it does mean that we would need <b>very</b> large transformers for them to exhibit longer-term planning capabilities. Since we posit that (standalone) models with more than 1 trillion parameters are already unfeasible to serve at scale (note: MoE is a different story), we need to overcome this limitation of the transformer architecture.
+            <br>
+            <br>
+            While we have been aware of this limitation and of its severity for a long time (much longer than <div style="font-style: italic; display: inline; ">p(doom)</div> even existed for), today it is an open secret in the ML research community. Everyone knows that all big AGI labs (DeepMind, OpenAI, imbue, to name a few) are rushing towards overcoming this limitation [0][1][2][3][4], yet nobody has found a solution yet. The market value of an LLM/LMM with agentic reasoning capabilities is difficult to imagine.
+            <br>
+            <br>
+            Most public discourse around scaling up reasoning capabilities involves developing methods to shift computational resources from training to inference time: While only a tiny fraction of computational resources of LLMs are used for inference (>99% of compute goes to pretraining), systems like Pluribus [5][6], AlphaGo [7] or MuZero [8] leverage vast amounts of compute at inference time, primarily via Monte Carlo Tree Search. A few techniques for shifting compute to inference time already exist, albeit rather simple ones: chain-of-thought [9], tree-of-thought [10], sampling+scoring [1]. All of these techniques try to shift computation post-hoc. While [1] only helps if the correct solution is actually in the sampled space, [5] and [6] seem unelegant in execution, somewhat arbitrary as solutions and above all, have not been able to yield agentic systems.
+            <br>
+            <br>
+            We posit that one elegant way of addressing the transformer's limitation is via adaptive computation. We want to find a way of letting the model think for as long as it deems necessary before each token. That way, we do not hard-code a 'reasoning architecture' into the model, we do not materialize the search. The model's thought process stays in the latent space. We posit that such a model trained at GPT-4 level scale will exhibit agentic behaviour.
+            <br>
+            <br>
+            <a href="https://x.com/pfau/status/1732785418565796167?s=20">[0]</a>
+            <a href="https://storage.googleapis.com/deepmind-media/AlphaCode2/AlphaCode2_Tech_Report.pdf">[1]</a>
+            <a href="https://www.reuters.com/technology/sam-altmans-ouster-openai-was-precipitated-by-letter-board-about-ai-breakthrough-2023-11-22/">[2]</a>
+            <a href="https://imbue.com/podcast/2023-02-09-podcast-episode-27-noam-brown/">[3]</a>
+            <a href="https://www.youtube.com/watch?v=zjkBMFhNj_g&t=2100s">[4]</a>
+            <a href="https://www.science.org/doi/10.1126/science.aay2400">[5]</a>
+            <a href="https://www.linkedin.com/posts/franz-srambical-418630178_paper-cfr-variants-and-its-application-activity-6988455459317768192-42Kd?utm_source=share&utm_medium=member_desktop">[6]</a>
+            <a href="https://www.nature.com/articles/nature16961">[7]</a>
+            <a href="https://arxiv.org/abs/1911.08265">[8]</a>
+            <a href="https://arxiv.org/abs/2201.11903">[9]</a>
+            <a href="https://arxiv.org/abs/2305.10601">[10]</a>
+            
+            <hr>
+
+            Bi-directional Open-Vocabulary Retrieval of Proteins and their Function.
+            <br>
+            <br>
+            Current approaches to protein function annotation are primarily based on sequence or structure similarity searches and take EC- [1] or GO-numbers [2] as the ground-truth functional annotations. However, neither of those annotation methods adequately captures the complexity of protein functions, which act on multiple spatial and temporal scales and are often highly dependent on the environment.
+            <br>
+            <br>
+            The primary goal of this project is to create a shared embedding space aligning amino acid sequences with their nuanced, expert-labeled, text-based functional annotations from the Swiss-Prot [3] database. Leveraging ESM-2 [4] as the protein encoder, a capable text encoder, as well as CLIP-loss [5] for embedding space alignment, the model enables bi-directional retrieval of amino acid sequences and functional annotations, including zero-shot learning applications.
+            <br>
+            <br>
+            Since this is a true novelty in the field, there is currently no direct evaluation procedure for the capabilities of such a model. That being said, the model is suitable for participation in the Critical Assessment of Protein Function Annotation Algorithms (CAFA) [6] by zeros-shotting the GO-labels.
+            <br>
+            <br>
+            <a href="https://enzyme.expasy.org/">[1]</a>
+            <a href="https://geneontology.org/">[2]</a>
+            <a href="https://www.expasy.org/resources/uniprotkb-swiss-prot">[3]</a>
+            <a href="https://www.science.org/doi/10.1126/science.ade2574">[4]</a>
+            <a href="https://arxiv.org/abs/2103.00020">[5]</a>
+            <a href="https://www.kaggle.com/competitions/cafa-5-protein-function-prediction/overview">[6]</a>
+            <hr>
+        </div>
+    </div>
+	</body>
+</html>
