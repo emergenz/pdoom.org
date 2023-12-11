@@ -58,7 +58,7 @@
         </div>
         <div id="content">
             <hr>
-                ACT: <u>A</u>daptive <u>C</u>ompute <u>T</u>ransformer.
+            <b>ACT: <u>A</u>daptive <u>C</u>ompute <u>T</u>ransformer.</b>
             <br>
             <br>
             Large language models exhibit remarkable reasoning capabilities with scale. However, a fundamental flaw of current-generation transformer-based language models is their uniform allocation of compute per token. A vanilla transformer (and all currently used variations thereof) generates each token after one (and only one) forward-pass through the network. Intuitively this means that at inference time the network 'thinks' for the same amount of time before each token generation. While this is not an inherent limitation on the reasoning capabilities of transformer models, it does mean that we would need <b>very</b> large transformers for them to exhibit longer-term planning capabilities. Since we posit that (standalone) models with more than 1 trillion parameters are already unfeasible to serve at scale (note: MoE is a different story), we need to overcome this limitation of the transformer architecture.
@@ -87,7 +87,7 @@
             
             <hr>
 
-            Bi-directional Open-Vocabulary Retrieval of Proteins and their Function.
+            <b>Bi-directional Open-Vocabulary Retrieval of Proteins and their Function.</b>
             <br>
             <br>
             Current approaches to protein function annotation are primarily based on sequence or structure similarity searches and take EC- [1] or GO-numbers [2] as the ground-truth functional annotations. However, neither of those annotation methods adequately captures the complexity of protein functions, which act on multiple spatial and temporal scales and are often highly dependent on the environment.
