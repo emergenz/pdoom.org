@@ -55,7 +55,7 @@ export const footerTemplate = `
   </a> is dedicated to truly open research on the path to AGI
 
   <div class="nav">
-    <a href="index.html">Archive</a>
+    <a href="blog.html">Archive</a>
     <a href="https://github.com/p-doom">GitHub</a>
     <a href="https://twitter.com/prob_doom">Twitter</a>
     <hr>

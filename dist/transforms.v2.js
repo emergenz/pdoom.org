@@ -13048,12 +13048,12 @@ distill-header .nav a {
 <div class='footer-container'>
 
   <a href="/" class="logo">
-    <img src="${img}" alt="p(doom) logo"/>
+    <img src="${img}" alt="p(doom) logo" />
     p(doom)
   </a> is dedicated to truly open research on the path to AGI
 
   <div class="nav">
-    <a href="index.html">Archive</a>
+    <a href="blog.html">Archive</a>
     <a href="https://github.com/p-doom">GitHub</a>
     <a href="https://twitter.com/prob_doom">Twitter</a>
     <hr>
