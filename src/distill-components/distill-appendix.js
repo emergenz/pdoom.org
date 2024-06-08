@@ -45,7 +45,7 @@ const styles = `
 export function appendixTemplate(frontMatter) {
   let html = styles;
   frontMatter.journal.title = "p(doom) blog";
-  frontMatter.journal.url = "https://pdoom.org/blog";
+  frontMatter.journal.url = "https://pdoom.org/blog.html";
 
   if (typeof frontMatter.githubUrl !== 'undefined') {
     html += `

@@ -9031,7 +9031,7 @@ distill-header .nav a {
   function appendixTemplate(frontMatter) {
     let html = styles$2;
     frontMatter.journal.title = "p(doom) blog";
-    frontMatter.journal.url = "https://pdoom.org/blog";
+    frontMatter.journal.url = "https://pdoom.org/blog.html";
 
     if (typeof frontMatter.githubUrl !== 'undefined') {
       html += `
