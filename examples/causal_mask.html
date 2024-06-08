@@ -1,0 +1,128 @@
+<!--
+  Copyright 2018 The Distill Template Authors
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!doctype html>
+
+<head>
+  <script src="template.v2.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf8">
+</head>
+
+<body>
+  <!--
+  <distill-header></distill-header>
+  -->
+  <d-front-matter>
+    <script id='distill-front-matter' type="text/json">{
+    "title": "Going Beyond the Causal Mask in Language Modeling",
+    "description": "Although ubiquitously used in large-scale language modeling, the necessity of the causal mask is seldom questioned in the literature. Why do we really need the causal mask?",
+    "published": "June 8, 2024",
+    "url": "https://pdoom.org/causal_mask.html",
+    "authors": [
+      {
+        "author":"Franz Srambical",
+        "authorURL":"https://srambical.fr/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"}]
+      }
+    ],
+    "katex": {
+      "delimiters": [
+        {"left": "$$", "right": "$$", "display": false}
+      ]
+    }
+  }</script>
+  </d-front-matter>
+  <d-title>
+    <p>Although ubiquitously used in large-scale language modeling <d-cite key="radford2018improving, radford2019language, brown2020language, raffel2020exploring, touvron2023llama, bai2023qwen, young2024yi"></d-cite>, the neccessity of the causal mask is seldom questioned in the literature.
+      <i>"The causal mask is needed to inhibit information leakage from future tokens"</i> is a commonly encountered, almost dogmatically repeated phrase.
+      However, among researchers and practitioners alike, there exists a certain confusion around what the causal mask is and why we actually need it. </p>
+  </d-title>
+  <d-byline></d-byline>
+  <d-article>
+    <a class="marker" href="#section-1" id="section-1"><span>1</span></a>
+    <h2>A primer on the causal mask</h2>
+    <p>The confusion about the causal mask already starts with its name. The original Transformer paper <d-cite key="vaswani2017attention"></d-cite>
+      does not mention the term <i>causal mask</i> at all. While we cannot definitively pin-point the origin of the term, its
+      first well-known appearance is in the T5 paper <d-cite key="raffel2020exploring"></d-cite>, where it is used to describe the
+      triangular mask that is applied to the attention weights in the self-attention mechanism (Figure 1, middle). The mask being triangular
+      has the effect of only allowing information from previous tokens to be used in the computation of the current token, which already
+      leads us to the first common misconception: <u>For causal LMs at inference time, even if $$n$$ tokens have already been generated, token $$k$$ with $$k < n$$
+      cannot attend to token $$j$$ with $$k < j < n$$, even though token $$j$$ is already known</u>. From an information-theoretic perspective,
+      it is clear that this is suboptimal, and indeed recent works have studied this algorithmic deficiency of causal language models <d-cite key="zhou2024what, ding2024causallm"></d-cite>.
+    </p>
+    <aside>Causal LMs are language models that use a causal mask</aside>
+    <figure style="grid-column: page; margin: 1rem 0; display: flex; justify-content: center"><img src="t5_masking.png"
+      style="width:100%; border: 1px solid rgba(0, 0, 0, 0.2);" /></figure>
+    <figcaption style="grid-column: page; text-align: center; margin-bottom: 2rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Figure 1: A schematic of full attention, causal masking, and prefix masking. Figure from <d-cite key="raffel2020exploring"></d-cite>. Used under CC-by license.</figcaption>
+    <p>
+      When solely looking at inference time, what we ideally want is full attention, i. e. every (generated) token can attend to every (generated) token (Figure 1, left).
+      This is the <i>no-mask</i> regime, where the attention weights are not modified at all. Yet, all LLMs also use
+      the causal mask at inference time since omitting the mask would lead to a distribution shift between training and inference, thus hurting performance.
+      Since the causal mask is needed at inference time <i>because </i> it was used during training, a natural question to ask is: Why do we need the causal mask during training?
+
+    </p>
+    <a class="marker" href="#section-2" id="section-2"><span>2</span></a>
+    <h2>On the necessity of the causal mask</h2>
+    <p>
+      For brevity's sake, let us focus on the GPT-style pre-training regime <d-cite key="radford2018improving, radford2019language, brown2020language"></d-cite>, where the model is trained to predict the next token given the previous tokens.
+      One of the key advantages of the Transformer architecture over classical RNNs is that we can predict all tokens of a sequence in parallel.
+      Specifically, this is achieved using a technique called <i>teacher-forcing</i> <d-cite key="williams1989learning"></d-cite>, where instead of the tokens generated by the model, we use the ground-truth previous tokens to predict each 'next token'.
+      Clearly, during the model prediction of token $$k$$, its computation should not use information from token $$k$$ and beyond, which brings us to the second common misconception: <u>The causal mask is not needed to prevent information leakage from future tokens during training</u>.
+    </p>
+    <p>
+      To illustrate my point, suppose we have a sequence of tokens $$x_1, x_2, x_3, x_4$$ and we want the model to use tokens $$x_1, x_2, x_3$$ to predict token $$x_4$$.
+      We have to prohibit tokens from attending to token $$x_4$$ when predicting token $$x_4$$, but we do not need to prohibit token $$x_1$$ from attending to tokens $$\{x_2, x_3\}$$, or token $$x_2$$ from attending to token $$x_3$$, which is exactly what the causal mask does.
+      Instead of a triangular mask, using a block-sparse mask would be sufficient to prevent information leakage from future tokens, while allowing for all tokens in the context to attend to each other.
+    </p>
+    <p>
+      The illustration above only depicts the case of a single token prediction during training, raising the question of whether the point holds for parallel training as well.
+      <u>Indeed, the causal mask is neither needed for parallel training, nor for teacher-forcing</u>, and a block-sparse mask suffices for both.
+    </p>
+    <a class="marker" href="#section-3" id="section-3"><span>3</span></a>
+    <h2>What about PrefixLMs?</h2>
+    <p>
+      We can motivate the use of block-sparse masks by looking at PrefixLMs <d-cite key="raffel2020exploring, tay2022ul2"></d-cite>, which are language models originally designed to solve sequence-to-sequence tasks.
+      In PrefixLMs, the model is trained to predict the next token given the previous tokens and a so-called prefix which is input to the model.
+      During supervised training of PrefixLMs, the prefix could be a prompt, a question, or any other kind of context that is given to the model.
+      The model is then trained to predict the answer or continuation of the prompt. Since the prefix is fixed and not predicted by the model, the tokens in the prefix are not masked at all, while the rest of the sequence is causally masked (Figure 1, right).
+    </p>
+    <p>
+      This masking procedure is especially tailored towards the regime of sequence-to-sequence tasks under explicit supervision.
+      However, the great abundance of textual data available on the Internet is unlabeled and largely unstructured, in which case PrefixLM training consists of
+      randomly splitting text into prefixes and targets. In this case, causal language modeling leads to much denser supervision than prefix language modeling,
+      since the prefix does not provide a direct supervisory signal to the model.
+    </p>
+    <p>
+      This motivates a procedure that benefits from both dense supervision as well as full attention: Taking each token as the sole target
+      and using all previous tokens as the prefix. This is exactly the block-sparse mask and nothing inherently prohibits parallelization in this regime.
+      However, the block-sparse mask depends on the position of the token in the sequence, which means that a naïve implementation would require $$n$$ times as much memory
+      and $$n$$ times as much computation since everything after the first attention map calculation is token-position dependent (where $$n$$ is the sequence length).
+      <u>Thus, the main challenge in overcoming the causal mask is mitigating the memory and compute overhead that comes with it</u>.
+    </p>
+  </d-article>
+
+  <d-appendix>
+
+    <h3>Contributions</h3>
+    <p>FS worked on all aspects of this post, including research, analysis and writing. This blog post has benefited from various discussions with senior colleagues, among others Preetum Nakkiran and Thomas Scialom.</p>
+    <d-bibliography src="bibliography.bib"></d-bibliography>
+    <distill-appendix>
+    </distill-appendix>
+  </d-appendix>
+
+  <distill-footer></distill-footer>
+
+</body>

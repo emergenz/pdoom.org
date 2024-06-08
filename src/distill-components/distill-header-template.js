@@ -1,8 +1,10 @@
-import logo from '../assets/distill-logo.svg';
+import logo from '../assets/pdoom-logo.png';
 
 export const headerTemplate = `
 <style>
 distill-header {
+  font-family: 'Lora', serif;
+  font-style: italic;
   position: relative;
   height: 60px;
   background-color: hsl(200, 60%, 15%);
@@ -28,10 +30,10 @@ distill-header a {
 distill-header a:hover {
   color: rgba(255, 255, 255, 1);
 }
-distill-header svg {
-  width: 24px;
+distill-header img {
+  width: 48px;
   position: relative;
-  top: 4px;
+  top: 10px;
   margin-right: 2px;
 }
 @media(min-width: 1080px) {
@@ -46,13 +48,8 @@ distill-header svg {
   distill-header .logo {
   }
 }
-distill-header svg path {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.8);
-  stroke-width: 3px;
-}
 distill-header .logo {
-  font-size: 17px;
+  font-size: 30px;
   font-weight: 200;
 }
 distill-header .nav {
@@ -67,13 +64,8 @@ distill-header .nav a {
 </style>
 <div class="content">
   <a href="/" class="logo">
-    ${logo}
-    Distill
+    <img src="${logo}" alt="p(doom) logo" />
+    p(doom)
   </a>
-  <nav class="nav">
-    <a href="/about/">About</a>
-    <a href="/prize/">Prize</a>
-    <a href="/journal/">Submit</a>
-  </nav>
 </div>
 `;

@@ -16,6 +16,7 @@ import resolve from "rollup-plugin-node-resolve";
 import string from "rollup-plugin-string";
 import commonjs from "rollup-plugin-commonjs";
 import babel from '@rollup/plugin-babel';
+import image from '@rollup/plugin-image';
 
 // uncomment to show dependencies [1/2]
 // import rollupGrapher from 'rollup-plugin-grapher'
@@ -29,7 +30,8 @@ const defaultConfig = {
     commonjs(),
     string({
       include: ["**/*.txt", "**/*.svg", "**/*.html", "**/*.css", "**/*.base64"]
-    })
+    }),
+    image()
   ]
 };
 

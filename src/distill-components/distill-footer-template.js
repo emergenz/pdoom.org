@@ -1,4 +1,4 @@
-import logo from '../assets/distill-logo.svg';
+import logo from '../assets/pdoom-logo.png';
 
 export const footerTemplate = `
 <style>
@@ -13,22 +13,18 @@ export const footerTemplate = `
   contain: content;
 }
 
-.footer-container .logo svg {
+.footer-container .logo img {
   width: 24px;
   position: relative;
   top: 4px;
   margin-right: 2px;
 }
 
-.footer-container .logo svg path {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.8);
-  stroke-width: 3px;
-}
-
 .footer-container .logo {
   font-size: 17px;
   font-weight: 200;
+  font-family: 'Lora', serif;
+  font-style: italic;
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   margin-right: 6px;
@@ -54,19 +50,16 @@ export const footerTemplate = `
 <div class='footer-container'>
 
   <a href="/" class="logo">
-    ${logo}
-    Distill
-  </a> is dedicated to clear explanations of machine learning
+    <img src="${logo}" alt="p(doom) logo" />
+    p(doom)
+  </a> is dedicated to truly open research on the path to AGI
 
   <div class="nav">
-    <a href="https://distill.pub/about/">About</a>
-    <a href="https://distill.pub/journal/">Submit</a>
-    <a href="https://distill.pub/prize/">Prize</a>
-    <a href="https://distill.pub/archive/">Archive</a>
-    <a href="https://distill.pub/rss.xml">RSS</a>
-    <a href="https://github.com/distillpub">GitHub</a>
-    <a href="https://twitter.com/distillpub">Twitter</a>
-    &nbsp;&nbsp;&nbsp;&nbsp; ISSN 2476-0757
+    <a href="index.html">Archive</a>
+    <a href="https://github.com/p-doom">GitHub</a>
+    <a href="https://twitter.com/prob_doom">Twitter</a>
+    <hr>
+    We are thankful to distill.pub for creating the template on which we based this blog.
   </div>
 
 </div>

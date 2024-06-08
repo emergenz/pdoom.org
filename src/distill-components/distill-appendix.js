@@ -44,6 +44,8 @@ const styles = `
 
 export function appendixTemplate(frontMatter) {
   let html = styles;
+  frontMatter.journal.title = "p(doom) blog";
+  frontMatter.journal.url = "https://pdoom.org/blog";
 
   if (typeof frontMatter.githubUrl !== 'undefined') {
     html += `
@@ -58,7 +60,7 @@ export function appendixTemplate(frontMatter) {
   }
 
   const journal = frontMatter.journal;
-  if (typeof journal !== 'undefined' && journal.title === 'Distill') {
+  if (typeof journal !== 'undefined' && journal.title === 'p(doom) Blog') {
     html += `
     <h3 id="reuse">Reuse</h3>
     <p>Diagrams and text are licensed under Creative Commons Attribution <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a> with the <a class="github" href="${frontMatter.githubUrl}">source available on GitHub</a>, unless noted otherwise. The figures that have been reused from other sources don’t fall under this license and can be recognized by a note in their caption: “Figure from …”.</p>
@@ -69,7 +71,7 @@ export function appendixTemplate(frontMatter) {
     html += `
     <h3 id="citation">Citation</h3>
     <p>For attribution in academic contexts, please cite this work as</p>
-    <pre class="citation short">${frontMatter.concatenatedAuthors}, "${frontMatter.title}", Distill, ${frontMatter.publishedYear}.</pre>
+    <pre class="citation short">${frontMatter.concatenatedAuthors}, "${frontMatter.title}", p(doom), ${frontMatter.publishedYear}.</pre>
     <p>BibTeX citation</p>
     <pre class="citation long">${serializeFrontmatterToBibtex(frontMatter)}</pre>
     `;
