@@ -102,7 +102,7 @@
     </p>
     <p>
       This masking procedure is specifically tailored towards the regime of sequence-to-sequence tasks under explicit supervision.
-      However, the great abundance of textual data available on the Internet is unlabeled and largely unstructured, in which case PrefixLM training consists of
+      However, the great abundance of textual data available on the Internet is unlabeled and largely unstructured, in which case PrefixLM training involves
       randomly splitting text into prefixes and targets. In this case, causal language modeling leads to much denser supervision than prefix language modeling,
       since the prefix does not provide a direct supervisory signal to the model.
     </p>
@@ -111,7 +111,7 @@
       and using all previous tokens as the prefix. This is exactly the block-sparse mask and nothing inherently prohibits parallelization in this regime.
       However, the block-sparse mask depends on the position of the token in the sequence, which means that a naïve implementation would require $$n$$ times as much memory
       and $$n$$ times as much computation, since everything after the first attention map computation is token-position dependent (where $$n$$ is the sequence length).
-      <u>Thus, the main challenge in overcoming the causal mask is mitigating the memory and compute overhead that comes with it</u>.
+      <u>Thus, the main challenge in moving beyond the causal mask is mitigating the memory and compute overhead that comes with that</u>.
     </p>
   </d-article>
 
