@@ -1,0 +1,93 @@
+<!--
+  Copyright 2018 The Distill Template Authors
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!doctype html>
+
+<head>
+  <script src="template.v2.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf8">
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+
+<body>
+  <!--
+  <distill-header></distill-header>
+  -->
+  <d-front-matter>
+    <script id='distill-front-matter' type="text/json">{
+    "title": "ACT: Adaptive Compute Transformer",
+    "description": "Large language models exhibit remarkable reasoning capabilities with scale. However, a fundamental flaw of current-generation transformer-based language models is their uniform allocation of compute per token.",
+    "published": "December 07, 2023",
+    "url": "https://pdoom.org/act.html",
+    "authors": [
+      {
+        "author":"Mihir Mahajan",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
+                         {"name": "TUM"}]
+      },
+      {
+        "author":"Franz Srambical",
+        "authorURL":"https://srambical.fr/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"}]
+      }
+    ],
+    "katex": {
+      "delimiters": [
+        {"left": "$$", "right": "$$", "display": false}
+      ]
+    }
+  }</script>
+  </d-front-matter>
+  <d-title>
+    <p>Large language models exhibit remarkable reasoning capabilities with scale. However, a fundamental flaw of current-generation transformer-based language models is their uniform allocation of compute per token.
+    </p>
+  </d-title>
+  <d-byline></d-byline>
+  <d-article>
+    <a class="marker" href="#section-1" id="section-1"><span>1</span></a>
+    <p>
+        A vanilla transformer (and all currently used variations thereof) generates each token after one (and only one) forward-pass through the network. Intuitively this means that at inference time, the network <i>thinks</i> for the same amount of time before each token generation. While this is not an inherent limitation on the reasoning capabilities of transformer models, it does mean that we would need obscenely large transformers for them to exhibit longer-term planning capabilities. Since we posit that (standalone) models with more than 1 trillion parameters are already unfeasible to serve at scale, we need to overcome this limitation of the transformer architecture.
+        <aside>
+            Note that MoE <d-cite key="shazeer2017outrageously"></d-cite> is a different story
+        </aside>
+    </p>
+    <p>
+        While we have been aware of this limitation and of its severity for a long time (much longer than p(doom) even existed for), today it is an open secret in the ML research community. Everyone knows that all big AGI labs (DeepMind, OpenAI, imbue, to name a few) are rushing towards overcoming this limitation <d-cite key="pfau2023last, deepmind2023alphacode, reuters2023sam, imbue2023podcast, karpathy2023youtube"></d-cite>, yet nobody has found a solution yet. The market value of an LLM/LMM with agentic reasoning capabilities is difficult to imagine.
+    </p>
+    <p>
+        Most public discourse around scaling up reasoning capabilities involves developing methods to shift computational resources from training to inference time: While only a tiny fraction of computational resources of LLMs are used for inference (>99% of compute goes to pretraining), systems like Pluribus <d-cite key="brown2019superhuman"></d-cite>, AlphaGo <d-cite key="silver2016mastering"></d-cite> or MuZero <d-cite key="schrittwieser2020mastering"></d-cite> leverage vast amounts of compute at inference time, primarily via Monte Carlo Tree Search. A few techniques for shifting compute to inference time already exist, albeit rather simple ones: chain-of-thought <d-cite key="wei2022chain"></d-cite>, tree-of-thought <d-cite key="yao2024tree"></d-cite>, sampling+scoring <d-cite key="deepmind2023alphacode"></d-cite>. All of these techniques try to shift computation post-hoc. While <d-cite key="deepmind2023alphacode"></d-cite> only helps if the correct solution is actually in the sampled space, <d-cite key="wei2022chain"></d-cite> and <d-cite key="yao2024tree"></d-cite> seem unelegant in execution, somewhat arbitrary as solutions and above all, have not been able to yield agentic systems.
+    </p>
+    <p>
+        We posit that one elegant way of addressing the transformer's limitation is via adaptive computation. We want to find a way of letting the model think for as long as it deems necessary before each token generation. That way, we do not hard-code a 'reasoning architecture' into the model <d-cite key="lecun2022path"></d-cite> and we do not materialize the search. The model's thought process stays in the latent space. We posit that such a model trained at GPT-4 scale will exhibit human-level reasoning.
+    </p>
+        <aside>
+            As of May 2024, Noam Brown's public opinion implies the polar opposite: He now thinks that shifting compute from
+            inference to training time is the only way to develop and deploy AI systems for the masses. Public perception in general has shifted since the release of Llama 3 8B <d-cite key="meta2024introducing"></d-cite>, which was trained on 15T tokens, way beyond what is considered chinchilla-compute optimal <d-cite key="hoffmann2022training"></d-cite>. While there has been a lot of confusion around chinchilla-optimality right after the release of Llama 3 <d-cite key="riley2024it"></d-cite>, the research community has now adapted the terms <i>training-compute optimality</i> and <i>inference-compute optimality</i> to clear up the confusion. While we agree that inference-compute optimality is needed for mass-deployment, we still believe that leveraging vast amounts of compute at inference time is inalienable to solve the biggest problems of our time using AI.
+        </aside>
+  </d-article>
+
+  <d-appendix>
+
+    <h3>Contributions</h3>
+    <p>MM worked on research and analysis, FS wrote the manuscript.</p>
+    <d-bibliography src="bibliography.bib"></d-bibliography>
+    <distill-appendix>
+    </distill-appendix>
+  </d-appendix>
+
+  <distill-footer></distill-footer>
+
+</body>
