@@ -67,7 +67,7 @@
     <aside>Causal LMs are language models that use a causal mask</aside>
     <figure style="grid-column: page; margin: 1rem 0; display: flex; justify-content: center"><img src="t5_masking.png"
       style="width:100%; border: 1px solid rgba(0, 0, 0, 0.2);" /></figure>
-    <figcaption style="grid-column: page; text-align: center; margin-bottom: 2rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Figure 1: A schematic of full attention, causal masking, and prefix masking. Figure from <d-cite key="raffel2020exploring"></d-cite>. Used under CC-by license.</figcaption>
+    <figcaption style="grid-column: page; text-align: center; margin-bottom: 2rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Figure 1: A schematic of full attention, causal masking, and prefix masking. Figure from <d-cite key="raffel2020exploring"></d-cite>. Used under CC-BY 4.0 license.</figcaption>
     <p>
       When solely looking at inference time, what we ideally want is full attention, i.e. every (generated) token can attend to every (generated) token (Figure 1, left).
       This is the <i>no-mask</i> regime, where the attention weights are not modified at all. Yet, all LLMs also use
