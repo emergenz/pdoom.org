@@ -1,6 +1,6 @@
 # pdoom.org
 
-This is the repository of the pdoom.org website. It is a fork from [distillpub/template](https://github.com/distillpub/template).
+This is the repository of the pdoom.org website. It is a fork of [distillpub/template](https://github.com/distillpub/template).
 
 ### Local Development
 
