@@ -1,0 +1,91 @@
+
+<!--
+  Copyright 2018 The Distill Template Authors
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!doctype html>
+
+<head>
+  <script src="template.v2.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf8">
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+
+<body>
+  <!--
+  <distill-header></distill-header>
+  -->
+  <d-front-matter>
+    <script id='distill-front-matter' type="text/json">{
+    "title": "NNs Do Not Generalize OOD",
+    "description": "Neural networks are mean-seeking. They work well when you run inference on data points that lie around the mean of their training data. They embarrassingly fail otherwise.",
+    "published": "September 26, 2024",
+    "url": "https://pdoom.org/act.html",
+    "authors": [
+      {
+        "author":"Franz Srambical",
+        "authorURL":"https://srambical.fr/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"}]
+      },
+      {
+        "author":"Mihir Mahajan",
+        "authorURL":"https://maharajamihir.github.io/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"}]
+      }
+    ],
+    "katex": {
+      "delimiters": [
+        {"left": "$$", "right": "$$", "display": false}
+      ]
+    }
+  }</script>
+  </d-front-matter>
+  <d-title>
+    <p>
+        Neural networks are mean-seeking. They work well when you run inference on data points that lie around the mean of their training data. They embarrassingly fail otherwise.
+    </p>
+  </d-title>
+  <d-byline></d-byline>
+  <d-article>
+    <a class="marker" href="#section-1" id="section-1"><span>1</span></a>
+    <p>
+        Currently, we exploit the paradigm of data-driven self-supervision by using neural networks to approximate the underlying data-generating process of a training distribution, until we run out of data. When we have exhausted the data readily accessible to us, a system trained using naïve self-supervision on such a large-scale dataset will have a reasonably good internal model of neighborhoods in data-space that have a high presence in the training data. The further we go along the long tail of the data distribution, the worse a neural network gets at modeling such data points in its representation-space.
+    </p>
+    <p>
+        Language models are simulators. They will simulate anything, so long as you let the language model ingest enough imitation data at training time. While general, conversational data may be highly present in a simple data dump of the internet, data of highly skilled behavior is scarce. Upsampling desired behavioral data works until such data is overly scarce. At said skill level, behavior cloning is not feasible anymore, at which point we use reward signals to approximate how we should update the model’s parameters instead. Crucially, the entire progression from naïve modeling of data dumps of the internet towards attaining higher skill levels is handcrafted: dataset curation is handcrafted, upsampling is handcrafted, reward signals are handcrafted.
+        <aside>
+            <i>Anything</i> being any dynamics function that is representable using a single forward pass
+        </aside>
+    </p>
+    <p>
+        They should not be. In systems prospectively as capable as us, they cannot be. At inference time, when given a long-horizon goal such as getting an IMO gold medal, an intelligent system should itself identify whether its internal model and — by extension — the current distribution of training data it has seen is sufficient to solve the task at hand, and if not, what data to gather next. Beyond gathering new data points, such an endeavor necessitates some verification signal, which can be external or intrinsic, in order to gauge whether progress towards the long-horizon goal is being made.
+    </p>
+    <p>
+        There are four, largely orthogonal, but additive directions towards AGI: acting, reasoning, continual learning, and the ability to gather the next most useful set of data points. While the first three are active research areas both in the academic literature and in closed AGI labs, the latter is still largely neglected. We motivate the latter by the inherent inability of neural networks to generalize beyond their training distribution. Ultimately, such a capability would solve both curriculum learning and the ‘long-tail problem’ from first principles, allowing us to move beyond power-law scaling and into a new regime. A regime that leads to AGI in a world full of constraints.
+    </p>
+  </d-article>
+
+  <d-appendix>
+
+    <h3>Contributions</h3>
+    <p>MM and FS worked on research and analysis, FS wrote the manuscript.</p>
+    <d-bibliography src="bibliography.bib"></d-bibliography>
+    <distill-appendix>
+    </distill-appendix>
+  </d-appendix>
+
+  <distill-footer></distill-footer>
+
+</body>
