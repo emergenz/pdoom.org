@@ -1,0 +1,94 @@
+<!--
+  Copyright 2018 The Distill Template Authors
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!doctype html>
+
+<head>
+  <script src="template.v2.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf8">
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+
+<body>
+  <!--
+  <distill-header></distill-header>
+  -->
+  <d-front-matter>
+    <script id='distill-front-matter' type="text/json">{
+    "title": "PPO Is Secretly Using Monte Carlo Advantage Estimation In LLM Post-Training",
+    "description": "When using PPO in LLM post-training, hyperparameter settings turn Generalized Advantage Estimation into Monte Carlo Advantage Estimation.",
+    "published": "February 12, 2025",
+    "url": "https://pdoom.org/ppo.html",
+    "authors": [
+      {
+        "author":"Franz Srambical",
+        "authorURL":"https://srambical.fr/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"}]
+      }
+    ],
+    "katex": {
+      "delimiters": [
+        {"left": "$$", "right": "$$", "display": false}
+      ]
+    }
+  }</script>
+  </d-front-matter>
+  <d-title>
+    <p>
+        When using PPO in LLM post-training, hyperparameter settings turn Generalized Advantage Estimation into Monte Carlo Advantage Estimation.
+    </p>
+  </d-title>
+  <d-byline></d-byline>
+  <d-article>
+    <a class="marker" href="#section-1" id="section-1"><span>1</span></a>
+    <p>
+      Although PPO originally uses Generalized Advantage Estimation <d-cite key="schulman2015high"></d-cite>,
+      modern LLM post-training usually employs $$\lambda=1$$, $$\gamma=1$$, which means that we use full rollouts
+      and do not discount future rewards. Disabling discounting is natural in the post-training regime, since the trajectories
+      are not very long. Using full rollouts means that we do not want to trade increased bias for decreased variance.
+      In post-training, we want the policy updates to be as stable as possible. However, we also want them to be as
+      correct as possible. Since there are other ways of reducing variance (e.g. increasing batch size), we hold off
+      from increasing bias.
+    </p>
+
+    <p>
+      The original authors define generalized advantage as
+      $$\hat{A}_t^{GAE(\gamma,\lambda)} := \sum_{l=0}^{\infty}(\gamma \lambda)^l \delta^V_{t+l}$$.
+
+      They already shows that in the setting $$\lambda=1$$,
+      the advantage estimation reduces to $$\hat{A}_t := \sum_{l=0}^{\infty}\gamma^l \delta_{t+l} = \sum_{l=0}^{\infty}\gamma^l r_{t+l} - V(s_t)$$.
+
+      Additionally setting $$\gamma=1$$ reduces this to $$\hat{A}_t := \sum_{l=0}^{\infty}r_{t+l} - V(s_t)$$, the empirical returns minus a value function baseline.
+
+      Since in post-training we only get sparse rewards at the end of the trajectory, the advantage becomes $$\hat{A}_t := r_{T} - V(s_t)$$.
+    </p>
+    <p>
+      This is simply Monte Carlo Advantage Estimation.
+    </p>
+  </d-article>
+
+  <d-appendix>
+
+    <h3>Contributions</h3>
+    <p>FS worked on all aspects of this post, including research, analysis and writing.</p>
+    <d-bibliography src="bibliography.bib"></d-bibliography>
+    <distill-appendix>
+    </distill-appendix>
+  </d-appendix>
+
+  <distill-footer></distill-footer>
+
+</body>
