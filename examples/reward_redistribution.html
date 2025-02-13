@@ -55,26 +55,9 @@
   <d-article>
     <a class="marker" href="#section-1" id="section-1"><span>1</span></a>
     <p>
-      Although PPO originally uses Generalized Advantage Estimation <d-cite key="schulman2015high"></d-cite>,
-      modern LLM post-training usually employs $$\lambda=1$$, $$\gamma=1$$, which means that we use full rollouts
-      and do not discount future rewards. Disabling discounting is natural in the post-training regime, since the trajectories
-      are not very long. Using full rollouts means that we do not want to trade increased bias for decreased variance.
-      In post-training, we want the policy updates to be as stable as possible. However, we also want them to be as
-      correct as possible. Since there are other ways of reducing variance (e.g. increasing batch size), we hold off
-      from increasing bias.
-    </p>
-
-    <p>
-      The original authors define generalized advantage as
-      $$\hat{A}_t^{GAE(\gamma,\lambda)} := \sum_{l=0}^{\infty}(\gamma \lambda)^l \delta^V_{t+l}$$.
-
-      They already shows that in the setting $$\lambda=1$$,
-      the advantage estimation reduces to $$\hat{A}_t := \sum_{l=0}^{\infty}\gamma^l \delta_{t+l} = \sum_{l=0}^{\infty}\gamma^l r_{t+l} - V(s_t)$$.
-
-      Additionally setting $$\gamma=1$$ reduces this to $$\hat{A}_t := \sum_{l=0}^{\infty}r_{t+l} - V(s_t)$$, the empirical returns minus a value function baseline.
-
-      Since in post-training we only get sparse rewards at the end of the trajectory, the advantage becomes $$\hat{A}_t := r_{T} - V(s_t)$$.
-      The only time-dependency in this simplified advantage calculation comes from the value function.
+      The GAE paper <d-cite key="schulman2015high"></d-cite> defines generalized advantage as
+      $$\hat{A}_t^{GAE(\gamma,\lambda)} := \sum_{l=0}^{\infty}(\gamma \lambda)^l \delta^V_{t+l}$$, which, in the LLM
+      post-training regime, reduces to $$\hat{A}_t := r_{T} - V(s_t)$$ <d-cite key="srambical2025ppo"></d-cite>.
     </p>
 
     <p>

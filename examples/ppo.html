@@ -76,8 +76,18 @@
       Since in post-training we only get sparse rewards at the end of the trajectory, the advantage becomes $$\hat{A}_t := r_{T} - V(s_t)$$.
     </p>
     <p>
-      This is simply Monte Carlo Advantage Estimation.
+      This is simply Monte Carlo Advantage Estimation. Thus in the LLM post-training setting, the difference between REINFORCE with baseline
+      <d-cite key="williams1992simple"></d-cite> and PPO boils down to PPO's clipping and the use of a likelihood ratio:
     </p>
+    <ul>
+      <li>
+      $$\mathcal{L}^{\text{CLIP}}=\mathbb{E}[\text{min}(\text{ratio}_t(\theta)(r_T-V(s_t)), \text{clip}(\text{ratio}_t(\theta), 1-\epsilon, \epsilon)(r_T-V(s_t)))]$$
+      , where $$\text{ratio}_t=\frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)}$$.
+      </li>
+      <li>
+      $$\mathcal{L}^{\text{REINFORCE}}=\mathbb{E}[\log \pi_\theta(a_t|s_t)(r_T-V(s_t))]$$
+      </li>
+    </ul>
   </d-article>
 
   <d-appendix>
