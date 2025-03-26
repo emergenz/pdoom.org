@@ -1,0 +1,119 @@
+<!--
+  Copyright 2018 The Distill Template Authors
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!doctype html>
+
+<head>
+  <script src="template.v2.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf8">
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+
+<body>
+  <!--
+  <distill-header></distill-header>
+  -->
+  <d-front-matter>
+    <script id='distill-front-matter' type="text/json">{
+    "title": "Performance-degradation Free Value Assertions in JAX",
+    "description": "Traditional value assertions in jitted JAX lead to performance degredation. A new (not yet public) JAX API fixes this.",
+    "published": "March 26, 2025",
+    "url": "https://pdoom.org/jax_assert.html",
+    "authors": [
+      {
+        "author":"Mihir Mahajan",
+        "authorURL":"https://maharajamihir.github.io/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
+                         {"name": "TUM"}]
+      },
+      {
+        "author":"Franz Srambical",
+        "authorURL":"https://srambical.fr/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"}]
+      }
+    ],
+    "katex": {
+      "delimiters": [
+        {"left": "$$", "right": "$$", "display": false}
+      ]
+    }
+  }</script>
+  </d-front-matter>
+  <d-title>
+    <p>
+      Traditional value assertions in jitted JAX lead to performance degredation. A new (not yet public) JAX API fixes this.
+    </p>
+  </d-title>
+  <d-byline></d-byline>
+  <d-article>
+    <a class="marker" href="#section-1" id="section-1"><span>1</span></a>
+    <p>
+      Jitted JAX does not support traditional python asserts that access JAX arrays <d-cite key="jax2025checkify, jax2025callbacks, jax2025jit, jax2025key, deepmind2020chex"></d-cite>.
+      Chex <d-cite key="deepmind2020chex"></d-cite> and <code>jax.experimental.checkify.check</code> <d-cite key="jax2025checkify"></d-cite> provide ways of wrapping a jitted function
+      with decorators to enable value assertions, but they lead to performance-degradation, making them unusable in practical settings.
+    </p>
+    <p>
+      For a performance-degradation free way of using value assertions in jitted JAX, we can use a new (as of today still private) JAX API: <code>error_check</code>:
+    </p>
+    <d-code block="" language="python">
+      import jax
+      from jax._src.error_check import set_error_if, raise_if_error
+      import jax.numpy as jnp
+
+      @jax.jit
+      def f(x, y):
+          set_error_if(x != 0, 'x must be 0')
+          return jnp.multiply(x, y)
+
+      f(1, 0)
+
+      raise_if_error()
+    </d-code>
+
+    <d-code block="" language="bash">
+      Traceback (most recent call last):
+        File "/home/ubuntu/code/temp.py", line 12, in <module>
+          raise_if_error()
+        File "/home/ubuntu/code/.venv/lib/python3.10/site-packages/jax/_src/error_check.py", line 93, in raise_if_error
+          raise exc.with_traceback(filtered_traceback)
+        File "/home/ubuntu/code/temp.py", line 10, in <module>
+          f(1, 0)
+        File "/home/ubuntu/code/temp.py", line 7, in f
+          set_error_if(x != 0, 'x must be 0')
+      jax._src.error_check.JaxValueError: x must be 0
+    </d-code>
+    <p>
+      This pattern exploits that it suffices to raise an assertion error <i>post-hoc</i>, in this case after the computation of the jitted function.
+      Thus, the implementation merely conditionally stores the error in JAX-managed context. While purely functional conditional computation is fully supported by JAX and XLA <d-cite key="jax2025control, xla2025conditional"></d-cite>, and thus fully compatible with XLA graph compilation,
+      the error is only raised outside of the jitted function, avoiding the typical performance overhead of value assertions.
+    </p>
+    <aside>
+      Error raising is an operation that is not purely functional, but has side-effects.
+    </aside>
+    </d-article>
+
+  <d-appendix>
+
+    <h3>Contributions</h3>
+    <p>MM and FS worked on research and analysis, FS wrote the manuscript.</p>
+    <d-bibliography src="bibliography.bib"></d-bibliography>
+    <distill-appendix>
+    </distill-appendix>
+  </d-appendix>
+
+  <distill-footer></distill-footer>
+
+</body>
