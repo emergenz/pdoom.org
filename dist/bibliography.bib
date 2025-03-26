@@ -422,3 +422,37 @@
   url = {https://openxla.org/xla/operation_semantics#conditional},
   note = {Accessed: 2025-03-26},
 }
+
+@misc{ayaka76822025error,
+  author = {ayaka7682},
+  title = {Message on public Discord server: Try this:
+  <d-code block="", language="python">
+  import jax from jax._src.error_check import set_error_if, raise_if_errorn
+  </d-code>
+  <d-code block="", language="python">
+  import jax.numpy as jnp
+  </d-code>
+  <d-code block="", language="python">
+  @jax.jit
+  </d-code>
+  <d-code block="", language="python">
+  def f(x, y):
+  </d-code>
+  <d-code block="", language="python">
+    set_error_if(x != 0, 'x must be 0')
+  </d-code>
+  <d-code block="", language="python">
+    return jnp.multiply(x, y)
+  </d-code>
+  <d-code block="", language="python">
+  f(0, 0)
+  </d-code>
+  <d-code block="", language="python">
+  raise_if_error()
+  </d-code> },
+  year = {2025},
+  url = {
+         https://discord.com/channels/1107832795377713302/1107832795688083561/1354171414596419854
+         },
+  note = {Accessed: 2025-03-26},
+}
