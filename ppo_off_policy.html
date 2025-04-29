@@ -1,0 +1,105 @@
+<!--
+  Copyright 2018 The Distill Template Authors
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!doctype html>
+
+<head>
+  <script src="template.v2.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf8">
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+
+<body>
+  <!--
+  <distill-header></distill-header>
+  -->
+  <d-front-matter>
+    <script id='distill-front-matter' type="text/json">{
+    "title": "PPO Is An Off-Policy Algorithm",
+    "description": "PPO is commonly referred to as an on-policy algorithm. We argue that this is confusing, and show that truly on-policy PPO reduces to vanilla policy gradient REINFORCE with baseline.",
+    "published": "April 29, 2025",
+    "url": "https://pdoom.org/ppo_off_policy.html",
+    "authors": [
+      {
+        "author":"Franz Srambical",
+        "authorURL":"https://srambical.fr/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"}]
+      },
+      {
+        "author":"Mihir Mahajan",
+        "authorURL":"https://maharajamihir.github.io/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
+                         {"name": "TUM"}]
+      }
+    ],
+    "katex": {
+      "delimiters": [
+        {"left": "$$", "right": "$$", "display": false}
+      ]
+    }
+  }</script>
+  </d-front-matter>
+  <d-title>
+    <p>
+        PPO is commonly referred to as an on-policy algorithm. We argue that this naming scheme is confusing, and show that true on-policy PPO reduces to vanilla policy gradient REINFORCE with baseline.
+    </p>
+  </d-title>
+  <d-byline></d-byline>
+  <d-article>
+    <a class="marker" href="#section-1" id="section-1"><span>1</span></a>
+    <p>
+        Reinforcement learning is used in LLM post-training because we cannot backpropagate through generation <d-cite key="sutton1998reinforcement"></d-cite>.
+        The original policy gradient <d-cite key="williams1992simple"></d-cite> $$\hat{g}=\hat{\mathbb{E}}_t [\nabla_\theta \log \pi_\theta (a_t|s_t)\hat{A}_t]$$ intuitively increases the probability of actions that led to high returns, and decreases that of actions that led to low returns.
+        PPO is a two-fold modification of the vanilla policy gradient.
+        The first modification is the vanilla policy gradient's extension to the off-policy regime: The policy gradient theorem <d-cite key="sutton1999policy"></d-cite> assumes the behaviour policy to be the target policy due to its expectation.
+        When behaviour and target policy are different, a further approximated policy gradient with a corrective term <d-cite key="degris2012off"></d-cite> can be used instead: $$\hat{g}=\hat{\mathbb{E}}_t [\frac{\pi_\theta (a_t|s_t)}{\pi_{\theta_\text{old}} (a_t|s_t)} \nabla_\theta \log \pi_\theta (a_t|s_t)\hat{A}_t]$$.
+        Instead of nudging the logprobs, the importance sampling ratio $$\frac{\pi_\theta (a_t|s_t)}{\pi_{\theta_\text{old}} (a_t|s_t)}$$ is nudged instead, leading to the objective $$L^{CPI}=\hat{\mathbb{E}}_t [\frac{\pi_\theta (a_t|s_t)}{\pi_{\theta_\text{old}} (a_t|s_t)} \hat{A}_t ]$$.
+        A common source of confusion for newcomers to policy gradient methods is the meaning of $$\theta_{\text{old}}$$, which refers to the policy that was used to gather the experience (commonly called behaviour policy).
+        PPO's primary contribution over the vanilla policy gradient is increased sample-efficiency by reusing collected trajectories.
+        More specifically, trajectories are implicitly reused by performing multiple gradient updates from the same experience. Note that this is different to classical off-policy methods, which usually sample from a replay buffer.
+        Therefore, a better (but slightly less scientifically sounding) way to characterize PPO is to call it a on-policy-ish algorithm (where the -ish refers to the fact that the behaviour and target policies in PPO are fairly similar, unlike for classical off-policy methods).
+    </p>
+    <p>
+        However, even with the importance sampling ratio, applying multiple gradient steps towards $$L^{CPI}$$ empirically leads to destructively large updates <d-cite key="schulman2017proximal"></d-cite>, which leads us to PPO's second contribution:
+        Instead of directly optimizing $$L^{CPI}$$, PPO optimizes $$L^{CLIP}=\hat{\mathbb{E}}_t [ \min(r_t(\theta)) \hat{A}_t, \text{clip}(r_t(\theta),1-\epsilon,1+\epsilon)\hat{A}_t ]$$, where the clipping disincentivizes large changes to the policy within a single PPO step.
+    </p>
+    <p>
+        In PPO, the behaviour and target policies are identical for the first (of potentially many) optimizer step of each PPO step, but the gradient at said step is still non-zero due to an implicit <d-code language="python">stop_gradient</d-code> in the denominator of the importance sampling ratio due to $$\pi_{\theta_{\text{old}}}$$ being collected during the rollout in PPO implementations.
+        Specifically, the gradient at the first optimizer step reduces to the gradient of REINFORCE with baseline (and GAE).
+        At this initial step, the target parameters $$\theta$$ are identical to the behavior parameters $$\theta_{\text{old}}$$, meaning the ratio $$r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)}$$ numerically evaluates to 1.
+        Since $$1-\epsilon < 1 < 1+\epsilon$$, the clipping mechanism is inactive, and the objective matches $$L^{CPI}$$ with the gradient $$ \nabla_\theta L^{CPI} = \hat{\mathbb{E}}_t [ \hat{A}_t \nabla_\theta r_t(\theta) ] $$.
+        Using the identity $$ \nabla_\theta r_t(\theta) = r_t(\theta) \nabla_\theta \log \pi_\theta(a_t|s_t) $$, the gradient becomes $$ \nabla_\theta L^{CPI} = \hat{\mathbb{E}}_t [ \hat{A}_t r_t(\theta) \nabla_\theta \log \pi_\theta(a_t|s_t) ] $$. Evaluating this expression when $$r_t(\theta)=1$$ yields:
+        $$ \nabla_\theta L^{CLIP}(\theta)|_{\theta=\theta_{\text{old}}} = \hat{\mathbb{E}}_t [ \hat{A}_t \nabla_\theta \log \pi_\theta(a_t|s_t) ] $$
+        This is exactly the gradient of REINFORCE using the generalized advantage estimate $$\hat{A}_t$$. PPO's clipping only modifies gradients in subsequent steps as $$\theta$$ diverges from $$\theta_{\text{old}}$$.
+        When used with $$\gamma=1$$, $$\lambda=1$$, the first optimizer step of PPO fully reduces to that of REINFORCE with baseline.
+        <aside>
+            By REINFORCE with baseline, we assume Monte-Carlo advantage estimation
+        </aside>
+    </p>
+    </d-article>
+
+  <d-appendix>
+
+    <h3>Contributions</h3>
+    <p>MM and FS worked on research and analysis, FS wrote the manuscript.</p>
+    <d-bibliography src="bibliography.bib"></d-bibliography>
+    <distill-appendix>
+    </distill-appendix>
+  </d-appendix>
+
+  <distill-footer></distill-footer>
+
+</body>
