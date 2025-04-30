@@ -88,15 +88,22 @@
         This is exactly the gradient of REINFORCE using the generalized advantage estimate $$\hat{A}_t$$. PPO's clipping only modifies gradients in subsequent steps as $$\theta$$ diverges from $$\theta_{\text{old}}$$.
         When used with $$\gamma=1$$, $$\lambda=1$$, the first optimizer step of PPO fully reduces to that of REINFORCE with baseline.
         <aside>
-            By REINFORCE with baseline, we assume Monte-Carlo advantage estimation
+          By REINFORCE with baseline, we assume Monte-Carlo advantage estimation
         </aside>
     </p>
     </d-article>
 
   <d-appendix>
 
+    <h3>Notes</h3>
+    <p>
+          To derive the identity $$ \nabla_\theta r_t(\theta) = r_t(\theta) \nabla_\theta \log \pi_\theta(a_t|s_t) $$, first recognize the identity $$ \nabla_\theta r_t(\theta) = \nabla_\theta [ \frac{\pi_\theta (a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)} ] = \frac{1}{\pi_{\theta_{\text{old}}}(a_t|s_t)}  * \nabla_\theta [ \pi_\theta (a_t|s_t) ] $$ since $$ \theta_{\text{old}} $$ is treated as a constant.
+          Now we apply the log-derivative trick $$ \nabla_\theta f(\theta) = f(\theta) \nabla_\theta \log f(\theta) $$ to $$ \pi_\theta (a_t|s_t) $$ and get $$ \nabla_\theta \pi_\theta(a_t|s_t) = \pi_\theta(a_t|s_t) \nabla_\theta \log \pi_\theta(a_t|s_t) $$.
+          Substituting this back back we get $$ \nabla_\theta r_t(\theta) = \frac{1}{\pi_{\theta_{\text{old}}}(a_t|s_t)}  * [ \pi_\theta(a_t|s_t) \nabla_\theta \log \pi_\theta (a_t|s_t) ] = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t) } * \nabla_\theta \log \pi_\theta (a_t|s_t) = r_t(\theta) \nabla_\theta \log \pi_\theta(a_t|s_t) $$.
+
+    </p>
     <h3>Contributions</h3>
-    <p>MM and FS worked on research and analysis, FS wrote the manuscript.</p>
+    <p>MM and FS worked on research and analysis, FS wrote the manuscript. We thank Gemini 2.5 Pro for deriving the identity.</p>
     <d-bibliography src="bibliography.bib"></d-bibliography>
     <distill-appendix>
     </distill-appendix>
