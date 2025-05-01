@@ -56,9 +56,9 @@
     <a class="marker" href="#section-1" id="section-1"><span>1</span></a>
     <p>
       Although PPO originally uses Generalized Advantage Estimation <d-cite key="schulman2015high"></d-cite>,
-      modern LLM post-training usually employs $$\lambda=1$$, $$\gamma=1$$, which means that we use full rollouts
+      modern LLM post-training usually employs $$\lambda=1$$, $$\gamma=1$$, which means that we do not introduce bias to reduce variance
       and do not discount future rewards. Disabling discounting is natural in the post-training regime, since the trajectories
-      are not very long. Using full rollouts means that we do not want to trade increased bias for decreased variance.
+      are not very long.
       In post-training, we want the policy updates to be as stable as possible. However, we also want them to be as
       correct as possible. Since there are other ways of reducing variance (e.g. increasing batch size), we hold off
       from increasing bias.
@@ -81,11 +81,11 @@
     </p>
     <ul>
       <li>
-      $$\mathcal{L}^{\text{CLIP}}=\mathbb{E}[\text{min}(\text{ratio}_t(\theta)(r_T-V(s_t)), \text{clip}(\text{ratio}_t(\theta), 1-\epsilon, \epsilon)(r_T-V(s_t)))]$$
+      $$\mathcal{J}^{\text{CLIP}}=\mathbb{E}[\text{min}(\text{ratio}_t(\theta)(r_T-V(s_t)), \text{clip}(\text{ratio}_t(\theta), 1-\epsilon, \epsilon)(r_T-V(s_t)))]$$
       , where $$\text{ratio}_t=\frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)}$$.
       </li>
       <li>
-      $$\mathcal{L}^{\text{REINFORCE}}=\mathbb{E}[\log \pi_\theta(a_t|s_t)(r_T-V(s_t))]$$
+      $$\mathcal{J}^{\text{REINFORCE}}=\mathbb{E}[\log \pi_\theta(a_t|s_t)(r_T-V(s_t))]$$
       </li>
     </ul>
   </d-article>
