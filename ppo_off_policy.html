@@ -99,7 +99,7 @@
     <p>
           To derive the identity $$ \nabla_\theta r_t(\theta) = r_t(\theta) \nabla_\theta \log \pi_\theta(a_t|s_t) $$, first recognize the identity $$ \nabla_\theta r_t(\theta) = \nabla_\theta [ \frac{\pi_\theta (a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)} ] = \frac{1}{\pi_{\theta_{\text{old}}}(a_t|s_t)}  * \nabla_\theta [ \pi_\theta (a_t|s_t) ] $$ since $$ \theta_{\text{old}} $$ is treated as a constant.
           Now we apply the log-derivative trick $$ \nabla_\theta f(\theta) = f(\theta) \nabla_\theta \log f(\theta) $$ to $$ \pi_\theta (a_t|s_t) $$ and get $$ \nabla_\theta \pi_\theta(a_t|s_t) = \pi_\theta(a_t|s_t) \nabla_\theta \log \pi_\theta(a_t|s_t) $$.
-          Substituting this back back we get $$ \nabla_\theta r_t(\theta) = \frac{1}{\pi_{\theta_{\text{old}}}(a_t|s_t)}  * [ \pi_\theta(a_t|s_t) \nabla_\theta \log \pi_\theta (a_t|s_t) ] = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t) } * \nabla_\theta \log \pi_\theta (a_t|s_t) = r_t(\theta) \nabla_\theta \log \pi_\theta(a_t|s_t) $$.
+          Substituting this back we get $$ \nabla_\theta r_t(\theta) = \frac{1}{\pi_{\theta_{\text{old}}}(a_t|s_t)}  * [ \pi_\theta(a_t|s_t) \nabla_\theta \log \pi_\theta (a_t|s_t) ] = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t) } * \nabla_\theta \log \pi_\theta (a_t|s_t) = r_t(\theta) \nabla_\theta \log \pi_\theta(a_t|s_t) $$.
 
     </p>
     <h3>Contributions</h3>
