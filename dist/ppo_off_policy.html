@@ -77,6 +77,7 @@
         However, even with the importance sampling ratio, applying multiple gradient steps towards $$L^{CPI}$$ empirically leads to destructively large updates <d-cite key="schulman2017proximal"></d-cite>, which leads us to PPO's second contribution:
         Instead of directly optimizing $$L^{CPI}$$, PPO optimizes $$L^{CLIP}=\hat{\mathbb{E}}_t [ \min(r_t(\theta)) \hat{A}_t, \text{clip}(r_t(\theta),1-\epsilon,1+\epsilon)\hat{A}_t ]$$, where the clipping disincentivizes large changes to the policy within a single PPO step.
     </p>
+    <a class="marker" href="#section-2" id="section-2"><span>2</span></a>
     <h2>PPO reduces to REINFORCE with baseline on the first optimizer step</h2>
     <p>
         In PPO, the behaviour and target policies are identical for the first (of potentially many) optimizer step of each PPO step, but the gradient at said step is still non-zero due to an implicit <d-code language="python">stop_gradient</d-code> in the denominator of the importance sampling ratio due to $$\pi_{\theta_{\text{old}}}$$ being collected during the rollout in PPO implementations.
@@ -90,6 +91,11 @@
         <aside>
           By REINFORCE with baseline, we assume Monte-Carlo advantage estimation
         </aside>
+    </p>
+    <a class="marker" href="#section-3" id="section-3"><span>3</span></a>
+    <h2>InstructGPT training effectively used REINFORCE with baseline, not PPO</h2>
+    <p>
+      The InstructGPT authors state that they used PPO with a single inner epoch <d-cite key="ouyang2022training"></d-cite>. Based on our derivation from the previous section, InstructGPT was effectively trained using REINFORCE with baseline and GAE rather than PPO.
     </p>
     </d-article>
 
