@@ -1,0 +1,125 @@
+<!--
+  Copyright 2018 p(doom)
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!doctype html>
+
+<head>
+  <script src="template.v2.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf8">
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+
+<body>
+  <!--
+  <distill-header></distill-header>
+  -->
+  <d-front-matter>
+    <script id='distill-front-matter' type="text/json">{
+    "title": "crowd-code: Crowd-Sourcing A Dataset To Make Agents Code Like Humans",
+    "description": "We introduce crowd-code, a VS Code/Cursor extension that allows anyone to participate in crowd-sourcing a software engineering dataset to eventually finetune models on. Install once, and forget about it.",
+    "published": "June 22, 2025",
+    "url": "https://pdoom.org/crowd_code.html",
+    "authors": [
+      {
+        "author":"Alfred Nguyen",
+        "authorURL":"https://home.cit.tum.de/~nguyenal/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
+                         {"name": "TUM"}]
+      },
+      {
+        "author":"Mihir Mahajan",
+        "authorURL":"https://maharajamihir.github.io/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
+                         {"name": "TUM"}]
+      },
+      {
+        "author":"Franz Srambical",
+        "authorURL":"https://srambical.fr/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
+                         {"name": "TUM"}]
+      }
+    ],
+    "katex": {
+      "delimiters": [
+        {"left": "$$", "right": "$$", "display": false}
+      ]
+    }
+  }</script>
+  </d-front-matter>
+  <d-title>
+    <p>
+        We introduce crowd-code, a VS Code/Cursor extension that allows anyone to participate in crowd-sourcing a software engineering dataset to eventually finetune models on.
+        <a href="https://github.com/p-doom/crowd-code/releases">Install once</a>, and forget about it.
+    </p>
+  </d-title>
+  <d-byline></d-byline>
+  <d-article>
+    <a class="marker" href="#section-1" id="section-1"><span>1</span></a>
+    <h2>Data Is The New Oil</h2>
+    <p>
+        Neural networks are simulators. Anything you want your model to do, you have to teach it. Base models represent the mean of the data distribution of the internet.
+        Post-training permits shifting that distribution towards desired behaviours. The higher the required skill, the scarcer the corresponding data on the internet.
+    </p>
+    <p>
+        The most straightforward way to teach a model to do something is to give it a dataset to behaviour-clone off of. No software engineer in the world writes code linearly,
+        in a single branch, in a single commit, in a single PR, without jumping around the codebase, without making mistakes, without debugging. crowd-code is our first attempt
+        at capturing a broad spectrum of human software engineering, including character-level text insertions, deletions, undo, redo, cursor movement, file switches, jumping
+        to function defintions, git checkouts, terminal command execution, autocompletes, LLM changes, and more.
+    </p>
+    <a class="marker" href="#section-2" id="section-2"><span>2</span></a>
+    <h2>Going Beyond Open-Source Towards Open-Engineering</h2>
+    <p>
+        Every day, millions of developers are writing open-source code. We propose going beyond open-source and towards open-engineering, a paradigm where the value of the
+        developer's time is not just captured by the code they produce, but also by the mere act of engineering.
+    </p>
+    <p>
+        We introduce crowd-code, a VS Code/Cursor extension that allows anyone to participate in crowd-sourcing a software engineering dataset to eventually finetune models on.
+        We want to make it as easy as possible for developers to participate in crowd-sourcing. All you need to do is <a href="https://github.com/p-doom/crowd-code/releases">
+        install the crowd-code extension</a>, and forget about it.
+    </p>
+    <figure style="grid-column: page; margin: 1rem 0; display: flex; justify-content: center"><img src="crowd_code_preview.gif"
+      style="width:100%; border-radius: 8px;" /></figure>
+    <figcaption style="grid-column: page; text-align: center; margin-bottom: 2rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Figure 1: A preview of the crowd-code extension in action. Figure from Mattia Consiglio.</figcaption>
+    <p>
+        The extension periodically uploads the user's captured IDE actions to a server, where they are cleaned, filtered, thoroughly anonymized, and periodically released to the
+        public.
+        An ongoing recording is transparently indicated in the IDE's status bar, and can be stopped at any time. If the user has inserted sensitive data, they can simply
+        press the 'panic button' in the status bar to remove the last actions from the recording before they even leave the user's machine. Additionally, the user is asked for
+        consent to participate in crowd-sourcing upon extension installation, and can opt-out at any time. We take user privacy very seriously and welcome any feedback on how to
+        make data collection and release more transparent.
+    </p>
+    <p>
+        Beyond behaviour-cloning on a dataset crowd-sourced using crowd-code, we eventually want to use crowd-code to annotate the entirety of IDE screencasts on the internet 
+        using an inverse dynamics model trained on screen recordings paired with crowd-code's IDE action annotations. This would unlock an entirely new trove of training data
+        for software engineering agents.
+    </p>
+    <p>
+        We want to democratize AI research. We are greater than the sum of our parts. <u>Together</u>.
+    </p>
+    </d-article>
+
+  <d-appendix>
+
+    <h3>Contributions</h3>
+    <p>AN, MM and FS worked on ideation and implementation. FS wrote the manuscript. We thank Gemini Code Assist and Cursor for their help in writing the extension.</p>
+    <d-bibliography src="bibliography.bib"></d-bibliography>
+    <distill-appendix>
+    </distill-appendix>
+  </d-appendix>
+
+  <distill-footer></distill-footer>
+
+</body>
