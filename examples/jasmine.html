@@ -1,0 +1,139 @@
+<!--
+  Copyright 2018 p(doom)
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!doctype html>
+
+<head>
+  <script src="template.v2.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf8">
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+
+<body>
+  <!--
+  <distill-header></distill-header>
+  -->
+  <d-front-matter>
+    <script id='distill-front-matter' type="text/json">{
+    "title": "🧞‍♀️ Jasmine: A Simple, Performant and Scalable JAX-based World Modeling Codebase",
+    "description": "We introduce Jasmine, a production-ready JAX-based codebase for world modeling from unlabeled videos. Scale from single hosts to hundreds of xPUs thanks to XLA.",
+    "published": "August 5, 2025",
+    "url": "https://pdoom.org/jasmine.html",
+    "authors": [
+      {
+        "author":"Mihir Mahajan",
+        "authorURL":"https://maharajamihir.github.io/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
+                         {"name": "TUM"}]
+      },
+      {
+        "author":"Alfred Nguyen",
+        "authorURL":"https://home.cit.tum.de/~nguyenal/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
+                         {"name": "TUM"}]
+      },
+      {
+        "author":"Franz Srambical",
+        "authorURL":"https://srambical.fr/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
+                         {"name": "TUM"}]
+      },
+      {
+        "author":"Stefan Bauer",
+        "authorURL":"https://www.professoren.tum.de/en/bauer-stefan",
+        "affiliations": [{"name": "TUM"}]
+      }
+    ],
+    "katex": {
+      "delimiters": [
+        {"left": "$$", "right": "$$", "display": false}
+      ]
+    }
+  }</script>
+  </d-front-matter>
+  <d-title>
+    <p>
+        We introduce <a href="https://github.com/p-doom/jasmine">Jasmine</a>, a production-ready JAX-based codebase for world modeling from unlabeled videos.
+        Scale from single hosts to hundreds of xPUs thanks to XLA.
+    </p>
+  </d-title>
+  <d-byline></d-byline>
+  <d-article>
+    <a class="marker" href="#section-1" id="section-1"><span>1</span></a>
+    <h2>Introduction</h2>
+    <p>
+        We are at the cusp of an intelligence revolution. Neural networks are able to clone the behaviour of peak human intellectual performance <d-cite key="openai2025imo,deepmind2025imo"></d-cite>
+        given enough compute, data, and the right algorithms <d-cite key="deepseekai2025r1"></d-cite>. While an increasing amount of capital expenditure is allocated to compute clusters, and a well-working
+        recipe of equipping models with the required priors and capacity to reason is publicly available, the path to human-level intelligence with the ability to automate
+        large fractions of the economy will increasingly be shaped by paradigms that are able to find and efficiently use untouched data troves.
+    </p>
+    <p>
+        While product-feedback-loops <d-cite key="cursor2025tab"></d-cite> constitute an adaptive data trove, many domains like robotics are not mature enough to yield a product with wide enough
+        adoption to create a feedback-loop of sufficient magnitude, prompting the search for alternatives.
+        One paradigm proposed by the research community to overcome the data scarcity in those domains is that of world models. While world models can help frontier model
+        development in numerous ways, an ambitious goal of the community is to train a world model to act as a simulation of the world <d-cite key="bruce2024genie,parkerholder2024genie2,deepmind2025genie3"></d-cite>, in order to
+        train an agent in that simulation, via an adaptive curriculum <d-cite key="parkerholder2022evolving"></d-cite> or otherwise.
+    </p>
+    <h2>Deriving Empirical Environment Complexity Scaling Trends</h2>
+    <p>
+        While numerous previous works have investigated large-scale world modeling and its application to robotics <d-cite key="agarwal2025cosmos"></d-cite>, world modeling for agent training calls for a vastly different treatment.
+        Such regime requires the compounding error of world models to be orders of magnitude smaller than when solely used for short-term look-ahead. The feasibility of such a world model in its truest sense is entirely
+        understudied, and Jasmine, a world modeling codebase, is our first milestone towards studying the setting using rigorous evaluations. Specifically, we want to develop <i>Empirical Environment Complexity Scaling Trends</i>, where we train world models to full convergence
+        in environments of increasing complexity (Atari <d-cite key="bellemare2013arcade"></d-cite>, RetroGym <d-cite key="nichol2018retro"></d-cite>, Craftax <d-cite key="matthews2024craftax"></d-cite>, Minecraft <d-cite key="NEURIPS2022_9c7008af"></d-cite>)
+        and under the synthetic infinite-data regime. Subsequently, we want to evaluate those models two-fold: i) via a taxonomy of granular benchmarks probing
+        specific world modeling capabilities (reconstruction quality, environment dynamics at the body/tail of the data distribution, long-horizon consistency) <d-cite key="osband2020bsuite"></d-cite>, and ii) by training reinforcement learning (RL) agents in both
+        the world model and the corresponding ground-truth environment, and measuring the performance difference between those agents.
+    </p>
+    <p>
+        Ultimately, such treatment permits us to derive empirical estimates of compute and data requirements to model environments of increasing complexity sufficiently well (as determined by our evaluation procedure). Only given such estimates can we try to draw conclusions
+        about the feasibility of world modeling of environments as complex as the real world for agent training. If our empirical estimates show resource requirement trends that are feasible under the assumption of the continuation of Moore's Law and increased capital
+        expenditure, that would manifest world modeling as a paradigm with high likelihood of success in overcoming the data-scarcity in domains as general as (humanoid) robotics. Otherwise, the world modeling research community must realign its direction with downstream goals
+        that are feasible.
+    </p>
+    <h2>A batteries-included foundation for world modeling research</h2>
+    <p>
+        Jasmine, our first milestone towards deriving <i>Empirical Environment Complexity Scaling Trends</i>, is the result of weeks of infrastructure work to make large-scale world modeling research more accessible. What started off as a fork of
+        <a href="https://github.com/flairox/jafar">Jafar</a> grew into a full-fledged world
+        modeling codebase amenable to large-scale training, implementing multiple dynamics model baselines, asynchronous checkpointing, process-parallel dataloading, checkpointing of model weights, optimizer and dataloader states, checkpointing policies, full reproducibility with <strong>identical</strong>
+        training curves, mixed precision training, optimized FlashAttention (via <a href="https://github.com/jax-ml/jax/blob/a155c5a9997924170e0067d552351a9833c12c11/jax/_src/cudnn/fused_attention_stablehlo.py#L842">cuDNN SDPA</a>), activation checkpointing, DDP
+        (with FSDP/HSDP requiring changing a singe LoC), WSD schedule, index-shuffling during dataloading, and native <a href="https://github.com/google-deepmind/treescope">Treescope</a> support. Jasmine implements the new
+        <a href="https://flax.readthedocs.io/en/latest/migrating/linen_to_nnx.html">flax.nnx</a> API and strictly adheres to Noam Shazeer's <a href="https://medium.com/@NoamShazeer/shape-suffixes-good-coding-style-f836e72e24fd">shape suffix convention</a>, thereby providing
+        a didactic implementation of world modeling architectures. Jasmine solely depends
+        on battle-tested libraries from the Google ecosystem (<a href="https://github.com/google/flax">Flax</a>, <a href="https://github.com/google-deepmind/optax">Optax</a>, <a href="https://github.com/google/orbax">Orbax</a>, <a href="https://github.com/google/grain">Grain</a>,
+        <a href="https://github.com/google-deepmind/dm_pix">PIX</a>, <a href="https://github.com/google/array_record">ArrayRecord</a>).
+    </p>
+    <h2>Releasing a dataset of fine-grained research engineering</h2>
+    <p>
+        We captured every step of the research engineering process behind Jasmine using <a href="https://github.com/p-doom/crowd-code">crowd-code</a> <d-cite key="nguyen2025crowd-sourcing"></d-cite>,
+        a VS Code/ Cursor extension that captures fine-grained IDE interactions (character-level edits, navigation, debugging patterns, terminal usage) and allows researchers to contribute their 
+        engineering process to a crowd-sourced dataset. Today, we release <a href="https://huggingface.co/"><code>crowd-code-0.1</code></a>, our first dataset of dense IDE interactions, which encompasses the entire development of Jasmine.
+        <code>crowd-code-0.1</code> is unfiltered, uncleaned, and uncurated, but only contains IDE interactions of the authors. We are actively working on cleaning and curating the full dataset,
+        which will be released in the future.
+    </p>
+    </d-article>
+
+  <d-appendix>
+
+    <h3>Contributions</h3>
+    <p>MM, AN and FS worked on research, ideation and implementation. FS wrote the manuscript. SB provided feedback and guidance.</p>
+    <d-bibliography src="bibliography.bib"></d-bibliography>
+    <distill-appendix>
+    </distill-appendix>
+  </d-appendix>
+
+  <distill-footer></distill-footer>
+
+</body>
