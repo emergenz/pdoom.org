@@ -35,4 +35,26 @@ export default function(dom) {
     meta.setAttribute('content', 'width=device-width, initial-scale=1');
     head.appendChild(meta);
   }
+
+  // ensure Google Fonts (Lora) is available so header renders with correct font
+  const hasLoraFont = !!dom.querySelector('link[href*="fonts.googleapis.com"][href*="Lora"]');
+  if (!hasLoraFont) {
+    if (!dom.querySelector('link[rel="preconnect"][href="https://fonts.googleapis.com"]')) {
+      const preconnect1 = dom.createElement('link');
+      preconnect1.setAttribute('rel', 'preconnect');
+      preconnect1.setAttribute('href', 'https://fonts.googleapis.com');
+      head.appendChild(preconnect1);
+    }
+    if (!dom.querySelector('link[rel="preconnect"][href="https://fonts.gstatic.com"]')) {
+      const preconnect2 = dom.createElement('link');
+      preconnect2.setAttribute('rel', 'preconnect');
+      preconnect2.setAttribute('href', 'https://fonts.gstatic.com');
+      preconnect2.setAttribute('crossorigin', '');
+      head.appendChild(preconnect2);
+    }
+    const stylesheet = dom.createElement('link');
+    stylesheet.setAttribute('rel', 'stylesheet');
+    stylesheet.setAttribute('href', 'https://fonts.googleapis.com/css2?family=Lora:ital@0;1&display=swap');
+    head.appendChild(stylesheet);
+  }
 }

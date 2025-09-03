@@ -23,6 +23,7 @@ html {
   text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
+  scrollbar-gutter: stable;
 }
 
 @media(min-width: 768px) {
@@ -33,6 +34,7 @@ html {
 
 body {
   margin: 0;
+  overflow-y: scroll; /* Reserve scrollbar space to avoid horizontal shift */
 }
 
 a {

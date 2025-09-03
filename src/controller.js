@@ -184,6 +184,14 @@ export const Controller = {
         console.debug("Runlevel 4: Controller running DOMContentLoaded");
       }
 
+      // Ensure a header is present on client load if not prerendered
+      const existingHeader = document.querySelector("distill-header");
+      if (!existingHeader) {
+        const headerEl = document.createElement("distill-header");
+        // If prerender didn't inject innerHTML, rely on the web component's template
+        document.body.insertBefore(headerEl, document.body.firstChild);
+      }
+
       const frontMatterTag = document.querySelector("d-front-matter");
       if (frontMatterTag) {
         const data = parseFrontmatter(frontMatterTag);
