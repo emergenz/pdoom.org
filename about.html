@@ -2,10 +2,12 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>p(doom)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital@0;1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="favicon.png">
 	<style>
     html, body {
@@ -15,6 +17,7 @@
       font-family: 'Lora', serif;
       color: #e8e8e8;
     }
+    html { scrollbar-gutter: stable; }
     #main-container {
       display: flex;
       flex-direction: column; /* Stack elements vertically */
@@ -48,17 +51,104 @@
       align-items: center;
     }
 	</style>
+	<style>
+    /* Standalone site header to match Distill header */
+    .site-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background-color: #000;
+      box-sizing: border-box;
+      z-index: 10;
+      border-bottom: none;
+      box-shadow: none;
+    }
+    .site-header .content {
+      max-width: 1080px;
+      margin: 0 auto;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+    .site-header a {
+      font-size: 16px;
+      height: 60px;
+      line-height: 60px;
+      text-decoration: none;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    .site-header a:hover { color: rgba(255, 255, 255, 1); }
+    .site-header .logo {
+      display: flex;
+      align-items: center;
+      font-size: 30px;
+      font-weight: 200;
+      font-style: italic;
+    }
+    .site-header .logo img {
+      width: 48px;
+      height: 48px;
+      margin-right: 6px;
+    }
+    .site-header .nav {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;
+      font-weight: 500;
+    }
+    .site-header .nav a {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;
+      font-weight: 500;
+      font-size: 12px;
+      margin-left: 24px;
+      text-transform: uppercase;
+      font-style: normal;
+      letter-spacing: 0.06em;
+    }
+    @media(min-width: 1080px) {
+      .site-header { height: 70px; }
+      .site-header .content { height: 70px; }
+      .site-header a { height: 70px; line-height: 70px; }
+    }
+    /* Wrap nav to next line on small screens */
+    @media(max-width: 640px) {
+      .site-header { height: auto; position: static; }
+      .site-header .content { height: auto; padding: 8px 12px; flex-direction: column; align-items: flex-start; gap: 6px; }
+      .site-header a { height: auto; line-height: 1.3; }
+      .site-header .logo { font-size: 24px; line-height: 1; }
+      .site-header .logo img { width: 36px; height: 36px; }
+      .site-header .nav { width: 100%; display: flex; flex-wrap: wrap; gap: 8px 12px; justify-content: flex-start; }
+      .site-header .nav a { margin-left: 0; margin-right: 0; padding: 6px 0; font-size: 12px; }
+      .page-offset { padding-top: 0; }
+    }
+    /* offset body content for fixed header */
+    .page-offset { padding-top: 70px; }
+    </style>
 	</head>
 	<body>
+    <header class="site-header" role="banner">
+        <div class="content">
+            <a href="/" class="logo">
+                <img src="logo.png" alt="p(doom) logo" />
+                p(doom)
+            </a>
+            <nav class="nav" role="navigation" aria-label="Primary">
+                <a href="blog.html">Research</a>
+                <a href="about.html">About</a>
+                <a href="https://discord.gg/G4JNuPX2VR">Join</a>
+            </nav>
+        </div>
+    </header>
+    <div class="page-offset">
     <div id="main-container">
         <div id="header-container">
-        <img id="logo" src="logo.png" alt="p(doom)">
         <div id="title">about</div>
         </div>
         <div id="about">
             <p>
             Kurzgesagt: We are an open, entirely decentralised, global AI research lab and organise the entirety of our research via Discord.
-            <br>
             <br>
             <div style="font-style: italic; display: inline;">p(doom)</div> is about pioneering truly open research on the path to AGI. Our right to exist stems from the fact that there is an immense talent pool of people that would love to meaningfully contribute to research on the path towards AGI, but are not given the opportunity to do so (as long as they don't magically get positions at DeepMind or OpenAI). Harnessing our deep, collective expertise in the realm of deep learning and beyond will lead to breakthroughs in both application areas as well as the development of learning agents.
             <br>
@@ -75,6 +165,7 @@
             We are greater than the sum of our parts. <u>Together</u>.
             </p>
         </div>
+    </div>
     </div>
 	</body>
 </html>
