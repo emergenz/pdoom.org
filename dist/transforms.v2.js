@@ -12910,6 +12910,39 @@ distill-header .nav a {
   font-style: normal;
   letter-spacing: 0.06em;
 }
+@media(max-width: 640px) {
+  distill-header { height: auto; }
+  distill-header .content {
+    height: auto;
+    padding: 8px 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  distill-header a {
+    height: auto;
+    line-height: 1.3;
+  }
+  distill-header .logo {
+    font-size: 24px;
+    line-height: 1;
+  }
+  distill-header img {
+    width: 36px;
+    height: 36px;
+  }
+  distill-header .nav {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+  distill-header .nav a {
+    margin-left: 0;
+    padding: 6px 0;
+    font-size: 12px;
+  }
+}
 </style>
 <div class="content">
   <a href="/" class="logo">
