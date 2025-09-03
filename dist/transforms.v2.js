@@ -63,6 +63,7 @@
 
     constructor(object) {
       this.name = object.author; // 'Chris Olah'
+      this.equalContrib = !!(object.equalContrib);
       this.personalURL = object.authorURL; // 'https://colah.github.io'
       this.affiliation = object.affiliation; // 'Google Brain'
       this.affiliationURL = object.affiliationURL; // 'https://g.co/brain'
@@ -1038,13 +1039,11 @@
       ${frontMatter.authors.map(author => `
         <p class="author">
           ${author.personalURL ? `
-            <a class="name" href="${author.personalURL}">${author.name}</a>` : `
-            <span class="name">${author.name}</span>`}
+            <a class="name" href="${author.personalURL}">${author.name}${author.equalContrib ? '<sup>*</sup>' : ''}</a>` : `
+            <span class="name">${author.name}${author.equalContrib ? '<sup>*</sup>' : ''}</span>`}
         </p>
         <p class="affiliation">
-        ${author.affiliations.map(affiliation =>
-          affiliation.url ? `<a class="affiliation" href="${affiliation.url}">${affiliation.name}</a>` : `<span class="affiliation">${affiliation.name}</span>`
-        ).join(', ')}
+        ${author.affiliations.map(affiliation => affiliation.url ? `<a class="affiliation" href="${affiliation.url}">${affiliation.name}</a>` : `<span class="affiliation">${affiliation.name}</span>`).join(', ')}
         </p>
       `).join('')}
     </div>
@@ -1053,12 +1052,6 @@
       ${frontMatter.publishedDate ? `
         <p>${frontMatter.publishedMonth} ${frontMatter.publishedDay}, ${frontMatter.publishedYear}</p> ` : `
         <p><em>Not published yet.</em></p>`}
-    </div>
-    <div>
-      <h3>DOI</h3>
-      ${frontMatter.doi ? `
-        <p><a href="https://doi.org/${frontMatter.doi}">${frontMatter.doi}</a></p>` : `
-        <p><em>No DOI yet.</em></p>`}
     </div>
   </div>
 `;

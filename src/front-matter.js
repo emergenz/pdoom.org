@@ -55,6 +55,7 @@ class Author {
 
   constructor(object) {
     this.name = object.author; // 'Chris Olah'
+    this.equalContrib = !!(object.equalContrib);
     this.personalURL = object.authorURL; // 'https://colah.github.io'
     this.affiliation = object.affiliation; // 'Google Brain'
     this.affiliationURL = object.affiliationURL; // 'https://g.co/brain'
