@@ -58,6 +58,7 @@
   </d-title>
   <d-byline></d-byline>
   <d-article>
+  <aside>*Equal contribution</aside>
     <a class="marker" href="#section-1" id="section-1"><span>1</span></a>
     <p>
         A vanilla transformer (and all currently used variations thereof) generates each token after one (and only one) forward-pass through the network. Intuitively this means that at inference time, the network <i>thinks</i> for the same amount of time before each token generation. While this is not an inherent limitation on the reasoning capabilities of transformer models, it does mean that we would need obscenely large transformers for them to exhibit longer-term planning capabilities. Since we posit that (standalone) models with more than 1 trillion parameters are already unfeasible to serve at scale, we need to overcome this limitation of the transformer architecture.
