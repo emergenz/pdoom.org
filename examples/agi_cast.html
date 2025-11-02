@@ -1,0 +1,97 @@
+<!--
+  Copyright 2018 p(doom)
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!doctype html>
+
+<head>
+  <script src="template.v2.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf8">
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+
+<body>
+  <!--
+  <distill-header></distill-header>
+  -->
+  <d-front-matter>
+    <script id='distill-front-matter' type="text/json">{
+    "title": "AGI-CAST: Making Agents Work Like Humans",
+    "description": "We introduce AGI-CAST, a continually growing dataset of unlabeled screen recordings of AGI research.",
+    "published": "November 02, 2025",
+    "url": "https://pdoom.org/agi_cast.html",
+    "authors": [
+      {
+        "author":"Franz Srambical",
+        "authorURL":"https://srambical.fr/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
+                         {"name": "TUM"}]
+      }
+    ],
+    "katex": {
+      "delimiters": [
+        {"left": "$$", "right": "$$", "display": false}
+      ]
+    }
+  }</script>
+  </d-front-matter>
+  <d-title>
+    <p>
+        We introduce <a href="https://www.youtube.com/playlist?list=PLjRnysMzVojeW07tbldm5sIDrVIqAWiHy">AGI-CAST</a>, a continually growing dataset of unlabeled screen recordings of long-horizon AGI research.
+    </p>
+  </d-title>
+  <d-byline></d-byline>
+  <d-article>
+    <figure style="grid-column: page; margin: 1rem 0; display: flex; justify-content: center"><video src="agi_cast.mp4"
+    style="width:100%; border-radius: 8px;" controls autoplay loop muted /></figure>
+    <figcaption style="grid-column: page; text-align: center; margin-bottom: 2rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Figure 1: AGI-CAST in action.</figcaption>
+    <a class="marker" href="#section-1" id="section-1"><span>1</span></a>
+    <h2>Behaviour-Cloning Knowledge Work</h2>
+    <p>
+      Internet-scale pre-training, preference modeling, and reinforcement learning using verification signals offer a compelling pathway for language models
+      to attain human-level performance
+      <d-cite key="openai2025imo,LuongLockhart2025GeminiIMO,LinCheng2025GeminiICPC"></d-cite>, yet data is increasingly bottlenecking progress from
+      spiky towards general intelligence. A natural way to extend the current paradigm to automation of arbitrary knowledge work is to behaviour-clone
+      from screen recordings of human practitioners. This
+      requires moving from predominantly text-based towards video-based behaviour-cloning, a nascent field <d-cite key="yang2024video"></d-cite>.<aside class="note">Analogous to 'cold-start data' in the language modeling regime</aside>
+    </p>
+    <p>
+      A longstanding goal of AGI research is automating the process of conducting research itself.
+      While a long line of work tried to tackle necessary capabilities for automating research individually (coding, ideation, exploration, planning),
+      research automation does not warrant special treatment compared to other types of knowledge work, and behaviour-cloning from screen recordings is a natural way to bootstrap models in general.
+    </p>
+    <p>
+      We introduce AGI-CAST, a dataset of unlabeled screen recordings of AGI research, intended to facilitate research on behaviour-cloning from screen recordings.
+      We go beyond <a href="https://pdoom.org/crowd_code.html">crowd-code</a>, our previous work on crowd-sourcing a dataset of IDE interactions, by capturing not only the IDE, but also browser-use, notes, and paper exploration.
+      While crowd-code is intended as a low-threshold crowd-sourcing effort, AGI-CAST captures the entire day of researchers at p(doom), with all its idiosyncrasies and nuances. While we only started recording recently,
+      the entire up-to-date dataset is available <a href="https://www.youtube.com/playlist?list=PLjRnysMzVojeW07tbldm5sIDrVIqAWiHy">as a playlist on YouTube</a> and will be updated continuously.
+    </p>
+    <p>
+      All uncaptured data is lost data. AGI-CAST represents the first step towards capturing and openly releasing the longest-horizon data imaginable. We invite the community to follow our lead and openly release screen recordings of their own research.
+    </p>
+    </d-article>
+
+  <d-appendix>
+
+    <h3>Contributions</h3>
+    <p>FS worked on all aspects of this post. The dataset exclusively captures the work of the authors of this post.</p>
+    <d-bibliography src="bibliography.bib"></d-bibliography>
+    <distill-appendix>
+    </distill-appendix>
+  </d-appendix>
+
+  <distill-footer></distill-footer>
+
+</body>
