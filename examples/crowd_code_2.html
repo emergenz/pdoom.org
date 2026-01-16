@@ -1,0 +1,319 @@
+<!--
+  Copyright 2026 p(doom)
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!doctype html>
+
+<head>
+  <script src="template.v2.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf8">
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+
+<body>
+  <!--
+  <distill-header></distill-header>
+  -->
+  <d-front-matter>
+    <script id='distill-front-matter' type="text/json">{
+    "title": "crowd-code 2.0: Crowd-Sourcing Long-Horizon Human SWE Traces",
+    "description": "We introduce crowd-code 2.0, a complete redesign of crowd-code: a VS Code / Cursor extension for crowd-sourcing software engineering traces as action–observation rollouts. Install once, and forget about it.",
+    "published": "January 15, 2026",
+    "url": "https://pdoom.org/crowd_code_2.html",
+    "authors": [
+      {
+        "author":"Alfred Nguyen",
+        "equalContrib": true,
+        "authorURL":"https://avocadoali.github.io/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
+                         {"name": "TUM"}]
+      },
+      {
+        "author":"Mihir Mahajan",
+        "equalContrib": true,
+        "authorURL":"https://maharajamihir.github.io/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
+                         {"name": "TUM"}]
+      },
+      {
+        "author":"Franz Srambical",
+        "equalContrib": true,
+        "authorURL":"https://srambical.fr/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
+                         {"name": "TUM"}]
+      },
+      {
+        "author":"Stefan Bauer",
+        "authorURL":"https://www.professoren.tum.de/en/bauer-stefan",
+        "affiliations": [{"name": "TUM"}]
+      }
+    ],
+    "katex": {
+      "delimiters": [
+        {"left": "$$", "right": "$$", "display": false}
+      ]
+    }
+  }</script>
+  </d-front-matter>
+  <d-title>
+    <p>
+     We introduce <a href="https://github.com/p-doom/crowd-code">crowd-code 2.0</a>, a complete redesign of crowd-code: a VS Code / Cursor extension for crowd-sourcing software engineering traces
+     as action–observation rollouts. <a href="cursor:extension/p-doom.crowd-code">Install</a> once, and forget about it.
+    </p>
+  </d-title>
+  <d-byline></d-byline>
+  <d-article>
+    <aside><sup>*</sup>Equal contribution</aside>
+    <p style="border-top: 1px solid rgba(0, 0, 0, 0.1); border-bottom: 1px solid rgba(0, 0, 0, 0.1); padding: 1rem 0; margin: 1.5rem 0; grid-column: page; text-align: center; font-size: 1.1em;">
+      <strong>Install crowd-code 2.0 on <a href="cursor:extension/p-doom.crowd-code" target="_blank" style="color: #0000ee;">Cursor</a>, <a href="vscode:extension/p-doom.crowd-code" target="_blank" style="color: #0000ee;">VS Code</a>, and <a href="antigravity:extension/p-doom.crowd-code" target="_blank" style="color: #0000ee;">Antigravity</a> </strong>
+    </p>
+    <a class="marker" href="#section-1" id="section-1"><span>1</span></a>
+    <h2>You Get What You Train</h2>
+    <p>
+      Models can win IMO gold medals yet struggle at tasks that would provide obvious economic value. They can one-shot solutions yet struggle at long debugging sessions.
+      This is not a capability problem, it is a data problem. Models do what they are trained to do.
+    </p>
+    <p>
+      Millions of people work every day, creating billions of hours of open-ended, yet goal-conditioned long-horizon behaviour-cloning data every month, but this data trove goes uncaptured and lost.
+      With <a href="https://pdoom.org/agi_cast.html">AGI-CAST</a>, we recently published the largest, open long-horizon screen capture dataset by recording p(doom) members conducting open-ended AGI research.
+      We believe that behaviour-cloning from long-horizon screencasts (and eventual product-feedback loops) will unlock the next set of model capabilities in a way that mere internet-scale training and data-labeler-powered reinforcement learning cannot.
+      The story of deep learning is that of scalable methods winning. The data story is no different.
+    </p>
+    
+    <a class="marker" href="#section-2" id="section-2"><span>2</span></a>
+    <h2>A Simplified Setting for Behaviour Cloning from Screencasts</h2>
+    <p>
+      Behaviour cloning from unlabeled videos means attaining policies given observation streams without action labels or rewards. <a href="https://pdoom.org/agi_cast.html">AGI-CAST</a> captures raw screen recordings of AGI research, but training on videos is compute-expensive, and large-scale, open datasets of workforce screencasts beyond <a href="https://pdoom.org/agi_cast.html">AGI-CAST</a> that are suitable for training are non-existent.
+    </p>
+    <p>
+      <strong>crowd-code 2.0 is a simplified setting to study behaviour cloning from screencasts</strong> where observations correspond to what humans can see inside of IDEs (editor and terminal viewports), while actions correspond to edits, cursor movement, navigation and terminal interaction.
+    </p>
+    <p>
+      The result is a sequence of action–observation rollouts, directly analogous to video-based imitation learning, but purely text-based. We subsample continuously changing viewports (scrolling, streaming terminal output) at 10 Hz matching the temporal granularity of video. This means we capture the state of interactive CLI tools like Claude Code, Codex CLI, <code>vim</code> and <code>less</code> in real-time.
+    </p>
+    
+    <a class="marker" href="#section-3" id="section-3"><span>3</span></a>
+    <h2>Why crowd-code 2.0?</h2>
+    <p>
+      Over the past six months, we crowd-sourced over 2.5 million actions across 25 people using the <a href="https://pdoom.org/crowd_code.html">original crowd-code</a> extension. <strong>Today, we publicly release <a href="https://huggingface.co/datasets/p-doom/crowd-code-dataset-1.0">crowd-code-dataset-1.0</a></strong>, a cleaned and <a href="https://github.com/p-doom/crowd-code-anonymizer">anonymized</a> version of the dataset,
+      under the most permissive Creative Commons license (CC0).
+    </p>
+    <p>
+      The crowd-code dataset is flexible enough to support serialization to formats suitable for continual training of off-the-shelf language models.
+      <a href="https://github.com/p-doom/crowd-pilot-serializer">crowd-pilot-serializer</a> provides a Rust-based serialization implementation for an action-observation format familiar for coding agents:
+    </p>
+    <style>
+      .trace {
+        grid-column: text;
+        margin: 1rem 0 1.5rem 0;
+        display: grid;
+        gap: 8px;
+        min-width: 0;
+      }
+
+      .trace-card {
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        border-radius: 8px;
+        padding: 8px 12px;
+        background: #fafafa;
+        min-width: 0;
+      }
+
+      .trace-card.system {
+        background: #fff7e6;
+        border-color: rgba(122, 72, 0, 0.2);
+      }
+
+      .trace-card.assistant {
+        background: #f3f8ff;
+        border-color: rgba(0, 68, 153, 0.18);
+      }
+
+      .trace-card.user {
+        background: #f7f7f7;
+        border-color: rgba(0, 0, 0, 0.15);
+      }
+
+      .trace-role {
+        display: inline-block;
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.08);
+        color: rgba(0, 0, 0, 0.7);
+        margin-bottom: 6px;
+      }
+
+      .trace-body {
+        font-size: 12px;
+        line-height: 1.45;
+        color: rgba(0, 0, 0, 0.8);
+      }
+
+      .trace-body pre {
+        margin: 8px 0 0 0;
+        padding: 8px 10px;
+        background: #111;
+        color: #e8e8e8;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-size: 11px;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+
+      .trace-body code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      }
+    </style>
+    <div class="trace">
+      <div class="trace-card system">
+        <div class="trace-role">System</div>
+        <div class="trace-body">
+          You are a helpful assistant that interacts with a computer shell to solve programming tasks.
+          Your goal is to predict the next bash command a developer would most likely execute, given their editing and navigation history.
+        </div>
+      </div>
+      <div class="trace-card assistant">
+        <div class="trace-role">Assistant</div>
+        <div class="trace-body">
+          Command:
+          <pre><code class="language-bash">python src/input_pipeline/validation_to_testcases.py --input_file data/temp/validation.jsonl --output_file data/temp/validation_testcases.jsonl</code></pre>
+        </div>
+      </div>
+      <div class="trace-card user">
+        <div class="trace-role">User</div>
+        <div class="trace-body">
+          Output:
+          <pre><code class="language-text">Traceback (most recent call last):
+  File "/fast/home/mihir.mahajan/Projects/tab-model-eval/src/input_pipeline/validation_to_testcases.py", line 47, in &lt;module&gt;
+    args = tyro.cli(Args)
+           ^^^^
+NameError: name 'tyro' is not defined</code></pre>
+        </div>
+      </div>
+      <div class="trace-card assistant">
+        <div class="trace-role">Assistant</div>
+        <div class="trace-body">
+          Command:
+          <pre><code class="language-bash">cat -n src/input_pipeline/validation_to_testcases.py</code></pre>
+        </div>
+      </div>
+      <div class="trace-card user">
+        <div class="trace-role">User</div>
+        <div class="trace-body">
+          Output:
+          <pre><code class="language-python">     1  import json
+     2  import os
+     3  from dataclasses import dataclass
+
+     6  @dataclass
+     7  class Args:
+     8      input_file: str = "data/eval/val/validation.jsonl"
+     9      output_file: str = "data/eval/val/validation_testcases.jsonl"
+    10      task_name: str = "validation_set"
+    ...</code></pre>
+        </div>
+      </div>
+      <div class="trace-card assistant">
+        <div class="trace-role">Assistant</div>
+        <div class="trace-body">
+          Command:
+          <pre><code class="language-bash">sed -i '1i\import tyro' src/input_pipeline/validation_to_testcases.py && cat -n src/input_pipeline/validation_to_testcases.py | sed -n '1,10p'</code></pre>
+        </div>
+      </div>
+      <div class="trace-card user">
+        <div class="trace-role">User</div>
+        <div class="trace-body">
+          Output:
+          <pre><code class="language-python">     1  import tyro
+     2  import json
+     3  import os
+     4  from dataclasses import dataclass
+
+     7  @dataclass
+     8  class Args:
+     9      input_file: str = "data/eval/val/validation.jsonl"
+    10      output_file: str = "data/eval/val/validation_testcases.jsonl"</code></pre>
+        </div>
+      </div>
+    </div>
+    <p>
+      To give one example that illustrates crowd-code's usefulness, we can use this serialization format to train tab completion models that allow us to avoid KV cache invalidation and harness multi-token prediction-powered speculative decoding at deployment time.
+      That way, we can deploy much larger models compared to traditional tab completion systems under the same latency requirements.
+    </p>
+    <p>
+      However, crowd-code 1.0 was not designed for the agent-heavy software engineering workflows that are now standard, and its data capturing logic is not reminiscent of the setting of behaviour cloning from videos.
+      crowd-code 2.0 moves beyond purely event-based recordings towards capturing states (observations) and events (actions), with states designed to be as close to human observations as possible.
+      We now capture edits workspace-wide and differentiate between user actions/edits (keystrokes, navigation, terminal commands), agent edits (changes made by Cursor, Copilot, or other IDE agents) and external changes (git operations, CLI tools).
+    </p>
+    <p>
+      Attributing user edits to filesystem changes is non-trivial: We buffer user edits, correlate them with filesystem changes on save, and attribute uncorrelated changes to agents. We tested our implementation for edge-cases: if a save is triggered by an agent edit while user changes are pending, the agent edit is still correctly attributed.
+    </p>
+    <p>
+      With crowd-code 2.0 we directly capture prompt-response pairs of CLI agents invoked from the terminal, but even when using non-CLI based agents (that we cannot capture using the VS Code extension API), we can reconstruct prompts and model rollouts by capturing a <strong>compressed snapshot of the workspace immediately before each agent edit</strong> as well as a diff of the agent edit itself: Language models can reconstruct likely prompts by conditioning on the workspace snapshot and the agent edit diff. This has an additional benefit: we can <strong>replay the rollout with a different model for on-policy data</strong>.
+    </p>
+
+    <a class="marker" href="#section-4" id="section-4"><span>4</span></a>
+    <h2>Cool dataset, what gives?</h2>
+    <p>
+    crowd-code 2.0 decouples the capture format from the training format. The raw capture format is a sequence of timestamped actions and observations. Post-processing can transform this into:
+    </p>
+    <ul>
+      <li><strong>Goal-conditioned trajectories</strong> for behaviour cloning</li>
+      <li><strong>Teacher-forced next-action prediction sequences</strong> for tab completion (without invalidation of the KV cache)</li>
+      <li><strong>Learning from implicit user feedback</strong> by treating human acceptance, rejection and revision of agent edits as learning signals</li>
+    </ul>
+    <p>
+      With crowd-code 2.0, we hope to also enable the community to work on <strong>methods and algorithms for product-feedback loops</strong>.
+    </p>
+    <a class="marker" href="#section-5" id="section-5"><span>5</span></a>
+    <h2>Looking Forward</h2>
+    <p>
+    We believe that many capabilities are yet to be unlocked in current-generation architectures by behaviour-cloning them: Expanding the task horizon of models, working on single problems for hours and days at a time, imitating human exploration priors, learning on-the-go, knowing where to look (how to search by efficiently jumping around repositories, how to recall information beyond working memory; what we call <strong>attention in environment-space</strong>). Architectural bottlenecks only become imminent by constructing potential paths towards AGI. Architecture research prerequisites first exhausting the data regime.
+    </p>
+    <p>
+    Our long-term goal is not merely to train on crowd-code data.
+    We want to use it to <strong>train inverse dynamics models</strong> inferring actions from unlabeled observation sequences, as a <strong>testbed for behaviour-cloning from videos</strong> to gather insights transferable to the setting of AGI-CAST and beyond, and to <strong>bootstrap agents</strong> that can acquire the data they need when they encounter unfamiliar regimes.
+    </p>
+    <p>
+    AGI will require systems that can expand their training distribution by knowing where to look. We believe software engineering is one of the best environments to study these problems.
+    </p>
+    <p>
+      We are greater than the sum of our parts. <u>Together</u>.
+    </p>
+
+    <!--
+    <figure style="grid-column: page; margin: 1rem 0; display: flex; justify-content: center"><img src="crowd_code_2_preview.gif"
+      style="width:100%; border-radius: 8px;" /></figure>
+    <figcaption style="grid-column: page; text-align: center; margin-bottom: 2rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Figure 1: [Caption]</figcaption>
+    -->
+    </d-article>
+
+  <d-appendix>
+
+    <h3>Contributions</h3>
+    <p>AN, MM, and FS worked on research, ideation and implementation. FS wrote the manuscript.</p>
+    <d-bibliography src="bibliography.bib"></d-bibliography>
+    <distill-appendix>
+    </distill-appendix>
+  </d-appendix>
+
+  <distill-footer></distill-footer>
+
+</body>
