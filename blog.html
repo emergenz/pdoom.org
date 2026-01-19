@@ -83,6 +83,9 @@
         margin-bottom: 24px;
         position: relative;
         max-width: 500px;
+        border: 1px solid #000;
+        border-radius: 8px;
+        overflow: hidden;
     }
 
     .posts-list .post-preview.editorial .thumbnail {
@@ -91,6 +94,11 @@
 
     .posts-list .post-preview img {
         width: 100%;
+        display: block;
+    }
+    .posts-list .post-preview video {
+        width: 100%;
+        height: auto;
         display: block;
     }
 
@@ -1194,7 +1202,7 @@
                   <div class="publishedDate">January 15, 2026</div>
               </div>
               <a href="crowd_code_2.html">
-                  <div class="thumbnail"><video src="cc2_0_1.mp4" style="width: 100%; height: auto; border-radius: 8px;" controls autoplay loop muted /></div>
+                  <div class="thumbnail"><video src="cc2_0_1.mp4" controls autoplay loop muted /></div>
                   <div class="description">
                       <h2 class="title">crowd-code 2.0: Crowd-Sourcing Long-Horizon Human SWE Traces</h2>
                       <p class="authors">Alfred&nbsp;Nguyen<sup>*</sup>, Mihir&nbsp;Mahajan<sup>*</sup>, Franz&nbsp;Srambical<sup>*</sup>, Stefan&nbsp;Bauer</p>
@@ -1207,7 +1215,7 @@
                   <div class="publishedDate">November 2, 2025</div>
               </div>
               <a href="agi_cast.html">
-                  <div class="thumbnail"><video src="agi_cast.mp4" style="width: 100%; height: auto; border-radius: 8px;" controls autoplay loop muted /></div>
+                  <div class="thumbnail"><video src="agi_cast.mp4" controls autoplay loop muted /></div>
                   <div class="description">
                       <h2 class="title">AGI-CAST: Making Agents Work Like Humans</h2>
                       <p class="authors">Franz&nbsp;Srambical</p>
@@ -1220,7 +1228,7 @@
                   <div class="publishedDate">August 5, 2025</div>
               </div>
               <a href="jasmine.html">
-                  <div class="thumbnail"><img src="jasmine_preview.gif" style="border-radius: 8px;"></div>
+                  <div class="thumbnail"><img src="jasmine_preview.gif"></div>
                   <div class="description">
                       <h2 class="title">🧞‍♀️ Jasmine: A Simple, Performant and Scalable JAX-based World Modeling Codebase</h2>
                       <p class="authors">Mihir&nbsp;Mahajan<sup>*</sup>, Alfred&nbsp;Nguyen<sup>*</sup>, Franz&nbsp;Srambical<sup>*</sup>, Stefan&nbsp;Bauer</p>
@@ -1233,7 +1241,7 @@
                   <div class="publishedDate">June 22, 2025</div>
               </div>
               <a href="crowd_code.html">
-                  <div class="thumbnail"><img src="crowd_code_preview.gif" style="border-radius: 8px;"></div>
+                  <div class="thumbnail"><img src="crowd_code_preview.gif"></div>
                   <div class="description">
                       <h2 class="title">Crowd-Sourcing A Dataset To Make Agents Code Like Humans</h2>
                       <p class="authors">Franz&nbsp;Srambical, Mihir&nbsp;Mahajan</p>
