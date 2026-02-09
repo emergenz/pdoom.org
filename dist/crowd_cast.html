@@ -1,0 +1,160 @@
+<!--
+  Copyright 2026 p(doom)
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!doctype html>
+
+<head>
+  <script src="template.v2.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf8">
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+
+<body>
+  <!--
+  <distill-header></distill-header>
+  -->
+  <d-front-matter>
+    <script id='distill-front-matter' type="text/json">{
+    "title": "crowd-cast: Crowd-Sourcing Action-Annotated Long-Horizon Digital Labour",
+    "description": "We introduce crowd-cast, a privacy-preserving desktop application that allows anyone to participate in crowd-sourcing an action-annotated long-horizon behaviour-cloning dataset of computer work.",
+    "published": "February 2, 2026",
+    "url": "https://pdoom.org/crowd_cast.html",
+    "authors": [
+      {
+        "author":"Franz Srambical",
+        "equalContrib": true,
+        "authorURL":"https://srambical.fr/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
+                         {"name": "TUM"}]
+      },
+      {
+        "author":"Alfred Nguyen",
+        "equalContrib": true,
+        "authorURL":"https://avocadoali.github.io/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
+                         {"name": "TUM"}]
+      },
+      {
+        "author":"Mihir Mahajan",
+        "equalContrib": true,
+        "authorURL":"https://maharajamihir.github.io/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
+                         {"name": "TUM"}]
+      },
+      {
+        "author":"Stefan Bauer",
+        "authorURL":"https://www.professoren.tum.de/en/bauer-stefan",
+        "affiliations": [{"name": "TUM"}]
+      }
+    ],
+    "katex": {
+      "delimiters": [
+        {"left": "$$", "right": "$$", "display": false}
+      ]
+    }
+  }</script>
+  </d-front-matter>
+  <d-title>
+    <p>
+    We introduce <a href="https://github.com/p-doom/crowd-cast">crowd-cast</a>, a privacy-preserving desktop application that allows anyone to participate in crowd-sourcing an action-annotated long-horizon behaviour-cloning dataset of computer work. <a href="https://github.com/p-doom/crowd-cast/releases">Install</a> once, and forget about it.
+    </p>
+  </d-title>
+  <d-byline></d-byline>
+  <d-article>
+    <aside><sup>*</sup>Equal contribution</aside>
+    <p style="border-top: 1px solid rgba(0, 0, 0, 0.1); border-bottom: 1px solid rgba(0, 0, 0, 0.1); padding: 1rem 0; margin: 1.5rem 0; grid-column: page; text-align: center; font-size: 1.1em;">
+      <!--FIXME (f.srambical): insert the download link before releasing the blog post-->
+      <strong>Install crowd-cast on <a href="https://github.com/p-doom/crowd-cast/releases" target="_blank" style="color: #0000ee;">macOS</a></strong>
+      <br>
+      (Windows and Linux support are coming soon)
+    </p>
+    <figure style="grid-column: page; margin: 1rem 0; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center"><video src="crowd-cast-2.mp4"
+    style="width: 100%; min-width: 280px; border-radius: 8px; border: 1px solid #000; box-sizing: border-box;" controls autoplay loop muted></video>
+    </figure>
+    <figcaption style="grid-column: page; text-align: center; margin-bottom: 2rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Figure 1: Action-annotated recording captured via crowd-cast.</figcaption>
+    <a class="marker" href="#section-1" id="section-1"><span>1</span></a>
+    <h2>You really think we're going to scale data labelers to AGI?</h2>
+    <p>
+        While pretraining data acquisition has saturated and post-training overwhelmingly piggybacks on manual data labeling or handcrafted RL environments,
+        the trillion-dollar question remains how we will get to the next set of model capabilities.
+    </p>
+    <p>
+        A billion people are predominantly working on computers, generating hundreds of billions of hours of behaviour-cloning data every week, yet that data remains uncaptured and ultimately lost.
+        Models can make sense of the predominantly garbage-filled internet, they can learn to produce long chains of thoughts from thousands of cold-start examples <d-cite key="deepseekai2025r1"></d-cite>. What is stopping us from automating all digital labour... by training on digital labour?
+    </p>
+    
+    <a class="marker" href="#section-2" id="section-2"><span>2</span></a>
+    <h2>600h of AGI screencasts (and counting)</h2>
+    <p>
+      While <a href="https://pdoom.org/crowd_code_2.html">crowd-code</a> was our first effort to capture real-world long-horizon research engineering workflows by recording fine-grained IDE interactions, <a href="https://pdoom.org/agi_cast.html">AGI-CAST</a> went one step further by capturing raw screencasts of digital work.
+    </p>
+    <p>Today, we publicly release <a href="https://huggingface.co/datasets/p-doom/AGI-CAST-0.6k">AGI-CAST-0.6k</a> on Hugging Face under the most permissive Creative Commons license, representing the largest public long-horizon dataset of human digital work consisting of over 600 hours of screencasts of researchers at p(doom).</p>
+    <p>
+      More recently, we started capturing a paired dataset of screencasts, keylogs and mouse movement in order to eventually train inverse dynamcis models to action-annotate unlabeled screencasts.
+      While <a href="https://github.com/TheDuckAI/DuckTrack">great solutions</a> exist for capturing such a paired dataset, no off-the-shelf solution sufficiently addressed our requirements of
+      being unobtrusive to the user when they go about their work, while transparently displaying recording status at a glance. We also needed a solution that supported privacy-preserving workflows
+      that, robust anonymization <d-cite key="jiang2025generative"></d-cite> notwithstanding, leads to users being comfortable sharing their screencasts.
+    </p>
+    <p></p>
+    
+    <a class="marker" href="#section-3" id="section-3"><span>3</span></a>
+    <h2>...and millions more thanks to you?</h2>
+    <p>
+      We introduce <a href="https://github.com/p-doom/crowd-cast/releases">crowd-cast</a>, a native desktop application that allows anyone to participate in crowd-sourcing a long-horizon behaviour-cloning dataset of computer work.
+      Originally intended for internal rollout to construct a paired dataset of screencast observations and corresponding actions (key presses and mouse movement), we are now <a href="https://github.com/p-doom/crowd-cast">open-sourcing</a> crowd-cast and allowing anyone to participate in crowd-sourcing.
+    </p>
+    <p>
+      On initial setup, the crowd-cast wizard asks you for a list of applications that should be recorded. An example list that we use internally includes a browser (Firefox), a text editor (Cursor) and a PDF viewer (Preview).
+      We then use a separate browser (that is not part of the list of applications to be recorded, e.g. Chrome) for sensitive workflows such as E-Mails or messaging services. We found that this
+      immensely helps adoption while still covering the majority of our working day. If you work on open-source projects, you will likely be surprised that you wouldn't be bothered by publicly streaming on YouTube with this setup (something which <a href="https://www.youtube.com/playlist?list=PLjRnysMzVojeW07tbldm5sIDrVIqAWiHy">we did for months</a>).
+    </p>
+
+    <figure style="grid-column: page; margin: 1rem 0; display: flex; justify-content: center"><img src="crowd-cast-1.png"
+      style="width:50%; border-radius: 8px; border: 1px solid #000;" /></figure>
+    <figcaption style="grid-column: page; text-align: center; margin-bottom: 2rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Figure 2: crowd-cast provides a tray icon that shows the recording status a quick glance (green means active recording).</figcaption>
+    <p>
+      We synchronize actions per-frame and provide a <a href="https://github.com/p-doom/crowd-cast/blob/main/scripts/overlay_keylogs.py">script</a> to render screencasts with action overlays.
+      When the focused application switches to an application outside the predefined list, we capture a blackscreen and do not record actions (Figure 3).
+      While the application tries to stay out of the user's way, recording status is always glanceable via the crowd-cast tray icon (Figure 2). The small circle indicates active recording (<span style="color:green;font-weight:bold;">green</span>), pausing due to the focused application being outside the predefined list (<span style="color:orange;font-weight:bold;">orange</span>), and inactive recording (<span style="color:grey;font-weight:bold;">grey</span>).
+    </p>
+    <figure style="grid-column: page; margin: 1rem 0; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center"><video src="crowd-cast-3.mp4"
+    style="width: 100%; min-width: 280px; border-radius: 8px; border: 1px solid #000; box-sizing: border-box;" controls autoplay loop muted></video>
+    </figure>
+    <figcaption style="grid-column: page; text-align: center; margin-bottom: 2rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Figure 3: Both screen recording and action recording stop when switching focus to an app that should not be recorded (Discord in this example).</figcaption>
+    <p>
+      The open research community produces half a billion hours of uncaptured screencasts every single week, yet all of that data is lost. If you openly publish your work, consider
+      participating in crowd-sourcing by installing crowd-cast. We are greater than the sum of our parts. <strong>Together.</strong>
+    </p>
+
+    <!--
+    <figure style="grid-column: page; margin: 1rem 0; display: flex; justify-content: center"><img src="crowd_code_2_preview.gif"
+      style="width:100%; border-radius: 8px;" /></figure>
+    <figcaption style="grid-column: page; text-align: center; margin-bottom: 2rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Figure 1: [Caption]</figcaption>
+    -->
+    </d-article>
+
+  <d-appendix>
+
+    <h3>Contributions</h3>
+    <p>AN, MM, and FS worked on research, ideation and implementation. FS wrote the manuscript.</p>
+    <d-bibliography src="bibliography.bib"></d-bibliography>
+    <distill-appendix>
+    </distill-appendix>
+  </d-appendix>
+
+  <distill-footer></distill-footer>
+
+</body>
