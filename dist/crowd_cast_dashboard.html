@@ -227,6 +227,112 @@
             word-break: break-all;
         }
 
+        /* -- User detail panel -- */
+        .user-detail-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .user-detail-stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-detail-stat-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #555555;
+        }
+
+        .user-detail-stat-value {
+            font-size: 20px;
+            font-weight: 800;
+            font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+        }
+
+        /* -- Contribution heatmap -- */
+        .heatmap-wrapper {
+            margin-top: 20px;
+        }
+
+        .heatmap-scroll {
+            overflow-x: auto;
+        }
+
+        .heatmap-grid {
+            display: inline-grid;
+            grid-template-rows: repeat(7, 14px);
+            grid-auto-flow: column;
+            grid-auto-columns: 14px;
+            gap: 2px;
+        }
+
+        .heatmap-cell {
+            width: 14px;
+            height: 14px;
+            background: #ebedf0;
+            border-radius: 2px;
+        }
+
+        .heatmap-cell[title] {
+            cursor: default;
+        }
+
+        .heatmap-day-labels {
+            display: inline-grid;
+            grid-template-rows: repeat(7, 14px);
+            gap: 2px;
+            margin-right: 6px;
+            vertical-align: top;
+        }
+
+        .heatmap-day-label {
+            font-size: 9px;
+            font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+            color: #999999;
+            line-height: 14px;
+            text-align: right;
+        }
+
+        .heatmap-month-labels {
+            margin-left: 30px;
+            margin-bottom: 4px;
+        }
+
+        .heatmap-month-label {
+            font-size: 9px;
+            font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+            color: #999999;
+            display: inline-block;
+        }
+
+        .heatmap-legend {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+            color: #999999;
+        }
+
+        .heatmap-legend-cell {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            display: inline-block;
+        }
+
+        @media (max-width: 560px) {
+            .user-detail-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         /* -- Loading / error states -- */
         .loading-state {
             text-align: center;
@@ -363,22 +469,35 @@
             </div>
 
             <!-- Top users table -->
-            <div class="table-box outline-box">
-                <span class="section-title">Users by Estimated Hours</span>
-                <div style="overflow-x: auto;">
-                    <table id="users-table">
-                        <thead>
-                            <tr>
-                                <th data-col="rank"># <span class="sort-arrow">&#9650;</span></th>
-                                <th data-col="user">User <span class="sort-arrow">&#9650;</span></th>
-                                <th data-col="sessions" class="align-right">Sessions <span class="sort-arrow">&#9650;</span></th>
-                                <th data-col="segments" class="align-right">Segments <span class="sort-arrow">&#9650;</span></th>
-                                <th data-col="hours" class="align-right sorted">Hours <span class="sort-arrow">&#9660;</span></th>
-                                <th data-col="steps" class="align-right">Action Steps <span class="sort-arrow">&#9650;</span></th>
-                            </tr>
-                        </thead>
-                        <tbody id="users-tbody"></tbody>
-                    </table>
+            <div class="table-box outline-box" id="users-section">
+                <div id="users-table-view">
+                    <span class="section-title">Users by Estimated Hours</span>
+                    <div style="overflow-x: auto;">
+                        <table id="users-table">
+                            <thead>
+                                <tr>
+                                    <th data-col="rank"># <span class="sort-arrow">&#9650;</span></th>
+                                    <th data-col="user">User <span class="sort-arrow">&#9650;</span></th>
+                                    <th data-col="sessions" class="align-right">Sessions <span class="sort-arrow">&#9650;</span></th>
+                                    <th data-col="segments" class="align-right">Segments <span class="sort-arrow">&#9650;</span></th>
+                                    <th data-col="hours" class="align-right sorted">Hours <span class="sort-arrow">&#9660;</span></th>
+                                    <th data-col="steps" class="align-right">Action Steps <span class="sort-arrow">&#9650;</span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="user-detail-view" style="display:none;">
+                    <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:16px;">
+                        <span class="section-title" id="user-detail-title" style="margin-bottom:0;"></span>
+                        <a href="#" id="user-back-btn" style="font-size:11px;font-family:'SF Mono',monospace;color:#555;text-decoration:none;border-bottom:1px solid #ccc;" onclick="showUsersTableView();return false;">&larr; Back to users</a>
+                    </div>
+                    <div class="user-detail-stats" id="user-detail-stats"></div>
+                    <div class="heatmap-wrapper">
+                        <span class="section-title">Contribution History</span>
+                        <div id="user-heatmap"></div>
+                    </div>
                 </div>
             </div>
 
@@ -390,7 +509,7 @@
 
             <!-- Footer -->
             <div class="site-footer">
-                <a href="https://pdoom.org/crowd_cast.html" target="_blank" rel="noopener">crowd-cast</a> &mdash; privacy-preserving behaviour-cloning data, crowd-sourced.
+                <a href="https://pdoom.org/crowd_cast.html" target="_blank" rel="noopener">crowd-cast</a>: Crowd-Sourcing Action-Annotated Long-Horizon Digital Labour.
             </div>
         </div>
     </div>
@@ -491,7 +610,9 @@
         const hist = meta.action_histogram || {};
         const detail = meta.action_histogram_detail || {};
         const perUser = meta.per_user || {};
-        const daily = meta.daily_history || [];
+        const perUserDaily = meta.per_user_daily || {};
+        const dailyRaw = meta.daily_history || [];
+        const daily = dailyRaw.slice(1); // skip first day (inflated by pre-existing files)
 
         /* -- Header -- */
         const statusOk = j.last_run_status === 'ok';
@@ -524,6 +645,9 @@
         renderActionDonut(hist, detail);
 
         /* -- Users table -- */
+        _cachedPerUser = perUser;
+        _cachedPerUserDaily = perUserDaily;
+        _cachedDailyDates = daily.map(d => d.date);
         renderUsersTable(perUser);
 
         /* -- Health panel -- */
@@ -688,6 +812,7 @@
     }
 
     function _drillIntoFamily(family) {
+        history.pushState({ view: 'family', family: family }, '');
         _donutMode = family;
         const detail = _cachedDetail;
         // Filter labels belonging to this family.
@@ -759,6 +884,9 @@
 
     /* ---- Users table ---- */
     let usersData = [];
+    let _cachedPerUser = {};
+    let _cachedPerUserDaily = {};
+    let _cachedDailyDates = [];
 
     function buildUsersData(perUser) {
         usersData = Object.entries(perUser).map(([hash, u]) => ({
@@ -790,7 +918,7 @@
         const tbody = document.getElementById('users-tbody');
         let html = '';
         usersData.forEach((row, i) => {
-            html += '<tr>' +
+            html += '<tr style="cursor:pointer;" onclick="drillIntoUser(\'' + escapeHtml(row.user) + '\')">' +
                 '<td>' + (i + 1) + '</td>' +
                 '<td class="user-hash" title="' + escapeHtml(row.user) + '">' + escapeHtml(shortHash(row.user)) + '</td>' +
                 '<td class="align-right">' + fmt(row.sessions) + '</td>' +
@@ -826,7 +954,7 @@
             const tbody = document.getElementById('users-tbody');
             let html = '';
             usersData.forEach((row, i) => {
-                html += '<tr>' +
+                html += '<tr style="cursor:pointer;" onclick="drillIntoUser(\'' + escapeHtml(row.user) + '\')">' +
                     '<td>' + (i + 1) + '</td>' +
                     '<td class="user-hash" title="' + escapeHtml(row.user) + '">' + escapeHtml(shortHash(row.user)) + '</td>' +
                     '<td class="align-right">' + fmt(row.sessions) + '</td>' +
@@ -838,6 +966,143 @@
             tbody.innerHTML = html;
         });
     });
+
+    /* ---- User detail / heatmap drill-down ---- */
+    function showUsersTableView() {
+        document.getElementById('users-table-view').style.display = 'block';
+        document.getElementById('user-detail-view').style.display = 'none';
+    }
+
+    function drillIntoUser(userHash) {
+        history.pushState({ view: 'user', user: userHash }, '');
+        const u = _cachedPerUser[userHash] || {};
+        const userDaily = (_cachedPerUserDaily[userHash]) || {};
+
+        /* Show detail, hide table */
+        document.getElementById('users-table-view').style.display = 'none';
+        document.getElementById('user-detail-view').style.display = 'block';
+
+        /* Title */
+        document.getElementById('user-detail-title').textContent = shortHash(userHash, 24);
+
+        /* Stats */
+        const stats = [
+            ['Sessions', fmt(u.sessions)],
+            ['Segments', fmt(u.segments)],
+            ['Hours', fmtDec((u.estimated_minutes || 0) / 60, 2)],
+            ['Action Steps', fmt(u.action_steps)],
+        ];
+        document.getElementById('user-detail-stats').innerHTML = stats.map(([label, value]) =>
+            '<div class="user-detail-stat">' +
+                '<span class="user-detail-stat-label">' + escapeHtml(label) + '</span>' +
+                '<span class="user-detail-stat-value">' + escapeHtml(value) + '</span>' +
+            '</div>'
+        ).join('');
+
+        /* Heatmap */
+        renderHeatmap(userDaily);
+    }
+
+    function renderHeatmap(userDaily) {
+        const container = document.getElementById('user-heatmap');
+
+        /* Determine date range from daily_history dates */
+        if (_cachedDailyDates.length === 0) {
+            container.innerHTML = '<span style="font-size:12px;color:#999;">No daily data available.</span>';
+            return;
+        }
+
+        const startDate = new Date(_cachedDailyDates[0] + 'T00:00:00');
+        const endDate = new Date(_cachedDailyDates[_cachedDailyDates.length - 1] + 'T00:00:00');
+
+        /* Rewind startDate to the previous Monday */
+        const startDay = startDate.getDay(); // 0=Sun
+        const mondayOffset = startDay === 0 ? -6 : 1 - startDay;
+        const gridStart = new Date(startDate);
+        gridStart.setDate(gridStart.getDate() + mondayOffset);
+
+        /* Build array of all days from gridStart through endDate */
+        const days = [];
+        const d = new Date(gridStart);
+        while (d <= endDate) {
+            days.push(new Date(d));
+            d.setDate(d.getDate() + 1);
+        }
+        /* Pad to complete the last week (fill to Sunday) */
+        while (days.length % 7 !== 0) {
+            days.push(new Date(d));
+            d.setDate(d.getDate() + 1);
+        }
+
+        /* Look up minutes per day */
+        const minutesPerDay = days.map(day => {
+            const key = day.toISOString().slice(0, 10);
+            const entry = userDaily[key];
+            return entry ? (entry.estimated_minutes || 0) : 0;
+        });
+
+        /* Color scale (0 = #ebedf0, max = #000000) */
+        const maxMin = Math.max(...minutesPerDay, 1);
+        function cellColor(mins) {
+            if (mins === 0) return '#ebedf0';
+            /* 4 intensity levels like GitHub */
+            const ratio = mins / maxMin;
+            if (ratio <= 0.25) return '#c6c6c6';
+            if (ratio <= 0.50) return '#888888';
+            if (ratio <= 0.75) return '#444444';
+            return '#000000';
+        }
+
+        /* Month labels */
+        const weeks = days.length / 7;
+        let monthHtml = '<div class="heatmap-month-labels" style="padding-left:30px;">';
+        let lastMonth = -1;
+        for (let w = 0; w < weeks; w++) {
+            const weekStart = days[w * 7];
+            const m = weekStart.getMonth();
+            if (m !== lastMonth) {
+                const monthName = weekStart.toLocaleString('en-US', { month: 'short' });
+                monthHtml += '<span class="heatmap-month-label" style="width:' + (16) + 'px;">' + monthName + '</span>';
+                lastMonth = m;
+            } else {
+                monthHtml += '<span class="heatmap-month-label" style="width:16px;"></span>';
+            }
+        }
+        monthHtml += '</div>';
+
+        /* Day labels (Mon, Wed, Fri) */
+        const dayNames = ['Mon', '', 'Wed', '', 'Fri', '', ''];
+        let dayLabelsHtml = '<div class="heatmap-day-labels">';
+        dayNames.forEach(name => {
+            dayLabelsHtml += '<span class="heatmap-day-label">' + name + '</span>';
+        });
+        dayLabelsHtml += '</div>';
+
+        /* Grid cells — grid-auto-flow: column fills top-to-bottom (Mon→Sun), then next week */
+        let gridHtml = '<div class="heatmap-grid">';
+        days.forEach((day, i) => {
+            const key = day.toISOString().slice(0, 10);
+            const mins = minutesPerDay[i];
+            const title = key + ': ' + fmtDec(mins, 1) + ' min';
+            gridHtml += '<div class="heatmap-cell" style="background:' + cellColor(mins) + ';" title="' + title + '"></div>';
+        });
+        gridHtml += '</div>';
+
+        /* Legend */
+        let legendHtml = '<div class="heatmap-legend">' +
+            '<span>Less</span>' +
+            '<span class="heatmap-legend-cell" style="background:#ebedf0;"></span>' +
+            '<span class="heatmap-legend-cell" style="background:#c6c6c6;"></span>' +
+            '<span class="heatmap-legend-cell" style="background:#888888;"></span>' +
+            '<span class="heatmap-legend-cell" style="background:#444444;"></span>' +
+            '<span class="heatmap-legend-cell" style="background:#000000;"></span>' +
+            '<span>More</span>' +
+            '</div>';
+
+        container.innerHTML = monthHtml +
+            '<div class="heatmap-scroll" style="display:flex;">' + dayLabelsHtml + gridHtml + '</div>' +
+            legendHtml;
+    }
 
     /* ---- Health panel ---- */
     function renderHealth(meta) {
@@ -883,6 +1148,13 @@
                 '<p style="margin-top:8px;font-size:13px;color:#777;">' + escapeHtml(String(err)) + '</p>';
         }
     }
+
+    /* History-based back navigation (swipe-back / mouse-back) */
+    window.addEventListener('popstate', function(e) {
+        /* When going back, restore the default (non-drilled) view */
+        if (_donutMode !== 'family') showFamilyView();
+        if (document.getElementById('user-detail-view').style.display !== 'none') showUsersTableView();
+    });
 
     boot();
     </script>
