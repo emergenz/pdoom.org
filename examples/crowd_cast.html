@@ -41,16 +41,16 @@
                          {"name": "TUM"}]
       },
       {
-        "author":"Alfred Nguyen",
+        "author":"Mihir Mahajan",
         "equalContrib": true,
-        "authorURL":"https://avocadoali.github.io/",
+        "authorURL":"https://maharajamihir.github.io/",
         "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
                          {"name": "TUM"}]
       },
       {
-        "author":"Mihir Mahajan",
+        "author":"Alfred Nguyen",
         "equalContrib": true,
-        "authorURL":"https://maharajamihir.github.io/",
+        "authorURL":"https://avocadoali.github.io/",
         "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
                          {"name": "TUM"}]
       },
@@ -76,7 +76,6 @@
   <d-article>
     <aside><sup>*</sup>Equal contribution</aside>
     <p style="border-top: 1px solid rgba(0, 0, 0, 0.1); border-bottom: 1px solid rgba(0, 0, 0, 0.1); padding: 1rem 0; margin: 1.5rem 0; grid-column: page; text-align: center; font-size: 1.1em;">
-      <!--FIXME (f.srambical): insert the download link before releasing the blog post-->
       <strong>Install crowd-cast on <a href="https://github.com/p-doom/crowd-cast/releases" target="_blank" style="color: #0000ee;">macOS</a></strong>
       <br>
       (Windows and Linux support are coming soon)
@@ -97,13 +96,13 @@
     </p>
     
     <a class="marker" href="#section-2" id="section-2"><span>2</span></a>
-    <h2>600h of AGI screencasts (and counting)</h2>
+    <h2>1200h of AGI screencasts (and counting)</h2>
     <p>
       While <a href="https://pdoom.org/crowd_code_2.html">crowd-code</a> was our first attempt at capturing real-world long-horizon research engineering workflows by recording fine-grained IDE interactions, <a href="https://pdoom.org/agi_cast.html">AGI-CAST</a> went one step further by capturing raw screencasts of digital work.
     </p>
     <p>Today, we publicly release <a href="https://huggingface.co/datasets/p-doom/AGI-CAST-0.6k">AGI-CAST-0.6k</a> on Hugging Face under the most permissive Creative Commons license, representing the largest public long-horizon dataset of human digital work consisting of over 600 hours of screencasts of researchers at p(doom).</p>
     <p>
-      More recently, we started capturing a paired dataset of screencasts, keylogs and mouse movement in order to eventually train inverse dynamcis models to action-annotate unlabeled screencasts.
+      More recently, we started capturing a paired dataset of screencasts, keylogs and mouse movement in order to train inverse dynamcis models to action-annotate unlabeled screencasts.
       While <a href="https://github.com/TheDuckAI/DuckTrack">great solutions</a> exist for capturing such a paired dataset, no off-the-shelf solution sufficiently addressed our requirements of
       being unobtrusive to the user when they go about their work, while transparently displaying recording status at a glance. We also needed a solution that supported privacy-preserving workflows
       that, robust anonymization <d-cite key="jiang2025generative"></d-cite> notwithstanding, leads to users being comfortable sharing their screencasts.
@@ -120,6 +119,10 @@
       On initial setup, the crowd-cast wizard asks you for a list of applications that should be recorded. An example list that we use internally includes a browser (Firefox), a text editor (Cursor) and a PDF viewer (Preview).
       We then use a separate browser (that is not part of the list of applications to be recorded, e.g. Chrome) for sensitive workflows such as E-Mails or messaging services. We found that this
       immensely helps adoption while still covering the majority of our working day. If you work on open-source projects, you will likely be surprised that you wouldn't be bothered by publicly streaming on YouTube with this setup (something <a href="https://www.youtube.com/playlist?list=PLjRnysMzVojeW07tbldm5sIDrVIqAWiHy">we did for months</a>).
+    </p>
+    <p>
+      We strive to make crowd-cast as unobtrusive as possible: by default, we capture five-minute segments, upload each segment to a private S3 bucket, and delete the local copy on segment boundaries. As with <a href="https://pdoom.org/crowd_code_2.html">crowd-code</a>
+      and <a href="https://huggingface.co/datasets/p-doom/AGI-CAST-0.6k">AGI-CAST</a>, we will publish the cleaned dataset under the most permissive Creative Commons license (CC0). A live <a href="https://pdoom.org/crowd_cast_dashboard.html">dashboard</a> shows collection progress and summary statistics.
     </p>
 
     <figure style="grid-column: page; margin: 1rem 0; display: flex; justify-content: center"><img src="crowd-cast-1.png"
