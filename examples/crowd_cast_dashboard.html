@@ -1006,14 +1006,15 @@
     function renderHeatmap(userDaily) {
         const container = document.getElementById('user-heatmap');
 
-        /* Determine date range from daily_history dates */
-        if (_cachedDailyDates.length === 0) {
-            container.innerHTML = '<span style="font-size:12px;color:#999;">No daily data available.</span>';
+        /* Determine date range from user's own per_user_daily data */
+        const userDates = Object.keys(userDaily).sort();
+        if (userDates.length === 0) {
+            container.innerHTML = '<span style="font-size:12px;color:#999;">No daily data available for this user.</span>';
             return;
         }
 
-        const startDate = new Date(_cachedDailyDates[0] + 'T00:00:00');
-        const endDate = new Date(_cachedDailyDates[_cachedDailyDates.length - 1] + 'T00:00:00');
+        const startDate = new Date(userDates[0] + 'T00:00:00');
+        const endDate = new Date(userDates[userDates.length - 1] + 'T00:00:00');
 
         /* Rewind startDate to the previous Monday */
         const startDay = startDate.getDay(); // 0=Sun
