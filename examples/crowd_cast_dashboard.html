@@ -1054,20 +1054,28 @@
             return '#000000';
         }
 
-        /* Month labels */
+        /* Month labels — collect positions first, then drop any that are too close
+           to the NEXT label (so the later/more relevant month wins). */
         const weeks = days.length / 7;
-        let monthHtml = '<div class="heatmap-month-labels" style="padding-left:30px;">';
+        const colW = 16; /* 14px cell + 2px gap */
+        const monthEntries = [];
         let lastMonth = -1;
         for (let w = 0; w < weeks; w++) {
             const weekStart = days[w * 7];
             const m = weekStart.getMonth();
             if (m !== lastMonth) {
-                const monthName = weekStart.toLocaleString('en-US', { month: 'short' });
-                monthHtml += '<span class="heatmap-month-label" style="width:' + (16) + 'px;">' + monthName + '</span>';
+                monthEntries.push({ x: w * colW, name: weekStart.toLocaleString('en-US', { month: 'short' }) });
                 lastMonth = m;
-            } else {
-                monthHtml += '<span class="heatmap-month-label" style="width:16px;"></span>';
             }
+        }
+        /* Filter: drop entry if the next one is less than 30px away */
+        const filteredMonths = monthEntries.filter((entry, i) => {
+            if (i + 1 < monthEntries.length && monthEntries[i + 1].x - entry.x < 30) return false;
+            return true;
+        });
+        let monthHtml = '<div class="heatmap-month-labels" style="padding-left:30px;position:relative;height:14px;">';
+        for (const entry of filteredMonths) {
+            monthHtml += '<span class="heatmap-month-label" style="position:absolute;left:' + entry.x + 'px;">' + entry.name + '</span>';
         }
         monthHtml += '</div>';
 
