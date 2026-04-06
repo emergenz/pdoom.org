@@ -37,7 +37,7 @@ const defaultConfig = {
 
 const componentsConfig = {
   input: "src/components.js",
-  output: [{ format: "umd", name: "dl", file: "dist/template.v2.js", sourcemap: true }],
+  output: [{ format: "umd", name: "dl", file: "public/template.v2.js", sourcemap: true }],
   plugins: [
     babel({
       "babelHelpers": "bundled",
@@ -52,7 +52,7 @@ const transformsConfig = {
     {
       format: "umd",
       name: "dl",
-      file: "dist/transforms.v2.js",
+      file: "public/transforms.v2.js",
       globals: { fs: "fs" },
       sourcemap: true,
     }

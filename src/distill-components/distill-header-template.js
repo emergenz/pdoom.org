@@ -2,112 +2,121 @@ import logo from '../assets/pdoom-logo.png';
 
 export const headerTemplate = `
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Lora:ital@0;1&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@1,400&display=swap');
+
+body {
+  padding-top: 70px;
+}
+
 distill-header {
   display: block !important;
-  font-family: 'Lora', serif;
-  font-style: normal;
-  position: relative;
-  height: 60px;
-  background-color: #000;
-  width: 100%;
-  box-sizing: border-box;
-  z-index: 2;
-  color: rgba(0, 0, 0, 0.8);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+  grid-template-columns: none !important;
+  grid-column-gap: 0 !important;
+  padding: 0 !important;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: #000;
+  z-index: 200;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
 }
+
+distill-header * {
+  box-sizing: border-box;
+}
+
 distill-header .content {
-  height: 60px;
+  max-width: 1120px;
+  margin: 0 auto;
+  height: 70px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  max-width: 1080px;
-  width: 100%;
-  margin: 0 auto;
+  padding: 0 48px;
 }
+
 distill-header a {
-  font-size: 16px;
-  height: 60px;
-  line-height: 60px;
   text-decoration: none;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255,255,255,0.8);
+  transition: color 0.15s ease;
+  font-weight: inherit;
 }
-distill-header a:hover {
-  color: rgba(255, 255, 255, 1);
-}
-distill-header img {
-  width: 48px;
-  height: 48px;
-  margin-right: 6px;
-}
-@media(min-width: 1080px) {
-  distill-header { height: 70px; }
-  distill-header .content { height: 70px; }
-  distill-header a { height: 70px; line-height: 70px; }
-}
+
 distill-header .logo {
   display: flex;
   align-items: center;
-  font-size: 30px;
-  font-weight: 200;
+  gap: 8px;
+}
+
+distill-header .logo img {
+  width: 52px;
+  height: 52px;
+}
+
+distill-header .logo span {
+  font-family: 'Lora', Georgia, serif;
   font-style: italic;
+  font-size: 28px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  line-height: 1;
 }
+
 distill-header .nav {
-  font-weight: 500;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 32px;
 }
+
 distill-header .nav a {
   font-size: 12px;
-  margin-left: 24px;
+  font-weight: 700;
   text-transform: uppercase;
-  font-style: normal;
   letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.8);
+  height: auto;
+  line-height: 1;
 }
-@media(max-width: 640px) {
+
+distill-header .nav a:hover {
+  color: rgba(255,255,255,1);
+}
+
+@media(max-width: 600px) {
+  distill-header .content {
+    padding: 0 20px;
+  }
+  distill-header .nav { gap: 16px; }
+  distill-header .nav a { font-size: 11px; letter-spacing: 0.04em; }
+  distill-header .logo span { font-size: 22px; }
+  distill-header .logo img { width: 36px; height: 36px; }
+  distill-header a { height: auto; line-height: 1; }
+}
+
+@media(max-width: 480px) {
   distill-header { height: auto; }
   distill-header .content {
     height: auto;
-    padding: 8px 12px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-  distill-header a {
-    height: auto;
-    line-height: 1.3;
-  }
-  distill-header .logo {
-    font-size: 24px;
-    line-height: 1;
-  }
-  distill-header img {
-    width: 36px;
-    height: 36px;
-  }
-  distill-header .nav {
-    width: 100%;
-    display: flex;
+    padding: 20px 20px;
     flex-wrap: wrap;
-    gap: 8px 12px;
+    gap: 12px;
   }
-  distill-header .nav a {
-    margin-left: 0;
-    padding: 6px 0;
-    font-size: 12px;
-  }
+  body { padding-top: 0; }
 }
 </style>
 <div class="content">
   <a href="/" class="logo">
-    <img src="${logo}" alt="p(doom) logo" />
-    p(doom)
+    <img src="${logo}" alt="p(doom)" />
+    <span>p(doom)</span>
   </a>
   <nav class="nav">
-    <a href="blog.html">Research</a>
-    <a href="about.html">About</a>
+    <a href="/blog.html">Research</a>
+    <a href="/about.html">About</a>
     <a href="https://discord.gg/G4JNuPX2VR">Join</a>
   </nav>
 </div>

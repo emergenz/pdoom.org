@@ -2,7 +2,7 @@
   "name": "distill-template",
   "version": "2.8.0",
   "description": "Template for creating Distill articles.",
-  "main": "dist/template.v2.js",
+  "main": "public/template.v2.js",
   "bin": {
     "distill-render": "./bin/render.js"
   },

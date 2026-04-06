@@ -35,10 +35,11 @@ html {
 body {
   margin: 0;
   overflow-y: scroll; /* Reserve scrollbar space to avoid horizontal shift */
+  background: #fff;
 }
 
 a {
-  color: #004276;
+  color: #1a1a1a;
 }
 
 figure {

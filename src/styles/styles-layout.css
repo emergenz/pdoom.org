@@ -16,7 +16,6 @@
 
 @supports not (display: grid) {
   .base-grid,
-  distill-header,
   d-title,
   d-abstract,
   d-article,
@@ -32,7 +31,6 @@
 }
 
 .base-grid,
-distill-header,
 d-title,
 d-abstract,
 d-article,
@@ -55,7 +53,6 @@ distill-footer {
 
 @media(min-width: 768px) {
   .base-grid,
-  distill-header,
   d-title,
   d-abstract,
   d-article,
@@ -76,7 +73,6 @@ distill-footer {
 
 @media(min-width: 1000px) {
   .base-grid,
-  distill-header,
   d-title,
   d-abstract,
   d-article,
@@ -97,7 +93,6 @@ distill-footer {
 
 @media(min-width: 1180px) {
   .base-grid,
-  distill-header,
   d-title,
   d-abstract,
   d-article,

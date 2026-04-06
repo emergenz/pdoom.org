@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="google-site-verification" content="csNYtDpSllpbkTyXPeTcMy5XxF76j8loFUcyrVczaZE" />
+    <title>p(doom)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@1,400&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: #fff;
+            color: #1a1a1a;
+            font-size: 16px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        .container {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 0 48px;
+        }
+
+        /* ── Header ── */
+        .site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            height: 70px;
+            background: #000;
+        }
+
+        .nav {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Lora', serif;
+            font-style: italic;
+            font-weight: 600;
+            font-size: 28px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .nav-logo img { width: 52px; height: 52px; }
+
+        .nav-links { display: flex; gap: 32px; }
+
+        .nav-links a {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: rgba(255, 255, 255, 0.8);
+            transition: color 0.15s;
+        }
+
+        .nav-links a:hover { color: rgba(255, 255, 255, 1); }
+
+        /* ── Hero ── */
+        .hero {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            gap: 64px;
+            padding: 70px 0 0;
+        }
+
+        .hero-text {}
+
+        .hero-name {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Lora', serif;
+            font-style: italic;
+            font-weight: 400;
+            font-size: clamp(3.5rem, 7vw, 5.5rem);
+            line-height: 1;
+            letter-spacing: -0.03em;
+            margin-bottom: 16px;
+        }
+
+        .hero-name img {
+            width: 1.85em;
+            height: auto;
+        }
+
+        .hero-tagline {
+            font-size: clamp(1.3rem, 2vw, 1.65rem);
+            font-weight: 400;
+            color: #444;
+            line-height: 1.45;
+            max-width: 480px;
+            margin-top: 8px;
+        }
+
+        /* Hero booklet */
+        .hero-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-booklet {
+            width: 100%;
+            max-width: 360px;
+        }
+
+        .hero-booklet {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .hero-booklet > div {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            border-radius: 6px;
+            overflow: visible;
+            background: #fff;
+            box-shadow: 0 25px 60px rgba(0,0,0,.18);
+            aspect-ratio: 3 / 4;
+        }
+
+        .booklet-header {
+            display: flex;
+            flex-direction: column;
+            padding: 24px 24px 0;
+            background: #fff;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .booklet-meta {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #999;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .booklet-meta .booklet-no {
+            color: #1a1a1a;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .booklet-meta span { margin-right: 8px; }
+
+        .booklet-title {
+            font-size: clamp(1.1rem, 2vw, 1.5rem);
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            color: #1a1a1a;
+        }
+
+        .booklet-space {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 0 10%;
+        }
+
+        .booklet-cover {
+            width: calc(100% + 60px);
+            position: relative;
+            left: -30px;
+        }
+
+        .booklet-cover video,
+        .booklet-cover img {
+            width: 100%;
+            display: block;
+            border-radius: 4px;
+            box-shadow: 0 20px 40px rgba(0,0,0,.2);
+        }
+
+        /* Glare */
+        .card-glare {
+            position: absolute;
+            inset: -50%;
+            background: radial-gradient(ellipse closest-side, hsla(0,0%,100%,.35), hsla(0,0%,100%,0));
+            mix-blend-mode: overlay;
+            pointer-events: none;
+            z-index: 3;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        [data-parallax]:hover .card-glare { opacity: 1; }
+
+        /* ── Releases (matching research page) ── */
+        .releases { border-top: 1px solid #e5e5e5; }
+
+        .release {
+            display: flex;
+            width: 100%;
+            min-height: 70vh;
+        }
+
+        .release:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .release-cover {
+            width: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .release-booklet {
+            width: 100%;
+            max-width: 440px;
+            z-index: 10;
+        }
+
+        .release-booklet {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .release-booklet > div {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            border-radius: 6px;
+            overflow: visible;
+            background: #fff;
+            box-shadow: 0 25px 50px rgba(0,0,0,.18);
+            aspect-ratio: 3 / 4;
+        }
+
+        .release-desc {
+            width: 50%;
+            background: #fff;
+            padding: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .release-desc-title {
+            font-weight: 600;
+            font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+            line-height: 1.15;
+            letter-spacing: -0.025em;
+            color: #141414;
+        }
+
+        .release-desc-bottom { margin-top: auto; }
+
+        .release-desc-text {
+            font-size: 17px;
+            line-height: 1.6;
+            color: #555;
+            max-width: 400px;
+            margin-bottom: 20px;
+        }
+
+        .release-desc-authors {
+            font-size: 14px;
+            color: #888;
+        }
+
+        .release-desc-link {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #e03030;
+        }
+
+        .release-desc-link:hover { opacity: 0.7; }
+
+        /* Gradient backgrounds */
+        .release-cover.grad-1 { background: linear-gradient(135deg, #c8d6e5, #a29bca, #d4a5a5); }
+        .release-cover.grad-2 { background: linear-gradient(135deg, #e8c4a0, #d4956a, #c47a5a); }
+        .release-cover.grad-3 { background: linear-gradient(135deg, #2c3e50, #4a6274, #8395a7); }
+
+        /* View all */
+        .view-all-wrap {
+            padding: 60px 0 80px;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .view-all {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #e03030;
+            transition: opacity 0.15s;
+        }
+
+        .view-all:hover { opacity: 0.7; }
+
+        /* ── Footer ── */
+        .site-footer {
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .footer-inner {
+            padding: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Lora', serif;
+            font-style: italic;
+            font-size: 18px;
+            color: rgba(0,0,0,0.4);
+            transition: color 0.15s;
+        }
+
+        .footer-brand:hover { color: rgba(0,0,0,0.8); }
+        .footer-brand:hover img { opacity: 0.7; }
+
+        .footer-brand img { width: 24px; height: 24px; opacity: 0.35; transition: opacity 0.15s; }
+
+        .footer-links { display: flex; gap: 32px; }
+        .footer-links a { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(0,0,0,0.4); transition: color 0.15s; }
+        .footer-links a:hover { color: rgba(0,0,0,0.8); }
+
+        /* ── Mobile ── */
+        @media (max-width: 900px) {
+            .hero { min-height: auto; padding: 100px 0 60px; grid-template-columns: 1fr; gap: 40px; text-align: center; }
+            .hero-name { justify-content: center; }
+            .hero-tagline { margin-left: auto; margin-right: auto; }
+            .hero-card { justify-content: center; }
+            .hero-booklet { max-width: 280px; }
+            .release { flex-direction: column !important; min-height: auto; }
+            .release-cover { width: 100%; min-height: 400px; }
+            .release-desc { width: 100%; padding: 48px; }
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 0 20px; }
+            .nav-links { gap: 16px; }
+            .nav-links a { font-size: 11px; letter-spacing: 0.04em; }
+            .nav-logo { font-size: 22px; }
+            .nav-logo img { width: 36px; height: 36px; }
+            .release-cover { padding: 32px; min-height: 300px; overflow: hidden; }
+            .release-booklet { max-width: 300px; }
+            .booklet-cover { width: calc(100% + 30px); left: -15px; }
+            .release-desc { padding: 32px 20px; }
+            .footer-inner { flex-direction: column; gap: 24px; text-align: center; }
+        }
+
+        @media (max-width: 480px) {
+            .nav { height: auto; padding: 20px 0; flex-wrap: wrap; gap: 12px; }
+            .hero-name { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <nav class="nav">
+                <a href="/" class="nav-logo">
+                    <img src="logo.png" alt="p(doom)" />
+                    <span>p(doom)</span>
+                </a>
+                <div class="nav-links">
+                    <a href="/blog.html">Research</a>
+                    <a href="/about.html">About</a>
+                    <a href="https://discord.gg/G4JNuPX2VR">Join</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <section class="hero">
+                <div class="hero-text">
+                    <h1 class="hero-name"><img src="logo.png" alt="">p(doom)</h1>
+										<p class="hero-tagline">Turning sand into intelligence.<br> One bitter lesson at a time.</p>
+                </div>
+                <div class="hero-card">
+                    <a href="/crowd_cast.html" class="hero-booklet" data-parallax data-parallax-angle="4.5" data-parallax-scale="1.03">
+                        <div>
+                            <div class="card-glare"></div>
+                            <div class="booklet-header">
+                                <div class="booklet-meta"><span class="booklet-no">No. 5</span> <span>Feb 2, 2026</span></div>
+                                <div class="booklet-title">crowd-cast:<br>Crowd-Sourcing Action-Annotated Long-Horizon Digital Labour</div>
+                            </div>
+                            <div class="booklet-space"><div class="booklet-cover" data-depth="1">
+                                <video autoplay muted loop playsinline><source src="crowd-cast-2.mp4" type="video/mp4"></video>
+                            </div></div>
+                        </div>
+                    </a>
+                </div>
+            </section>
+        </div>
+
+        <!-- Research releases -->
+        <section class="releases">
+            <div class="release">
+                <div class="release-cover grad-1">
+                    <a href="/crowd_code_2.html" class="release-booklet" data-parallax data-parallax-angle="4.5" data-parallax-scale="1.03">
+                        <div>
+                            <div class="card-glare"></div>
+                            <div class="booklet-header">
+                                <div class="booklet-meta"><span class="booklet-no">No. 4</span> <span>Jan 15, 2026</span></div>
+                                <div class="booklet-title">crowd-code 2.0:<br>Crowd-Sourcing Long-Horizon Human SWE Traces</div>
+                            </div>
+                            <div class="booklet-space"><div class="booklet-cover" data-depth="1">
+                                <video autoplay muted loop playsinline><source src="cc2_0_1.mp4" type="video/mp4"></video>
+                            </div></div>
+                        </div>
+                    </a>
+                </div>
+                <a href="/crowd_code_2.html" class="release-desc">
+                    <div class="release-desc-title">Capturing Long-Horizon Human-Agent Cowork</div>
+                    <div class="release-desc-bottom"><div class="release-desc-text">We release over six months of SWE traces across 25 people, and a VS Code/Cursor extension for capturing human software engineering in the age of coding agents.</div>
+                    <div class="release-desc-authors">Alfred Nguyen, Mihir Mahajan, Franz Srambical, Stefan Bauer</div>
+                    <div class="release-desc-link">View research &rsaquo;</div></div>
+                </a>
+            </div>
+
+            <div class="release">
+                <div class="release-cover grad-2">
+                    <a href="/agi_cast.html" class="release-booklet" data-parallax data-parallax-angle="4.5" data-parallax-scale="1.03">
+                        <div>
+                            <div class="card-glare"></div>
+                            <div class="booklet-header">
+                                <div class="booklet-meta"><span class="booklet-no">No. 3</span> <span>Nov 2, 2025</span></div>
+                                <div class="booklet-title">AGI-CAST:<br>Making Agents Work Like Humans</div>
+                            </div>
+                            <div class="booklet-space"><div class="booklet-cover" data-depth="1">
+                                <video autoplay muted loop playsinline><source src="agi_cast.mp4" type="video/mp4"></video>
+                            </div></div>
+                        </div>
+                    </a>
+                </div>
+                <a href="/agi_cast.html" class="release-desc">
+                    <div class="release-desc-title">600 Hours of AGI Research</div>
+                    <div class="release-desc-bottom"><div class="release-desc-text">We at p(doom) started capturing everything we do, and openly release over 600 hours of AGI research.</div>
+                    <div class="release-desc-authors">Franz Srambical</div>
+                    <div class="release-desc-link">View research &rsaquo;</div></div>
+                </a>
+            </div>
+
+            <div class="release">
+                <div class="release-cover grad-3">
+                    <a href="/jasmine.html" class="release-booklet" data-parallax data-parallax-angle="4.5" data-parallax-scale="1.03">
+                        <div>
+                            <div class="card-glare"></div>
+                            <div class="booklet-header">
+                                <div class="booklet-meta"><span class="booklet-no">No. 2</span> <span>Aug 5, 2025</span></div>
+                                <div class="booklet-title">Jasmine:<br>A JAX-based World Modeling Codebase</div>
+                            </div>
+                            <div class="booklet-space"><div class="booklet-cover" data-depth="1">
+                                <img src="jasmine_preview.gif" alt="Jasmine" loading="lazy">
+                            </div></div>
+                        </div>
+                    </a>
+                </div>
+                <a href="/jasmine.html" class="release-desc">
+                    <div class="release-desc-title">Training Real-World Agents in World Models</div>
+                    <div class="release-desc-bottom"><div class="release-desc-text">We release a production-ready codebase for world modeling from unlabeled videos. Scale from single hosts to hundreds of xPUs thanks to XLA.</div>
+                    <div class="release-desc-authors">Mihir Mahajan, Alfred Nguyen, Franz Srambical, Stefan Bauer</div>
+                    <div class="release-desc-link">View research &rsaquo;</div></div>
+                </a>
+            </div>
+        </section>
+
+        <div class="container">
+            <div class="view-all-wrap">
+                <a href="/blog.html" class="view-all">All research &rsaquo;</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <a href="/" class="footer-brand">
+                    <img src="logo.png" alt="">
+                    <span>p(doom)</span>
+                </a>
+                <div class="footer-links">
+                    <a href="https://github.com/p-doom/">GitHub</a>
+                    <a href="https://discord.gg/G4JNuPX2VR">Discord</a>
+                    <a href="https://x.com/@prob_doom">Twitter</a>
+                    <a href="https://www.linkedin.com/company/p-doom">LinkedIn</a>
+                    <a href="https://huggingface.co/p-doom">HuggingFace</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="parallax.js"></script>
+</body>
+</html>
