@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>About — p(doom)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@1,400&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body { overflow-x: hidden; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: #fff;
+            color: #1a1a1a;
+            font-size: 16px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        .container { max-width: 1120px; margin: 0 auto; padding: 0 48px; }
+
+        /* ── Header ── */
+        .site-header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            height: 70px;
+            background: #000;
+        }
+
+        .nav {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            display: flex; align-items: center; gap: 8px;
+            font-family: 'Lora', serif; font-style: italic;
+            font-weight: 600; font-size: 28px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .nav-logo img { width: 52px; height: 52px; }
+
+        .nav-links { display: flex; gap: 32px; }
+        .nav-links a {
+            font-size: 12px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.06em; color: rgba(255,255,255,0.8); transition: color 0.15s;
+        }
+        .nav-links a:hover { color: rgba(255,255,255,1); }
+
+        /* ── Content ── */
+        .page {
+            padding: calc(70px + 12vh) 0 120px;
+            max-width: 720px;
+        }
+
+        .page-label {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #999;
+            margin-bottom: 40px;
+        }
+
+        .page h1 {
+            font-weight: 700;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.2;
+            letter-spacing: -0.025em;
+            margin-bottom: 32px;
+        }
+
+        .page p {
+            font-size: 18px;
+            color: #555;
+            line-height: 1.75;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            margin-top: 80px;
+            padding-top: 48px;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .section-label {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #999;
+            margin-bottom: 32px;
+        }
+
+        .section p {
+            font-size: 17px;
+            color: #555;
+            line-height: 1.7;
+            max-width: 560px;
+        }
+
+        .links {
+            margin-top: 80px;
+            padding-top: 48px;
+            border-top: 1px solid #e5e5e5;
+            display: flex;
+            gap: 24px;
+        }
+
+        .links a {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #e03030;
+            transition: opacity 0.15s;
+        }
+
+        .links a:hover { opacity: 0.7; }
+
+        /* ── Footer ── */
+        .site-footer { border-top: 1px solid #e5e5e5; }
+
+        .footer-inner {
+            padding: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .footer-brand {
+            display: flex; align-items: center; gap: 8px;
+            font-family: 'Lora', serif; font-style: italic;
+            font-size: 18px; color: rgba(0,0,0,0.4); transition: color 0.15s;
+        }
+        .footer-brand:hover { color: rgba(0,0,0,0.8); }
+        .footer-brand:hover img { opacity: 0.7; }
+        .footer-brand img { width: 24px; height: 24px; opacity: 0.35; transition: opacity 0.15s; }
+
+        .footer-links { display: flex; gap: 32px; }
+        .footer-links a { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(0,0,0,0.4); transition: color 0.15s; }
+        .footer-links a:hover { color: rgba(0,0,0,0.8); }
+
+        /* ── Mobile ── */
+        @media (max-width: 600px) {
+            .container { padding: 0 20px; }
+            .nav-links { gap: 16px; }
+            .nav-links a { font-size: 11px; letter-spacing: 0.04em; }
+            .nav-logo { font-size: 22px; }
+            .nav-logo img { width: 36px; height: 36px; }
+            .footer-inner { flex-direction: column; gap: 24px; text-align: center; }
+        }
+
+        @media (max-width: 480px) {
+            .nav { height: auto; padding: 20px 0; flex-wrap: wrap; gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <nav class="nav">
+                <a href="/" class="nav-logo">
+                    <img src="logo.png" alt="p(doom)" />
+                    <span>p(doom)</span>
+                </a>
+                <div class="nav-links">
+                    <a href="/blog.html">Research</a>
+                    <a href="/about.html">About</a>
+                    <a href="https://discord.gg/G4JNuPX2VR">Join</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="page">
+            <div class="page-label">About</div>
+
+            <h1>Turning sand into intelligence. One bitter lesson at a time.</h1>
+
+            <p>p(doom) is an AGI research lab. Pretraining unlocked one direction to scale. As did self-play, RLHF and RLVR. We work on the scalable methods of the future: learning from real-world human behavior, continual improvement through deployment, architectures that carry memory forever. Removing scaling bottlenecks, one bitter lesson at a time.</p>
+
+        </main>
+    </div>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <a href="/" class="footer-brand">
+                    <img src="logo.png" alt="">
+                    <span>p(doom)</span>
+                </a>
+                <div class="footer-links">
+                    <a href="https://github.com/p-doom/">GitHub</a>
+                    <a href="https://discord.gg/G4JNuPX2VR">Discord</a>
+                    <a href="https://x.com/@prob_doom">Twitter</a>
+                    <a href="https://www.linkedin.com/company/p-doom">LinkedIn</a>
+                    <a href="https://huggingface.co/p-doom">HuggingFace</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
