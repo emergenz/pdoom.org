@@ -1,7 +1,7 @@
 (function (factory) {
   typeof define === 'function' && define.amd ? define(factory) :
   factory();
-}((function () { 'use strict';
+})((function () { 'use strict';
 
   // Copyright 2018 The Distill Template Authors
   //
@@ -107,7 +107,7 @@
     }
   }
 
-  class FrontMatter {
+  class FrontMatter$1 {
     constructor() {
       this.title = 'unnamed article'; // 'Attention and Augmented Recurrent Neural Networks'
       this.description = ''; // 'A visual overview of neural attention...'
@@ -319,7 +319,7 @@
     }
 
     static fromObject(source) {
-      const frontMatter = new FrontMatter();
+      const frontMatter = new FrontMatter$1();
       Object.assign(frontMatter, source);
       return frontMatter;
     }
@@ -722,7 +722,7 @@
   const katexJSURL = 'https://distill.pub/third-party/katex/katex.min.js';
   const katexCSSTag = '<link rel="stylesheet" href="https://distill.pub/third-party/katex/katex.min.css" crossorigin="anonymous">';
 
-  const T = Template('d-math', `
+  const T$c = Template('d-math', `
 ${katexCSSTag}
 <style>
 
@@ -741,7 +741,7 @@ ${math}
 `);
 
   // DMath, not Math, because that would conflict with the JS built-in
-  class DMath extends Mutating(T(HTMLElement)) {
+  class DMath extends Mutating(T$c(HTMLElement)) {
 
     static set katexOptions(options) {
       DMath._katexOptions = options;
@@ -1050,7 +1050,7 @@ ${math}
     return {};
   }
 
-  class FrontMatter$1 extends HTMLElement {
+  class FrontMatter extends HTMLElement {
 
     static get is() { return 'd-front-matter'; }
 
@@ -1169,7 +1169,7 @@ ${math}
 
   // Copyright 2018 The Distill Template Authors
 
-  const frontMatter = new FrontMatter();
+  const frontMatter = new FrontMatter$1();
 
   const Controller = {
     frontMatter: frontMatter,
@@ -1380,11 +1380,11 @@ ${math}
 
   var article = "/*\n * Copyright 2018 The Distill Template Authors\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\nd-article {\n  contain: layout style;\n  overflow-x: hidden;\n  border-top: 1px solid rgba(0, 0, 0, 0.1);\n  padding-top: 2rem;\n  color: rgba(0, 0, 0, 0.8);\n}\n\nd-article > * {\n  grid-column: text;\n}\n\n@media(min-width: 768px) {\n  d-article {\n    font-size: 16px;\n  }\n}\n\n@media(min-width: 1024px) {\n  d-article {\n    font-size: 1.06rem;\n    line-height: 1.7em;\n  }\n}\n\n\n/* H2 */\n\n\nd-article .marker {\n  text-decoration: none;\n  border: none;\n  counter-reset: section;\n  grid-column: kicker;\n  line-height: 1.7em;\n}\n\nd-article .marker:hover {\n  border: none;\n}\n\nd-article .marker span {\n  padding: 0 3px 4px;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.2);\n  position: relative;\n  top: 4px;\n}\n\nd-article .marker:hover span {\n  color: rgba(0, 0, 0, 0.7);\n  border-bottom: 1px solid rgba(0, 0, 0, 0.7);\n}\n\nd-article h2 {\n  font-weight: 600;\n  font-size: 24px;\n  line-height: 1.25em;\n  margin: 2rem 0 1.5rem 0;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n  padding-bottom: 1rem;\n}\n\n@media(min-width: 1024px) {\n  d-article h2 {\n    font-size: 36px;\n  }\n}\n\n/* H3 */\n\nd-article h3 {\n  font-weight: 700;\n  font-size: 18px;\n  line-height: 1.4em;\n  margin-bottom: 1em;\n  margin-top: 2em;\n}\n\n@media(min-width: 1024px) {\n  d-article h3 {\n    font-size: 20px;\n  }\n}\n\n/* H4 */\n\nd-article h4 {\n  font-weight: 600;\n  text-transform: uppercase;\n  font-size: 14px;\n  line-height: 1.4em;\n}\n\nd-article a {\n  color: inherit;\n}\n\nd-article p,\nd-article ul,\nd-article ol,\nd-article blockquote {\n  margin-top: 0;\n  margin-bottom: 1em;\n  margin-left: 0;\n  margin-right: 0;\n}\n\nd-article blockquote {\n  border-left: 2px solid rgba(0, 0, 0, 0.2);\n  padding-left: 2em;\n  font-style: italic;\n  color: rgba(0, 0, 0, 0.6);\n}\n\nd-article a {\n  border-bottom: 1px solid rgba(0, 0, 0, 0.4);\n  text-decoration: none;\n}\n\nd-article a:hover {\n  border-bottom: 1px solid rgba(0, 0, 0, 0.8);\n}\n\nd-article .link {\n  text-decoration: underline;\n  cursor: pointer;\n}\n\nd-article ul,\nd-article ol {\n  padding-left: 24px;\n}\n\nd-article li {\n  margin-bottom: 1em;\n  margin-left: 0;\n  padding-left: 0;\n}\n\nd-article li:last-child {\n  margin-bottom: 0;\n}\n\nd-article pre {\n  font-size: 14px;\n  margin-bottom: 20px;\n}\n\nd-article hr {\n  grid-column: screen;\n  width: 100%;\n  border: none;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n  margin-top: 60px;\n  margin-bottom: 60px;\n}\n\nd-article section {\n  margin-top: 60px;\n  margin-bottom: 60px;\n}\n\nd-article span.equation-mimic {\n  font-family: georgia;\n  font-size: 115%;\n  font-style: italic;\n}\n\nd-article > d-code,\nd-article section > d-code  {\n  display: block;\n}\n\nd-article > d-math[block],\nd-article section > d-math[block]  {\n  display: block;\n}\n\n@media (max-width: 768px) {\n  d-article > d-code,\n  d-article section > d-code,\n  d-article > d-math[block],\n  d-article section > d-math[block] {\n      overflow-x: scroll;\n      -ms-overflow-style: none;  // IE 10+\n      overflow: -moz-scrollbars-none;  // Firefox\n  }\n\n  d-article > d-code::-webkit-scrollbar,\n  d-article section > d-code::-webkit-scrollbar,\n  d-article > d-math[block]::-webkit-scrollbar,\n  d-article section > d-math[block]::-webkit-scrollbar {\n    display: none;  // Safari and Chrome\n  }\n}\n\nd-article .citation {\n  color: #668;\n  cursor: pointer;\n}\n\nd-include {\n  width: auto;\n  display: block;\n}\n\nd-figure {\n  contain: layout style;\n}\n\n/* KaTeX */\n\n.katex, .katex-prerendered {\n  contain: style;\n  display: inline-block;\n}\n\n/* Tables */\n\nd-article table {\n  border-collapse: collapse;\n  margin-bottom: 1.5rem;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.2);\n}\n\nd-article table th {\n  border-bottom: 1px solid rgba(0, 0, 0, 0.2);\n}\n\nd-article table td {\n  border-bottom: 1px solid rgba(0, 0, 0, 0.05);\n}\n\nd-article table tr:last-of-type td {\n  border-bottom: none;\n}\n\nd-article table th,\nd-article table td {\n  font-size: 15px;\n  padding: 2px 8px;\n}\n\nd-article table tbody :first-child td {\n  padding-top: 2px;\n}\n";
 
-  var title = "/*\n * Copyright 2018 The Distill Template Authors\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\nd-title {\n  padding: 2rem 0 1.5rem;\n  contain: layout style;\n  overflow-x: hidden;\n}\n\n@media(min-width: 768px) {\n  d-title {\n    padding: 4rem 0 1.5rem;\n  }\n}\n\nd-title h1 {\n  grid-column: text;\n  font-size: 40px;\n  font-weight: 700;\n  line-height: 1.1em;\n  margin: 0 0 0.5rem;\n}\n\n@media(min-width: 768px) {\n  d-title h1 {\n    font-size: 50px;\n  }\n}\n\nd-title p {\n  font-weight: 300;\n  font-size: 1.2rem;\n  line-height: 1.55em;\n  grid-column: text;\n}\n\nd-title .status {\n  margin-top: 0px;\n  font-size: 12px;\n  color: #009688;\n  opacity: 0.8;\n  grid-column: kicker;\n}\n\nd-title .status span {\n  line-height: 1;\n  display: inline-block;\n  padding: 6px 0;\n  border-bottom: 1px solid #80cbc4;\n  font-size: 11px;\n  text-transform: uppercase;\n}\n";
+  var title = "/*\n * Copyright 2018 The Distill Template Authors\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\nd-title {\n  padding: 3rem 0 3rem;\n  contain: layout style;\n  overflow-x: hidden;\n}\n\nd-title h1 {\n  grid-column: text;\n  font-size: 40px;\n  font-weight: 700;\n  line-height: 1.1em;\n  margin: 0 0 0.5rem;\n}\n\n@media(min-width: 768px) {\n  d-title h1 {\n    font-size: 50px;\n  }\n}\n\nd-title p {\n  font-weight: 300;\n  font-size: 1.2rem;\n  line-height: 1.55em;\n  grid-column: text;\n}\n\nd-title .status {\n  margin-top: 0px;\n  font-size: 12px;\n  color: #009688;\n  opacity: 0.8;\n  grid-column: kicker;\n}\n\nd-title .status span {\n  line-height: 1;\n  display: inline-block;\n  padding: 6px 0;\n  border-bottom: 1px solid #80cbc4;\n  font-size: 11px;\n  text-transform: uppercase;\n}\n";
 
   // Copyright 2018 The Distill Template Authors
 
-  const styles = base + layout + title + byline + article + math + print;
+  const styles$2 = base + layout + title + byline + article + math + print;
 
   function makeStyleTag(dom) {
 
@@ -1394,7 +1394,7 @@ ${math}
       const styleTag = dom.createElement('style');
       styleTag.id = styleTagId;
       styleTag.type = 'text/css';
-      const cssTextTag = dom.createTextNode(styles);
+      const cssTextTag = dom.createTextNode(styles$2);
       styleTag.appendChild(cssTextTag);
       const firstScriptTag = dom.head.querySelector('script');
       dom.head.insertBefore(styleTag, firstScriptTag);
@@ -1521,7 +1521,7 @@ ${math}
 
   // Copyright 2018 The Distill Template Authors
 
-  const T$1 = Template('d-abstract', `
+  const T$b = Template('d-abstract', `
 <style>
   :host {
     font-size: 1.25rem;
@@ -1541,13 +1541,13 @@ ${math}
 <slot></slot>
 `);
 
-  class Abstract extends T$1(HTMLElement) {
+  class Abstract extends T$b(HTMLElement) {
 
   }
 
   // Copyright 2018 The Distill Template Authors
 
-  const T$2 = Template('d-appendix', `
+  const T$a = Template('d-appendix', `
 <style>
 
 d-appendix {
@@ -1608,7 +1608,7 @@ d-appendix > distill-appendix {
 
 `, false);
 
-  class Appendix extends T$2(HTMLElement) {
+  class Appendix extends T$a(HTMLElement) {
 
   }
 
@@ -1959,7 +1959,7 @@ d-appendix > distill-appendix {
           
       };
 
-  })( exports);
+  })(exports);
 
   /* end bibtexParse */
   });
@@ -2128,7 +2128,7 @@ d-appendix > distill-appendix {
 
   // Copyright 2018 The Distill Template Authors
 
-  const T$3 = Template(
+  const T$9 = Template(
     "d-cite",
     `
 <style>
@@ -2187,7 +2187,7 @@ ul li:last-of-type {
 `
   );
 
-  class Cite extends T$3(HTMLElement) {
+  class Cite extends T$9(HTMLElement) {
     /* Lifecycle */
     constructor() {
       super();
@@ -3074,7 +3074,7 @@ d-citation-list .references .title {
 
   })(_self);
 
-  if ( module.exports) {
+  if (module.exports) {
   	module.exports = Prism;
   }
 
@@ -4182,7 +4182,7 @@ d-citation-list .references .title {
 
   // Copyright 2018 The Distill Template Authors
 
-  const T$4 = Template('d-code', `
+  const T$8 = Template('d-code', `
 <style>
 
 code {
@@ -4207,7 +4207,7 @@ ${css}
 
 `);
 
-  class Code extends Mutating(T$4(HTMLElement)) {
+  class Code extends Mutating(T$8(HTMLElement)) {
 
     renderContent() {
 
@@ -4250,7 +4250,7 @@ ${css}
 
   // Copyright 2018 The Distill Template Authors
 
-  const T$5 = Template('d-footnote', `
+  const T$7 = Template('d-footnote', `
 <style>
 
 d-math[block] {
@@ -4292,7 +4292,7 @@ span {
 
 `);
 
-  class Footnote extends T$5(HTMLElement) {
+  class Footnote extends T$7(HTMLElement) {
 
     constructor() {
       super();
@@ -4406,7 +4406,7 @@ d-footnote-list a.footnote-backlink {
 
   // Copyright 2018 The Distill Template Authors
 
-  const T$7 = Template('d-hover-box', `
+  const T$5 = Template('d-hover-box', `
 <style>
 
 :host {
@@ -4451,7 +4451,7 @@ d-footnote-list a.footnote-backlink {
 </div>
 `);
 
-  class HoverBox extends T$7(HTMLElement) {
+  class HoverBox extends T$5(HTMLElement) {
 
     constructor() {
       super();
@@ -4564,7 +4564,7 @@ d-footnote-list a.footnote-backlink {
 
   // Copyright 2018 The Distill Template Authors
 
-  const T$8 = Template('d-references', `
+  const T$4 = Template('d-references', `
 <style>
 d-references {
   display: block;
@@ -4572,7 +4572,7 @@ d-references {
 </style>
 `, false);
 
-  class References extends T$8(HTMLElement) {
+  class References extends T$4(HTMLElement) {
 
   }
 
@@ -4855,7 +4855,7 @@ d-references {
   // It is only meant as a social deterrent.
 
   const productionHostname = 'distill.pub';
-  const T$9 = Template('d-interstitial', `
+  const T$3 = Template('d-interstitial', `
 <style>
 
 .overlay {
@@ -4958,7 +4958,7 @@ p small {
 </div>
 `);
 
-  class Interstitial extends T$9(HTMLElement) {
+  class Interstitial extends T$3(HTMLElement) {
 
     connectedCallback() {
       if (this.shouldRemoveSelf()) {
@@ -5006,7 +5006,7 @@ p small {
 
   }
 
-  function ascending(a, b) {
+  function ascending$1(a, b) {
     return a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;
   }
 
@@ -5038,11 +5038,11 @@ p small {
 
   function ascendingComparator(f) {
     return function(d, x) {
-      return ascending(f(d), x);
+      return ascending$1(f(d), x);
     };
   }
 
-  var ascendingBisect = bisector(ascending);
+  var ascendingBisect = bisector(ascending$1);
   var bisectRight = ascendingBisect.right;
 
   function range(start, stop, step) {
@@ -5359,7 +5359,7 @@ p small {
     return new Rgb(o.r, o.g, o.b, o.opacity);
   }
 
-  function rgb(r, g, b, opacity) {
+  function rgb$1(r, g, b, opacity) {
     return arguments.length === 1 ? rgbConvert(r) : new Rgb(r, g, b, opacity == null ? 1 : opacity);
   }
 
@@ -5370,7 +5370,7 @@ p small {
     this.opacity = +opacity;
   }
 
-  define(Rgb, rgb, extend(Color, {
+  define(Rgb, rgb$1, extend(Color, {
     brighter: function(k) {
       k = k == null ? brighter : Math.pow(brighter, k);
       return new Rgb(this.r * k, this.g * k, this.b * k, this.opacity);
@@ -5509,10 +5509,10 @@ p small {
       Xn = 0.96422,
       Yn = 1,
       Zn = 0.82521,
-      t0 = 4 / 29,
-      t1 = 6 / 29,
-      t2 = 3 * t1 * t1,
-      t3 = t1 * t1 * t1;
+      t0$1 = 4 / 29,
+      t1$1 = 6 / 29,
+      t2 = 3 * t1$1 * t1$1,
+      t3 = t1$1 * t1$1 * t1$1;
 
   function labConvert(o) {
     if (o instanceof Lab) return new Lab(o.l, o.a, o.b, o.opacity);
@@ -5564,11 +5564,11 @@ p small {
   }));
 
   function xyz2lab(t) {
-    return t > t3 ? Math.pow(t, 1 / 3) : t / t2 + t0;
+    return t > t3 ? Math.pow(t, 1 / 3) : t / t2 + t0$1;
   }
 
   function lab2xyz(t) {
-    return t > t1 ? t * t * t : t2 * (t - t0);
+    return t > t1$1 ? t * t * t : t2 * (t - t0$1);
   }
 
   function lrgb2rgb(x) {
@@ -5639,7 +5639,7 @@ p small {
     return new Cubehelix(h < 0 ? h + 360 : h, s, l, o.opacity);
   }
 
-  function cubehelix(h, s, l, opacity) {
+  function cubehelix$1(h, s, l, opacity) {
     return arguments.length === 1 ? cubehelixConvert(h) : new Cubehelix(h, s, l, opacity == null ? 1 : opacity);
   }
 
@@ -5650,7 +5650,7 @@ p small {
     this.opacity = +opacity;
   }
 
-  define(Cubehelix, cubehelix, extend(Color, {
+  define(Cubehelix, cubehelix$1, extend(Color, {
     brighter: function(k) {
       k = k == null ? brighter : Math.pow(brighter, k);
       return new Cubehelix(this.h, this.s, this.l * k, this.opacity);
@@ -5674,13 +5674,13 @@ p small {
     }
   }));
 
-  function constant(x) {
+  function constant$3(x) {
     return function() {
       return x;
     };
   }
 
-  function linear(a, d) {
+  function linear$1(a, d) {
     return function(t) {
       return a + t * d;
     };
@@ -5692,22 +5692,27 @@ p small {
     };
   }
 
+  function hue(a, b) {
+    var d = b - a;
+    return d ? linear$1(a, d > 180 || d < -180 ? d - 360 * Math.round(d / 360) : d) : constant$3(isNaN(a) ? b : a);
+  }
+
   function gamma(y) {
     return (y = +y) === 1 ? nogamma : function(a, b) {
-      return b - a ? exponential(a, b, y) : constant(isNaN(a) ? b : a);
+      return b - a ? exponential(a, b, y) : constant$3(isNaN(a) ? b : a);
     };
   }
 
   function nogamma(a, b) {
     var d = b - a;
-    return d ? linear(a, d) : constant(isNaN(a) ? b : a);
+    return d ? linear$1(a, d) : constant$3(isNaN(a) ? b : a);
   }
 
-  var rgb$1 = (function rgbGamma(y) {
+  var rgb = (function rgbGamma(y) {
     var color = gamma(y);
 
-    function rgb$1(start, end) {
-      var r = color((start = rgb(start)).r, (end = rgb(end)).r),
+    function rgb(start, end) {
+      var r = color((start = rgb$1(start)).r, (end = rgb$1(end)).r),
           g = color(start.g, end.g),
           b = color(start.b, end.b),
           opacity = nogamma(start.opacity, end.opacity);
@@ -5720,9 +5725,9 @@ p small {
       };
     }
 
-    rgb$1.gamma = rgbGamma;
+    rgb.gamma = rgbGamma;
 
-    return rgb$1;
+    return rgb;
   })(1);
 
   function numberArray(a, b) {
@@ -5856,10 +5861,10 @@ p small {
 
   function interpolate(a, b) {
     var t = typeof b, c;
-    return b == null || t === "boolean" ? constant(b)
+    return b == null || t === "boolean" ? constant$3(b)
         : (t === "number" ? interpolateNumber
-        : t === "string" ? ((c = color(b)) ? (b = c, rgb$1) : string)
-        : b instanceof color ? rgb$1
+        : t === "string" ? ((c = color(b)) ? (b = c, rgb) : string)
+        : b instanceof color ? rgb
         : b instanceof Date ? date
         : isNumberArray(b) ? numberArray
         : Array.isArray(b) ? genericArray
@@ -5873,7 +5878,34 @@ p small {
     };
   }
 
-  function constant$1(x) {
+  function cubehelix(hue) {
+    return (function cubehelixGamma(y) {
+      y = +y;
+
+      function cubehelix(start, end) {
+        var h = hue((start = cubehelix$1(start)).h, (end = cubehelix$1(end)).h),
+            s = nogamma(start.s, end.s),
+            l = nogamma(start.l, end.l),
+            opacity = nogamma(start.opacity, end.opacity);
+        return function(t) {
+          start.h = h(t);
+          start.s = s(t);
+          start.l = l(Math.pow(t, y));
+          start.opacity = opacity(t);
+          return start + "";
+        };
+      }
+
+      cubehelix.gamma = cubehelixGamma;
+
+      return cubehelix;
+    })(1);
+  }
+
+  cubehelix(hue);
+  cubehelix(nogamma);
+
+  function constant$2(x) {
     return function() {
       return x;
     };
@@ -5885,14 +5917,14 @@ p small {
 
   var unit = [0, 1];
 
-  function identity(x) {
+  function identity$1(x) {
     return x;
   }
 
   function normalize(a, b) {
     return (b -= (a = +a))
         ? function(x) { return (x - a) / b; }
-        : constant$1(isNaN(b) ? NaN : 0.5);
+        : constant$2(isNaN(b) ? NaN : 0.5);
   }
 
   function clamper(a, b) {
@@ -5949,14 +5981,14 @@ p small {
         transform,
         untransform,
         unknown,
-        clamp = identity,
+        clamp = identity$1,
         piecewise,
         output,
         input;
 
     function rescale() {
       var n = Math.min(domain.length, range.length);
-      if (clamp !== identity) clamp = clamper(domain[0], domain[n - 1]);
+      if (clamp !== identity$1) clamp = clamper(domain[0], domain[n - 1]);
       piecewise = n > 2 ? polymap : bimap;
       output = input = null;
       return scale;
@@ -5983,7 +6015,7 @@ p small {
     };
 
     scale.clamp = function(_) {
-      return arguments.length ? (clamp = _ ? true : identity, rescale()) : clamp !== identity;
+      return arguments.length ? (clamp = _ ? true : identity$1, rescale()) : clamp !== identity$1;
     };
 
     scale.interpolate = function(_) {
@@ -6001,7 +6033,7 @@ p small {
   }
 
   function continuous() {
-    return transformer()(identity, identity);
+    return transformer()(identity$1, identity$1);
   }
 
   // Computes the decimal coefficient and exponent of the specified number x with
@@ -6151,19 +6183,19 @@ p small {
     "x": function(x) { return Math.round(x).toString(16); }
   };
 
-  function identity$1(x) {
+  function identity(x) {
     return x;
   }
 
   var map = Array.prototype.map,
       prefixes = ["y","z","a","f","p","n","µ","m","","k","M","G","T","P","E","Z","Y"];
 
-  function formatLocale(locale) {
-    var group = locale.grouping === undefined || locale.thousands === undefined ? identity$1 : formatGroup(map.call(locale.grouping, Number), locale.thousands + ""),
+  function formatLocale$1(locale) {
+    var group = locale.grouping === undefined || locale.thousands === undefined ? identity : formatGroup(map.call(locale.grouping, Number), locale.thousands + ""),
         currencyPrefix = locale.currency === undefined ? "" : locale.currency[0] + "",
         currencySuffix = locale.currency === undefined ? "" : locale.currency[1] + "",
         decimal = locale.decimal === undefined ? "." : locale.decimal + "",
-        numerals = locale.numerals === undefined ? identity$1 : formatNumerals(map.call(locale.numerals, String)),
+        numerals = locale.numerals === undefined ? identity : formatNumerals(map.call(locale.numerals, String)),
         percent = locale.percent === undefined ? "%" : locale.percent + "",
         minus = locale.minus === undefined ? "-" : locale.minus + "",
         nan = locale.nan === undefined ? "NaN" : locale.nan + "";
@@ -6295,11 +6327,11 @@ p small {
     };
   }
 
-  var locale;
+  var locale$1;
   var format;
   var formatPrefix;
 
-  defaultLocale({
+  defaultLocale$1({
     decimal: ".",
     thousands: ",",
     grouping: [3],
@@ -6307,11 +6339,11 @@ p small {
     minus: "-"
   });
 
-  function defaultLocale(definition) {
-    locale = formatLocale(definition);
-    format = locale.format;
-    formatPrefix = locale.formatPrefix;
-    return locale;
+  function defaultLocale$1(definition) {
+    locale$1 = formatLocale$1(definition);
+    format = locale$1.format;
+    formatPrefix = locale$1.formatPrefix;
+    return locale$1;
   }
 
   function precisionFixed(step) {
@@ -6410,11 +6442,11 @@ p small {
     return scale;
   }
 
-  function linear$1() {
+  function linear() {
     var scale = continuous();
 
     scale.copy = function() {
-      return copy(scale, linear$1());
+      return copy(scale, linear());
     };
 
     initRange.apply(scale, arguments);
@@ -6422,8 +6454,8 @@ p small {
     return linearish(scale);
   }
 
-  var t0$1 = new Date,
-      t1$1 = new Date;
+  var t0 = new Date,
+      t1 = new Date;
 
   function newInterval(floori, offseti, count, field) {
 
@@ -6475,9 +6507,9 @@ p small {
 
     if (count) {
       interval.count = function(start, end) {
-        t0$1.setTime(+start), t1$1.setTime(+end);
-        floori(t0$1), floori(t1$1);
-        return Math.floor(count(t0$1, t1$1));
+        t0.setTime(+start), t1.setTime(+end);
+        floori(t0), floori(t1);
+        return Math.floor(count(t0, t1));
       };
 
       interval.every = function(step) {
@@ -6514,6 +6546,7 @@ p small {
       return (end - start) / k;
     });
   };
+  millisecond.range;
 
   var durationSecond = 1e3;
   var durationMinute = 6e4;
@@ -6530,6 +6563,7 @@ p small {
   }, function(date) {
     return date.getUTCSeconds();
   });
+  second.range;
 
   var minute = newInterval(function(date) {
     date.setTime(date - date.getMilliseconds() - date.getSeconds() * durationSecond);
@@ -6540,6 +6574,7 @@ p small {
   }, function(date) {
     return date.getMinutes();
   });
+  minute.range;
 
   var hour = newInterval(function(date) {
     date.setTime(date - date.getMilliseconds() - date.getSeconds() * durationSecond - date.getMinutes() * durationMinute);
@@ -6550,6 +6585,7 @@ p small {
   }, function(date) {
     return date.getHours();
   });
+  hour.range;
 
   var day = newInterval(function(date) {
     date.setHours(0, 0, 0, 0);
@@ -6560,6 +6596,7 @@ p small {
   }, function(date) {
     return date.getDate() - 1;
   });
+  day.range;
 
   function weekday(i) {
     return newInterval(function(date) {
@@ -6580,6 +6617,14 @@ p small {
   var friday = weekday(5);
   var saturday = weekday(6);
 
+  sunday.range;
+  monday.range;
+  tuesday.range;
+  wednesday.range;
+  thursday.range;
+  friday.range;
+  saturday.range;
+
   var month = newInterval(function(date) {
     date.setDate(1);
     date.setHours(0, 0, 0, 0);
@@ -6590,6 +6635,7 @@ p small {
   }, function(date) {
     return date.getMonth();
   });
+  month.range;
 
   var year = newInterval(function(date) {
     date.setMonth(0, 1);
@@ -6612,6 +6658,7 @@ p small {
       date.setFullYear(date.getFullYear() + step * k);
     });
   };
+  year.range;
 
   var utcMinute = newInterval(function(date) {
     date.setUTCSeconds(0, 0);
@@ -6622,6 +6669,7 @@ p small {
   }, function(date) {
     return date.getUTCMinutes();
   });
+  utcMinute.range;
 
   var utcHour = newInterval(function(date) {
     date.setUTCMinutes(0, 0, 0);
@@ -6632,6 +6680,7 @@ p small {
   }, function(date) {
     return date.getUTCHours();
   });
+  utcHour.range;
 
   var utcDay = newInterval(function(date) {
     date.setUTCHours(0, 0, 0, 0);
@@ -6642,6 +6691,7 @@ p small {
   }, function(date) {
     return date.getUTCDate() - 1;
   });
+  utcDay.range;
 
   function utcWeekday(i) {
     return newInterval(function(date) {
@@ -6662,6 +6712,14 @@ p small {
   var utcFriday = utcWeekday(5);
   var utcSaturday = utcWeekday(6);
 
+  utcSunday.range;
+  utcMonday.range;
+  utcTuesday.range;
+  utcWednesday.range;
+  utcThursday.range;
+  utcFriday.range;
+  utcSaturday.range;
+
   var utcMonth = newInterval(function(date) {
     date.setUTCDate(1);
     date.setUTCHours(0, 0, 0, 0);
@@ -6672,6 +6730,7 @@ p small {
   }, function(date) {
     return date.getUTCMonth();
   });
+  utcMonth.range;
 
   var utcYear = newInterval(function(date) {
     date.setUTCMonth(0, 1);
@@ -6694,6 +6753,7 @@ p small {
       date.setUTCFullYear(date.getUTCFullYear() + step * k);
     });
   };
+  utcYear.range;
 
   function localDate(d) {
     if (0 <= d.y && d.y < 100) {
@@ -6717,7 +6777,7 @@ p small {
     return {y: y, m: m, d: d, H: 0, M: 0, S: 0, L: 0};
   }
 
-  function formatLocale$1(locale) {
+  function formatLocale(locale) {
     var locale_dateTime = locale.dateTime,
         locale_date = locale.date,
         locale_time = locale.time,
@@ -7346,13 +7406,11 @@ p small {
     return Math.floor(+d / 1000);
   }
 
-  var locale$1;
-  var timeFormat;
-  var timeParse;
+  var locale;
   var utcFormat;
   var utcParse;
 
-  defaultLocale$1({
+  defaultLocale({
     dateTime: "%x, %X",
     date: "%-m/%-d/%Y",
     time: "%-I:%M:%S %p",
@@ -7363,13 +7421,13 @@ p small {
     shortMonths: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
   });
 
-  function defaultLocale$1(definition) {
-    locale$1 = formatLocale$1(definition);
-    timeFormat = locale$1.format;
-    timeParse = locale$1.parse;
-    utcFormat = locale$1.utcFormat;
-    utcParse = locale$1.utcParse;
-    return locale$1;
+  function defaultLocale(definition) {
+    locale = formatLocale(definition);
+    locale.format;
+    locale.parse;
+    utcFormat = locale.utcFormat;
+    utcParse = locale.utcParse;
+    return locale;
   }
 
   var isoSpecifier = "%Y-%m-%dT%H:%M:%S.%LZ";
@@ -7378,7 +7436,7 @@ p small {
     return date.toISOString();
   }
 
-  var formatIso = Date.prototype.toISOString
+  Date.prototype.toISOString
       ? formatIsoNative
       : utcFormat(isoSpecifier);
 
@@ -7387,7 +7445,7 @@ p small {
     return isNaN(date) ? null : date;
   }
 
-  var parseIso = +new Date("2000-01-01T00:00:00.000Z")
+  +new Date("2000-01-01T00:00:00.000Z")
       ? parseIsoNative
       : utcParse(isoSpecifier);
 
@@ -7405,7 +7463,7 @@ p small {
     this._ = _;
   }
 
-  function parseTypenames(typenames, types) {
+  function parseTypenames$1(typenames, types) {
     return typenames.trim().split(/^|\s+/).map(function(t) {
       var name = "", i = t.indexOf(".");
       if (i >= 0) name = t.slice(i + 1), t = t.slice(0, i);
@@ -7418,7 +7476,7 @@ p small {
     constructor: Dispatch,
     on: function(typename, callback) {
       var _ = this._,
-          T = parseTypenames(typename + "", _),
+          T = parseTypenames$1(typename + "", _),
           t,
           i = -1,
           n = T.length;
@@ -7605,7 +7663,7 @@ p small {
     querySelectorAll: function(selector) { return this._parent.querySelectorAll(selector); }
   };
 
-  function constant$2(x) {
+  function constant$1(x) {
     return function() {
       return x;
     };
@@ -7694,7 +7752,7 @@ p small {
         parents = this._parents,
         groups = this._groups;
 
-    if (typeof value !== "function") value = constant$2(value);
+    if (typeof value !== "function") value = constant$1(value);
 
     for (var m = groups.length, update = new Array(m), enter = new Array(m), exit = new Array(m), j = 0; j < m; ++j) {
       var parent = parents[j],
@@ -7770,7 +7828,7 @@ p small {
   }
 
   function selection_sort(compare) {
-    if (!compare) compare = ascending$1;
+    if (!compare) compare = ascending;
 
     function compareNode(a, b) {
       return a && b ? compare(a.__data__, b.__data__) : !a - !b;
@@ -7788,7 +7846,7 @@ p small {
     return new Selection(sortgroups, this._parents).order();
   }
 
-  function ascending$1(a, b) {
+  function ascending(a, b) {
     return a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;
   }
 
@@ -8188,7 +8246,7 @@ p small {
     };
   }
 
-  function parseTypenames$1(typenames) {
+  function parseTypenames(typenames) {
     return typenames.trim().split(/^|\s+/).map(function(t) {
       var name = "", i = t.indexOf(".");
       if (i >= 0) name = t.slice(i + 1), t = t.slice(0, i);
@@ -8232,7 +8290,7 @@ p small {
   }
 
   function selection_on(typename, value, capture) {
-    var typenames = parseTypenames$1(typename + ""), i, n = typenames.length, t;
+    var typenames = parseTypenames(typename + ""), i, n = typenames.length, t;
 
     if (arguments.length < 2) {
       var on = this.node().__on;
@@ -8303,11 +8361,7 @@ p small {
     this._parents = parents;
   }
 
-  function selection() {
-    return new Selection([[document.documentElement]], root);
-  }
-
-  Selection.prototype = selection.prototype = {
+  Selection.prototype = {
     constructor: Selection,
     select: selection_select,
     selectAll: selection_selectAll,
@@ -8347,6 +8401,30 @@ p small {
         ? new Selection([[document.querySelector(selector)]], [document.documentElement])
         : new Selection([[selector]], root);
   }
+
+  var nextId = 0;
+
+  function Local() {
+    this._ = "@" + (++nextId).toString(36);
+  }
+
+  Local.prototype = {
+    constructor: Local,
+    get: function(node) {
+      var id = this._;
+      while (!(id in node)) if (!(node = node.parentNode)) return;
+      return node[id];
+    },
+    set: function(node, value) {
+      return node[this._] = value;
+    },
+    remove: function(node) {
+      return this._ in node && delete node[this._];
+    },
+    toString: function() {
+      return this._;
+    }
+  };
 
   function sourceEvent() {
     var current = event, source;
@@ -8421,7 +8499,7 @@ p small {
     }
   }
 
-  function constant$3(x) {
+  function constant(x) {
     return function() {
       return x;
     };
@@ -8579,19 +8657,19 @@ p small {
     }
 
     drag.filter = function(_) {
-      return arguments.length ? (filter = typeof _ === "function" ? _ : constant$3(!!_), drag) : filter;
+      return arguments.length ? (filter = typeof _ === "function" ? _ : constant(!!_), drag) : filter;
     };
 
     drag.container = function(_) {
-      return arguments.length ? (container = typeof _ === "function" ? _ : constant$3(_), drag) : container;
+      return arguments.length ? (container = typeof _ === "function" ? _ : constant(_), drag) : container;
     };
 
     drag.subject = function(_) {
-      return arguments.length ? (subject = typeof _ === "function" ? _ : constant$3(_), drag) : subject;
+      return arguments.length ? (subject = typeof _ === "function" ? _ : constant(_), drag) : subject;
     };
 
     drag.touchable = function(_) {
-      return arguments.length ? (touchable = typeof _ === "function" ? _ : constant$3(!!_), drag) : touchable;
+      return arguments.length ? (touchable = typeof _ === "function" ? _ : constant(!!_), drag) : touchable;
     };
 
     drag.on = function() {
@@ -8608,7 +8686,7 @@ p small {
 
   // Copyright 2018 The Distill Template Authors
 
-  const T$a = Template('d-slider', `
+  const T$2 = Template('d-slider', `
 <style>
   :host {
     position: relative;
@@ -8720,7 +8798,7 @@ p small {
     home: 36
   };
 
-  class Slider extends T$a(HTMLElement) {
+  class Slider extends T$2(HTMLElement) {
 
 
     connectedCallback() {
@@ -8741,7 +8819,7 @@ p small {
       // Default values for attributes
       this.min = this.min ? this.min : 0;
       this.max = this.max ? this.max : 100;
-      this.scale = linear$1().domain([this.min, this.max]).range([0, 1]).clamp(true);
+      this.scale = linear().domain([this.min, this.max]).range([0, 1]).clamp(true);
 
       this.origin = this.origin !== undefined ? this.origin : this.min;
       this.step = this.step ? this.step : 1;
@@ -8926,7 +9004,7 @@ p small {
 @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@1,400&display=swap');
 
 body {
-  padding-top: 70px;
+  padding-top: 70px !important;
 }
 
 distill-header {
@@ -9045,15 +9123,15 @@ distill-header .nav a:hover {
 
   // Copyright 2018 The Distill Template Authors
 
-  const T$b = Template('distill-header', headerTemplate, false);
+  const T$1 = Template('distill-header', headerTemplate, false);
 
-  class DistillHeader extends T$b(HTMLElement) {
+  class DistillHeader extends T$1(HTMLElement) {
 
   }
 
   // Copyright 2018 The Distill Template Authors
 
-  const styles$2 = `
+  const styles = `
 <style>
   distill-appendix {
     contain: layout style;
@@ -9082,7 +9160,7 @@ distill-header .nav a:hover {
 `;
 
   function appendixTemplate(frontMatter) {
-    let html = styles$2;
+    let html = styles;
     frontMatter.journal.title = "p(doom) blog";
     frontMatter.journal.url = "https://pdoom.org/blog.html";
 
@@ -9161,6 +9239,10 @@ distill-header .nav a:hover {
   color: rgba(0,0,0,0.8);
 }
 
+.footer-container .logo:hover span {
+  color: rgba(0,0,0,0.8);
+}
+
 .footer-container .logo:hover img {
   opacity: 0.7;
 }
@@ -9185,6 +9267,7 @@ distill-header .nav a:hover {
 .footer-container .nav {
   display: flex;
   gap: 32px;
+  flex-wrap: wrap;
 }
 
 .footer-container .nav a {
@@ -9204,8 +9287,12 @@ distill-header .nav a:hover {
 @media(max-width: 640px) {
   .footer-container {
     flex-direction: column;
-    gap: 24px;
+    gap: 16px;
     text-align: center;
+  }
+  .footer-container .nav {
+    gap: 16px;
+    justify-content: center;
   }
 }
 </style>
@@ -9227,9 +9314,9 @@ distill-header .nav a:hover {
 
   // Copyright 2018 The Distill Template Authors
 
-  const T$c = Template('distill-footer', footerTemplate);
+  const T = Template('distill-footer', footerTemplate);
 
-  class DistillFooter extends T$c(HTMLElement) {
+  class DistillFooter extends T(HTMLElement) {
 
   }
 
@@ -9274,7 +9361,7 @@ distill-header .nav a:hover {
     /* 4. Register components */
     const components = [
       Abstract, Appendix, Article, Bibliography, Byline, Cite, CitationList, Code,
-      Footnote, FootnoteList, FrontMatter$1, HoverBox, Title, DMath, References, TOC, Figure,
+      Footnote, FootnoteList, FrontMatter, HoverBox, Title, DMath, References, TOC, Figure,
       Slider, Interstitial
     ];
 
@@ -9319,5 +9406,5 @@ distill-header .nav a:hover {
     Polyfills.load(window.distill.initialize);
   }
 
-})));
+}));
 //# sourceMappingURL=template.v2.js.map

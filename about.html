@@ -143,10 +143,11 @@
             font-size: 18px; color: rgba(0,0,0,0.4); transition: color 0.15s;
         }
         .footer-brand:hover { color: rgba(0,0,0,0.8); }
+        .footer-brand:hover span { color: rgba(0,0,0,0.8); }
         .footer-brand:hover img { opacity: 0.7; }
         .footer-brand img { width: 24px; height: 24px; opacity: 0.35; transition: opacity 0.15s; }
 
-        .footer-links { display: flex; gap: 32px; }
+        .footer-links { display: flex; gap: 32px; flex-wrap: wrap; }
         .footer-links a { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(0,0,0,0.4); transition: color 0.15s; }
         .footer-links a:hover { color: rgba(0,0,0,0.8); }
 
@@ -157,7 +158,8 @@
             .nav-links a { font-size: 11px; letter-spacing: 0.04em; }
             .nav-logo { font-size: 22px; }
             .nav-logo img { width: 36px; height: 36px; }
-            .footer-inner { flex-direction: column; gap: 24px; text-align: center; }
+            .footer-inner { flex-direction: column; gap: 16px; text-align: center; }
+            .footer-links { gap: 16px; justify-content: center; }
         }
 
         @media (max-width: 480px) {
