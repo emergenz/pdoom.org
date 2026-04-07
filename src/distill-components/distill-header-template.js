@@ -5,7 +5,7 @@ export const headerTemplate = `
 @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@1,400&display=swap');
 
 body {
-  padding-top: 70px;
+  padding-top: 70px !important;
 }
 
 distill-header {

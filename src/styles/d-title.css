@@ -15,15 +15,9 @@
  */
 
 d-title {
-  padding: 2rem 0 1.5rem;
+  padding: 3rem 0 3rem;
   contain: layout style;
   overflow-x: hidden;
-}
-
-@media(min-width: 768px) {
-  d-title {
-    padding: 4rem 0 1.5rem;
-  }
 }
 
 d-title h1 {

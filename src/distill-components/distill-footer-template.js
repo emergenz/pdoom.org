@@ -32,6 +32,10 @@ export const footerTemplate = `
   color: rgba(0,0,0,0.8);
 }
 
+.footer-container .logo:hover span {
+  color: rgba(0,0,0,0.8);
+}
+
 .footer-container .logo:hover img {
   opacity: 0.7;
 }
@@ -56,6 +60,7 @@ export const footerTemplate = `
 .footer-container .nav {
   display: flex;
   gap: 32px;
+  flex-wrap: wrap;
 }
 
 .footer-container .nav a {
@@ -75,8 +80,12 @@ export const footerTemplate = `
 @media(max-width: 640px) {
   .footer-container {
     flex-direction: column;
-    gap: 24px;
+    gap: 16px;
     text-align: center;
+  }
+  .footer-container .nav {
+    gap: 16px;
+    justify-content: center;
   }
 }
 </style>
