@@ -55,7 +55,10 @@
            RELEASES — Full-width alternating
            booklet card + description
            ══════════════════════════════════ */
-        .releases { margin-bottom: 100px; }
+        .releases {
+					margin-bottom: 100px;
+					border-bottom: 1px solid #e5e5e5;
+				}
 
         .release {
             display: flex;
@@ -319,6 +322,11 @@
             .paper-category { display: none; }
         }
 
+        @media (max-width: 900px) {
+            .footer-inner { flex-direction: column; gap: 16px; text-align: center; }
+            .footer-links { gap: 16px; justify-content: center; }
+        }
+
         @media (max-width: 600px) {
             .container { padding: 0 20px; }
             .nav-links { gap: 16px; }
@@ -329,8 +337,6 @@
             .booklet { max-width: 300px; }
             .booklet-cover { width: calc(100% + 30px); left: -15px; }
             .release-desc { padding: 32px 20px; }
-            .footer-inner { flex-direction: column; gap: 16px; text-align: center; }
-            .footer-links { gap: 16px; justify-content: center; }
         }
 
         @media (max-width: 480px) {
@@ -532,6 +538,7 @@
                     <a href="https://x.com/@prob_doom">Twitter</a>
                     <a href="https://www.linkedin.com/company/p-doom">LinkedIn</a>
                     <a href="https://huggingface.co/p-doom">HuggingFace</a>
+                    <a href="/imprint.html">Imprint</a>
                 </div>
             </div>
         </div>
