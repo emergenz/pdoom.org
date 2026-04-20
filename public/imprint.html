@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>About — p(doom)</title>
+    <title>Imprint — p(doom)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@1,400&display=swap" rel="stylesheet">
@@ -76,56 +76,32 @@
             font-size: clamp(2rem, 4vw, 3rem);
             line-height: 1.2;
             letter-spacing: -0.025em;
-            margin-bottom: 32px;
+            margin-bottom: 48px;
         }
 
-        .page p {
-            font-size: 18px;
-            color: #555;
-            line-height: 1.75;
-            margin-bottom: 20px;
+        .fields {
         }
 
-        .section {
-            margin-top: 80px;
-            padding-top: 48px;
-            border-top: 1px solid #e5e5e5;
-        }
+        .field-group { margin-bottom: 40px; }
+        .field-group:last-child { margin-bottom: 0; }
 
-        .section-label {
+        .field-label {
             font-size: 13px;
             font-weight: 600;
             letter-spacing: 0.12em;
             text-transform: uppercase;
             color: #999;
-            margin-bottom: 32px;
+            margin-bottom: 10px;
         }
 
-        .section p {
+        .field-value {
             font-size: 17px;
-            color: #555;
+            color: #333;
             line-height: 1.7;
-            max-width: 560px;
         }
 
-        .links {
-            margin-top: 80px;
-            padding-top: 48px;
-            border-top: 1px solid #e5e5e5;
-            display: flex;
-            gap: 24px;
-        }
-
-        .links a {
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #e03030;
-            transition: opacity 0.15s;
-        }
-
-        .links a:hover { opacity: 0.7; }
+        .field-value a { color: #e03030; transition: opacity 0.15s; }
+        .field-value a:hover { opacity: 0.7; }
 
         /* ── Footer ── */
         .site-footer { border-top: 1px solid #e5e5e5; }
@@ -190,12 +166,48 @@
 
     <div class="container">
         <main class="page">
-            <div class="page-label">About</div>
+            <div class="page-label">Imprint</div>
 
-            <h1>Turning sand into intelligence. One bitter lesson at a time.</h1>
+            <h1>Imprint (Impressum)</h1>
 
-            <p>p(doom) is an AGI research lab. Pretraining unlocked one direction to scale. As did self-play, RLHF and RLVR. We work on the scalable methods of the future: learning from real-world human behavior, continual improvement through deployment, architectures that carry memory forever. Removing scaling bottlenecks, one bitter lesson at a time.</p>
+            <div class="fields">
+                <div class="field-group">
+                    <div class="field-label">Company</div>
+                    <div class="field-value">pdoom UG (haftungsbeschränkt)</div>
+                </div>
 
+                <div class="field-group">
+                    <div class="field-label">Registered address</div>
+                    <div class="field-value">
+                        Volkartstr. 43<br>
+                        80636 Munich<br>
+                        Germany
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <div class="field-label">Commercial register</div>
+                    <div class="field-value">
+                        Amtsgericht München<br>
+                        HRB 311706
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <div class="field-label">Managing directors</div>
+                    <div class="field-value">Franz Srambical</div>
+                </div>
+
+                <div class="field-group">
+                    <div class="field-label">VAT ID (USt.-IdNr.)</div>
+                    <div class="field-value"></div>
+                </div>
+
+                <div class="field-group">
+                    <div class="field-label">Contact</div>
+                    <div class="field-value"><a href="mailto:franz@pdoom.org">franz@pdoom.org</a></div>
+                </div>
+            </div>
         </main>
     </div>
 

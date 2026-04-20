@@ -77,7 +77,7 @@ export const footerTemplate = `
   color: rgba(0,0,0,0.8);
 }
 
-@media(max-width: 640px) {
+@media(max-width: 900px) {
   .footer-container {
     flex-direction: column;
     gap: 16px;
@@ -101,6 +101,7 @@ export const footerTemplate = `
     <a href="https://x.com/@prob_doom">Twitter</a>
     <a href="https://www.linkedin.com/company/p-doom">LinkedIn</a>
     <a href="https://huggingface.co/p-doom">HuggingFace</a>
+    <a href="/imprint.html">Imprint</a>
   </div>
 </div>
 `;
