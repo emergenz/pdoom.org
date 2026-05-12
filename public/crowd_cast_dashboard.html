@@ -630,7 +630,16 @@
         document.getElementById('card-sessions').textContent = fmt(t.sessions);
         document.getElementById('card-segments-sub').textContent = fmt(t.recording_segments) + ' segments';
 
-        document.getElementById('card-users').textContent = fmt(t.users);
+        /* Deduplicate users: merge UUIDs that share an email. */
+        const _seenEmails = new Set();
+        const _userNames = meta.user_names || {};
+        let uniqueUsers = 0;
+        for (const hash of Object.keys(perUser)) {
+            const info = _userNames[hash];
+            const key = (info && info.email) ? info.email : hash;
+            if (!_seenEmails.has(key)) { _seenEmails.add(key); uniqueUsers++; }
+        }
+        document.getElementById('card-users').textContent = fmt(uniqueUsers);
         const todayEntry = daily.length ? daily[daily.length - 1] : null;
         document.getElementById('card-users-sub').textContent =
             todayEntry ? '+' + fmt(todayEntry.new_segments) + ' seg today' : '';
@@ -648,6 +657,7 @@
         _cachedPerUser = perUser;
         _cachedPerUserDaily = perUserDaily;
         _cachedDailyDates = daily.map(d => d.date);
+        _cachedUserNames = meta.user_names || {};
         renderUsersTable(perUser);
 
         /* -- Health panel -- */
@@ -887,15 +897,51 @@
     let _cachedPerUser = {};
     let _cachedPerUserDaily = {};
     let _cachedDailyDates = [];
+    let _cachedUserNames = {};
+
+    /** Resolve a user UUID to a display name (abbreviated name, email, or short hash). */
+    function displayName(hash) {
+        const info = _cachedUserNames[hash];
+        if (info) {
+            if (info.name) {
+                const parts = info.name.trim().split(/\s+/);
+                if (parts.length >= 2) return parts[0] + ' ' + parts[parts.length - 1][0] + '.';
+                return parts[0];
+            }
+            if (info.email) return info.email;
+        }
+        return shortHash(hash);
+    }
 
     function buildUsersData(perUser) {
-        usersData = Object.entries(perUser).map(([hash, u]) => ({
-            user: hash,
-            sessions: u.sessions || 0,
-            segments: u.segments || 0,
-            hours: (u.estimated_minutes || 0) / 60,
-            steps: u.action_steps || 0,
-        }));
+        /* Group UUIDs by email so same-account-different-machine rows merge. */
+        const emailToUuids = {};
+        const merged = {};
+        for (const hash of Object.keys(perUser)) {
+            const info = _cachedUserNames[hash];
+            const key = (info && info.email) ? info.email : hash;
+            if (!emailToUuids[key]) emailToUuids[key] = [];
+            emailToUuids[key].push(hash);
+        }
+        usersData = Object.entries(emailToUuids).map(([key, uuids]) => {
+            let sessions = 0, segments = 0, minutes = 0, steps = 0;
+            for (const uid of uuids) {
+                const u = perUser[uid] || {};
+                sessions += u.sessions || 0;
+                segments += u.segments || 0;
+                minutes += u.estimated_minutes || 0;
+                steps += u.action_steps || 0;
+            }
+            return {
+                user: uuids[0],
+                uuids: uuids,
+                name: displayName(uuids[0]),
+                sessions: sessions,
+                segments: segments,
+                hours: minutes / 60,
+                steps: steps,
+            };
+        });
     }
 
     function sortUsers() {
@@ -920,7 +966,7 @@
         usersData.forEach((row, i) => {
             html += '<tr style="cursor:pointer;" onclick="drillIntoUser(\'' + escapeHtml(row.user) + '\')">' +
                 '<td>' + (i + 1) + '</td>' +
-                '<td class="user-hash" title="' + escapeHtml(row.user) + '">' + escapeHtml(shortHash(row.user)) + '</td>' +
+                '<td class="user-hash" title="' + escapeHtml(row.user) + '">' + escapeHtml(displayName(row.user)) + '</td>' +
                 '<td class="align-right">' + fmt(row.sessions) + '</td>' +
                 '<td class="align-right">' + fmt(row.segments) + '</td>' +
                 '<td class="align-right">' + fmtDec(row.hours, 2) + '</td>' +
@@ -956,7 +1002,7 @@
             usersData.forEach((row, i) => {
                 html += '<tr style="cursor:pointer;" onclick="drillIntoUser(\'' + escapeHtml(row.user) + '\')">' +
                     '<td>' + (i + 1) + '</td>' +
-                    '<td class="user-hash" title="' + escapeHtml(row.user) + '">' + escapeHtml(shortHash(row.user)) + '</td>' +
+                    '<td class="user-hash" title="' + escapeHtml(row.user) + '">' + escapeHtml(displayName(row.user)) + '</td>' +
                     '<td class="align-right">' + fmt(row.sessions) + '</td>' +
                     '<td class="align-right">' + fmt(row.segments) + '</td>' +
                     '<td class="align-right">' + fmtDec(row.hours, 2) + '</td>' +
@@ -975,15 +1021,36 @@
 
     function drillIntoUser(userHash) {
         history.pushState({ view: 'user', user: userHash }, '');
-        const u = _cachedPerUser[userHash] || {};
-        const userDaily = (_cachedPerUserDaily[userHash]) || {};
+        /* Find the merged row to get all UUIDs for this user. */
+        const row = usersData.find(r => r.user === userHash);
+        const uuids = (row && row.uuids) ? row.uuids : [userHash];
+        /* Merge per_user stats across UUIDs. */
+        const u = { sessions: 0, segments: 0, estimated_minutes: 0, action_steps: 0 };
+        for (const uid of uuids) {
+            const pu = _cachedPerUser[uid] || {};
+            u.sessions += pu.sessions || 0;
+            u.segments += pu.segments || 0;
+            u.estimated_minutes += pu.estimated_minutes || 0;
+            u.action_steps += pu.action_steps || 0;
+        }
+        /* Merge per_user_daily across UUIDs. */
+        const userDaily = {};
+        for (const uid of uuids) {
+            const days = _cachedPerUserDaily[uid] || {};
+            for (const [date, day] of Object.entries(days)) {
+                if (!userDaily[date]) userDaily[date] = { segments: 0, estimated_minutes: 0, action_steps: 0 };
+                userDaily[date].segments += day.segments || 0;
+                userDaily[date].estimated_minutes += day.estimated_minutes || 0;
+                userDaily[date].action_steps += day.action_steps || 0;
+            }
+        }
 
         /* Show detail, hide table */
         document.getElementById('users-table-view').style.display = 'none';
         document.getElementById('user-detail-view').style.display = 'block';
 
         /* Title */
-        document.getElementById('user-detail-title').textContent = shortHash(userHash, 24);
+        document.getElementById('user-detail-title').textContent = displayName(userHash);
 
         /* Stats */
         const stats = [
