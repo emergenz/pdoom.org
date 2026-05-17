@@ -355,6 +355,10 @@
             color: #333333;
         }
 
+        .activity-summary-entry.pinned {
+            border-color: #000000;
+        }
+
         .activity-summary-none {
             font-size: 12px;
             color: #999999;
@@ -612,6 +616,13 @@
         max = max || 18;
         if (!h || h.length <= max) return h || '';
         return h.slice(0, 8) + '\u2026' + h.slice(-6);
+    }
+    /** Format a Date as YYYY-MM-DD in local time (avoids UTC shift from toISOString). */
+    function localDateStr(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + day;
     }
     function escapeHtml(s) {
         const d = document.createElement('div');
@@ -1106,29 +1117,88 @@
         renderActivitySummaries(uuids);
     }
 
+    /** Convert **bold** markdown to <strong> tags, escape the rest. */
+    function renderMd(text) {
+        const escaped = escapeHtml(text);
+        return escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    let _summaryByDate = {};
+    let _pinnedDate = null;
+
     function renderActivitySummaries(uuids) {
         const container = document.getElementById('user-activity-summaries');
+        _pinnedDate = null;
+
         /* Merge summaries from all UUIDs for this user */
-        const byDate = {};
+        _summaryByDate = {};
         for (const uid of uuids) {
             const entries = _cachedSummaries[uid] || [];
             for (const entry of entries) {
-                if (!byDate[entry.date] || byDate[entry.date].length < entry.summary.length) {
-                    byDate[entry.date] = entry.summary;
+                if (!_summaryByDate[entry.date] || _summaryByDate[entry.date].length < entry.summary.length) {
+                    _summaryByDate[entry.date] = entry.summary;
                 }
             }
         }
-        const dates = Object.keys(byDate).sort().reverse();
-        if (dates.length === 0) {
-            container.innerHTML = '<span class="activity-summary-none">No activity summaries available yet.</span>';
+
+        const hasSummaries = Object.keys(_summaryByDate).length > 0;
+        if (!hasSummaries) {
+            container.innerHTML = '<span class="activity-summary-none">No activity summaries available yet. Hover over a day in the heatmap to see summaries as they become available.</span>';
+        } else {
+            /* Show most recent by default */
+            const latest = Object.keys(_summaryByDate).sort().reverse()[0];
+            _showSummary(latest, true);
+        }
+
+        /* Wire up heatmap cells */
+        document.querySelectorAll('.heatmap-cell[data-date]').forEach(function(cell) {
+            cell.addEventListener('mouseenter', function() {
+                if (!_pinnedDate) {
+                    _showSummary(cell.dataset.date, false);
+                }
+            });
+            cell.addEventListener('mouseleave', function() {
+                if (!_pinnedDate) {
+                    _clearSummary();
+                }
+            });
+            cell.addEventListener('click', function() {
+                const date = cell.dataset.date;
+                if (_pinnedDate === date) {
+                    _pinnedDate = null;
+                    _clearSummary();
+                    document.querySelectorAll('.heatmap-cell').forEach(c => c.style.outline = '');
+                } else {
+                    _pinnedDate = date;
+                    _showSummary(date, true);
+                    document.querySelectorAll('.heatmap-cell').forEach(c => c.style.outline = '');
+                    cell.style.outline = '2px solid #000';
+                }
+            });
+        });
+    }
+
+    function _showSummary(date, pinned) {
+        const container = document.getElementById('user-activity-summaries');
+        const summary = _summaryByDate[date];
+        if (!summary) {
+            container.innerHTML = '<div class="activity-summary-entry">' +
+                '<div class="activity-summary-date">' + escapeHtml(date) + '</div>' +
+                '<div class="activity-summary-text" style="color:#999;">No summary available for this day.</div>' +
+                '</div>';
             return;
         }
-        container.innerHTML = dates.map(function(date) {
-            return '<div class="activity-summary-entry">' +
-                '<div class="activity-summary-date">' + escapeHtml(date) + '</div>' +
-                '<div class="activity-summary-text">' + escapeHtml(byDate[date]) + '</div>' +
-                '</div>';
-        }).join('');
+        container.innerHTML = '<div class="activity-summary-entry' + (pinned ? ' pinned' : '') + '">' +
+            '<div class="activity-summary-date">' + escapeHtml(date) + (pinned ? ' <span style="font-size:9px;color:#999;letter-spacing:0;">(click day again to unpin)</span>' : '') + '</div>' +
+            '<div class="activity-summary-text">' + renderMd(summary) + '</div>' +
+            '</div>';
+    }
+
+    function _clearSummary() {
+        const container = document.getElementById('user-activity-summaries');
+        if (Object.keys(_summaryByDate).length > 0) {
+            container.innerHTML = '<span class="activity-summary-none">Hover over a day to see its activity summary.</span>';
+        }
     }
 
     function renderHeatmap(userDaily) {
@@ -1165,7 +1235,7 @@
 
         /* Look up minutes per day */
         const minutesPerDay = days.map(day => {
-            const key = day.toISOString().slice(0, 10);
+            const key = localDateStr(day);
             const entry = userDaily[key];
             return entry ? (entry.estimated_minutes || 0) : 0;
         });
@@ -1218,10 +1288,10 @@
         /* Grid cells — grid-auto-flow: column fills top-to-bottom (Mon→Sun), then next week */
         let gridHtml = '<div class="heatmap-grid">';
         days.forEach((day, i) => {
-            const key = day.toISOString().slice(0, 10);
+            const key = localDateStr(day);
             const mins = minutesPerDay[i];
             const title = key + ': ' + fmtDec(mins, 1) + ' min';
-            gridHtml += '<div class="heatmap-cell" style="background:' + cellColor(mins) + ';" title="' + title + '"></div>';
+            gridHtml += '<div class="heatmap-cell" data-date="' + key + '" style="background:' + cellColor(mins) + ';cursor:pointer;" title="' + title + '"></div>';
         });
         gridHtml += '</div>';
 
