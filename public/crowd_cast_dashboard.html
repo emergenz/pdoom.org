@@ -333,6 +333,33 @@
             }
         }
 
+        /* -- Activity summaries -- */
+        .activity-summary-entry {
+            margin-bottom: 14px;
+            padding: 12px 14px;
+            border: 1px solid #eeeeee;
+        }
+
+        .activity-summary-date {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #555555;
+            margin-bottom: 6px;
+        }
+
+        .activity-summary-text {
+            font-size: 13px;
+            line-height: 1.65;
+            color: #333333;
+        }
+
+        .activity-summary-none {
+            font-size: 12px;
+            color: #999999;
+        }
+
         /* -- Loading / error states -- */
         .loading-state {
             text-align: center;
@@ -498,6 +525,10 @@
                         <span class="section-title">Contribution History</span>
                         <div id="user-heatmap"></div>
                     </div>
+                    <div class="activity-summaries" style="margin-top:20px;">
+                        <span class="section-title">Activity Summaries</span>
+                        <div id="user-activity-summaries"></div>
+                    </div>
                 </div>
             </div>
 
@@ -521,6 +552,7 @@
     // Override via ?url=<encoded_url> query param, e.g.:
     //   index.html?url=https://my-bucket.s3.us-east-1.amazonaws.com/metadata.json
     const METADATA_URL = 'https://crowd-cast-bucket.s3.us-east-1.amazonaws.com/metadata.json';
+    const SUMMARIES_URL = 'https://crowd-cast-bucket.s3.us-east-1.amazonaws.com/summaries_index.json';
 
     /* Chart.js global defaults */
     Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
@@ -898,6 +930,7 @@
     let _cachedPerUserDaily = {};
     let _cachedDailyDates = [];
     let _cachedUserNames = {};
+    let _cachedSummaries = {};
 
     /** Resolve a user UUID to a display name (abbreviated name, email, or short hash). */
     function displayName(hash) {
@@ -1068,6 +1101,34 @@
 
         /* Heatmap */
         renderHeatmap(userDaily);
+
+        /* Activity summaries */
+        renderActivitySummaries(uuids);
+    }
+
+    function renderActivitySummaries(uuids) {
+        const container = document.getElementById('user-activity-summaries');
+        /* Merge summaries from all UUIDs for this user */
+        const byDate = {};
+        for (const uid of uuids) {
+            const entries = _cachedSummaries[uid] || [];
+            for (const entry of entries) {
+                if (!byDate[entry.date] || byDate[entry.date].length < entry.summary.length) {
+                    byDate[entry.date] = entry.summary;
+                }
+            }
+        }
+        const dates = Object.keys(byDate).sort().reverse();
+        if (dates.length === 0) {
+            container.innerHTML = '<span class="activity-summary-none">No activity summaries available yet.</span>';
+            return;
+        }
+        container.innerHTML = dates.map(function(date) {
+            return '<div class="activity-summary-entry">' +
+                '<div class="activity-summary-date">' + escapeHtml(date) + '</div>' +
+                '<div class="activity-summary-text">' + escapeHtml(byDate[date]) + '</div>' +
+                '</div>';
+        }).join('');
     }
 
     function renderHeatmap(userDaily) {
@@ -1213,9 +1274,15 @@
        ================================================================= */
     async function boot() {
         try {
-            const resp = await fetch(METADATA_URL);
-            if (!resp.ok) throw new Error('HTTP ' + resp.status);
-            const meta = await resp.json();
+            const [metaResp, summResp] = await Promise.all([
+                fetch(METADATA_URL),
+                fetch(SUMMARIES_URL).catch(() => null),
+            ]);
+            if (!metaResp.ok) throw new Error('HTTP ' + metaResp.status);
+            const meta = await metaResp.json();
+            if (summResp && summResp.ok) {
+                _cachedSummaries = await summResp.json();
+            }
             render(meta);
         } catch (err) {
             document.getElementById('loading-state').innerHTML =
