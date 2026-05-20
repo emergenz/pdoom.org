@@ -333,6 +333,37 @@
             }
         }
 
+        /* -- Activity summaries -- */
+        .activity-summary-entry {
+            margin-bottom: 14px;
+            padding: 12px 14px;
+            border: 1px solid #eeeeee;
+        }
+
+        .activity-summary-date {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #555555;
+            margin-bottom: 6px;
+        }
+
+        .activity-summary-text {
+            font-size: 13px;
+            line-height: 1.65;
+            color: #333333;
+        }
+
+        .activity-summary-entry.pinned {
+            border-color: #000000;
+        }
+
+        .activity-summary-none {
+            font-size: 12px;
+            color: #999999;
+        }
+
         /* -- Loading / error states -- */
         .loading-state {
             text-align: center;
@@ -494,9 +525,14 @@
                         <a href="#" id="user-back-btn" style="font-size:11px;font-family:'SF Mono',monospace;color:#555;text-decoration:none;border-bottom:1px solid #ccc;" onclick="showUsersTableView();return false;">&larr; Back to users</a>
                     </div>
                     <div class="user-detail-stats" id="user-detail-stats"></div>
+                    <div id="user-weekly-summary" style="margin-bottom:16px;font-size:12px;font-family:'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;color:#555;"></div>
                     <div class="heatmap-wrapper">
                         <span class="section-title">Contribution History</span>
                         <div id="user-heatmap"></div>
+                    </div>
+                    <div class="activity-summaries" style="margin-top:20px;">
+                        <span class="section-title">Activity Summaries</span>
+                        <div id="user-activity-summaries"></div>
                     </div>
                 </div>
             </div>
@@ -521,6 +557,7 @@
     // Override via ?url=<encoded_url> query param, e.g.:
     //   index.html?url=https://my-bucket.s3.us-east-1.amazonaws.com/metadata.json
     const METADATA_URL = 'https://crowd-cast-bucket.s3.us-east-1.amazonaws.com/metadata.json';
+    const SUMMARIES_URL = 'https://crowd-cast-bucket.s3.us-east-1.amazonaws.com/summaries_index.json';
 
     /* Chart.js global defaults */
     Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
@@ -580,6 +617,13 @@
         max = max || 18;
         if (!h || h.length <= max) return h || '';
         return h.slice(0, 8) + '\u2026' + h.slice(-6);
+    }
+    /** Format a Date as YYYY-MM-DD in local time (avoids UTC shift from toISOString). */
+    function localDateStr(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + day;
     }
     function escapeHtml(s) {
         const d = document.createElement('div');
@@ -898,6 +942,7 @@
     let _cachedPerUserDaily = {};
     let _cachedDailyDates = [];
     let _cachedUserNames = {};
+    let _cachedSummaries = {};
 
     /** Resolve a user UUID to a display name (abbreviated name, email, or short hash). */
     function displayName(hash) {
@@ -1066,8 +1111,190 @@
             '</div>'
         ).join('');
 
+        /* Weekly summary */
+        renderWeeklySummary(uuids, userDaily);
+
         /* Heatmap */
         renderHeatmap(userDaily);
+
+        /* Activity summaries */
+        renderActivitySummaries(uuids);
+    }
+
+    /** Convert markdown (bold, inline code, code blocks) to HTML, escape the rest. */
+    function renderMd(text) {
+        const escaped = escapeHtml(text);
+        return escaped
+            .replace(/`([^`]+)`/g, '<code style="background:#f0f0f0;padding:1px 4px;border-radius:3px;font-size:12px;">$1</code>')
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    let _summaryByDate = {};
+    let _pinnedDate = null;
+
+    function renderActivitySummaries(uuids) {
+        const container = document.getElementById('user-activity-summaries');
+        _pinnedDate = null;
+
+        /* Merge summaries from all UUIDs for this user (store full entry for stats) */
+        _summaryByDate = {};
+        for (const uid of uuids) {
+            const entries = _cachedSummaries[uid] || [];
+            for (const entry of entries) {
+                if (!_summaryByDate[entry.date] || (_summaryByDate[entry.date].summary || '').length < (entry.summary || '').length) {
+                    _summaryByDate[entry.date] = entry;
+                }
+            }
+        }
+
+        const hasSummaries = Object.keys(_summaryByDate).length > 0;
+        if (!hasSummaries) {
+            container.innerHTML = '<span class="activity-summary-none">No activity summaries available yet. Hover over a day in the heatmap to see summaries as they become available.</span>';
+        } else {
+            /* Show most recent by default */
+            const latest = Object.keys(_summaryByDate).sort().reverse()[0];
+            _showSummary(latest, true);
+        }
+
+        /* Wire up heatmap cells */
+        document.querySelectorAll('.heatmap-cell[data-date]').forEach(function(cell) {
+            cell.addEventListener('mouseenter', function() {
+                if (!_pinnedDate) {
+                    _showSummary(cell.dataset.date, false);
+                }
+            });
+            cell.addEventListener('mouseleave', function() {
+                if (!_pinnedDate) {
+                    _clearSummary();
+                }
+            });
+            cell.addEventListener('click', function() {
+                const date = cell.dataset.date;
+                if (_pinnedDate === date) {
+                    _pinnedDate = null;
+                    _clearSummary();
+                    document.querySelectorAll('.heatmap-cell').forEach(c => c.style.outline = '');
+                } else {
+                    _pinnedDate = date;
+                    _showSummary(date, true);
+                    document.querySelectorAll('.heatmap-cell').forEach(c => c.style.outline = '');
+                    cell.style.outline = '2px solid #000';
+                }
+            });
+        });
+    }
+
+    function _showSummary(date, pinned) {
+        const container = document.getElementById('user-activity-summaries');
+        const entry = _summaryByDate[date];
+        if (!entry) {
+            container.innerHTML = '<div class="activity-summary-entry">' +
+                '<div class="activity-summary-date">' + escapeHtml(date) + '</div>' +
+                '<div class="activity-summary-text" style="color:#999;">No summary available for this day.</div>' +
+                '</div>';
+            return;
+        }
+        var statsHtml = '';
+        var parts = [];
+        if (entry.segment_count != null) parts.push(entry.segment_count + ' segments');
+        if (entry.total_hours != null) parts.push(entry.total_hours + 'h');
+        if (entry.visible_fraction != null) parts.push(Math.round(entry.visible_fraction * 100) + '% visible');
+        if (parts.length > 0) statsHtml = ' · ' + parts.join(' · ');
+        var unpinHint = pinned ? ' <span style="font-size:9px;color:#999;letter-spacing:0;">(click day again to unpin)</span>' : '';
+        container.innerHTML = '<div class="activity-summary-entry' + (pinned ? ' pinned' : '') + '">' +
+            '<div class="activity-summary-date">' + escapeHtml(date) + '<span style="font-weight:400;color:#777;">' + statsHtml + '</span>' + unpinHint + '</div>' +
+            '<div class="activity-summary-text">' + renderMd(entry.summary || '') + '</div>' +
+            '</div>';
+    }
+
+    function _clearSummary() {
+        const container = document.getElementById('user-activity-summaries');
+        if (Object.keys(_summaryByDate).length > 0) {
+            container.innerHTML = '<span class="activity-summary-none">Hover over a day to see its activity summary.</span>';
+        }
+    }
+
+    let _weeklyUuids = [];
+    let _weeklyUserDaily = {};
+    let _weekOffset = 0;
+
+    function renderWeeklySummary(uuids, userDaily) {
+        _weeklyUuids = uuids;
+        _weeklyUserDaily = userDaily;
+        _weekOffset = 0;
+        _renderWeek();
+    }
+
+    function _renderWeek() {
+        const container = document.getElementById('user-weekly-summary');
+        const now = new Date();
+        /* Find Monday of the target week */
+        const dayOfWeek = now.getDay();
+        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        const monday = new Date(now);
+        monday.setDate(monday.getDate() + mondayOffset + (_weekOffset * 7));
+        monday.setHours(0, 0, 0, 0);
+        const sunday = new Date(monday);
+        sunday.setDate(sunday.getDate() + 6);
+        const endDate = sunday > now ? now : sunday;
+
+        let totalMinutes = 0;
+        let totalSegments = 0;
+        let visibleMinutes = 0;
+
+        for (let d = new Date(monday); d <= endDate; d.setDate(d.getDate() + 1)) {
+            const dateStr = localDateStr(d);
+            for (const uid of _weeklyUuids) {
+                const dayData = (_cachedPerUserDaily[uid] || {})[dateStr];
+                if (dayData) {
+                    totalMinutes += dayData.estimated_minutes || 0;
+                    totalSegments += dayData.segments || 0;
+                }
+            }
+            for (const uid of _weeklyUuids) {
+                const entries = _cachedSummaries[uid] || [];
+                for (const entry of entries) {
+                    if (entry.date === localDateStr(d) && entry.total_hours != null && entry.visible_fraction != null) {
+                        visibleMinutes += (entry.total_hours * 60) * entry.visible_fraction;
+                    }
+                }
+            }
+        }
+
+        const totalHours = totalMinutes / 60;
+        const visibleHours = visibleMinutes / 60;
+        const visPct = totalHours > 0 ? Math.round(visibleHours / totalHours * 100) : 0;
+
+        /* Week label */
+        var weekLabel;
+        if (_weekOffset === 0) {
+            weekLabel = 'This Week';
+        } else {
+            var mo1 = monday.toLocaleString('en-US', { month: 'short' });
+            var d1 = monday.getDate();
+            var mo2 = sunday.toLocaleString('en-US', { month: 'short' });
+            var d2 = sunday.getDate();
+            weekLabel = mo1 === mo2 ? mo1 + ' ' + d1 + '–' + d2 : mo1 + ' ' + d1 + ' – ' + mo2 + ' ' + d2;
+        }
+
+        var arrowStyle = 'cursor:pointer;user-select:none;padding:0 6px;color:#999;';
+        var leftArrow = '<span style="' + arrowStyle + '" onclick="_weekOffset--;_renderWeek();">&#9664;</span>';
+        var rightArrow = _weekOffset < 0
+            ? '<span style="' + arrowStyle + '" onclick="_weekOffset++;_renderWeek();">&#9654;</span>'
+            : '<span style="padding:0 6px;color:#ddd;">&#9654;</span>';
+
+        var statsText;
+        if (totalSegments === 0) {
+            statsText = 'no recordings';
+        } else {
+            statsText = fmtDec(totalHours, 1) + 'h recorded · ' +
+                fmtDec(visibleHours, 1) + 'h visible (' + visPct + '%) · ' +
+                fmt(totalSegments) + ' segments';
+        }
+
+        container.innerHTML = leftArrow +
+            '<span style="text-transform:uppercase;font-size:11px;font-weight:700;letter-spacing:1.5px;">' + escapeHtml(weekLabel) + '</span>' +
+            rightArrow + ' · ' + statsText;
     }
 
     function renderHeatmap(userDaily) {
@@ -1104,7 +1331,7 @@
 
         /* Look up minutes per day */
         const minutesPerDay = days.map(day => {
-            const key = day.toISOString().slice(0, 10);
+            const key = localDateStr(day);
             const entry = userDaily[key];
             return entry ? (entry.estimated_minutes || 0) : 0;
         });
@@ -1157,10 +1384,10 @@
         /* Grid cells — grid-auto-flow: column fills top-to-bottom (Mon→Sun), then next week */
         let gridHtml = '<div class="heatmap-grid">';
         days.forEach((day, i) => {
-            const key = day.toISOString().slice(0, 10);
+            const key = localDateStr(day);
             const mins = minutesPerDay[i];
             const title = key + ': ' + fmtDec(mins, 1) + ' min';
-            gridHtml += '<div class="heatmap-cell" style="background:' + cellColor(mins) + ';" title="' + title + '"></div>';
+            gridHtml += '<div class="heatmap-cell" data-date="' + key + '" style="background:' + cellColor(mins) + ';cursor:pointer;" title="' + title + '"></div>';
         });
         gridHtml += '</div>';
 
@@ -1213,9 +1440,15 @@
        ================================================================= */
     async function boot() {
         try {
-            const resp = await fetch(METADATA_URL);
-            if (!resp.ok) throw new Error('HTTP ' + resp.status);
-            const meta = await resp.json();
+            const [metaResp, summResp] = await Promise.all([
+                fetch(METADATA_URL),
+                fetch(SUMMARIES_URL).catch(() => null),
+            ]);
+            if (!metaResp.ok) throw new Error('HTTP ' + metaResp.status);
+            const meta = await metaResp.json();
+            if (summResp && summResp.ok) {
+                _cachedSummaries = await summResp.json();
+            }
             render(meta);
         } catch (err) {
             document.getElementById('loading-state').innerHTML =
