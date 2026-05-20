@@ -525,6 +525,7 @@
                         <a href="#" id="user-back-btn" style="font-size:11px;font-family:'SF Mono',monospace;color:#555;text-decoration:none;border-bottom:1px solid #ccc;" onclick="showUsersTableView();return false;">&larr; Back to users</a>
                     </div>
                     <div class="user-detail-stats" id="user-detail-stats"></div>
+                    <div id="user-weekly-summary" style="margin-bottom:16px;font-size:12px;font-family:'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;color:#555;"></div>
                     <div class="heatmap-wrapper">
                         <span class="section-title">Contribution History</span>
                         <div id="user-heatmap"></div>
@@ -1110,6 +1111,9 @@
             '</div>'
         ).join('');
 
+        /* Weekly summary */
+        renderWeeklySummary(uuids, userDaily);
+
         /* Heatmap */
         renderHeatmap(userDaily);
 
@@ -1117,10 +1121,12 @@
         renderActivitySummaries(uuids);
     }
 
-    /** Convert **bold** markdown to <strong> tags, escape the rest. */
+    /** Convert markdown (bold, inline code, code blocks) to HTML, escape the rest. */
     function renderMd(text) {
         const escaped = escapeHtml(text);
-        return escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        return escaped
+            .replace(/`([^`]+)`/g, '<code style="background:#f0f0f0;padding:1px 4px;border-radius:3px;font-size:12px;">$1</code>')
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     }
 
     let _summaryByDate = {};
@@ -1130,13 +1136,13 @@
         const container = document.getElementById('user-activity-summaries');
         _pinnedDate = null;
 
-        /* Merge summaries from all UUIDs for this user */
+        /* Merge summaries from all UUIDs for this user (store full entry for stats) */
         _summaryByDate = {};
         for (const uid of uuids) {
             const entries = _cachedSummaries[uid] || [];
             for (const entry of entries) {
-                if (!_summaryByDate[entry.date] || _summaryByDate[entry.date].length < entry.summary.length) {
-                    _summaryByDate[entry.date] = entry.summary;
+                if (!_summaryByDate[entry.date] || (_summaryByDate[entry.date].summary || '').length < (entry.summary || '').length) {
+                    _summaryByDate[entry.date] = entry;
                 }
             }
         }
@@ -1180,17 +1186,24 @@
 
     function _showSummary(date, pinned) {
         const container = document.getElementById('user-activity-summaries');
-        const summary = _summaryByDate[date];
-        if (!summary) {
+        const entry = _summaryByDate[date];
+        if (!entry) {
             container.innerHTML = '<div class="activity-summary-entry">' +
                 '<div class="activity-summary-date">' + escapeHtml(date) + '</div>' +
                 '<div class="activity-summary-text" style="color:#999;">No summary available for this day.</div>' +
                 '</div>';
             return;
         }
+        var statsHtml = '';
+        var parts = [];
+        if (entry.segment_count != null) parts.push(entry.segment_count + ' segments');
+        if (entry.total_hours != null) parts.push(entry.total_hours + 'h');
+        if (entry.visible_fraction != null) parts.push(Math.round(entry.visible_fraction * 100) + '% visible');
+        if (parts.length > 0) statsHtml = ' · ' + parts.join(' · ');
+        var unpinHint = pinned ? ' <span style="font-size:9px;color:#999;letter-spacing:0;">(click day again to unpin)</span>' : '';
         container.innerHTML = '<div class="activity-summary-entry' + (pinned ? ' pinned' : '') + '">' +
-            '<div class="activity-summary-date">' + escapeHtml(date) + (pinned ? ' <span style="font-size:9px;color:#999;letter-spacing:0;">(click day again to unpin)</span>' : '') + '</div>' +
-            '<div class="activity-summary-text">' + renderMd(summary) + '</div>' +
+            '<div class="activity-summary-date">' + escapeHtml(date) + '<span style="font-weight:400;color:#777;">' + statsHtml + '</span>' + unpinHint + '</div>' +
+            '<div class="activity-summary-text">' + renderMd(entry.summary || '') + '</div>' +
             '</div>';
     }
 
@@ -1199,6 +1212,89 @@
         if (Object.keys(_summaryByDate).length > 0) {
             container.innerHTML = '<span class="activity-summary-none">Hover over a day to see its activity summary.</span>';
         }
+    }
+
+    let _weeklyUuids = [];
+    let _weeklyUserDaily = {};
+    let _weekOffset = 0;
+
+    function renderWeeklySummary(uuids, userDaily) {
+        _weeklyUuids = uuids;
+        _weeklyUserDaily = userDaily;
+        _weekOffset = 0;
+        _renderWeek();
+    }
+
+    function _renderWeek() {
+        const container = document.getElementById('user-weekly-summary');
+        const now = new Date();
+        /* Find Monday of the target week */
+        const dayOfWeek = now.getDay();
+        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        const monday = new Date(now);
+        monday.setDate(monday.getDate() + mondayOffset + (_weekOffset * 7));
+        monday.setHours(0, 0, 0, 0);
+        const sunday = new Date(monday);
+        sunday.setDate(sunday.getDate() + 6);
+        const endDate = sunday > now ? now : sunday;
+
+        let totalMinutes = 0;
+        let totalSegments = 0;
+        let visibleMinutes = 0;
+
+        for (let d = new Date(monday); d <= endDate; d.setDate(d.getDate() + 1)) {
+            const dateStr = localDateStr(d);
+            for (const uid of _weeklyUuids) {
+                const dayData = (_cachedPerUserDaily[uid] || {})[dateStr];
+                if (dayData) {
+                    totalMinutes += dayData.estimated_minutes || 0;
+                    totalSegments += dayData.segments || 0;
+                }
+            }
+            for (const uid of _weeklyUuids) {
+                const entries = _cachedSummaries[uid] || [];
+                for (const entry of entries) {
+                    if (entry.date === localDateStr(d) && entry.total_hours != null && entry.visible_fraction != null) {
+                        visibleMinutes += (entry.total_hours * 60) * entry.visible_fraction;
+                    }
+                }
+            }
+        }
+
+        const totalHours = totalMinutes / 60;
+        const visibleHours = visibleMinutes / 60;
+        const visPct = totalHours > 0 ? Math.round(visibleHours / totalHours * 100) : 0;
+
+        /* Week label */
+        var weekLabel;
+        if (_weekOffset === 0) {
+            weekLabel = 'This Week';
+        } else {
+            var mo1 = monday.toLocaleString('en-US', { month: 'short' });
+            var d1 = monday.getDate();
+            var mo2 = sunday.toLocaleString('en-US', { month: 'short' });
+            var d2 = sunday.getDate();
+            weekLabel = mo1 === mo2 ? mo1 + ' ' + d1 + '–' + d2 : mo1 + ' ' + d1 + ' – ' + mo2 + ' ' + d2;
+        }
+
+        var arrowStyle = 'cursor:pointer;user-select:none;padding:0 6px;color:#999;';
+        var leftArrow = '<span style="' + arrowStyle + '" onclick="_weekOffset--;_renderWeek();">&#9664;</span>';
+        var rightArrow = _weekOffset < 0
+            ? '<span style="' + arrowStyle + '" onclick="_weekOffset++;_renderWeek();">&#9654;</span>'
+            : '<span style="padding:0 6px;color:#ddd;">&#9654;</span>';
+
+        var statsText;
+        if (totalSegments === 0) {
+            statsText = 'no recordings';
+        } else {
+            statsText = fmtDec(totalHours, 1) + 'h recorded · ' +
+                fmtDec(visibleHours, 1) + 'h visible (' + visPct + '%) · ' +
+                fmt(totalSegments) + ' segments';
+        }
+
+        container.innerHTML = leftArrow +
+            '<span style="text-transform:uppercase;font-size:11px;font-weight:700;letter-spacing:1.5px;">' + escapeHtml(weekLabel) + '</span>' +
+            rightArrow + ' · ' + statsText;
     }
 
     function renderHeatmap(userDaily) {
