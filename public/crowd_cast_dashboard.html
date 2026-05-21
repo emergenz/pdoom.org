@@ -1343,7 +1343,8 @@
 
         let totalMinutes = 0;
         let totalSegments = 0;
-        let visibleMinutes = 0;
+        let visWeightedSum = 0;
+        let visWeightCount = 0;
 
         for (let d = new Date(monday); d <= endDate; d.setDate(d.getDate() + 1)) {
             const dateStr = localDateStr(d);
@@ -1354,19 +1355,20 @@
                     totalSegments += dayData.segments || 0;
                 }
             }
+            /* Compute visibility as weighted average from daily summaries */
             for (const uid of _weeklyUuids) {
                 const entries = _cachedSummaries[uid] || [];
                 for (const entry of entries) {
-                    if (entry.date === localDateStr(d) && entry.total_hours != null && entry.visible_fraction != null) {
-                        visibleMinutes += (entry.total_hours * 60) * entry.visible_fraction;
+                    if (entry.date === dateStr && entry.visible_fraction != null && entry.segment_count) {
+                        visWeightedSum += entry.visible_fraction * entry.segment_count;
+                        visWeightCount += entry.segment_count;
                     }
                 }
             }
         }
 
         const totalHours = totalMinutes / 60;
-        const visibleHours = visibleMinutes / 60;
-        const visPct = totalHours > 0 ? Math.round(visibleHours / totalHours * 100) : 0;
+        const visPct = visWeightCount > 0 ? Math.round(visWeightedSum / visWeightCount * 100) : 0;
 
         /* Week label */
         var weekLabel;
@@ -1391,7 +1393,7 @@
             statsText = 'no recordings';
         } else {
             statsText = fmtDec(totalHours, 1) + 'h recorded · ' +
-                fmtDec(visibleHours, 1) + 'h visible (' + visPct + '%) · ' +
+                visPct + '% visible · ' +
                 fmt(totalSegments) + ' segments';
         }
 
@@ -1618,18 +1620,20 @@
 
         const totalHours = totalMinutes / 60;
 
-        /* Compute visible hours from summaries */
-        let visibleHours = 0;
+        /* Compute visibility as weighted average from daily summaries */
+        let visWeightedSum = 0;
+        let visWeightCount = 0;
         for (const uid of Object.keys(_cachedSummaries)) {
             const info = _cachedUserNames[uid];
             if (!info || info.email !== myEmail) continue;
             for (const entry of _cachedSummaries[uid] || []) {
-                if (entry.total_hours != null && entry.visible_fraction != null) {
-                    visibleHours += entry.total_hours * entry.visible_fraction;
+                if (entry.visible_fraction != null && entry.segment_count) {
+                    visWeightedSum += entry.visible_fraction * entry.segment_count;
+                    visWeightCount += entry.segment_count;
                 }
             }
         }
-        const visPct = totalHours > 0 ? Math.round(visibleHours / totalHours * 100) : 0;
+        const visPct = visWeightCount > 0 ? Math.round(visWeightedSum / visWeightCount * 100) : 0;
 
         /* Find rank */
         let rank = '?';
@@ -1649,7 +1653,7 @@
         document.getElementById('my-hours').textContent = fmtDec(totalHours, 1);
         document.getElementById('my-hours-sub').textContent = fmt(totalSessions) + ' sessions';
         document.getElementById('my-visible').textContent = visPct + '%';
-        document.getElementById('my-visible-sub').textContent = fmtDec(visibleHours, 1) + 'h visible';
+        document.getElementById('my-visible-sub').textContent = 'visible';
         document.getElementById('my-segments').textContent = fmt(totalSegments);
         document.getElementById('my-segments-sub').textContent = fmt(totalSteps) + ' actions';
         document.getElementById('my-rank').textContent = '#' + rank;
