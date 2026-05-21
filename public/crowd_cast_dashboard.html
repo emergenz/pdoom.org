@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>crowd-cast metadata</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         * {
             box-sizing: border-box;
@@ -364,6 +365,23 @@
             color: #999999;
         }
 
+        /* -- Spinner -- */
+        @keyframes cc-spin { to { transform: rotate(360deg); } }
+        @keyframes cc-shimmer { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+
+        /* -- Skeleton cards -- */
+        .skel-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 20px; }
+        .skel-card { border: 1px solid #eee; padding: 22px 24px; }
+        .skel-line { height: 10px; background: #f0f0f0; margin-bottom: 8px; animation: cc-shimmer 1.5s infinite; }
+        .skel-line.short { width: 60%; }
+        .skel-line.tall { height: 28px; width: 45%; margin-bottom: 6px; }
+        .skel-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .skel-box { border: 1px solid #eee; padding: 24px; height: 200px; }
+        .skel-box .skel-line { width: 30%; margin-bottom: 14px; }
+        .skel-box .skel-block { height: 120px; background: #f8f8f8; animation: cc-shimmer 1.5s infinite 0.3s; }
+        @media (max-width: 900px) { .skel-cards { grid-template-columns: repeat(2, 1fr); } .skel-row { grid-template-columns: 1fr; } }
+        @media (max-width: 560px) { .skel-cards { grid-template-columns: 1fr; } }
+
         /* -- Loading / error states -- */
         .loading-state {
             text-align: center;
@@ -375,7 +393,7 @@
             font-weight: 800;
             letter-spacing: 1px;
             text-transform: uppercase;
-            margin-bottom: 14px;
+            margin-bottom: 0;
         }
 
         .loading-state p {
@@ -435,7 +453,8 @@
         <!-- Loading state -->
         <div class="loading-state outline-box" id="loading-state">
             <h2>crowd-cast</h2>
-            <p>Loading metadata&hellip;</p>
+            <div style="width:24px;height:24px;border:2px solid #eee;border-top-color:#000;border-radius:50%;animation:cc-spin 0.8s linear infinite;margin:20px auto 14px;"></div>
+            <p style="font-size:11px;color:#999;font-family:'SF Mono',monospace;letter-spacing:1px;text-transform:uppercase;">Loading data</p>
         </div>
 
         <!-- Dashboard (hidden until data loads) -->
@@ -447,8 +466,59 @@
                 <div class="header-meta">
                     <span id="header-status"></span>
                     <span id="header-updated"></span>
+                    <span id="auth-area">
+                        <div id="auth-signin"></div>
+                        <span id="auth-user" style="display:none;font-size:12px;">
+                            <span id="auth-user-name"></span>
+                            <span style="cursor:pointer;color:#999;margin-left:8px;border-bottom:1px solid #ccc;" onclick="signOut()">sign out</span>
+                        </span>
+                    </span>
                 </div>
             </div>
+
+            <!-- Tabs (only visible when logged in) -->
+            <div id="dashboard-tabs" style="display:none;margin-bottom:20px;">
+                <span class="tab-btn active" id="tab-my" onclick="switchTab('my')" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;border-bottom:2px solid #000;">My Overview</span>
+                <span class="tab-btn" id="tab-all" onclick="switchTab('all')" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">All Users</span>
+            </div>
+
+            <!-- My Overview (only visible when logged in) -->
+            <div id="my-overview" style="display:none;">
+                <div class="cards">
+                    <div class="card outline-box">
+                        <div class="card-label">Your Hours</div>
+                        <div class="card-value" id="my-hours">--</div>
+                        <div class="card-sub" id="my-hours-sub"></div>
+                    </div>
+                    <div class="card outline-box">
+                        <div class="card-label">Visible</div>
+                        <div class="card-value" id="my-visible">--</div>
+                        <div class="card-sub" id="my-visible-sub"></div>
+                    </div>
+                    <div class="card outline-box">
+                        <div class="card-label">Segments</div>
+                        <div class="card-value" id="my-segments">--</div>
+                        <div class="card-sub" id="my-segments-sub"></div>
+                    </div>
+                    <div class="card outline-box">
+                        <div class="card-label">Your Rank</div>
+                        <div class="card-value" id="my-rank">--</div>
+                        <div class="card-sub" id="my-rank-sub"></div>
+                    </div>
+                </div>
+                <div id="my-weekly-summary" style="margin-bottom:16px;font-size:12px;font-family:'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;color:#555;"></div>
+                <div class="outline-box" style="padding:24px;margin-bottom:20px;">
+                    <span class="section-title">Contribution History</span>
+                    <div id="my-heatmap"></div>
+                </div>
+                <div class="outline-box" style="padding:24px;margin-bottom:20px;">
+                    <span class="section-title">Activity Summaries</span>
+                    <div id="my-activity-summaries"></div>
+                </div>
+            </div>
+
+            <!-- All Users view -->
+            <div id="all-users-view">
 
             <!-- Summary cards -->
             <div class="cards">
@@ -543,6 +613,8 @@
                 <div class="health-grid" id="health-grid"></div>
             </div>
 
+            </div><!-- end all-users-view -->
+
             <!-- Footer -->
             <div class="site-footer">
                 <a href="https://pdoom.org/crowd_cast.html" target="_blank" rel="noopener">crowd-cast</a>: Crowd-Sourcing Action-Annotated Long-Horizon Digital Labour.
@@ -557,7 +629,13 @@
     // Override via ?url=<encoded_url> query param, e.g.:
     //   index.html?url=https://my-bucket.s3.us-east-1.amazonaws.com/metadata.json
     const METADATA_URL = 'https://crowd-cast-bucket.s3.us-east-1.amazonaws.com/metadata.json';
-    const SUMMARIES_URL = 'https://crowd-cast-bucket.s3.us-east-1.amazonaws.com/summaries_index.json';
+    const DASHBOARD_API = 'https://ob3iugfiy2.execute-api.us-east-1.amazonaws.com/v1/dashboard';
+    const GOOGLE_CLIENT_ID = '176488555898-29d645eudorth0i0k29keboctl92j5jm.apps.googleusercontent.com';
+
+    /* Auth state */
+    let _authToken = localStorage.getItem('cc_auth_token') || null;
+    let _authUser = null;
+    let _isAdmin = false;
 
     /* Chart.js global defaults */
     Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
@@ -565,6 +643,7 @@
     Chart.defaults.color = '#000000';
     Chart.defaults.plugins.legend.labels.boxWidth = 12;
     Chart.defaults.plugins.legend.labels.padding = 14;
+    /* Animation enabled for interactions, disabled on re-render via _skipNextAnim flag */
 
     /* Family colors (matching action_histogram.py FAMILY_COLORS) */
     const FAMILY_COLORS = {
@@ -674,12 +753,11 @@
         document.getElementById('card-sessions').textContent = fmt(t.sessions);
         document.getElementById('card-segments-sub').textContent = fmt(t.recording_segments) + ' segments';
 
-        /* Deduplicate users: merge UUIDs that share an email. */
+        /* Deduplicate users: merge UUIDs that share an email (from auth data). */
         const _seenEmails = new Set();
-        const _userNames = meta.user_names || {};
         let uniqueUsers = 0;
         for (const hash of Object.keys(perUser)) {
-            const info = _userNames[hash];
+            const info = _cachedUserNames[hash];
             const key = (info && info.email) ? info.email : hash;
             if (!_seenEmails.has(key)) { _seenEmails.add(key); uniqueUsers++; }
         }
@@ -701,7 +779,7 @@
         _cachedPerUser = perUser;
         _cachedPerUserDaily = perUserDaily;
         _cachedDailyDates = daily.map(d => d.date);
-        _cachedUserNames = meta.user_names || {};
+        /* user_names now comes from auth endpoint, not metadata.json */
         renderUsersTable(perUser);
 
         /* -- Health panel -- */
@@ -719,6 +797,7 @@
 
         trendChart = new Chart(ctx, {
             type: 'bar',
+            animation: false,
             data: {
                 labels: labels,
                 datasets: [
@@ -826,6 +905,7 @@
 
         actionChart = new Chart(ctx, {
             type: 'doughnut',
+            animation: false,
             data: {
                 labels: labels,
                 datasets: [{
@@ -906,6 +986,7 @@
 
         actionChart = new Chart(ctx, {
             type: 'doughnut',
+            animation: false,
             data: {
                 labels: labels,
                 datasets: [{
@@ -1009,7 +1090,9 @@
         const tbody = document.getElementById('users-tbody');
         let html = '';
         usersData.forEach((row, i) => {
-            html += '<tr style="cursor:pointer;" onclick="drillIntoUser(\'' + escapeHtml(row.user) + '\')">' +
+            const clickable = canDrillInto(row.user);
+            html += '<tr style="' + (clickable ? 'cursor:pointer;' : 'cursor:default;') + '"' +
+                (clickable ? ' onclick="drillIntoUser(\'' + escapeHtml(row.user) + '\')"' : '') + '>' +
                 '<td>' + (i + 1) + '</td>' +
                 '<td class="user-hash" title="' + escapeHtml(row.user) + '">' + escapeHtml(displayName(row.user)) + '</td>' +
                 '<td class="align-right">' + fmt(row.sessions) + '</td>' +
@@ -1045,7 +1128,9 @@
             const tbody = document.getElementById('users-tbody');
             let html = '';
             usersData.forEach((row, i) => {
-                html += '<tr style="cursor:pointer;" onclick="drillIntoUser(\'' + escapeHtml(row.user) + '\')">' +
+                const clickable = canDrillInto(row.user);
+                html += '<tr style="' + (clickable ? 'cursor:pointer;' : 'cursor:default;') + '"' +
+                    (clickable ? ' onclick="drillIntoUser(\'' + escapeHtml(row.user) + '\')"' : '') + '>' +
                     '<td>' + (i + 1) + '</td>' +
                     '<td class="user-hash" title="' + escapeHtml(row.user) + '">' + escapeHtml(displayName(row.user)) + '</td>' +
                     '<td class="align-right">' + fmt(row.sessions) + '</td>' +
@@ -1064,7 +1149,18 @@
         document.getElementById('user-detail-view').style.display = 'none';
     }
 
+    /** Check if the current user can drill into a given user hash. */
+    function canDrillInto(userHash) {
+        if (!_authToken || !_authUser) return false;
+        if (_isAdmin) return true;
+        /* Check if any of the row's UUIDs belong to the logged-in user */
+        const row = usersData.find(r => r.user === userHash);
+        const uuids = (row && row.uuids) ? row.uuids : [userHash];
+        return uuids.some(uid => _authUser.uuids.includes(uid));
+    }
+
     function drillIntoUser(userHash) {
+        if (!canDrillInto(userHash)) return;
         history.pushState({ view: 'user', user: userHash }, '');
         /* Find the merged row to get all UUIDs for this user. */
         const row = usersData.find(r => r.user === userHash);
@@ -1132,8 +1228,11 @@
     let _summaryByDate = {};
     let _pinnedDate = null;
 
-    function renderActivitySummaries(uuids) {
-        const container = document.getElementById('user-activity-summaries');
+    let _summaryContainerId = 'user-activity-summaries';
+
+    function renderActivitySummaries(uuids, containerId) {
+        _summaryContainerId = containerId || 'user-activity-summaries';
+        const container = document.getElementById(_summaryContainerId);
         _pinnedDate = null;
 
         /* Merge summaries from all UUIDs for this user (store full entry for stats) */
@@ -1156,8 +1255,9 @@
             _showSummary(latest, true);
         }
 
-        /* Wire up heatmap cells */
-        document.querySelectorAll('.heatmap-cell[data-date]').forEach(function(cell) {
+        /* Wire up heatmap cells (scoped to the associated heatmap container) */
+        var heatmapEl = document.getElementById(_heatmapContainerId);
+        (heatmapEl || document).querySelectorAll('.heatmap-cell[data-date]').forEach(function(cell) {
             cell.addEventListener('mouseenter', function() {
                 if (!_pinnedDate) {
                     _showSummary(cell.dataset.date, false);
@@ -1173,11 +1273,11 @@
                 if (_pinnedDate === date) {
                     _pinnedDate = null;
                     _clearSummary();
-                    document.querySelectorAll('.heatmap-cell').forEach(c => c.style.outline = '');
+                    (heatmapEl || document).querySelectorAll('.heatmap-cell').forEach(c => c.style.outline = '');
                 } else {
                     _pinnedDate = date;
                     _showSummary(date, true);
-                    document.querySelectorAll('.heatmap-cell').forEach(c => c.style.outline = '');
+                    (heatmapEl || document).querySelectorAll('.heatmap-cell').forEach(c => c.style.outline = '');
                     cell.style.outline = '2px solid #000';
                 }
             });
@@ -1185,7 +1285,7 @@
     }
 
     function _showSummary(date, pinned) {
-        const container = document.getElementById('user-activity-summaries');
+        const container = document.getElementById(_summaryContainerId);
         const entry = _summaryByDate[date];
         if (!entry) {
             container.innerHTML = '<div class="activity-summary-entry">' +
@@ -1208,7 +1308,7 @@
     }
 
     function _clearSummary() {
-        const container = document.getElementById('user-activity-summaries');
+        const container = document.getElementById(_summaryContainerId);
         if (Object.keys(_summaryByDate).length > 0) {
             container.innerHTML = '<span class="activity-summary-none">Hover over a day to see its activity summary.</span>';
         }
@@ -1218,15 +1318,18 @@
     let _weeklyUserDaily = {};
     let _weekOffset = 0;
 
-    function renderWeeklySummary(uuids, userDaily) {
+    let _weeklyContainerId = 'user-weekly-summary';
+
+    function renderWeeklySummary(uuids, userDaily, containerId) {
         _weeklyUuids = uuids;
         _weeklyUserDaily = userDaily;
         _weekOffset = 0;
+        _weeklyContainerId = containerId || 'user-weekly-summary';
         _renderWeek();
     }
 
     function _renderWeek() {
-        const container = document.getElementById('user-weekly-summary');
+        const container = document.getElementById(_weeklyContainerId);
         const now = new Date();
         /* Find Monday of the target week */
         const dayOfWeek = now.getDay();
@@ -1297,8 +1400,11 @@
             rightArrow + ' · ' + statsText;
     }
 
-    function renderHeatmap(userDaily) {
-        const container = document.getElementById('user-heatmap');
+    let _heatmapContainerId = 'user-heatmap';
+
+    function renderHeatmap(userDaily, containerId) {
+        _heatmapContainerId = containerId || 'user-heatmap';
+        const container = document.getElementById(_heatmapContainerId);
 
         /* Determine date range from user's own per_user_daily data */
         const userDates = Object.keys(userDaily).sort();
@@ -1438,18 +1544,249 @@
     /* =================================================================
        Fetch & boot
        ================================================================= */
+    /* =================================================================
+       Auth functions
+       ================================================================= */
+    /* =================================================================
+       Tab switching
+       ================================================================= */
+    function switchTab(tab) {
+        var myEl = document.getElementById('my-overview');
+        var allEl = document.getElementById('all-users-view');
+        myEl.style.display = tab === 'my' ? 'block' : 'none';
+        /* Use position:absolute + visibility:hidden for all-users to preserve chart layout */
+        if (tab === 'all') {
+            allEl.style.display = 'block';
+            allEl.style.visibility = 'visible';
+            allEl.style.position = 'static';
+            allEl.style.height = 'auto';
+        } else {
+            allEl.style.visibility = 'hidden';
+            allEl.style.position = 'absolute';
+            allEl.style.height = '0';
+            allEl.style.overflow = 'hidden';
+        }
+        document.getElementById('tab-my').style.borderBottomColor = tab === 'my' ? '#000' : 'transparent';
+        document.getElementById('tab-my').style.color = tab === 'my' ? '#000' : '#999';
+        document.getElementById('tab-all').style.borderBottomColor = tab === 'all' ? '#000' : 'transparent';
+        document.getElementById('tab-all').style.color = tab === 'all' ? '#000' : '#999';
+        if (tab === 'my') renderMyOverview();
+    }
+
+    function renderMyOverview() {
+        if (!_authUser || !window._lastMeta) return;
+        const meta = window._lastMeta;
+        const perUser = meta.per_user || {};
+        const perUserDaily = meta.per_user_daily || {};
+
+        /* Merge stats across user's UUIDs */
+        let totalMinutes = 0, totalSegments = 0, totalSteps = 0, totalSessions = 0;
+        const mergedDaily = {};
+        for (const uid of _authUser.uuids) {
+            const pu = perUser[uid] || {};
+            totalMinutes += pu.estimated_minutes || 0;
+            totalSegments += pu.segments || 0;
+            totalSteps += pu.action_steps || 0;
+            totalSessions += pu.sessions || 0;
+            const daily = perUserDaily[uid] || {};
+            for (const [date, day] of Object.entries(daily)) {
+                if (!mergedDaily[date]) mergedDaily[date] = { segments: 0, estimated_minutes: 0, action_steps: 0 };
+                mergedDaily[date].segments += day.segments || 0;
+                mergedDaily[date].estimated_minutes += day.estimated_minutes || 0;
+                mergedDaily[date].action_steps += day.action_steps || 0;
+            }
+        }
+
+        /* Also check migrated UUIDs (old hashes that map to same email) */
+        const myEmail = _authUser.email;
+        for (const [uid, info] of Object.entries(_cachedUserNames)) {
+            if (info.email === myEmail && !_authUser.uuids.includes(uid)) {
+                const pu = perUser[uid] || {};
+                totalMinutes += pu.estimated_minutes || 0;
+                totalSegments += pu.segments || 0;
+                totalSteps += pu.action_steps || 0;
+                totalSessions += pu.sessions || 0;
+                const daily = perUserDaily[uid] || {};
+                for (const [date, day] of Object.entries(daily)) {
+                    if (!mergedDaily[date]) mergedDaily[date] = { segments: 0, estimated_minutes: 0, action_steps: 0 };
+                    mergedDaily[date].segments += day.segments || 0;
+                    mergedDaily[date].estimated_minutes += day.estimated_minutes || 0;
+                    mergedDaily[date].action_steps += day.action_steps || 0;
+                }
+            }
+        }
+
+        const totalHours = totalMinutes / 60;
+
+        /* Compute visible hours from summaries */
+        let visibleHours = 0;
+        for (const uid of Object.keys(_cachedSummaries)) {
+            const info = _cachedUserNames[uid];
+            if (!info || info.email !== myEmail) continue;
+            for (const entry of _cachedSummaries[uid] || []) {
+                if (entry.total_hours != null && entry.visible_fraction != null) {
+                    visibleHours += entry.total_hours * entry.visible_fraction;
+                }
+            }
+        }
+        const visPct = totalHours > 0 ? Math.round(visibleHours / totalHours * 100) : 0;
+
+        /* Find rank */
+        let rank = '?';
+        if (usersData.length > 0) {
+            const sorted = [...usersData].sort((a, b) => b.hours - a.hours);
+            for (let i = 0; i < sorted.length; i++) {
+                const row = sorted[i];
+                const uuids = row.uuids || [row.user];
+                if (uuids.some(u => _authUser.uuids.includes(u))) {
+                    rank = i + 1;
+                    break;
+                }
+            }
+        }
+
+        /* Render cards */
+        document.getElementById('my-hours').textContent = fmtDec(totalHours, 1);
+        document.getElementById('my-hours-sub').textContent = fmt(totalSessions) + ' sessions';
+        document.getElementById('my-visible').textContent = visPct + '%';
+        document.getElementById('my-visible-sub').textContent = fmtDec(visibleHours, 1) + 'h visible';
+        document.getElementById('my-segments').textContent = fmt(totalSegments);
+        document.getElementById('my-segments-sub').textContent = fmt(totalSteps) + ' actions';
+        document.getElementById('my-rank').textContent = '#' + rank;
+        document.getElementById('my-rank-sub').textContent = 'of ' + fmt(usersData.length) + ' users';
+
+        /* Render weekly summary */
+        renderWeeklySummary(_authUser.uuids, mergedDaily, 'my-weekly-summary');
+
+        /* Render heatmap */
+        renderHeatmap(mergedDaily, 'my-heatmap');
+
+        /* Render activity summaries */
+        renderActivitySummaries(_authUser.uuids, 'my-activity-summaries');
+    }
+
+    function initGoogleSignIn() {
+        if (typeof google === 'undefined') {
+            setTimeout(initGoogleSignIn, 200);
+            return;
+        }
+        google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleCredentialResponse,
+        });
+        google.accounts.id.renderButton(
+            document.getElementById('auth-signin'),
+            { theme: 'outline', size: 'small', text: 'signin', shape: 'rectangular' }
+        );
+    }
+
+    function handleCredentialResponse(response) {
+        _authToken = response.credential;
+        localStorage.setItem('cc_auth_token', _authToken);
+        fetchAuthData();
+    }
+
+    function signOut() {
+        _authToken = null;
+        _authUser = null;
+        _isAdmin = false;
+        _cachedUserNames = {};
+        _cachedSummaries = {};
+        localStorage.removeItem('cc_auth_token');
+        document.getElementById('auth-signin').style.display = '';
+        document.getElementById('auth-user').style.display = 'none';
+        document.getElementById('dashboard-tabs').style.display = 'none';
+        document.getElementById('my-overview').style.display = 'none';
+        document.getElementById('all-users-view').style.display = 'block';
+        document.getElementById('all-users-view').style.visibility = 'visible';
+        document.getElementById('all-users-view').style.position = 'static';
+        document.getElementById('all-users-view').style.height = 'auto';
+        /* Re-render with anonymous view */
+        boot();
+    }
+
+    async function fetchAuthData() {
+        if (!_authToken) return;
+        /* Show skeleton loading state */
+        document.getElementById('auth-signin').style.display = 'none';
+        document.getElementById('auth-user').style.display = '';
+        document.getElementById('auth-user-name').textContent = 'Loading...';
+        document.getElementById('dashboard-tabs').style.display = 'block';
+        document.getElementById('my-overview').style.display = 'block';
+        document.getElementById('all-users-view').style.display = 'none';
+        switchTab('my');
+        document.getElementById('my-overview').innerHTML =
+            '<div class="skel-cards">' +
+                '<div class="skel-card"><div class="skel-line short"></div><div class="skel-line tall"></div><div class="skel-line short"></div></div>' +
+                '<div class="skel-card"><div class="skel-line short"></div><div class="skel-line tall"></div><div class="skel-line short"></div></div>' +
+                '<div class="skel-card"><div class="skel-line short"></div><div class="skel-line tall"></div><div class="skel-line short"></div></div>' +
+                '<div class="skel-card"><div class="skel-line short"></div><div class="skel-line tall"></div><div class="skel-line short"></div></div>' +
+            '</div>' +
+            '<div class="skel-row">' +
+                '<div class="skel-box"><div class="skel-line"></div><div class="skel-block"></div></div>' +
+                '<div class="skel-box"><div class="skel-line"></div><div class="skel-block"></div></div>' +
+            '</div>';
+        try {
+            const resp = await fetch(DASHBOARD_API, {
+                headers: { 'Authorization': 'Bearer ' + _authToken },
+            });
+            if (resp.status === 401) {
+                signOut();
+                return;
+            }
+            if (!resp.ok) {
+                document.getElementById('auth-user-name').textContent = 'Error';
+                return;
+            }
+            const data = await resp.json();
+            _authUser = data.user;
+            _isAdmin = data.is_admin;
+
+            /* Populate user names: own name for own UUIDs, or all names if admin */
+            if (data.all_user_names) {
+                _cachedUserNames = data.all_user_names;
+            } else {
+                _cachedUserNames = {};
+                for (const uid of data.user.uuids) {
+                    _cachedUserNames[uid] = { email: data.user.email, name: data.user.name };
+                }
+            }
+
+            /* Populate summaries */
+            _cachedSummaries = data.summaries || {};
+
+            /* Update auth UI */
+            document.getElementById('auth-signin').style.display = 'none';
+            document.getElementById('auth-user').style.display = '';
+            document.getElementById('auth-user-name').textContent = data.user.name || data.user.email;
+
+            /* Restore My Overview HTML from skeleton and render */
+            document.getElementById('my-overview').innerHTML = _myOverviewOrigHTML;
+            document.getElementById('dashboard-tabs').style.display = 'block';
+            if (window._lastMeta) render(window._lastMeta);
+            switchTab('my');
+        } catch (err) {
+            console.warn('Auth fetch failed:', err);
+        }
+    }
+
+    /* =================================================================
+       Boot
+       ================================================================= */
+    const _myOverviewOrigHTML = document.getElementById('my-overview').innerHTML;
+
     async function boot() {
         try {
-            const [metaResp, summResp] = await Promise.all([
-                fetch(METADATA_URL),
-                fetch(SUMMARIES_URL).catch(() => null),
-            ]);
+            const metaResp = await fetch(METADATA_URL);
             if (!metaResp.ok) throw new Error('HTTP ' + metaResp.status);
             const meta = await metaResp.json();
-            if (summResp && summResp.ok) {
-                _cachedSummaries = await summResp.json();
-            }
+            window._lastMeta = meta;
             render(meta);
+
+            /* If we have a stored token, fetch auth data */
+            if (_authToken) {
+                fetchAuthData();
+            }
         } catch (err) {
             document.getElementById('loading-state').innerHTML =
                 '<h2>crowd-cast</h2>' +
@@ -1466,6 +1803,7 @@
     });
 
     boot();
+    initGoogleSignIn();
     </script>
 </body>
 </html>
