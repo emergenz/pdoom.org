@@ -1653,7 +1653,7 @@
         document.getElementById('my-hours').textContent = fmtDec(totalHours, 1);
         document.getElementById('my-hours-sub').textContent = fmt(totalSessions) + ' sessions';
         document.getElementById('my-visible').textContent = visPct + '%';
-        document.getElementById('my-visible-sub').textContent = 'visible';
+        document.getElementById('my-visible-sub').textContent = fmtDec(totalHours * visPct / 100, 1) + 'h visible';
         document.getElementById('my-segments').textContent = fmt(totalSegments);
         document.getElementById('my-segments-sub').textContent = fmt(totalSteps) + ' actions';
         document.getElementById('my-rank').textContent = '#' + rank;
