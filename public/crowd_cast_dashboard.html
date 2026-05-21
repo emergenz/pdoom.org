@@ -1392,8 +1392,9 @@
         if (totalSegments === 0) {
             statsText = 'no recordings';
         } else {
+            var visHours = totalHours * visPct / 100;
             statsText = fmtDec(totalHours, 1) + 'h recorded · ' +
-                visPct + '% visible · ' +
+                fmtDec(visHours, 1) + 'h visible (' + visPct + '%) · ' +
                 fmt(totalSegments) + ' segments';
         }
 
