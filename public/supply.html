@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Supply — p(doom)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@1,400&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body { overflow-x: hidden; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: #fff;
+            color: #1a1a1a;
+            font-size: 16px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        .container { max-width: 1120px; margin: 0 auto; padding: 0 48px; }
+        body > .container { flex: 1 0 auto; width: 100%; }
+
+        /* ── Header ── */
+        .site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            height: 70px;
+            background: #000;
+        }
+
+        .nav {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Lora', serif;
+            font-style: italic;
+            font-weight: 600;
+            font-size: 28px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .nav-logo img { width: 52px; height: 52px; }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: rgba(255,255,255,0.8);
+            transition: color 0.15s;
+        }
+
+        .nav-links a:hover { color: rgba(255,255,255,1); }
+
+        /* ── Supply page ── */
+        .supply-page {
+            padding: calc(70px + 60px) 0 80px;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+        }
+
+        .product-card {
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover { transform: scale(1.03); }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            15% { transform: rotate(-2deg); }
+            30% { transform: rotate(2.5deg); }
+            45% { transform: rotate(-1.5deg); }
+            60% { transform: rotate(1deg); }
+            75% { transform: rotate(-0.5deg); }
+        }
+
+        .product-card.wiggle { animation: wiggle 0.6s ease-in-out; }
+
+        .product-card-image {
+            position: relative;
+            aspect-ratio: 1;
+            overflow: hidden;
+        }
+
+        .product-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.35s ease;
+        }
+
+        .product-card-image .hover-img {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+        }
+
+        .product-card:hover .hover-img { opacity: 1; }
+        .product-card:hover .default-img { opacity: 0; }
+
+        .product-card-info {
+            padding: 12px 2px 0;
+            text-align: center;
+        }
+
+        .product-card-info h3 {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .product-price {
+            margin-top: 2px;
+            font-size: 13px;
+            font-weight: 400;
+            color: rgba(0,0,0,0.42);
+        }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            margin: auto;
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        .modal-close {
+            position: fixed;
+            top: 1.25rem;
+            right: 1.5rem;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: none;
+            color: #666;
+            font-size: 1.75rem;
+            cursor: pointer;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover { color: #1a1a1a; }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .modal-price {
+            margin-left: 8px;
+            font-size: 14px;
+            font-weight: 400;
+            color: rgba(0,0,0,0.42);
+        }
+
+        .modal-main-image { overflow: hidden; }
+        .modal-main-image img { width: 100%; display: block; }
+
+        .modal-thumbnails {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .modal-thumbnails button {
+            width: 56px;
+            height: 56px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            background: none;
+            padding: 0;
+            transition: border-color 0.2s;
+        }
+
+        .modal-thumbnails button.active { border-color: #1a1a1a; }
+        .modal-thumbnails button:hover { border-color: #999; }
+
+        .modal-thumbnails button img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* ── Footer ── */
+        .site-footer { border-top: 1px solid #e5e5e5; flex-shrink: 0; }
+
+        .footer-inner {
+            padding: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Lora', serif;
+            font-style: italic;
+            font-size: 18px;
+            color: rgba(0,0,0,0.4);
+            transition: color 0.15s;
+        }
+
+        .footer-brand:hover { color: rgba(0,0,0,0.8); }
+        .footer-brand:hover span { color: rgba(0,0,0,0.8); }
+        .footer-brand:hover img { opacity: 0.7; }
+        .footer-brand img { width: 24px; height: 24px; opacity: 0.35; transition: opacity 0.15s; }
+
+        .footer-links { display: flex; gap: 32px; flex-wrap: wrap; }
+        .footer-links a { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(0,0,0,0.4); transition: color 0.15s; }
+        .footer-links a:hover { color: rgba(0,0,0,0.8); }
+
+        /* ── Mobile ── */
+        @media (max-width: 900px) {
+            .product-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+            .footer-inner { flex-direction: column; gap: 16px; text-align: center; }
+            .footer-links { gap: 16px; justify-content: center; }
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 0 20px; }
+            .nav-links { gap: 12px; }
+            .nav-links a { font-size: 10px; letter-spacing: 0.04em; }
+            .nav-logo { font-size: 22px; }
+            .nav-logo img { width: 36px; height: 36px; }
+            .supply-page { padding: calc(70px + 40px) 0 60px; }
+            .product-grid { grid-template-columns: 1fr; max-width: 400px; }
+        }
+
+        @media (max-width: 480px) {
+            .nav { height: auto; padding: 20px 0; flex-wrap: wrap; gap: 12px; }
+            .site-header { height: auto; }
+            .supply-page { padding-top: 132px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <nav class="nav">
+                <a href="/" class="nav-logo">
+                    <img src="/logo.png" alt="p(doom)" />
+                    <span>p(doom)</span>
+                </a>
+                <div class="nav-links">
+                    <a href="/blog.html">Research</a>
+                    <a href="/about.html">About</a>
+                    <a href="/supply.html">Supply</a>
+                    <a href="https://discord.gg/G4JNuPX2VR">Join</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="supply-page">
+            <div class="product-grid">
+                <div class="product-card" data-product="shirt1">
+                    <div class="product-card-image">
+                        <img class="default-img" src="/supply/shirt1-front.webp" alt="Meta Learner Tee — Front">
+                        <img class="hover-img" src="/supply/shirt1-back.webp" alt="Meta Learner Tee — Back" loading="lazy">
+                    </div>
+                    <div class="product-card-info"><h3>Meta Learner</h3><div class="product-price">15 EUR</div></div>
+                </div>
+
+                <div class="product-card" data-product="shirt2">
+                    <div class="product-card-image">
+                        <img class="default-img" src="/supply/shirt2-front.webp" alt="Finite Sized State Tee — Front">
+                        <img class="hover-img" src="/supply/shirt2-back.webp" alt="Finite Sized State Tee — Back" loading="lazy">
+                    </div>
+                    <div class="product-card-info"><h3>Finite Sized State</h3><div class="product-price">15 EUR</div></div>
+                </div>
+
+                <div class="product-card" data-product="hat">
+                    <div class="product-card-image">
+                        <img class="default-img" src="/supply/hat-side.webp" alt="Corduroy Hat — Side">
+                        <img class="hover-img" src="/supply/hat-front.webp" alt="Corduroy Hat — Front" loading="lazy">
+                    </div>
+                    <div class="product-card-info"><h3>Corduroy Hat</h3><div class="product-price">20 EUR</div></div>
+                </div>
+
+                <div class="product-card" data-product="beanie">
+                    <div class="product-card-image">
+                        <img class="default-img" src="/supply/beanie-front.webp" alt="Ribbed Beanie — Front">
+                        <img class="hover-img" src="/supply/beanie-detail.webp" alt="Ribbed Beanie — Detail" loading="lazy">
+                    </div>
+                    <div class="product-card-info"><h3>Ribbed Beanie</h3><div class="product-price">20 EUR</div></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal">
+        <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+        <div class="modal">
+            <h2 class="modal-title" id="modal-title"></h2>
+            <div class="modal-main-image">
+                <img id="modal-img" src="" alt="">
+            </div>
+            <div class="modal-thumbnails" id="modal-thumbs"></div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <a href="/" class="footer-brand">
+                    <img src="/logo.png" alt="">
+                    <span>p(doom)</span>
+                </a>
+                <div class="footer-links">
+                    <a href="https://github.com/p-doom/">GitHub</a>
+                    <a href="https://discord.gg/G4JNuPX2VR">Discord</a>
+                    <a href="https://x.com/@prob_doom">Twitter</a>
+                    <a href="https://www.linkedin.com/company/p-doom">LinkedIn</a>
+                    <a href="https://huggingface.co/p-doom">HuggingFace</a>
+                    <a href="/imprint.html">Imprint</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const products = {
+            shirt1: {
+                title: 'Meta Learner',
+                price: '15 EUR',
+                images: [
+                    { src: '/supply/shirt1-front.webp', alt: 'Front' },
+                    { src: '/supply/shirt1-back.webp', alt: 'Back' },
+                    { src: '/supply/shirt1-combo.webp', alt: 'Front & Back' },
+                ],
+            },
+            shirt2: {
+                title: 'Finite Sized State',
+                price: '15 EUR',
+                images: [
+                    { src: '/supply/shirt2-front.webp', alt: 'Front' },
+                    { src: '/supply/shirt2-back.webp', alt: 'Back' },
+                    { src: '/supply/shirt2-combo.webp', alt: 'Front & Back' },
+                ],
+            },
+            hat: {
+                title: 'Corduroy Hat',
+                price: '20 EUR',
+                images: [
+                    { src: '/supply/hat-side.webp', alt: 'Side' },
+                    { src: '/supply/hat-front.webp', alt: 'Front' },
+                    { src: '/supply/hat-back.webp', alt: 'Back' },
+                    { src: '/supply/hat-detail.webp', alt: 'Detail' },
+                ],
+            },
+            beanie: {
+                title: 'Ribbed Beanie',
+                price: '20 EUR',
+                images: [
+                    { src: '/supply/beanie-front.webp', alt: 'Front' },
+                    { src: '/supply/beanie-detail.webp', alt: 'Detail' },
+                ],
+            },
+        };
+
+        const overlay = document.getElementById('modal');
+        const modalImg = document.getElementById('modal-img');
+        const modalThumbs = document.getElementById('modal-thumbs');
+        const modalTitle = document.getElementById('modal-title');
+
+        function openModal(productId) {
+            const p = products[productId];
+            if (!p) return;
+
+            modalTitle.textContent = '';
+            modalTitle.appendChild(document.createTextNode(p.title));
+            const price = document.createElement('span');
+            price.className = 'modal-price';
+            price.textContent = p.price;
+            modalTitle.appendChild(price);
+            modalImg.src = p.images[0].src;
+            modalImg.alt = p.images[0].alt;
+
+            modalThumbs.innerHTML = '';
+            p.images.forEach((img, i) => {
+                const btn = document.createElement('button');
+                btn.innerHTML = '<img src="' + img.src + '" alt="' + img.alt + '">';
+                if (i === 0) btn.classList.add('active');
+                btn.addEventListener('click', () => {
+                    modalImg.src = img.src;
+                    modalImg.alt = img.alt;
+                    modalThumbs.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                });
+                modalThumbs.appendChild(btn);
+            });
+
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('click', () => openModal(card.dataset.product));
+        });
+
+        document.getElementById('modal-close').addEventListener('click', closeModal);
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Occasional wiggle
+        const cards = document.querySelectorAll('.product-card');
+        function triggerWiggle() {
+            const card = cards[Math.floor(Math.random() * cards.length)];
+            card.classList.add('wiggle');
+            card.addEventListener('animationend', () => card.classList.remove('wiggle'), { once: true });
+        }
+        setInterval(triggerWiggle, 4000);
+        setTimeout(triggerWiggle, 1500);
+    </script>
+</body>
+</html>
