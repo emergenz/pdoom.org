@@ -20,32 +20,66 @@
             font-size: 16px;
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         a { color: inherit; text-decoration: none; }
 
         .container { max-width: 1120px; margin: 0 auto; padding: 0 48px; }
+        body > .container { flex: 1 0 auto; width: 100%; }
+
+        /* ── Header ── */
+        .site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            height: 70px;
+            background: #000;
+        }
+
+        .nav {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Lora', serif;
+            font-style: italic;
+            font-weight: 600;
+            font-size: 28px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .nav-logo img { width: 52px; height: 52px; }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: rgba(255,255,255,0.8);
+            transition: color 0.15s;
+        }
+
+        .nav-links a:hover { color: rgba(255,255,255,1); }
 
         /* ── Supply page ── */
         .supply-page {
-            padding: 60px 0 80px;
-        }
-
-        .supply-title {
-            font-family: 'Lora', serif;
-            font-style: italic;
-            font-weight: 400;
-            font-size: clamp(2.5rem, 5vw, 3.5rem);
-            letter-spacing: -0.02em;
-            margin-bottom: 48px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .supply-title img {
-            width: 1.4em;
-            height: auto;
+            padding: calc(70px + 60px) 0 80px;
         }
 
         .product-grid {
@@ -104,6 +138,13 @@
             font-weight: 600;
         }
 
+        .product-price {
+            margin-top: 2px;
+            font-size: 13px;
+            font-weight: 400;
+            color: rgba(0,0,0,0.42);
+        }
+
         /* ── Modal ── */
         .modal-overlay {
             display: none;
@@ -152,6 +193,13 @@
             margin-bottom: 16px;
         }
 
+        .modal-price {
+            margin-left: 8px;
+            font-size: 14px;
+            font-weight: 400;
+            color: rgba(0,0,0,0.42);
+        }
+
         .modal-main-image { overflow: hidden; }
         .modal-main-image img { width: 100%; display: block; }
 
@@ -184,7 +232,7 @@
         }
 
         /* ── Footer ── */
-        .site-footer { border-top: 1px solid #e5e5e5; }
+        .site-footer { border-top: 1px solid #e5e5e5; flex-shrink: 0; }
 
         .footer-inner {
             padding: 20px 0;
@@ -222,48 +270,72 @@
 
         @media (max-width: 600px) {
             .container { padding: 0 20px; }
-            .supply-page { padding: 40px 0 60px; }
-            .supply-title { font-size: 2rem; }
+            .nav-links { gap: 12px; }
+            .nav-links a { font-size: 10px; letter-spacing: 0.04em; }
+            .nav-logo { font-size: 22px; }
+            .nav-logo img { width: 36px; height: 36px; }
+            .supply-page { padding: calc(70px + 40px) 0 60px; }
             .product-grid { grid-template-columns: 1fr; max-width: 400px; }
+        }
+
+        @media (max-width: 480px) {
+            .nav { height: auto; padding: 20px 0; flex-wrap: wrap; gap: 12px; }
+            .site-header { height: auto; }
+            .supply-page { padding-top: 132px; }
         }
     </style>
 </head>
 <body>
+    <header class="site-header">
+        <div class="container">
+            <nav class="nav">
+                <a href="/" class="nav-logo">
+                    <img src="/logo.png" alt="p(doom)" />
+                    <span>p(doom)</span>
+                </a>
+                <div class="nav-links">
+                    <a href="/blog.html">Research</a>
+                    <a href="/about.html">About</a>
+                    <a href="/supply.html">Supply</a>
+                    <a href="https://discord.gg/G4JNuPX2VR">Join</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
     <div class="container">
         <main class="supply-page">
-            <h1 class="supply-title"><a href="/"><img src="/logo.png" alt=""></a>p(doom) supply</h1>
-
             <div class="product-grid">
                 <div class="product-card" data-product="shirt1">
                     <div class="product-card-image">
-                        <img class="default-img" src="shirt1-front.webp" alt="Meta Learner Tee — Front">
-                        <img class="hover-img" src="shirt1-back.webp" alt="Meta Learner Tee — Back" loading="lazy">
+                        <img class="default-img" src="/supply/shirt1-front.webp" alt="Meta Learner Tee — Front">
+                        <img class="hover-img" src="/supply/shirt1-back.webp" alt="Meta Learner Tee — Back" loading="lazy">
                     </div>
-                    <div class="product-card-info"><h3>Meta Learner</h3></div>
+                    <div class="product-card-info"><h3>Meta Learner</h3><div class="product-price">15 EUR</div></div>
                 </div>
 
                 <div class="product-card" data-product="shirt2">
                     <div class="product-card-image">
-                        <img class="default-img" src="shirt2-front.webp" alt="Finite Sized State Tee — Front">
-                        <img class="hover-img" src="shirt2-back.webp" alt="Finite Sized State Tee — Back" loading="lazy">
+                        <img class="default-img" src="/supply/shirt2-front.webp" alt="Finite Sized State Tee — Front">
+                        <img class="hover-img" src="/supply/shirt2-back.webp" alt="Finite Sized State Tee — Back" loading="lazy">
                     </div>
-                    <div class="product-card-info"><h3>Finite Sized State</h3></div>
+                    <div class="product-card-info"><h3>Finite Sized State</h3><div class="product-price">15 EUR</div></div>
                 </div>
 
                 <div class="product-card" data-product="hat">
                     <div class="product-card-image">
-                        <img class="default-img" src="hat-side.webp" alt="Corduroy Hat — Side">
-                        <img class="hover-img" src="hat-front.webp" alt="Corduroy Hat — Front" loading="lazy">
+                        <img class="default-img" src="/supply/hat-side.webp" alt="Corduroy Hat — Side">
+                        <img class="hover-img" src="/supply/hat-front.webp" alt="Corduroy Hat — Front" loading="lazy">
                     </div>
-                    <div class="product-card-info"><h3>Corduroy Hat</h3></div>
+                    <div class="product-card-info"><h3>Corduroy Hat</h3><div class="product-price">20 EUR</div></div>
                 </div>
 
                 <div class="product-card" data-product="beanie">
                     <div class="product-card-image">
-                        <img class="default-img" src="beanie-front.webp" alt="Ribbed Beanie — Front">
-                        <img class="hover-img" src="beanie-detail.webp" alt="Ribbed Beanie — Detail" loading="lazy">
+                        <img class="default-img" src="/supply/beanie-front.webp" alt="Ribbed Beanie — Front">
+                        <img class="hover-img" src="/supply/beanie-detail.webp" alt="Ribbed Beanie — Detail" loading="lazy">
                     </div>
-                    <div class="product-card-info"><h3>Ribbed Beanie</h3></div>
+                    <div class="product-card-info"><h3>Ribbed Beanie</h3><div class="product-price">20 EUR</div></div>
                 </div>
             </div>
         </main>
@@ -304,34 +376,38 @@
         const products = {
             shirt1: {
                 title: 'Meta Learner',
+                price: '15 EUR',
                 images: [
-                    { src: 'shirt1-front.webp', alt: 'Front' },
-                    { src: 'shirt1-back.webp', alt: 'Back' },
-                    { src: 'shirt1-combo.webp', alt: 'Front & Back' },
+                    { src: '/supply/shirt1-front.webp', alt: 'Front' },
+                    { src: '/supply/shirt1-back.webp', alt: 'Back' },
+                    { src: '/supply/shirt1-combo.webp', alt: 'Front & Back' },
                 ],
             },
             shirt2: {
                 title: 'Finite Sized State',
+                price: '15 EUR',
                 images: [
-                    { src: 'shirt2-front.webp', alt: 'Front' },
-                    { src: 'shirt2-back.webp', alt: 'Back' },
-                    { src: 'shirt2-combo.webp', alt: 'Front & Back' },
+                    { src: '/supply/shirt2-front.webp', alt: 'Front' },
+                    { src: '/supply/shirt2-back.webp', alt: 'Back' },
+                    { src: '/supply/shirt2-combo.webp', alt: 'Front & Back' },
                 ],
             },
             hat: {
                 title: 'Corduroy Hat',
+                price: '20 EUR',
                 images: [
-                    { src: 'hat-side.webp', alt: 'Side' },
-                    { src: 'hat-front.webp', alt: 'Front' },
-                    { src: 'hat-back.webp', alt: 'Back' },
-                    { src: 'hat-detail.webp', alt: 'Detail' },
+                    { src: '/supply/hat-side.webp', alt: 'Side' },
+                    { src: '/supply/hat-front.webp', alt: 'Front' },
+                    { src: '/supply/hat-back.webp', alt: 'Back' },
+                    { src: '/supply/hat-detail.webp', alt: 'Detail' },
                 ],
             },
             beanie: {
                 title: 'Ribbed Beanie',
+                price: '20 EUR',
                 images: [
-                    { src: 'beanie-front.webp', alt: 'Front' },
-                    { src: 'beanie-detail.webp', alt: 'Detail' },
+                    { src: '/supply/beanie-front.webp', alt: 'Front' },
+                    { src: '/supply/beanie-detail.webp', alt: 'Detail' },
                 ],
             },
         };
@@ -345,7 +421,12 @@
             const p = products[productId];
             if (!p) return;
 
-            modalTitle.textContent = p.title;
+            modalTitle.textContent = '';
+            modalTitle.appendChild(document.createTextNode(p.title));
+            const price = document.createElement('span');
+            price.className = 'modal-price';
+            price.textContent = p.price;
+            modalTitle.appendChild(price);
             modalImg.src = p.images[0].src;
             modalImg.alt = p.images[0].alt;
 

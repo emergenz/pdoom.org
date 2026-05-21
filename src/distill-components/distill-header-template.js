@@ -91,8 +91,8 @@ distill-header .nav a:hover {
   distill-header .content {
     padding: 0 20px;
   }
-  distill-header .nav { gap: 16px; }
-  distill-header .nav a { font-size: 11px; letter-spacing: 0.04em; }
+  distill-header .nav { gap: 12px; }
+  distill-header .nav a { font-size: 10px; letter-spacing: 0.04em; }
   distill-header .logo span { font-size: 22px; }
   distill-header .logo img { width: 36px; height: 36px; }
   distill-header a { height: auto; line-height: 1; }
@@ -106,7 +106,7 @@ distill-header .nav a:hover {
     flex-wrap: wrap;
     gap: 12px;
   }
-  body { padding-top: 0; }
+  body { padding-top: 132px !important; }
 }
 </style>
 <div class="content">
@@ -117,6 +117,7 @@ distill-header .nav a:hover {
   <nav class="nav">
     <a href="/blog.html">Research</a>
     <a href="/about.html">About</a>
+    <a href="/supply.html">Supply</a>
     <a href="https://discord.gg/G4JNuPX2VR">Join</a>
   </nav>
 </div>
