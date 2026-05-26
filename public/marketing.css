@@ -229,7 +229,7 @@ h1.hero-manifesto.display {
 .booklet-title {
   font-family: var(--font-serif);
   font-weight: 500;
-  font-size: 30px;
+  font-size: 26px;
   line-height: 1.1;
   letter-spacing: -.02em;
   margin: 0 0 22px;
@@ -237,7 +237,6 @@ h1.hero-manifesto.display {
   text-wrap: pretty;
   transition: color var(--dur-fast) var(--ease-ink);
 }
-.booklet--md .booklet-title { font-size: 26px; }
 .booklet-foot {
   display: flex;
   justify-content: space-between;
@@ -459,7 +458,6 @@ h1.hero-manifesto.display {
   .booklet,
   .booklet--lg,
   .booklet--md { max-width: 100%; }
-  .booklet-title { font-size: 26px; }
   .release-inner {
     grid-template-columns: 1fr;
     gap: 32px;
