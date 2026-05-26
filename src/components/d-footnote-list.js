@@ -26,7 +26,7 @@ d-footnote-list > * {
 }
 
 d-footnote-list a.footnote-backlink {
-  color: rgba(0,0,0,0.3);
+  color: var(--ash-500);
   padding-left: 0.5em;
 }
 

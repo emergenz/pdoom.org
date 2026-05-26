@@ -20,10 +20,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="utf8">
   <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="stylesheet" href="marketing.css">
 </head>
 
 <body>
-  <!--
+    <header class="site-header" data-surface="void">
+    <div class="container">
+      <nav class="nav">
+        <a class="brand" href="/">
+          <img class="sigil-img" src="logo-mark-inverted.png" alt="">
+          <span class="wm">p(doom)</span>
+        </a>
+        <div class="nav-links">
+          <a href="/blog.html">Research</a>
+          <a href="/about.html">About</a>
+          <a href="/supply.html">Supply</a>
+          <a href="https://discord.gg/G4JNuPX2VR">Join</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+<!--
   <distill-header></distill-header>
   -->
   <d-front-matter>
@@ -84,7 +101,7 @@
       (Windows and Linux support are coming soon)
     </p>
     <figure style="grid-column: page; margin: 1rem 0; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center"><video src="crowd-cast-2.mp4"
-    style="width: 100%; min-width: 280px; border-radius: 8px; border: 1px solid #000; box-sizing: border-box;" controls autoplay loop muted></video>
+    style="width: 100%; min-width: 280px; border-radius: 8px; border: 1px solid var(--ink); box-sizing: border-box;" controls autoplay loop muted></video>
     </figure>
     <figcaption style="grid-column: page; text-align: center; margin-bottom: 2rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Figure 1: Action-annotated recording captured via crowd-cast.</figcaption>
     <a class="marker" href="#section-1" id="section-1"><span>1</span></a>
@@ -129,7 +146,7 @@
     </p>
 
     <figure style="grid-column: page; margin: 1rem 0; display: flex; justify-content: center"><img src="crowd-cast-1.png"
-      style="width:50%; border-radius: 8px; border: 1px solid #000;" /></figure>
+      style="width:50%; border-radius: 8px; border: 1px solid var(--ink);" /></figure>
     <figcaption style="grid-column: page; text-align: center; margin-bottom: 2rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Figure 2: crowd-cast provides a tray icon that shows the recording status at a quick glance (green means active recording).</figcaption>
     <p>
       We synchronize actions per-frame and provide a <a href="https://github.com/p-doom/crowd-cast/blob/main/scripts/overlay_keylogs.py">script</a> to render screencasts with action overlays.
@@ -137,7 +154,7 @@
       While the application tries to stay out of the user's way, recording status is always glanceable via the crowd-cast tray icon (Figure 2). The small circle indicates active recording (<span style="color:green;font-weight:bold;">green</span>), pausing due to the focused application being outside the predefined list (<span style="color:orange;font-weight:bold;">orange</span>), and inactive recording (<span style="color:grey;font-weight:bold;">grey</span>).
     </p>
     <figure style="grid-column: page; margin: 1rem 0; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center"><video src="crowd-cast-3.mp4"
-    style="width: 100%; min-width: 280px; border-radius: 8px; border: 1px solid #000; box-sizing: border-box;" controls autoplay loop muted></video>
+    style="width: 100%; min-width: 280px; border-radius: 8px; border: 1px solid var(--ink); box-sizing: border-box;" controls autoplay loop muted></video>
     </figure>
     <figcaption style="grid-column: page; text-align: center; margin-bottom: 2rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Figure 3: Both screen recording and action recording stop when switching focus to an app that should not be recorded (Discord in this example).</figcaption>
     <p>
@@ -161,6 +178,23 @@
     </distill-appendix>
   </d-appendix>
 
-  <distill-footer></distill-footer>
 
+  <footer class="site-footer" data-surface="void">
+    <div class="container">
+      <div class="footer-row">
+        <a class="brand" href="/">
+          <img class="sigil-img" src="logo-mark-inverted.png" alt="">
+          <span class="wm">p(doom)</span>
+        </a>
+        <nav class="footer-links">
+          <a href="https://github.com/p-doom/">GitHub</a>
+          <a href="https://discord.gg/G4JNuPX2VR">Discord</a>
+          <a href="https://x.com/@prob_doom">Twitter</a>
+          <a href="https://www.linkedin.com/company/p-doom">LinkedIn</a>
+          <a href="https://huggingface.co/p-doom">HuggingFace</a>
+          <a href="/imprint.html">Imprint</a>
+        </nav>
+      </div>
+    </div>
+  </footer>
 </body>

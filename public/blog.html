@@ -3,355 +3,115 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>p(doom) Research</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@1,400&display=swap" rel="stylesheet">
+    <title>p(doom) — Research</title>
     <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="colors_and_type.css">
+    <link rel="stylesheet" href="marketing.css">
     <style>
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        .releases-band--ash-500 { background: var(--ash-500); }
+        .releases-band--ash-500 { --rule: rgba(22,21,20,0.55); }
+        .releases-band--ash-500 .booklet-media { --booklet-matte: var(--ash-600); --booklet-frame: var(--ash-700); }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-            background: #fff;
-            color: #1a1a1a;
-            font-size: 16px;
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
+        .publications {
+            background: var(--ash-100);
+            padding: 96px 0;
         }
-
-        a { color: inherit; text-decoration: none; }
-
-        .container { max-width: 1120px; margin: 0 auto; padding: 0 48px; }
-
-        /* ── Header ── */
-        .site-header {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-            height: 70px;
-            background: #000;
+        .publications-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 48px;
         }
-
-        .nav {
-            height: 70px;
+        .publications-head {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 40px;
         }
-
-        .nav-logo {
-            display: flex; align-items: center; gap: 8px;
-            font-family: 'Lora', serif; font-style: italic;
-            font-size: 28px; font-weight: 600; color: rgba(255,255,255,0.8);
-        }
-        .nav-logo img { width: 52px; height: 52px; }
-        .nav-links { display: flex; gap: 32px; }
-        .nav-links a {
-            font-size: 12px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 0.06em; color: rgba(255,255,255,0.8); transition: color 0.15s;
-        }
-        .nav-links a:hover { color: rgba(255,255,255,1); }
-
-        /* ══════════════════════════════════
-           RELEASES — Full-width alternating
-           booklet card + description
-           ══════════════════════════════════ */
-        .releases {
-            margin-top: 70px;
-            margin-bottom: 100px;
-            border-bottom: 1px solid #e5e5e5;
-        }
-
-        .release {
-            display: flex;
-            width: 100%;
-            min-height: 80vh;
-        }
-
-        .release:nth-child(even) {
-            flex-direction: row-reverse;
-        }
-
-        /* Cover side — gradient bg with booklet card */
-        .release-cover {
-            width: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 80px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Booklet card — journal cover style */
-        .booklet {
-            display: block;
-            width: 100%;
-            max-width: 500px;
-            z-index: 10;
-            color: inherit;
-            text-decoration: none;
-        }
-
-        .booklet > div {
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            border-radius: 6px;
-            overflow: visible;
-            background: #fff;
-            box-shadow: 0 25px 50px rgba(0,0,0,.18);
-            aspect-ratio: 3 / 4;
-        }
-
-        .booklet-header {
-            display: flex;
-            flex-direction: column;
-            padding: 28px 28px 0;
-            background: #fff;
-            border-radius: 6px 6px 0 0;
-        }
-
-        .booklet-meta {
+        .publications-head .eyebrow {
+            font-family: var(--font-mono);
             font-size: 11px;
-            font-weight: 600;
+            letter-spacing: .18em;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
-            color: #999;
-            line-height: 1.4;
-            margin-bottom: 12px;
+            color: var(--ash-600);
         }
-
-        .booklet-meta .booklet-no {
-            color: #1a1a1a;
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .booklet-meta span {
-            margin-right: 8px;
-        }
-
-        .booklet-title {
-            font-size: clamp(1.3rem, 2.5vw, 1.75rem);
-            font-weight: 800;
-            line-height: 1.15;
-            letter-spacing: -0.02em;
-            color: #1a1a1a;
-        }
-
-        .booklet-space {
+        .publications-head::after {
+            content: '';
             flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 0 10%;
+            height: 1px;
+            background: rgba(22,21,20,0.55);
         }
-
-        .booklet-cover {
-            width: calc(100% + 60px);
-            position: relative;
-            left: -30px;
-        }
-
-        .booklet-cover video,
-        .booklet-cover img {
-            width: 100%;
-            display: block;
-            border-radius: 4px;
-            box-shadow: 0 20px 40px rgba(0,0,0,.2);
-        }
-
-        .card-glare {
-            position: absolute;
-            inset: -50%;
-            background: radial-gradient(ellipse closest-side, hsla(0,0%,100%,.45), hsla(0,0%,100%,0));
-            mix-blend-mode: overlay;
-            pointer-events: none;
-            z-index: 3;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        [data-parallax]:hover .card-glare { opacity: 1; }
-
-        /* Description side */
-        .release-desc {
-            width: 50%;
-            background: #fff;
-            padding: 80px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .release-desc-title {
-            font-weight: 600;
-            font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-            line-height: 1.15;
-            letter-spacing: -0.025em;
-            color: #141414;
-        }
-
-        .release-desc-bottom {
-            margin-top: auto;
-        }
-
-        .release-desc-text {
-            font-size: 17px;
-            line-height: 1.6;
-            color: #555;
-            max-width: 400px;
-            margin-bottom: 20px;
-        }
-
-        .release-desc-authors {
-            font-size: 14px;
-            color: #888;
-            margin-bottom: 32px;
-        }
-
-        .release-desc-link {
-            margin-top: 32px;
-            padding-top: 24px;
-            border-top: 1px solid #e0e0e0;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #e03030;
-        }
-
-        .release-desc-link:hover {
-            opacity: 0.7;
-        }
-
-        /* Gradient backgrounds per release — soft, desaturated, atmospheric */
-        .release-cover.grad-1 { background: linear-gradient(135deg, #c8d6e5, #a29bca, #d4a5a5); }
-        .release-cover.grad-2 { background: linear-gradient(135deg, #e8c4a0, #d4956a, #c47a5a); }
-        .release-cover.grad-3 { background: linear-gradient(135deg, #2c3e50, #4a6274, #8395a7); }
-        .release-cover.grad-4 { background: linear-gradient(135deg, #a8e6cf, #88c4b8, #b8d4c8); }
-        .release-cover.grad-5 { background: linear-gradient(135deg, #e6c9a8, #c4a088, #d4b8a8); }
-
-        /* ══════════════════════════════════
-           PAPERS — Table-style list
-           ══════════════════════════════════ */
-        .papers {
-            padding: 80px 0 120px;
-        }
-
-        .papers-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 24px;
-            letter-spacing: -0.01em;
-        }
-
-        .papers-divider {
-            border: none;
-            border-top: 2px solid #141414;
-            margin-bottom: 0;
-        }
-
         .paper-row {
             display: grid;
-            grid-template-columns: 180px 1fr auto;
+            grid-template-columns: 200px 1fr 200px;
             gap: 32px;
             align-items: baseline;
-            padding: 20px 0;
-            border-bottom: 1px solid #eee;
-            transition: background 0.15s;
+            padding: 22px 0;
+            border-bottom: 1px solid var(--ash-300);
+            text-decoration: none;
+            color: var(--ink);
+            transition: color var(--dur-fast) var(--ease-ink);
         }
-
-        .paper-row:hover { background: #fafafa; }
-
+        .paper-row:hover { color: var(--ember); }
+        .paper-row:hover .paper-title { color: var(--ember); }
         .paper-date {
-            font-size: 12px;
-            font-weight: 500;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: #999;
-            padding-top: 2px;
-        }
-
-        .paper-title {
-            font-size: 16px;
-            font-weight: 500;
-            color: #1a1a1a;
-        }
-
-        .paper-title sup {
-            font-size: 10px;
-            font-weight: 400;
-            color: #888;
-            margin-left: 4px;
-        }
-
-        .paper-category {
+            font-family: var(--font-mono);
             font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.1em;
+            font-weight: 500;
+            letter-spacing: .14em;
             text-transform: uppercase;
-            color: #aaa;
-            white-space: nowrap;
+            color: var(--ash-600);
         }
-
-        /* ── Footer ── */
-        .site-footer { border-top: 1px solid #e5e5e5; }
-
-        .footer-inner {
-            padding: 20px 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .paper-title {
+            font-family: var(--font-serif);
+            font-size: 18px;
+            line-height: 1.4;
+            font-weight: 500;
+            color: var(--ink);
+            letter-spacing: -.005em;
+            transition: color var(--dur-fast) var(--ease-ink);
         }
-
-        .footer-brand { display: flex; align-items: center; gap: 8px; font-family: 'Lora', serif; font-style: italic; font-size: 18px; color: rgba(0,0,0,0.4); transition: color 0.15s; }
-        .footer-brand:hover { color: rgba(0,0,0,0.8); }
-        .footer-brand:hover span { color: rgba(0,0,0,0.8); }
-        .footer-brand:hover img { opacity: 0.7; }
-        .footer-brand img { width: 24px; height: 24px; opacity: 0.35; transition: opacity 0.15s; }
-        .footer-links { display: flex; gap: 32px; flex-wrap: wrap; }
-        .footer-links a { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(0,0,0,0.4); transition: color 0.15s; }
-        .footer-links a:hover { color: rgba(0,0,0,0.8); }
-
-        /* ── Mobile ── */
-        @media (max-width: 900px) {
-            .release { flex-direction: column !important; }
-            .release-cover { width: 100%; min-height: 400px; }
-            .release-desc { width: 100%; padding: 48px; }
-            .paper-row { grid-template-columns: 1fr; gap: 4px; }
-            .paper-category { display: none; }
+        .paper-title sup {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: .08em;
+            color: var(--ash-600);
+            margin-left: 6px;
+            vertical-align: baseline;
+            text-transform: uppercase;
         }
-
-        @media (max-width: 900px) {
-            .footer-inner { flex-direction: column; gap: 16px; text-align: center; }
-            .footer-links { gap: 16px; justify-content: center; }
+        .paper-category {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            color: var(--ash-600);
+            text-align: right;
         }
-
+        @media (max-width: 960px) {
+            .publications { padding: 56px 0; }
+            .publications-inner { padding: 0 32px; }
+            .paper-row {
+                grid-template-columns: 1fr;
+                gap: 6px;
+                padding: 18px 0;
+            }
+            .paper-category { text-align: left; }
+        }
         @media (max-width: 600px) {
-            .container { padding: 0 20px; }
-            .nav-links { gap: 12px; }
-            .nav-links a { font-size: 10px; letter-spacing: 0.04em; }
-            .nav-logo { font-size: 22px; }
-            .nav-logo img { width: 36px; height: 36px; }
-            .release-cover { padding: 32px; min-height: 300px; overflow: hidden; }
-            .booklet { max-width: 300px; }
-            .booklet-cover { width: calc(100% + 30px); left: -15px; }
-            .release-desc { padding: 32px 20px; }
-        }
-
-        @media (max-width: 480px) {
-            .nav { height: auto; padding: 20px 0; flex-wrap: wrap; gap: 12px; }
-            .site-header { height: auto; }
-            .releases { margin-top: 132px; }
+            .publications-inner { padding: 0 20px; }
         }
     </style>
 </head>
 <body>
-    <header class="site-header">
+    <header class="site-header" data-surface="void">
         <div class="container">
             <nav class="nav">
-                <a href="/" class="nav-logo"><img src="logo.png" alt="p(doom)" /><span>p(doom)</span></a>
+                <a class="brand" href="/">
+                    <img class="sigil-img" src="logo-mark-inverted.png" alt="">
+                    <span class="wm">p(doom)</span>
+                </a>
                 <div class="nav-links">
                     <a href="/blog.html">Research</a>
                     <a href="/about.html">About</a>
@@ -363,191 +123,247 @@
     </header>
 
     <main>
-        <!-- ═══ Research Releases ═══ -->
-        <section class="releases">
-            <div class="release">
-                <div class="release-cover grad-1">
-                    <a href="/crowd_cast.html" class="booklet" data-parallax data-parallax-angle="4.5" data-parallax-scale="1.03">
-                        <div>
-                            <div class="card-glare"></div>
-                            <div class="booklet-header">
-                                <div class="booklet-meta"><span class="booklet-no">No. 5</span> <span>Feb 2, 2026</span></div>
-                                <div class="booklet-title">crowd-cast:<br>Crowd-Sourcing Action-Annotated Long-Horizon Digital Labour</div>
-                            </div>
-                            <div class="booklet-space"><div class="booklet-cover" data-depth="1">
-                                <video autoplay muted loop playsinline><source src="crowd-cast-2.mp4" type="video/mp4"></video>
-                            </div></div>
-                        </div>
-                    </a>
-                </div>
-                <a href="/crowd_cast.html" class="release-desc">
-                    <div class="release-desc-title">Capturing Long-Horizon Human Work</div>
-                    <div class="release-desc-bottom"><div class="release-desc-text">We release the biggest long-horizon screencast dataset in the world, and open-source infrastructure for action-annotated crowd-sourcing.</div>
-                    <div class="release-desc-authors">Franz Srambical, Alfred Nguyen, Mihir Mahajan, Stefan Bauer</div>
-                    <div class="release-desc-link">View research &rsaquo;</div></div>
-                </a>
+        <section id="research">
+            <div class="releases-head-wrap">
+                <header class="releases-head">
+                    <span class="eyebrow">§ Research · all releases</span>
+                </header>
             </div>
 
-            <div class="release">
-                <div class="release-cover grad-2">
-                    <a href="/crowd_code_2.html" class="booklet" data-parallax data-parallax-angle="4.5" data-parallax-scale="1.03">
-                        <div>
-                            <div class="card-glare"></div>
-                            <div class="booklet-header">
-                                <div class="booklet-meta"><span class="booklet-no">No. 4</span> <span>Jan 15, 2026</span></div>
-                                <div class="booklet-title">crowd-code 2.0:<br>Crowd-Sourcing Long-Horizon Human SWE Traces</div>
-                            </div>
-                            <div class="booklet-space"><div class="booklet-cover" data-depth="1">
-                                <video autoplay muted loop playsinline><source src="cc2_0_1.mp4" type="video/mp4"></video>
-                            </div></div>
+            <div class="releases-band releases-band--ash-100">
+                <article class="release">
+                    <div class="release-inner">
+                        <div class="release-desc">
+                            <div class="release-sub">Capturing Long-Horizon Human Work</div>
+                            <p class="release-body">We release the biggest long-horizon screencast dataset in the world, and open-source infrastructure for action-annotated crowd-sourcing.</p>
+                            <div class="release-authors">Franz Srambical, Alfred Nguyen, Mihir Mahajan, Stefan Bauer</div>
+                            <a class="release-link" href="/crowd_cast.html">
+                                <span>Read research</span>
+                                <span aria-hidden>→</span>
+                            </a>
                         </div>
-                    </a>
-                </div>
-                <a href="/crowd_code_2.html" class="release-desc">
-                    <div class="release-desc-title">Capturing Long-Horizon Human-Agent Cowork</div>
-                    <div class="release-desc-bottom"><div class="release-desc-text">We release over six months of SWE traces across 25 people, and a VS Code/Cursor extension for capturing human software engineering in the age of coding agents.</div>
-                    <div class="release-desc-authors">Alfred Nguyen, Mihir Mahajan, Franz Srambical, Stefan Bauer</div>
-                    <div class="release-desc-link">View research &rsaquo;</div></div>
-                </a>
+                        <div class="release-art">
+                            <a class="booklet booklet--md" href="/crowd_cast.html">
+                                <header class="booklet-meta">
+                                    <span class="booklet-no">№ 5</span>
+                                    <span class="booklet-rule" aria-hidden></span>
+                                    <span class="booklet-date">Feb 2, 2026</span>
+                                </header>
+                                <figure class="booklet-figure">
+                                    <div class="booklet-media">
+                                        <span class="booklet-rec" aria-hidden>
+                                            <span class="booklet-rec-dot"></span>REC
+                                        </span>
+                                        <video autoplay muted loop playsinline>
+                                            <source src="crowd-cast-2.mp4" type="video/mp4">
+                                        </video>
+                                    </div>
+                                </figure>
+                            </a>
+                        </div>
+                    </div>
+                </article>
             </div>
 
-            <div class="release">
-                <div class="release-cover grad-3">
-                    <a href="/agi_cast.html" class="booklet" data-parallax data-parallax-angle="4.5" data-parallax-scale="1.03">
-                        <div>
-                            <div class="card-glare"></div>
-                            <div class="booklet-header">
-                                <div class="booklet-meta"><span class="booklet-no">No. 3</span> <span>Nov 2, 2025</span></div>
-                                <div class="booklet-title">AGI-CAST:<br>Making Agents Work Like Humans</div>
-                            </div>
-                            <div class="booklet-space"><div class="booklet-cover" data-depth="1">
-                                <video autoplay muted loop playsinline><source src="agi_cast.mp4" type="video/mp4"></video>
-                            </div></div>
+            <div class="releases-band releases-band--ash-200">
+                <article class="release">
+                    <div class="release-inner">
+                        <div class="release-desc">
+                            <div class="release-sub">Capturing Long-Horizon Human–Agent Cowork</div>
+                            <p class="release-body">We release over six months of SWE traces across 25 people, and a VS Code / Cursor extension for capturing human software engineering in the age of coding agents.</p>
+                            <div class="release-authors">Alfred Nguyen, Mihir Mahajan, Franz Srambical, Stefan Bauer</div>
+                            <a class="release-link" href="/crowd_code_2.html">
+                                <span>Read research</span>
+                                <span aria-hidden>→</span>
+                            </a>
                         </div>
-                    </a>
-                </div>
-                <a href="/agi_cast.html" class="release-desc">
-                    <div class="release-desc-title">600 Hours of AGI Research</div>
-                    <div class="release-desc-bottom"><div class="release-desc-text">We at p(doom) started capturing everything we do, and openly release over 600 hours of AGI research.</div>
-                    <div class="release-desc-authors">Franz Srambical</div>
-                    <div class="release-desc-link">View research &rsaquo;</div></div>
-                </a>
+                        <div class="release-art">
+                            <a class="booklet booklet--md" href="/crowd_code_2.html">
+                                <header class="booklet-meta">
+                                    <span class="booklet-no">№ 4</span>
+                                    <span class="booklet-rule" aria-hidden></span>
+                                    <span class="booklet-date">Jan 15, 2026</span>
+                                </header>
+                                <figure class="booklet-figure">
+                                    <div class="booklet-media">
+                                        <span class="booklet-rec" aria-hidden>
+                                            <span class="booklet-rec-dot"></span>REC
+                                        </span>
+                                        <video autoplay muted loop playsinline>
+                                            <source src="cc2_0_1.mp4" type="video/mp4">
+                                        </video>
+                                    </div>
+                                </figure>
+                            </a>
+                        </div>
+                    </div>
+                </article>
             </div>
 
-            <div class="release">
-                <div class="release-cover grad-4">
-                    <a href="/jasmine.html" class="booklet" data-parallax data-parallax-angle="4.5" data-parallax-scale="1.03">
-                        <div>
-                            <div class="card-glare"></div>
-                            <div class="booklet-header">
-                                <div class="booklet-meta"><span class="booklet-no">No. 2</span> <span>Aug 5, 2025</span></div>
-                                <div class="booklet-title">🧞‍♀️ Jasmine:<br>A Simple, Performant and Scalable JAX-based World Modeling Codebase</div>
-                            </div>
-                            <div class="booklet-space"><div class="booklet-cover" data-depth="1">
-                                <img src="jasmine_preview.gif" alt="Jasmine" loading="lazy">
-                            </div></div>
+            <div class="releases-band releases-band--ash-300">
+                <article class="release">
+                    <div class="release-inner">
+                        <div class="release-desc">
+                            <div class="release-sub">600 Hours of AGI Research</div>
+                            <p class="release-body">We at p(doom) started capturing everything we do, and openly release over 600 hours of AGI research.</p>
+                            <div class="release-authors">Franz Srambical</div>
+                            <a class="release-link" href="/agi_cast.html">
+                                <span>Read research</span>
+                                <span aria-hidden>→</span>
+                            </a>
                         </div>
-                    </a>
-                </div>
-                <a href="/jasmine.html" class="release-desc">
-                    <div class="release-desc-title">Training Real-World Agents in World Models</div>
-                    <div class="release-desc-bottom"><div class="release-desc-text">We release the biggest Minecraft dataset in the world, and a production-ready codebase for world modeling from unlabeled videos.</div>
-                    <div class="release-desc-authors">Mihir Mahajan, Alfred Nguyen, Franz Srambical, Stefan Bauer</div>
-                    <div class="release-desc-link">View research &rsaquo;</div></div>
-                </a>
+                        <div class="release-art">
+                            <a class="booklet booklet--md" href="/agi_cast.html">
+                                <header class="booklet-meta">
+                                    <span class="booklet-no">№ 3</span>
+                                    <span class="booklet-rule" aria-hidden></span>
+                                    <span class="booklet-date">Nov 2, 2025</span>
+                                </header>
+                                <figure class="booklet-figure">
+                                    <div class="booklet-media">
+                                        <span class="booklet-rec" aria-hidden>
+                                            <span class="booklet-rec-dot"></span>REC
+                                        </span>
+                                        <video autoplay muted loop playsinline>
+                                            <source src="agi_cast.mp4" type="video/mp4">
+                                        </video>
+                                    </div>
+                                </figure>
+                            </a>
+                        </div>
+                    </div>
+                </article>
             </div>
 
-            <div class="release">
-                <div class="release-cover grad-5">
-                    <a href="/crowd_code.html" class="booklet" data-parallax data-parallax-angle="4.5" data-parallax-scale="1.03">
-                        <div>
-                            <div class="card-glare"></div>
-                            <div class="booklet-header">
-                                <div class="booklet-meta"><span class="booklet-no">No. 1</span> <span>Jun 22, 2025</span></div>
-                                <div class="booklet-title">crowd-code:<br>Crowd-Sourcing A Dataset To Make Agents Code Like Humans</div>
-                            </div>
-                            <div class="booklet-space"><div class="booklet-cover" data-depth="1">
-                                <img src="crowd_code_preview.gif" alt="crowd-code" loading="lazy">
-                            </div></div>
+            <div class="releases-band releases-band--ash-400">
+                <article class="release">
+                    <div class="release-inner">
+                        <div class="release-desc">
+                            <div class="release-sub">Training Real-World Agents in World Models</div>
+                            <p class="release-body">We release the biggest Minecraft dataset in the world, and a production-ready codebase for world modeling from unlabeled videos.</p>
+                            <div class="release-authors">Mihir Mahajan, Alfred Nguyen, Franz Srambical, Stefan Bauer</div>
+                            <a class="release-link" href="/jasmine.html">
+                                <span>Read research</span>
+                                <span aria-hidden>→</span>
+                            </a>
                         </div>
-                    </a>
-                </div>
-                <a href="/crowd_code.html" class="release-desc">
-                    <div class="release-desc-title">Capturing Long-Horizon Human Software Engineering</div>
-                    <div class="release-desc-bottom"><div class="release-desc-text">We open-source infrastructure that allows anyone to participate in crowd-sourcing a dataset of software engineering traces.</div>
-                    <div class="release-desc-authors">Franz Srambical, Mihir Mahajan</div>
-                    <div class="release-desc-link">View research &rsaquo;</div></div>
-                </a>
+                        <div class="release-art">
+                            <a class="booklet booklet--md" href="/jasmine.html">
+                                <header class="booklet-meta">
+                                    <span class="booklet-no">№ 2</span>
+                                    <span class="booklet-rule" aria-hidden></span>
+                                    <span class="booklet-date">Aug 5, 2025</span>
+                                </header>
+                                <figure class="booklet-figure">
+                                    <div class="booklet-media">
+                                        <img src="jasmine_preview.gif" alt="" loading="lazy" style="object-position: left center">
+                                    </div>
+                                </figure>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <div class="releases-band releases-band--ash-300">
+                <article class="release">
+                    <div class="release-inner">
+                        <div class="release-desc">
+                            <div class="release-sub">Capturing Long-Horizon Human Software Engineering</div>
+                            <p class="release-body">We open-source infrastructure that allows anyone to participate in crowd-sourcing a dataset of software engineering traces.</p>
+                            <div class="release-authors">Franz Srambical, Mihir Mahajan</div>
+                            <a class="release-link" href="/crowd_code.html">
+                                <span>Read research</span>
+                                <span aria-hidden>→</span>
+                            </a>
+                        </div>
+                        <div class="release-art">
+                            <a class="booklet booklet--md" href="/crowd_code.html">
+                                <header class="booklet-meta">
+                                    <span class="booklet-no">№ 1</span>
+                                    <span class="booklet-rule" aria-hidden></span>
+                                    <span class="booklet-date">Jun 22, 2025</span>
+                                </header>
+                                <figure class="booklet-figure">
+                                    <div class="booklet-media">
+                                        <img src="crowd_code_preview.gif" alt="" loading="lazy">
+                                    </div>
+                                </figure>
+                            </a>
+                        </div>
+                    </div>
+                </article>
             </div>
         </section>
 
-        <!-- ═══ Publications ═══ -->
-        <div class="container">
-            <section class="papers">
-                <div class="papers-title">Publications</div>
-                <hr class="papers-divider">
+        <section class="publications">
+            <div class="publications-inner">
+                <header class="publications-head">
+                    <span class="eyebrow">§ Publications</span>
+                </header>
 
                 <a href="https://arxiv.org/abs/2510.27002" class="paper-row">
-                    <div class="paper-date">October 30, 2025</div>
-                    <div class="paper-title">Jasmine: A Simple, Performant and Scalable JAX-based World Modeling Codebase <sup>[arXiv]</sup></div>
+                    <div class="paper-date">Oct 30, 2025</div>
+                    <div class="paper-title">Jasmine: A Simple, Performant and Scalable JAX-based World Modeling Codebase<sup>[arXiv]</sup></div>
                     <div class="paper-category">World Modeling</div>
                 </a>
 
                 <a href="/ppo_off_policy.html" class="paper-row">
-                    <div class="paper-date">April 29, 2025</div>
-                    <div class="paper-title">PPO Is An Off-Policy Algorithm <sup>[Blog]</sup></div>
+                    <div class="paper-date">Apr 29, 2025</div>
+                    <div class="paper-title">PPO Is An Off-Policy Algorithm<sup>[Blog]</sup></div>
                     <div class="paper-category">Reinforcement Learning</div>
                 </a>
 
                 <a href="/jax_assert.html" class="paper-row">
-                    <div class="paper-date">March 26, 2025</div>
-                    <div class="paper-title">Performance-degradation Free Value Assertions in JAX <sup>[Blog]</sup></div>
+                    <div class="paper-date">Mar 26, 2025</div>
+                    <div class="paper-title">Performance-degradation Free Value Assertions in JAX<sup>[Blog]</sup></div>
                     <div class="paper-category">Infrastructure</div>
                 </a>
 
                 <a href="/ppo.html" class="paper-row">
-                    <div class="paper-date">February 12, 2025</div>
-                    <div class="paper-title">PPO Is Secretly Using Monte Carlo Advantage Estimation In LLM Post-Training <sup>[Blog]</sup></div>
+                    <div class="paper-date">Feb 12, 2025</div>
+                    <div class="paper-title">PPO Is Secretly Using Monte Carlo Advantage Estimation In LLM Post-Training<sup>[Blog]</sup></div>
                     <div class="paper-category">Reinforcement Learning</div>
                 </a>
 
                 <a href="/thesis.html" class="paper-row">
-                    <div class="paper-date">September 26, 2024</div>
-                    <div class="paper-title">Neural Networks Do Not Generalize Out-of-Distribution <sup>[Blog]</sup></div>
+                    <div class="paper-date">Sep 26, 2024</div>
+                    <div class="paper-title">Neural Networks Do Not Generalize Out-of-Distribution<sup>[Blog]</sup></div>
                     <div class="paper-category">Roadmap</div>
                 </a>
 
                 <a href="/causal_mask.html" class="paper-row">
-                    <div class="paper-date">June 8, 2024</div>
-                    <div class="paper-title">Going Beyond the Causal Mask in Language Modeling <sup>[Blog]</sup></div>
+                    <div class="paper-date">Jun 8, 2024</div>
+                    <div class="paper-title">Going Beyond the Causal Mask in Language Modeling<sup>[Blog]</sup></div>
                     <div class="paper-category">Language Modeling</div>
                 </a>
 
                 <a href="/act.html" class="paper-row">
-                    <div class="paper-date">December 7, 2023</div>
-                    <div class="paper-title">ACT: Adaptive Compute Transformer <sup>[Blog]</sup></div>
+                    <div class="paper-date">Dec 7, 2023</div>
+                    <div class="paper-title">ACT: Adaptive Compute Transformer<sup>[Blog]</sup></div>
                     <div class="paper-category">Language Modeling</div>
                 </a>
-            </section>
-        </div>
+            </div>
+        </section>
     </main>
 
-    <footer class="site-footer">
+    <footer class="site-footer" data-surface="void">
         <div class="container">
-            <div class="footer-inner">
-                <a href="/" class="footer-brand"><img src="logo.png" alt=""><span>p(doom)</span></a>
-                <div class="footer-links">
+            <div class="footer-row">
+                <a class="brand" href="/">
+                    <img class="sigil-img" src="logo-mark-inverted.png" alt="">
+                    <span class="wm">p(doom)</span>
+                </a>
+                <nav class="footer-links">
                     <a href="https://github.com/p-doom/">GitHub</a>
                     <a href="https://discord.gg/G4JNuPX2VR">Discord</a>
                     <a href="https://x.com/@prob_doom">Twitter</a>
                     <a href="https://www.linkedin.com/company/p-doom">LinkedIn</a>
                     <a href="https://huggingface.co/p-doom">HuggingFace</a>
                     <a href="/imprint.html">Imprint</a>
-                </div>
+                </nav>
             </div>
         </div>
     </footer>
-
-    <script src="parallax.js"></script>
 </body>
 </html>

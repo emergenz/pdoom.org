@@ -32,17 +32,19 @@ const T = Template('d-code', `
 
 code {
   white-space: nowrap;
-  background: rgba(0, 0, 0, 0.04);
-  border-radius: 2px;
-  padding: 4px 7px;
-  font-size: 15px;
-  color: rgba(0, 0, 0, 0.6);
+  font-family: var(--font-mono);
+  background: var(--ash-100);
+  border-radius: 0;
+  padding: 2px 6px;
+  font-size: 14px;
+  color: var(--ash-700);
 }
 
 pre code {
   display: block;
-  border-left: 2px solid rgba(0, 0, 0, .1);
-  padding: 0 0 0 36px;
+  background: var(--ash-100);
+  border-left: 1px solid var(--ash-400);
+  padding: 12px 0 12px 24px;
 }
 
 ${css}

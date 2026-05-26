@@ -18,9 +18,10 @@ import { body } from '../helpers/layout';
 const T = Template('d-abstract', `
 <style>
   :host {
+    font-family: var(--font-serif);
     font-size: 1.25rem;
     line-height: 1.6em;
-    color: rgba(0, 0, 0, 0.7);
+    color: var(--ash-700);
     -webkit-font-smoothing: antialiased;
   }
 

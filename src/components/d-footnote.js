@@ -34,7 +34,7 @@ sup {
 }
 
 span {
-  color: hsla(206, 90%, 20%, 0.7);
+  color: var(--ember);
   cursor: default;
 }
 

@@ -1,0 +1,386 @@
+/* ============================================================
+ * p(doom) — Colors & Type tokens
+ * Load this first on any page using the brand.
+ *
+ * Type families: Lora (serif — same family as the wordmark) and
+ * IBM Plex Mono (system / labels / code).
+ *
+ * Icons (substitution): Lucide via CDN — load on pages that
+ * need UI glyphs:
+ *   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+ *   <script>lucide.createIcons();</script>
+ * ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap');
+
+:root {
+  /* -- Substrate / monochrome ramp ----------------------------- */
+  --void:      #0B0B0C;   /* inverted strips (header)    */
+  --ink:       #161514;   /* text on paper               */
+  --paper:     #F7F4EA;   /* primary surface — warm off-white */
+
+  /* warm gray ramp — neutral but lifted toward sand */
+  --ash-900:   #1B1A18;
+  --ash-800:   #2A2825;
+  --ash-700:   #3D3A35;
+  --ash-600:   #5A554C;
+  --ash-500:   #807A6E;
+  --ash-400:   #A39C8E;
+  --ash-300:   #CFC8B8;
+  --ash-200:   #E2DCCC;
+  --ash-100:   #EEE9DA;
+
+  /* -- Accents -------------------------------------------------- */
+  --ember:     #B7361E;   /* the only red. links, focus, doom. */
+  --ember-deep:#7E2010;
+  --ember-bg:  #f6e3df;   /* faint ember tint on paper */
+  --patina:    #5D6E63;   /* oxidized copper — rare */
+  --brass:     #B49254;   /* aged brass — rare highlight */
+
+  /* -- Semantic surfaces (default: paper) ---------------------- */
+  --fg1:       var(--ink);       /* primary text */
+  --fg2:       var(--ash-700);   /* secondary text */
+  --fg3:       var(--ash-600);   /* tertiary, captions */
+  --fg-dim:    var(--ash-500);   /* metadata */
+  --bg1:       var(--paper);
+  --bg2:       var(--ash-100);
+  --bg3:       var(--ash-200);
+  --rule:      var(--ash-300);
+
+  --link:      var(--ember);
+  --link-hover:var(--ember-deep);
+
+  /* -- Type families ------------------------------------------- */
+  --font-serif: 'Lora', 'Adobe Garamond Pro', 'Garamond', Georgia, serif;
+  --font-sans:  'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono:  'IBM Plex Mono', 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+  /* -- Type scale (modular, classical) ------------------------- */
+  --fs-eyebrow: 11px;     /* mono uppercase eyebrow */
+  --fs-caption: 13px;     /* mono caption */
+  --fs-body:    17px;     /* serif body */
+  --fs-lede:    20px;     /* serif larger body / lede */
+  --fs-h4:      22px;
+  --fs-h3:      28px;
+  --fs-h2:      40px;
+  --fs-h1:      64px;
+  --fs-display: 112px;    /* hero, italic */
+
+  /* -- Line heights -------------------------------------------- */
+  --lh-tight:   1.05;
+  --lh-snug:    1.2;
+  --lh-body:    1.55;
+  --lh-loose:   1.75;
+
+  /* -- Spacing scale (4px base) -------------------------------- */
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  24px;
+  --s-6:  32px;
+  --s-7:  48px;
+  --s-8:  64px;
+  --s-9:  96px;
+  --s-10: 128px;
+
+  /* -- Radii (almost none) ------------------------------------- */
+  --r-0: 0;
+  --r-1: 2px;
+  --r-pill: 999px;
+
+  /* -- Measure (line length for long-form) --------------------- */
+  --measure: 68ch;
+
+  /* -- Motion -------------------------------------------------- */
+  --ease-ink: cubic-bezier(0.2, 0.0, 0.0, 1.0);
+  --dur-fast: 160ms;
+  --dur-base: 280ms;
+  --dur-slow: 520ms;
+
+  /* -- Shadow (the one allowed) -------------------------------- */
+  --shadow-bleed: 0 1px 0 var(--ash-800);
+}
+
+/* Inverted (dark) surface override — used for the site header */
+.on-void, [data-surface="void"] {
+  --fg1: var(--paper);
+  --fg2: rgba(255,255,255,0.8);
+  --fg3: rgba(255,255,255,0.6);
+  --fg-dim: rgba(255,255,255,0.4);
+  --bg1: var(--void);
+  --bg2: var(--ash-900);
+  --bg3: var(--ash-800);
+  --rule: rgba(255,255,255,0.1);
+}
+
+/* ============================================================
+ * Base / reset
+ * ============================================================ */
+html, body {
+  background: var(--bg1);
+  color: var(--fg1);
+  font-family: var(--font-serif);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-feature-settings: "kern", "liga", "onum";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+::selection { background: var(--ember); color: var(--paper); }
+
+/* ============================================================
+ * Semantic type classes
+ * ============================================================ */
+
+/* Eyebrow — mono uppercase label that lives above headlines */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--fs-eyebrow);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg3);
+  line-height: 1;
+}
+
+/* Display — hero italic, the brand at full voice */
+.display, h1.display {
+  font-family: var(--font-serif);
+  font-size: var(--fs-display);
+  font-style: italic;
+  font-weight: 500;
+  line-height: var(--lh-tight);
+  letter-spacing: -0.02em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+h1, .h1 {
+  font-family: var(--font-serif);
+  font-size: var(--fs-h1);
+  font-weight: 500;
+  line-height: var(--lh-tight);
+  letter-spacing: -0.015em;
+  margin: 0 0 var(--s-5);
+  text-wrap: balance;
+}
+
+h2, .h2 {
+  font-family: var(--font-serif);
+  font-size: var(--fs-h2);
+  font-weight: 500;
+  line-height: var(--lh-snug);
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--s-4);
+  text-wrap: balance;
+}
+
+h3, .h3 {
+  font-family: var(--font-serif);
+  font-size: var(--fs-h3);
+  font-weight: 500;
+  line-height: var(--lh-snug);
+  margin: 0 0 var(--s-3);
+}
+
+h4, .h4 {
+  font-family: var(--font-serif);
+  font-size: var(--fs-h4);
+  font-weight: 600;
+  line-height: var(--lh-snug);
+  margin: 0 0 var(--s-3);
+}
+
+p, .body {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.65;
+  font-weight: 400;
+  max-width: var(--measure);
+  margin: 0 0 var(--s-4);
+}
+
+.lede {
+  font-family: var(--font-serif);
+  font-size: var(--fs-lede);
+  line-height: var(--lh-body);
+  color: var(--fg2);
+  max-width: var(--measure);
+}
+
+.caption {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--fg3);
+  letter-spacing: 0.02em;
+}
+
+code, .code, kbd, samp, pre {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+
+pre {
+  background: var(--bg2);
+  border: 1px solid var(--rule);
+  padding: var(--s-4) var(--s-5);
+  overflow-x: auto;
+  line-height: var(--lh-body);
+}
+
+blockquote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--fs-lede);
+  line-height: var(--lh-body);
+  padding-left: var(--s-5);
+  border-left: 1px solid var(--rule);
+  color: var(--fg2);
+  margin: var(--s-5) 0;
+  max-width: var(--measure);
+}
+
+a {
+  color: var(--link);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  transition: text-decoration-thickness var(--dur-fast) var(--ease-ink),
+              color var(--dur-fast) var(--ease-ink);
+}
+a:hover {
+  color: var(--link-hover);
+  text-decoration-thickness: 2px;
+}
+
+hr, .rule {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: var(--s-6) 0;
+}
+
+/* ============================================================
+ * Atomic utilities used across the system
+ * ============================================================ */
+
+/* Sigil — small inline mark for nav, footer, etc. */
+.sigil {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  background-image: url('../assets/logo-mark.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  vertical-align: middle;
+}
+[data-surface="void"] .sigil,
+.on-void .sigil {
+  background-image: url('../assets/logo-mark-inverted.png');
+}
+
+/* Wordmark — the locked sigil + serif italic "p(doom)" */
+.wordmark {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.wordmark::before {
+  content: '';
+  display: inline-block;
+  width: 1.1em;
+  height: 1.1em;
+  background-image: url('../assets/logo-mark.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+[data-surface="void"] .wordmark::before,
+.on-void .wordmark::before {
+  background-image: url('../assets/logo-mark-inverted.png');
+}
+
+/* Buttons */
+.btn {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 12px 22px;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--fg1);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: border-color var(--dur-fast) var(--ease-ink),
+              color var(--dur-fast) var(--ease-ink),
+              background var(--dur-fast) var(--ease-ink);
+}
+.btn:hover {
+  border-color: var(--ember);
+  color: var(--ember);
+}
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+.btn-primary:hover {
+  background: var(--ember);
+  border-color: var(--ember);
+  color: var(--paper);
+}
+[data-surface="void"] .btn-primary {
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--paper);
+}
+
+/* Eyebrow + rule combo — used to introduce sections */
+.section-mark {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-bottom: var(--s-5);
+}
+.section-mark::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+
+/* Hairline card */
+.card {
+  border: 1px solid var(--rule);
+  padding: var(--s-5);
+  background: transparent;
+}
+
+/* Status dot (mono glyph, not a div) */
+.dot {
+  font-family: var(--font-mono);
+  display: inline-block;
+  width: 1em;
+  color: var(--ember);
+}
+.dot.brass { color: var(--brass); }
+.dot.patina { color: var(--patina); }
+.dot.dim { color: var(--fg-dim); }
+
+/* Tabular figures — for any numeric tables, scores, dates */
+.tnum { font-variant-numeric: tabular-nums; }

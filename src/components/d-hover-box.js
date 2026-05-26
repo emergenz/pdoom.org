@@ -35,19 +35,16 @@ const T = Template('d-hover-box', `
 
 .panel {
   position: absolute;
-  font-size: 1rem;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
   line-height: 1.5em;
   top: 0;
   left: 0;
   width: 100%;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background-color: rgba(250, 250, 250, 0.95);
-  box-shadow: 0 0 7px rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
+  border: 1px solid var(--ash-300);
+  background-color: var(--paper);
+  border-radius: 0;
   box-sizing: border-box;
-
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
 }
 
 </style>

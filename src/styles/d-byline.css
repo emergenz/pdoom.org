@@ -17,11 +17,13 @@
 d-byline {
   contain: style;
   overflow: hidden;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  font-size: 0.8rem;
-  line-height: 1.8em;
+  border-top: 1px solid var(--ash-300);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  line-height: 1.7em;
   padding: 1.5rem 0;
   min-height: 1.8em;
+  color: var(--ink);
 }
 
 
@@ -49,9 +51,11 @@ d-byline .authors-affiliations {
 }
 
 d-byline h3 {
-  font-size: 0.6rem;
-  font-weight: 400;
-  color: rgba(0, 0, 0, 0.5);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  color: var(--ash-600);
   margin: 0;
   text-transform: uppercase;
 }
@@ -62,18 +66,21 @@ d-byline p {
 
 d-byline a,
 d-article d-byline a {
-  color: rgba(0, 0, 0, 0.8);
+  color: var(--ink);
   text-decoration: none;
   border-bottom: none;
+  transition: color 160ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 d-article d-byline a:hover {
-  text-decoration: underline;
+  color: var(--ember);
+  text-decoration: none;
   border-bottom: none;
 }
 
 d-byline p.author {
   font-weight: 500;
+  color: var(--ink);
 }
 
 d-byline .affiliations {

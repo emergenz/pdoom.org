@@ -19,23 +19,27 @@ const T = Template('d-appendix', `
 
 d-appendix {
   contain: layout style;
-  font-size: 0.8em;
+  font-family: var(--font-sans);
+  font-size: 0.85em;
   line-height: 1.7em;
   margin-top: 60px;
   margin-bottom: 0;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  color: rgba(0,0,0,0.5);
+  border-top: 1px solid var(--ash-300);
+  color: var(--ash-700);
   padding-top: 60px;
   padding-bottom: 48px;
 }
 
 d-appendix h3 {
   grid-column: page-start / text-start;
-  font-size: 15px;
+  font-family: var(--font-mono);
+  font-size: 11px;
   font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   margin-top: 1em;
   margin-bottom: 0;
-  color: rgba(0,0,0,0.65);
+  color: var(--ash-600);
 }
 
 d-appendix h3 + * {
@@ -58,7 +62,17 @@ d-appendix li {
 }
 
 d-appendix a {
-  color: rgba(0, 0, 0, 0.6);
+  color: var(--ash-700);
+  text-decoration: underline;
+  text-decoration-color: var(--ash-400);
+  text-underline-offset: 0.18em;
+  transition: color 160ms cubic-bezier(0.2, 0, 0, 1),
+              text-decoration-color 160ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+d-appendix a:hover {
+  color: var(--ember);
+  text-decoration-color: var(--ember);
 }
 
 d-appendix > * {

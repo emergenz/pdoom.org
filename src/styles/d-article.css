@@ -17,9 +17,10 @@
 d-article {
   contain: layout style;
   overflow-x: hidden;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 1px solid var(--ash-300);
   padding-top: 2rem;
-  color: rgba(0, 0, 0, 0.8);
+  font-family: var(--font-sans);
+  color: var(--ink);
 }
 
 d-article > * {
@@ -49,6 +50,7 @@ d-article .marker {
   counter-reset: section;
   grid-column: kicker;
   line-height: 1.7em;
+  color: var(--ash-600);
 }
 
 d-article .marker:hover {
@@ -57,54 +59,63 @@ d-article .marker:hover {
 
 d-article .marker span {
   padding: 0 3px 4px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--ash-400);
   position: relative;
   top: 4px;
 }
 
 d-article .marker:hover span {
-  color: rgba(0, 0, 0, 0.7);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.7);
+  color: var(--ember);
+  border-bottom: 1px solid var(--ember);
 }
 
 d-article h2 {
-  font-weight: 600;
-  font-size: 24px;
-  line-height: 1.25em;
-  margin: 2rem 0 1.5rem 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 28px;
+  line-height: 1.2em;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 2.5rem 0 1.5rem 0;
+  border-bottom: 1px solid var(--ash-300);
   padding-bottom: 1rem;
 }
 
 @media(min-width: 1024px) {
   d-article h2 {
-    font-size: 36px;
+    font-size: 40px;
   }
 }
 
 /* H3 */
 
 d-article h3 {
-  font-weight: 700;
-  font-size: 18px;
-  line-height: 1.4em;
-  margin-bottom: 1em;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.3em;
+  color: var(--ink);
+  margin-bottom: 0.75em;
   margin-top: 2em;
 }
 
 @media(min-width: 1024px) {
   d-article h3 {
-    font-size: 20px;
+    font-size: 24px;
   }
 }
 
 /* H4 */
 
 d-article h4 {
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-weight: 500;
   text-transform: uppercase;
-  font-size: 14px;
+  letter-spacing: 0.14em;
+  font-size: 12px;
   line-height: 1.4em;
+  color: var(--ash-700);
+  margin-top: 1.5em;
 }
 
 d-article a {
@@ -122,19 +133,25 @@ d-article blockquote {
 }
 
 d-article blockquote {
-  border-left: 2px solid rgba(0, 0, 0, 0.2);
-  padding-left: 2em;
+  border-left: 1px solid var(--ash-400);
+  padding-left: 1.5em;
+  font-family: var(--font-serif);
   font-style: italic;
-  color: rgba(0, 0, 0, 0.6);
+  font-size: 1.1em;
+  color: var(--ash-700);
 }
 
 d-article a {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  color: var(--ember);
+  border-bottom: 1px solid var(--ember);
   text-decoration: none;
+  transition: color 160ms cubic-bezier(0.2, 0, 0, 1),
+              border-color 160ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 d-article a:hover {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.8);
+  color: var(--ember-deep);
+  border-bottom: 1px solid var(--ember-deep);
 }
 
 d-article .link {
@@ -157,8 +174,16 @@ d-article li:last-child {
   margin-bottom: 0;
 }
 
-d-article pre {
+d-article pre,
+d-article code {
+  font-family: var(--font-mono);
   font-size: 14px;
+}
+
+d-article pre {
+  background: var(--ash-100);
+  border: 1px solid var(--ash-300);
+  padding: 16px 20px;
   margin-bottom: 20px;
 }
 
@@ -166,7 +191,7 @@ d-article hr {
   grid-column: screen;
   width: 100%;
   border: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--ash-300);
   margin-top: 60px;
   margin-bottom: 60px;
 }
@@ -211,7 +236,7 @@ d-article section > d-math[block]  {
 }
 
 d-article .citation {
-  color: #668;
+  color: var(--ember);
   cursor: pointer;
 }
 
@@ -236,15 +261,20 @@ d-figure {
 d-article table {
   border-collapse: collapse;
   margin-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--ash-400);
 }
 
 d-article table th {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--ash-400);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ash-700);
 }
 
 d-article table td {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid var(--ash-200);
 }
 
 d-article table tr:last-of-type td {

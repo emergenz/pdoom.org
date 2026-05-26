@@ -1,0 +1,467 @@
+/* p(doom) — marketing site styles
+ * Layered on top of ../../colors_and_type.css */
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main { display: block; flex: 1 0 auto; }
+
+.container {
+  max-width: 1200px;
+  padding: 0 48px;
+  margin: 0 auto;
+}
+
+/* ===== Header (dark, hairline-bordered) ====================== */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--void);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.site-header .nav {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: rgba(255,255,255,0.95);
+}
+.brand .sigil-img {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+.brand .wm {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 20px;
+  letter-spacing: -.01em;
+  line-height: 1;
+}
+.nav-links {
+  display: flex;
+  gap: 32px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  margin-left: auto;
+}
+.nav-links a {
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-ink);
+}
+.nav-links a:hover { color: var(--ember); }
+
+/* ===== Section transitions ==================================== */
+/* (Removed — momentum lives between release groups, not at
+ * header/footer boundaries.) */
+
+/* ===== Hero ================================================== */
+.hero {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 80px;
+  align-items: center;
+  padding: 96px 48px 120px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.hero-left { padding-right: 24px; }
+
+/* Manifesto sets the hero — Lora italic at display scale.
+   .display class supplies the family/size/style; this adds the
+   hero-specific letterspacing and width cap so the line breaks
+   land where they should. */
+h1.hero-manifesto.display {
+  /* Sized so "turning sand" fits the hero's left column on one line.
+     Measured at the design viewport: needs ~85% of --fs-display. */
+  font-size: calc(var(--fs-display) * 0.85);
+  letter-spacing: -0.025em;
+  /* Override .display's text-wrap: balance — manifesto uses explicit <br>s,
+     and the balancer was redistributing lines so "turning" landed alone. */
+  text-wrap: nowrap;
+  color: var(--ink);
+}
+
+/* ===== Booklet (unframed release composition) ================ */
+.booklet {
+  display: block;
+  text-decoration: none;
+  color: var(--ink);
+  width: 100%;
+  max-width: 460px;
+  transition: color var(--dur-fast) var(--ease-ink);
+}
+.booklet--md { max-width: 460px; }
+.booklet:hover .booklet-title { color: var(--ember); }
+.booklet:hover .booklet-foot { color: var(--ember); }
+.booklet-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.booklet-no { color: var(--ink); font-weight: 600; }
+.booklet-rule {
+  flex: 1 1 0;
+  min-width: 24px;
+  display: block;
+  height: 1px;
+  background: var(--ash-500);
+  align-self: center;
+}
+.booklet-date { color: var(--ash-600); font-weight: 400; }
+.booklet-figure { margin: 0 0 22px; display: flex; flex-direction: column; }
+.booklet-media {
+  position: relative;
+  overflow: hidden;
+  /* Frame steps one direction only: matte one step deeper than the band,
+     borders one step deeper than the matte. Defaults below cover the hero
+     (sits on --paper). Bands override on .releases-band--*. */
+  --booklet-matte: var(--ash-100);
+  --booklet-frame: var(--ash-200);
+  background: var(--booklet-matte);
+  padding: 8px 8px 8px;
+  aspect-ratio: 16 / 10;
+  border: 1px solid var(--booklet-frame);
+  box-sizing: border-box;
+}
+.booklet-media::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 1px solid var(--booklet-frame);
+  pointer-events: none;
+  z-index: 1;
+}
+.booklet-media video,
+.booklet-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.booklet-rec {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 7px;
+  background: rgba(11,11,12,0.72);
+  color: var(--paper);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.booklet-rec-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ember);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.2);
+  animation: rec-pulse 1.6s var(--ease-ink) infinite;
+}
+@keyframes rec-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+.booklet-caption {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ash-600);
+}
+.booklet-fig {
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: .14em;
+  flex: 0 0 auto;
+}
+.booklet-cap-rule {
+  width: 18px;
+  height: 1px;
+  background: var(--ash-400);
+  flex: 0 0 auto;
+}
+.booklet-cap-text {
+  letter-spacing: .04em;
+  text-transform: none;
+  font-family: var(--font-serif);
+  font-size: 13px;
+  color: var(--ash-700);
+}
+.booklet-title {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 30px;
+  line-height: 1.1;
+  letter-spacing: -.02em;
+  margin: 0 0 22px;
+  color: var(--ink);
+  text-wrap: pretty;
+  transition: color var(--dur-fast) var(--ease-ink);
+}
+.booklet--md .booklet-title { font-size: 26px; }
+.booklet-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ash-700);
+  transition: color var(--dur-fast) var(--ease-ink);
+}
+.booklet-foot span[aria-hidden] { font-size: 14px; }
+
+/* ===== Release list ========================================== */
+/* The research index descends across four warm-paper substrates.
+ * Hero is on --paper; the first release already lands somewhere
+ * different (--ash-100). Each subsequent release drops a band
+ * deeper. We never reach --void here — the archive stays paper. */
+.releases-head-wrap {
+  background: var(--paper);
+}
+.releases-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 64px 48px 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.releases-head .eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ash-600);
+}
+.releases-head::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(0,0,0,0.15);
+}
+
+.releases-band--ash-100 { background: var(--ash-100); }
+.releases-band--ash-200 { background: var(--ash-200); }
+.releases-band--ash-300 { background: var(--ash-300); }
+.releases-band--ash-400 { background: var(--ash-400); }
+
+/* Booklet frame tracks the substrate, always going darker:
+   matte = band + 1 step, borders = matte + 1 step. Single direction so
+   the rule is consistent from the hero through every band. */
+.releases-band--ash-100 .booklet-media { --booklet-matte: var(--ash-200); --booklet-frame: var(--ash-300); }
+.releases-band--ash-200 .booklet-media { --booklet-matte: var(--ash-300); --booklet-frame: var(--ash-400); }
+.releases-band--ash-300 .booklet-media { --booklet-matte: var(--ash-400); --booklet-frame: var(--ash-500); }
+.releases-band--ash-400 .booklet-media { --booklet-matte: var(--ash-500); --booklet-frame: var(--ash-600); }
+
+/* The strata: a decorative step-ramp descent into the archive.
+ * Sits below the visible releases, hard-cuts the page from
+ * ash-400 down to ash-900, then meets --void at the footer. */
+.release-strata {
+  display: grid;
+  grid-template-rows: repeat(5, 32px);
+}
+.stratum { width: 100%; height: 100%; }
+
+/* Hairlines: a single ink-tinted rule reads consistently across
+ * all four warm-paper substrates. (Per-band rule tuning was too
+ * fragile — the rule disappeared on mid-tone bands.) */
+.releases-band { --rule: rgba(22,21,20,0.55); }
+
+.release {
+  padding: 88px 0;
+}
+.release-inner {
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: 80px;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+.releases-band:nth-child(even) .release-desc { order: 2; }
+.releases-band:nth-child(even) .release-art { order: 1; justify-content: flex-start; }
+.release-desc { display: flex; flex-direction: column; gap: 22px; }
+
+.release-sub {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 44px;
+  line-height: 1.05;
+  letter-spacing: -.02em;
+  color: var(--ink);
+  margin: 0;
+  text-wrap: balance;
+}
+.release-body {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ash-700);
+  margin: 0;
+  max-width: 50ch;
+}
+.release-authors {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: .04em;
+  color: var(--ash-700);
+}
+.release-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ember);
+  text-decoration: none;
+  margin-top: 6px;
+  align-self: flex-start;
+  padding-top: 20px;
+  border-top: 1px solid var(--rule);
+  width: 240px;
+  justify-content: space-between;
+  transition: color var(--dur-fast) var(--ease-ink);
+}
+.release-link span[aria-hidden] { font-size: 14px; }
+.release-link:hover { color: var(--ember-deep); }
+.release-art { display: flex; justify-content: flex-end; }
+
+.releases-foot {
+  padding: 20px 0 22px;
+  display: flex;
+  justify-content: center;
+}
+.releases-foot .release-link {
+  border-top: 0;
+  padding-top: 0;
+  width: auto;
+}
+.releases-foot .release-link span[aria-hidden] { margin-left: 14px; }
+
+.releases-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 64px 48px 0;
+  max-width: 1200px;
+  margin: 0 auto 8px;
+}
+.releases-head .eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ash-600);
+}
+.releases-head::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+.release {
+  padding: 88px 0;
+}
+.releases--paper > .release { border-top: 1px solid var(--rule); }
+.releases--paper > .release:first-of-type { border-top: 0; padding-top: 24px; }
+
+/* ===== Footer (dark, single hairline row) ==================== */
+.site-footer {
+  background: var(--void);
+  padding: 0;
+}
+.footer-row {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+.site-footer .brand { color: rgba(255,255,255,0.95); }
+.site-footer .brand .wm { font-size: 20px; }
+.site-footer .brand .sigil-img { width: 28px; height: 28px; }
+.footer-links {
+  display: flex;
+  gap: 28px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  margin-left: auto;
+}
+.footer-links a {
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-ink);
+}
+.footer-links a:hover { color: var(--ember); }
+
+/* ===== Responsive (light touch) ============================== */
+@media (max-width: 960px) {
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 56px 32px 80px;
+    gap: 48px;
+  }
+  .hero-right { justify-content: flex-start; }
+  .release-inner {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 0 32px;
+  }
+  .release { padding: 48px 0; }
+  .release-sub { font-size: 32px; }
+  .container { padding: 0 32px; }
+  .site-header .nav { height: 60px; }
+  .nav-links { gap: 18px; }
+  .footer-row { flex-direction: column; gap: 16px; align-items: flex-start; padding: 20px 0; height: auto; }
+  .footer-links { margin-left: 0; flex-wrap: wrap; gap: 18px; }
+}

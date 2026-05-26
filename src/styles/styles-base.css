@@ -14,16 +14,38 @@
  * limitations under the License.
  */
 
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap');
+
+:root {
+  --void:      #0B0B0C;
+  --ink:       #161514;
+  --paper:     #F7F4EA;
+  --ash-900:   #1B1A18;
+  --ash-800:   #2A2825;
+  --ash-700:   #3D3A35;
+  --ash-600:   #5A554C;
+  --ash-500:   #807A6E;
+  --ash-400:   #A39C8E;
+  --ash-300:   #CFC8B8;
+  --ash-200:   #E2DCCC;
+  --ash-100:   #EEE9DA;
+  --ember:     #B7361E;
+  --ember-deep:#7E2010;
+  --font-serif: 'Lora', 'Adobe Garamond Pro', 'Garamond', Georgia, serif;
+  --font-sans:  'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono:  'IBM Plex Mono', 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+}
+
 html {
   font-size: 14px;
 	line-height: 1.6em;
-  /* font-family: "Libre Franklin", "Helvetica Neue", sans-serif; */
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
-  /*, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";*/
+  font-family: var(--font-sans);
   text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
   scrollbar-gutter: stable;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 @media(min-width: 768px) {
@@ -34,12 +56,17 @@ html {
 
 body {
   margin: 0;
-  overflow-y: scroll; /* Reserve scrollbar space to avoid horizontal shift */
-  background: #fff;
+  overflow-y: scroll;
+  background: var(--paper);
+  color: var(--ink);
 }
 
+*, *::before, *::after { box-sizing: border-box; }
+
+::selection { background: var(--ember); color: var(--paper); }
+
 a {
-  color: #1a1a1a;
+  color: var(--ink);
 }
 
 figure {
@@ -56,7 +83,7 @@ table th {
 }
 
 table thead {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid var(--ash-300);
 }
 
 table thead th {
@@ -90,9 +117,11 @@ sub {
 
 .kicker,
 .marker {
-  font-size: 15px;
-  font-weight: 600;
-  color: rgba(0, 0, 0, 0.5);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ash-600);
 }
 
 
@@ -126,9 +155,11 @@ figure svg tspan {
 
 figcaption,
 .figcaption {
-  color: rgba(0, 0, 0, 0.6);
+  font-family: var(--font-mono);
+  color: var(--ash-600);
   font-size: 12px;
   line-height: 1.5em;
+  letter-spacing: 0.02em;
 }
 
 @media(min-width: 1024px) {
@@ -139,19 +170,18 @@ figcaption,
 }
 
 figure.external img {
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  background: var(--paper);
+  border: 1px solid var(--ash-300);
   padding: 18px;
   box-sizing: border-box;
 }
 
 figcaption a {
-  color: rgba(0, 0, 0, 0.6);
+  color: var(--ash-600);
 }
 
 figcaption b,
 figcaption strong, {
   font-weight: 600;
-  color: rgba(0, 0, 0, 1.0);
+  color: var(--ink);
 }

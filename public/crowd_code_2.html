@@ -20,10 +20,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="utf8">
   <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="stylesheet" href="marketing.css">
 </head>
 
 <body>
-  <!--
+    <header class="site-header" data-surface="void">
+    <div class="container">
+      <nav class="nav">
+        <a class="brand" href="/">
+          <img class="sigil-img" src="logo-mark-inverted.png" alt="">
+          <span class="wm">p(doom)</span>
+        </a>
+        <div class="nav-links">
+          <a href="/blog.html">Research</a>
+          <a href="/about.html">About</a>
+          <a href="/supply.html">Supply</a>
+          <a href="https://discord.gg/G4JNuPX2VR">Join</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+<!--
   <distill-header></distill-header>
   -->
   <d-front-matter>
@@ -80,8 +97,8 @@
       <strong>Install crowd-code 2.0 on <a href="cursor:extension/p-doom.crowd-code" target="_blank" style="color: #0000ee;">Cursor</a>, <a href="vscode:extension/p-doom.crowd-code" target="_blank" style="color: #0000ee;">VS Code</a>, and <a href="antigravity:extension/p-doom.crowd-code" target="_blank" style="color: #0000ee;">Antigravity</a> </strong>
     </p>
     <figure style="grid-column: page; margin: 1rem 0; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center"><video src="cc2_0_1.mp4"
-    style="width: calc(50% - 0.5rem); min-width: 280px; border-radius: 8px; border: 1px solid #000; box-sizing: border-box;" controls autoplay loop muted></video><video src="cc2_0_2.mp4"
-    style="width: calc(50% - 0.5rem); min-width: 280px; border-radius: 8px; border: 1px solid #000; box-sizing: border-box;" controls autoplay loop muted></video></figure>
+    style="width: calc(50% - 0.5rem); min-width: 280px; border-radius: 8px; border: 1px solid var(--ink); box-sizing: border-box;" controls autoplay loop muted></video><video src="cc2_0_2.mp4"
+    style="width: calc(50% - 0.5rem); min-width: 280px; border-radius: 8px; border: 1px solid var(--ink); box-sizing: border-box;" controls autoplay loop muted></video></figure>
     <figcaption style="grid-column: page; text-align: center; margin-bottom: 2rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Figure 1: crowd-code 2.0 in action.</figcaption>
     <a class="marker" href="#section-1" id="section-1"><span>1</span></a>
     <h2>You Get What You Train</h2>
@@ -318,6 +335,23 @@ NameError: name 'tyro' is not defined</code></pre>
     </distill-appendix>
   </d-appendix>
 
-  <distill-footer></distill-footer>
 
+  <footer class="site-footer" data-surface="void">
+    <div class="container">
+      <div class="footer-row">
+        <a class="brand" href="/">
+          <img class="sigil-img" src="logo-mark-inverted.png" alt="">
+          <span class="wm">p(doom)</span>
+        </a>
+        <nav class="footer-links">
+          <a href="https://github.com/p-doom/">GitHub</a>
+          <a href="https://discord.gg/G4JNuPX2VR">Discord</a>
+          <a href="https://x.com/@prob_doom">Twitter</a>
+          <a href="https://www.linkedin.com/company/p-doom">LinkedIn</a>
+          <a href="https://huggingface.co/p-doom">HuggingFace</a>
+          <a href="/imprint.html">Imprint</a>
+        </nav>
+      </div>
+    </div>
+  </footer>
 </body>

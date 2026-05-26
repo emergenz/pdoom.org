@@ -25,15 +25,15 @@ const T = Template(
 }
 
 .citation {
-  color: hsla(206, 90%, 20%, 0.7);
+  color: var(--ember);
 }
 
 .citation-number {
   cursor: default;
   white-space: nowrap;
-  font-family: -apple-system, BlinkMacSystemFont, "Roboto", Helvetica, sans-serif;
+  font-family: var(--font-mono);
   font-size: 75%;
-  color: hsla(206, 90%, 20%, 0.7);
+  color: var(--ember);
   display: inline-block;
   line-height: 1.1em;
   text-align: center;
@@ -57,7 +57,7 @@ ul {
 
 ul li {
   padding: 15px 10px 15px 10px;
-  border-bottom: 1px solid rgba(0,0,0,0.1)
+  border-bottom: 1px solid var(--ash-300);
 }
 
 ul li:last-of-type {
