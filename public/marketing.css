@@ -444,14 +444,22 @@ h1.hero-manifesto.display {
 }
 .footer-links a:hover { color: var(--ember); }
 
-/* ===== Responsive (light touch) ============================== */
+/* ===== Responsive ============================================ */
 @media (max-width: 960px) {
   .hero {
     grid-template-columns: 1fr;
     padding: 56px 32px 80px;
     gap: 48px;
   }
+  h1.hero-manifesto.display {
+    font-size: clamp(56px, 12vw, 96px);
+  }
   .hero-right { justify-content: flex-start; }
+  .hero-left { padding-right: 0; }
+  .booklet,
+  .booklet--lg,
+  .booklet--md { max-width: 100%; }
+  .booklet-title { font-size: 26px; }
   .release-inner {
     grid-template-columns: 1fr;
     gap: 32px;
@@ -459,9 +467,34 @@ h1.hero-manifesto.display {
   }
   .release { padding: 48px 0; }
   .release-sub { font-size: 32px; }
-  .container { padding: 0 32px; }
+  .release-link { width: 100%; }
+  .container { padding: 0 24px; }
   .site-header .nav { height: 60px; }
   .nav-links { gap: 18px; }
   .footer-row { flex-direction: column; gap: 16px; align-items: flex-start; padding: 20px 0; height: auto; }
   .footer-links { margin-left: 0; flex-wrap: wrap; gap: 18px; }
+  .releases-head { padding-left: 32px; padding-right: 32px; }
+}
+
+@media (max-width: 600px) {
+  .hero {
+    padding: 40px 20px 56px;
+    gap: 36px;
+  }
+  h1.hero-manifesto.display {
+    font-size: clamp(44px, 14vw, 72px);
+    letter-spacing: -0.02em;
+  }
+  .booklet-title { font-size: 22px; }
+  .booklet-meta { font-size: 10px; gap: 10px; }
+  .release-inner { padding: 0 20px; gap: 24px; }
+  .release { padding: 36px 0; }
+  .release-sub { font-size: 26px; }
+  .release-body { font-size: 15px; }
+  .container { padding: 0 20px; }
+  .releases-head { padding: 40px 20px 24px; }
+  .brand .wm { font-size: 18px; }
+  .brand .sigil-img { width: 24px; height: 24px; }
+  .nav-links { gap: 14px; font-size: 10px; }
+  .footer-links { gap: 14px; font-size: 10px; }
 }
