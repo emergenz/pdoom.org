@@ -66,6 +66,9 @@
             object-fit: cover;
             display: block;
         }
+        .product-card-image .default-img {
+            transition: opacity var(--dur-base) var(--ease-ink);
+        }
         .product-card-image .hover-img {
             position: absolute;
             inset: 8px;
@@ -73,6 +76,10 @@
             height: calc(100% - 16px);
             opacity: 0;
             transition: opacity var(--dur-base) var(--ease-ink);
+        }
+        .product-card:hover .default-img,
+        .product-card:focus-visible .default-img {
+            opacity: 0;
         }
         .product-card:hover .hover-img,
         .product-card:focus-visible .hover-img {
@@ -245,6 +252,7 @@
         @media (prefers-reduced-motion: reduce) {
             .product-card,
             .product-card-image,
+            .product-card-image .default-img,
             .product-card-image .hover-img { transition: none; }
             .product-card.wiggle .product-card-image { animation: none; }
         }
