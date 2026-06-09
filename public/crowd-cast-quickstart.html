@@ -91,7 +91,7 @@
             font-size: 16px;
             line-height: 1.7;
             color: var(--ash-700);
-            max-width: 58ch;
+            max-width: none;
         }
         .steps > li::before {
             content: counter(step);
@@ -121,7 +121,7 @@
             font-size: 15px;
             line-height: 1.65;
             color: var(--ash-700);
-            max-width: 58ch;
+            max-width: none;
         }
         .callout--warn {
             background: #fef6e4;
@@ -155,7 +155,7 @@
             grid-template-columns: auto 1fr;
             gap: 8px 20px;
             margin: var(--s-5) 0;
-            max-width: 58ch;
+            max-width: none;
         }
         .tray-grid dt {
             font-family: var(--font-sans);
@@ -171,7 +171,7 @@
         }
 
         /* Troubleshooting */
-        .ts-item { margin-bottom: var(--s-6); max-width: 58ch; }
+        .ts-item { margin-bottom: var(--s-6); }
         .ts-item summary {
             font-family: var(--font-sans);
             font-weight: 600;
@@ -329,13 +329,13 @@
             </div>
 
             <!-- ==================== Common sections ==================== -->
-            <div class="callout callout--info" style="max-width:58ch; margin-bottom:var(--s-9);">
+            <div class="callout callout--info" style="margin-bottom:var(--s-9);">
                 <strong>How we use it:</strong> We record one browser (e.g. Firefox) for research, a text editor (e.g. Cursor), a terminal (e.g. Ghostty), and a PDF viewer (e.g. Preview). We use a <em>separate</em> browser (e.g. Chrome) for sensitive things like email, messaging, and contracts. That browser is simply not in the list, so it never gets recorded. When you switch to an app that isn't selected, crowd-cast captures a black screen and stops logging input. The more apps you record, the more useful the data, so add anything you're comfortable sharing. We found this setup covers the majority of the working day while keeping anything private completely out of the recording.
             </div>
 
             <section class="qs-section">
                 <h2>Using crowd-cast</h2>
-                <p style="font-family:var(--font-sans); font-size:16px; line-height:1.7; color:var(--ash-700); max-width:58ch; margin:0 0 var(--s-5);">
+                <p style="font-family:var(--font-sans); font-size:16px; line-height:1.7; color:var(--ash-700); margin:0 0 var(--s-5); text-wrap:nowrap;">
                     Everything is controlled from the tray icon in your menu bar (macOS) or system tray (Windows).
                 </p>
 
@@ -363,11 +363,11 @@
 
             <section class="qs-section">
                 <h2>Learn more</h2>
-                <p style="font-family:var(--font-sans); font-size:16px; line-height:1.7; color:var(--ash-700); max-width:58ch; margin:0 0 var(--s-5);">
+                <p style="font-family:var(--font-sans); font-size:16px; line-height:1.7; color:var(--ash-700); margin:0 0 var(--s-5);">
                     <a href="https://pdoom.org/crowd_cast.html" style="color:var(--ember);">crowd-cast: Crowd-Sourcing Months-Long Trajectories of Human Computer Work</a><br>
                     <span style="font-size:14px; color:var(--ash-600);">The research behind the project and how the data is used.</span>
                 </p>
-                <p style="font-family:var(--font-sans); font-size:16px; line-height:1.7; color:var(--ash-700); max-width:58ch; margin:0 0 var(--s-5);">
+                <p style="font-family:var(--font-sans); font-size:16px; line-height:1.7; color:var(--ash-700); margin:0 0 var(--s-5);">
                     <a href="https://pdoom.org/crowd_cast_dashboard.html" style="color:var(--ember);">Dashboard</a><br>
                     <span style="font-size:14px; color:var(--ash-600);">See your contributions and overall collection progress.</span>
                 </p>
@@ -417,7 +417,7 @@
                     <p><strong>Windows:</strong> Open <strong>Settings &rarr; Apps &rarr; Installed apps</strong>, find crowd-cast, and click Uninstall. The uninstaller stops the agent, removes the autostart entry, and deletes the install directory.</p>
                 </details>
 
-                <p style="font-family:var(--font-sans); font-size:15px; line-height:1.65; color:var(--ash-600); max-width:58ch; margin-top:var(--s-7);">
+                <p style="font-family:var(--font-sans); font-size:15px; line-height:1.65; color:var(--ash-600); margin-top:var(--s-7);">
                     Running into something not listed here? <a href="https://github.com/p-doom/crowd-cast/issues" style="color:var(--ember);">Open an issue</a> or email <a href="mailto:mihir@pdoom.org" style="color:var(--ember);">mihir@pdoom.org</a>.
                 </p>
             </section>
