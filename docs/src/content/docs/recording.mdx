@@ -1,0 +1,63 @@
+---
+title: Recording & capture
+description: "How crowd-cast decides what to record: follow-focus, segments, idle detection and video quality."
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+crowd-cast records the apps you selected during setup and nothing else. This
+page explains exactly how that works.
+
+## Follow-focus: only the selected app, only when it's in front
+
+crowd-cast continuously tracks which application is in the foreground (checking
+about ten times a second). Based on that:
+
+- If the foreground app **is** in your recorded list, crowd-cast captures it and
+  logs your keyboard and mouse input.
+- If the foreground app is **not** in your list, the video switches to a **blank
+  (black) screen** and **input logging stops**. Nothing from that app is
+  recorded.
+
+So switching to an app you didn't select automatically pauses meaningful
+capture, and switching back resumes it. This is the core of crowd-cast's
+[privacy model](/docs/crowd-cast/privacy/).
+
+<Aside type="note" title="One app at a time (macOS)">
+  On macOS, crowd-cast keeps only the foreground target app's capture source
+  active at a time, switching as you move between your selected apps. This
+  avoids running redundant capture for windows you're not looking at.
+</Aside>
+
+## Segments
+
+Recordings are split into **segments** (5 minutes each by default). Each finished
+segment (a video file plus its input-event log) is uploaded on its own. This
+is also why **Settings** changes take effect on the *next* segment rather than
+mid-recording.
+
+## Idle detection
+
+If there's **no keyboard or mouse activity for 2 minutes**, crowd-cast
+automatically **pauses** both video and input. The status shows *Idle
+(paused)*. As soon as you move the mouse or press a key, it resumes. **No data
+is recorded while you're idle**, so stepping away from your desk never gets
+captured.
+
+## What gets captured
+
+- **Video** of the selected app's window, encoded efficiently (HEVC/H.265 with
+  hardware acceleration where available, downscaled to 1080p, 30 fps). Audio is
+  **not** recorded.
+- **Input events**: key presses/releases and mouse movement, clicks and scroll,
+  each timestamped, but only while a selected app is in the foreground.
+
+For the full picture of what is and isn't collected, and how to keep things
+private, see [Privacy & data](/docs/crowd-cast/privacy/).
+
+## Reliability
+
+The capture engine is watched by a watchdog: if the underlying capture call
+stalls, crowd-cast restarts itself cleanly to recover rather than sitting in a
+broken state. You may occasionally see the tray icon briefly disappear and
+reappear when this happens.

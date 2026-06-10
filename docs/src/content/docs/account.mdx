@@ -1,0 +1,49 @@
+---
+title: Account, uploads & dashboard
+description: Signing in with Google, how uploads work, and seeing your contributions on the dashboard.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Signing in
+
+crowd-cast signs you in with **Google** (from **Sign in with Google** in the
+[tray menu](/docs/crowd-cast/tray/#sign-in-with-google--sign-out), or during
+first-run setup). Signing in opens your browser, you approve access, and you're
+done.
+
+Signing in links your uploaded recordings to your account so your contributions
+can be **attributed to you** on the dashboard. If you don't sign in, recordings
+can't be linked to you and won't show up on the dashboard.
+
+**Sign out** from the tray menu removes your local sign-in. (To fully revoke
+access, also remove crowd-cast from your Google account's security settings.)
+
+## How uploads work
+
+Finished [segments](/docs/crowd-cast/recording/#segments) upload in the background as
+they complete, a couple at a time. While a segment is uploading the tray shows
+*Uploading …*.
+
+- Segments are stored **locally until they upload successfully**, then removed.
+- If an upload fails (no connection, server hiccup), it's **retried
+  automatically with exponential backoff** (from about 30 seconds up to 2 hours),
+  so you don't have to do anything.
+- You can **[Pause Uploads](/docs/crowd-cast/tray/#pause-uploads--resume-uploads)**
+  from the tray to hold completed segments on disk (handy on a metered
+  connection), and **Resume** later. Recording keeps going either way.
+
+<Aside type="tip">
+  If uploads seem stuck, check your connection and make sure uploads aren't
+  paused. More in [troubleshooting](/docs/crowd-cast/troubleshooting/#uploads-are-failing).
+</Aside>
+
+## The dashboard
+
+The **[dashboard](https://pdoom.org/crowd_cast_dashboard.html)** shows your
+contributions and the overall collection progress. It updates roughly **once an
+hour**, so freshly recorded data won't appear instantly.
+
+If your recordings still aren't showing up after an hour, try signing out and
+back in from the tray menu. See
+[troubleshooting](/docs/crowd-cast/troubleshooting/#i-signed-in-but-cant-see-my-recordings).

@@ -1,0 +1,77 @@
+---
+title: The tray menu
+description: Every control in the crowd-cast menu-bar / system-tray menu and what it does.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Everything in crowd-cast is controlled from its icon, in the **menu bar** on
+macOS, or the **system tray** on Windows and Linux. Click the icon to open the
+menu.
+
+<Aside type="note" title="Linux tray">
+  On Linux the tray uses the freedesktop **StatusNotifierItem** protocol, which
+  only appears if your desktop runs a compatible host. Notably it works under
+  **waybar** but **not swaybar**. See [Linux → System tray](/docs/crowd-cast/linux/#system-tray).
+</Aside>
+
+## Status
+
+The top of the menu shows the current status (it's a display line, not a
+button). You'll see one of:
+
+| Status | Meaning |
+| --- | --- |
+| **Idle** | Not currently recording. |
+| **Capturing (N events)** | Recording; `N` input events captured in the current segment. |
+| **Idle (paused)** | Auto-paused because you stepped away. Resumes on activity. |
+| **Recording (no capture sources)** | Recording was requested but nothing can be captured, usually a missing Screen Recording permission (macOS). See [troubleshooting](/docs/crowd-cast/troubleshooting/#recording-shows-no-capture-sources). |
+| **Waiting for OBS…** | The capture engine is still starting up. |
+| **Uploading …** | A finished segment is being uploaded. |
+| **Error: …** | Something went wrong; the message gives the reason. |
+
+When you're signed in, the menu also shows **Signed in as &lt;your email&gt;**.
+
+## Controls
+
+### Start / Stop Recording
+
+Starts or stops recording. A **green** tray icon means recording is active.
+Recording also starts automatically when the app launches (you don't normally
+need to press Start).
+
+### Delete last 10 minutes
+
+The **panic button**. If you accidentally recorded something sensitive, this
+discards recent recording from the current session that hasn't been uploaded
+yet, then resumes recording. Use it whenever you want recent footage gone.
+
+### Pause Uploads / Resume Uploads
+
+Temporarily holds completed segments **on disk** instead of uploading them.
+Click again to resume. This is useful on a metered or slow connection. The
+pause state is remembered across restarts. (Recording continues regardless;
+this only affects uploading.)
+
+### Settings
+
+Opens settings, where you can change **which apps are recorded**. Changes take
+effect on the **next segment** (the current 5-minute segment finishes with the
+old selection). For everything that lives in the config file, see
+[Configuration](/docs/crowd-cast/configuration/).
+
+### Sign in with Google / Sign out
+
+Signs you in (or out). Signing in links your recordings to your account on the
+[dashboard](https://pdoom.org/crowd_cast_dashboard.html). See
+[Account, uploads & dashboard](/docs/crowd-cast/account/).
+
+### Check for Updates
+
+Checks for and installs a newer version. On macOS this uses Sparkle; updates
+also install automatically in the background.
+
+### Quit
+
+Stops recording and exits the agent. (Because crowd-cast normally starts at
+login, it'll be back next time you log in unless you also disable start-at-login.)

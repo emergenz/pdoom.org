@@ -1,0 +1,61 @@
+---
+title: Overview
+description: Crowd-sourcing months-long trajectories of human computer work. Install, configure and run the crowd-cast recording agent.
+---
+
+import { Card, CardGrid, LinkButton, Aside, Steps } from '@astrojs/starlight/components';
+
+**crowd-cast** is a desktop agent that records paired **screencast video** and
+**keyboard/mouse input** for the applications you choose, building an open
+dataset of real human computer work for research. It runs quietly in your menu
+bar (macOS) or system tray, captures only the apps you select, pauses when you
+step away, and uploads finished segments in the background.
+
+It's a single binary with [libobs](https://github.com/obsproject/obs-studio)
+embedded, so there's nothing else to install.
+
+<LinkButton href="/docs/crowd-cast/install/">Install crowd-cast</LinkButton>
+<LinkButton href="/docs/crowd-cast/setup/" variant="secondary">First-run setup</LinkButton>
+
+## Get crowd-cast running in under five minutes
+
+<Steps>
+
+1. [Install](/docs/crowd-cast/install/) the app for your platform.
+2. Walk through the [first-run setup](/docs/crowd-cast/setup/): grant permissions, pick the apps to record, and sign in.
+3. You're recording. Manage everything from [the tray menu](/docs/crowd-cast/tray/).
+
+</Steps>
+
+## Find your way around
+
+<CardGrid>
+  <Card title="Install & set up">
+    [Install crowd-cast](/docs/crowd-cast/install/) on macOS, Windows or
+    [Linux](/docs/crowd-cast/linux/), then run the [first-run setup](/docs/crowd-cast/setup/).
+  </Card>
+  <Card title="Use it day to day">
+    Learn [the tray menu](/docs/crowd-cast/tray/), how
+    [recording & follow-focus](/docs/crowd-cast/recording/) work, and how to manage
+    [your account and uploads](/docs/crowd-cast/account/).
+  </Card>
+  <Card title="Stay in control of your data">
+    See exactly [what is and isn't captured](/docs/crowd-cast/privacy/) and how to
+    keep private apps out of the recording.
+  </Card>
+  <Card title="When something's off">
+    Check [troubleshooting](/docs/crowd-cast/troubleshooting/) for fixes and
+    [known issues](/docs/crowd-cast/known-issues/) for things we're already aware of.
+  </Card>
+</CardGrid>
+
+## Learn more
+
+- **[crowd-cast: Crowd-Sourcing Months-Long Trajectories of Human Computer Work](https://pdoom.org/crowd_cast.html)**: the research behind the project and how the data is used.
+- **[Dashboard](https://pdoom.org/crowd_cast_dashboard.html)**: see your contributions and overall collection progress.
+
+<Aside type="tip" title="Need a hand?">
+  Questions or feedback? Join us on [Discord](https://discord.gg/G4JNuPX2VR),
+  [open an issue](https://github.com/p-doom/crowd-cast/issues), or email
+  [mihir@pdoom.org](mailto:mihir@pdoom.org).
+</Aside>

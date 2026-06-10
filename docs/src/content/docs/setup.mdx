@@ -1,0 +1,93 @@
+---
+title: First-run setup
+description: "The crowd-cast setup wizard: permissions, choosing apps to record, start-at-login, and signing in."
+---
+
+import { Steps, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+The first time you launch crowd-cast, a **setup wizard** opens automatically. It
+walks through three things: granting permissions, choosing which apps to record,
+and whether to start at login. After that, you sign in and you're recording.
+
+The wizard also reopens automatically later if a required permission is missing.
+You can re-run it any time. See [re-running the wizard](/docs/crowd-cast/troubleshooting/#re-run-the-setup-wizard).
+
+## 1. Permissions
+
+<Tabs syncKey="os">
+<TabItem label="macOS">
+
+crowd-cast needs two macOS permissions. The wizard requests both and won't be
+able to record properly until they're granted:
+
+- **Screen Recording**: required to capture windows. Without it, recording
+  starts but there are no capture sources.
+- **Accessibility**: required to capture keyboard and mouse input. Without it,
+  video records but no input is logged.
+
+If you skip one, grant it later in **System Settings → Privacy & Security**
+under the matching section, then restart crowd-cast.
+
+</TabItem>
+<TabItem label="Windows">
+
+No special permissions are required on Windows. The wizard goes straight to
+choosing which apps to record.
+
+</TabItem>
+<TabItem label="Linux">
+
+On Wayland, crowd-cast captures input via `evdev`, which requires your user to
+be in the `input` group. The Linux installer handles this for you (it's the one
+step that needs `sudo`). See the [Linux guide](/docs/crowd-cast/linux/#input-capture)
+for details. Per-app capture and follow-focus availability depend on your
+display server and compositor. See the [compatibility matrix](/docs/crowd-cast/linux/#compatibility-matrix).
+
+</TabItem>
+</Tabs>
+
+## 2. Choose which apps to record
+
+<Steps>
+
+1. The wizard asks whether to **capture all applications**, or to pick specific
+   ones.
+
+2. If you pick specific apps, it lists the applications currently running and
+   you select the ones you want recorded (for example your browser, terminal,
+   IDE and PDF viewer).
+
+3. Only the apps you select are captured. **Everything else is ignored**: when
+   a non-selected app is in the foreground, crowd-cast records a black screen
+   and stops logging input.
+
+</Steps>
+
+<Aside type="tip">
+  You can change this selection at any time later from **Settings** in the tray
+  menu. Changes take effect on the next recording segment. For the privacy
+  rationale (and our own setup), see [Privacy & data](/docs/crowd-cast/privacy/).
+</Aside>
+
+## 3. Start at login
+
+The wizard offers to **start crowd-cast automatically on login**. We recommend
+keeping this on so the agent runs whenever you log in without you having to
+remember to launch it.
+
+## 4. Sign in with Google
+
+When prompted, **sign in with Google**. This links your recordings to your
+account on the [dashboard](https://pdoom.org/crowd_cast_dashboard.html) so your
+contributions can be attributed to you. Without signing in, recordings can't be
+linked to you and won't appear on the dashboard.
+
+See [Account, uploads & dashboard](/docs/crowd-cast/account/) for how sign-in works
+and what it does.
+
+## Done
+
+When you finish the wizard, the app restarts cleanly and its icon appears in
+your **menu bar** (macOS) or **system tray** (Windows/Linux). Recording starts
+automatically. Everything from here on is controlled from
+[the tray menu](/docs/crowd-cast/tray/).

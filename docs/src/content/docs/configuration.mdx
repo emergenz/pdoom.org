@@ -1,0 +1,112 @@
+---
+title: Configuration
+description: "The crowd-cast config.toml file: where it lives and every option, with defaults."
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+Most settings are handled by the [setup wizard](/docs/crowd-cast/setup/) and the
+**Settings** item in the [tray menu](/docs/crowd-cast/tray/#settings). For anything
+not exposed there, you can edit the config file directly.
+
+<Aside type="caution">
+  Quit crowd-cast before editing the config file, and restart it afterwards.
+  Changes to which apps are recorded otherwise take effect on the next segment.
+</Aside>
+
+## Location
+
+<Tabs syncKey="os">
+<TabItem label="macOS">
+
+```text
+~/Library/Application Support/dev.crowd-cast.agent/config.toml
+```
+
+</TabItem>
+<TabItem label="Windows">
+
+```text
+%LOCALAPPDATA%\crowd-cast\config.toml
+```
+
+</TabItem>
+<TabItem label="Linux">
+
+```text
+~/.config/dev.crowd-cast.agent/config.toml
+```
+
+</TabItem>
+</Tabs>
+
+## Example
+
+```toml
+[capture]
+target_apps = ["com.google.Chrome", "com.apple.Terminal"]
+capture_all = false
+start_on_login = true
+idle_timeout_secs = 120
+pause_uploads_on_idle = true
+
+[input]
+capture_keyboard = true
+capture_mouse_move = true
+capture_mouse_click = true
+capture_mouse_scroll = true
+
+[recording]
+autostart_on_launch = true
+segment_duration_secs = 300
+notify_on_start_stop = true
+
+[upload]
+delete_after_upload = true
+max_concurrent_uploads = 2
+```
+
+## `[capture]`
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `target_apps` | `[]` | The apps to record. macOS uses bundle IDs; Linux uses the process name. Managed for you by the wizard / **Settings**. |
+| `capture_all` | `false` | Record **every** app, ignoring `target_apps`. |
+| `start_on_login` | `false` | Launch crowd-cast automatically at login. The wizard recommends turning this on. |
+| `idle_timeout_secs` | `120` | Seconds of no keyboard/mouse activity before auto-pausing. `0` disables idle pausing. |
+| `pause_uploads_on_idle` | `true` | Also pause uploads while idle. |
+| `single_active_app_capture` | `true` on macOS | Keep only the foreground target app's capture source active at a time. |
+| `blank_video_on_untracked_app` | `true` | Show a black screen (instead of capturing) when a non-selected app is in front. |
+
+## `[input]`
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `capture_keyboard` | `true` | Record key presses/releases. |
+| `capture_mouse_move` | `true` | Record mouse movement. |
+| `capture_mouse_click` | `true` | Record mouse clicks. |
+| `capture_mouse_scroll` | `true` | Record scrolling. |
+
+## `[recording]`
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `autostart_on_launch` | `true` | Start recording as soon as the app launches. |
+| `segment_duration_secs` | `300` | Length of each recording segment, in seconds (5 minutes). `0` disables segmenting. |
+| `notify_on_start_stop` | `true` | Show a notification when recording starts/stops. |
+| `max_output_height` | `1080` | Downscale video to this height (preserving aspect ratio). |
+| `fps` | `30` | Recording frame rate. |
+| `enable_audio` | `false` | Record audio. Off by default; crowd-cast is video + input only. |
+
+<Aside type="note">
+  Video uses HEVC/H.265 with hardware encoding where available (falling back to
+  H.264), tuned for sharp text (CRF 80). These encoder details rarely need
+  changing.
+</Aside>
+
+## `[upload]`
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `delete_after_upload` | `true` | Delete the local copy of a segment once it's uploaded. |
+| `max_concurrent_uploads` | `2` | How many segments to upload at once. |

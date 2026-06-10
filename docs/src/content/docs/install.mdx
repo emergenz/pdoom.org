@@ -1,0 +1,80 @@
+---
+title: Install crowd-cast
+description: Download and install crowd-cast on macOS, Windows or Linux.
+---
+
+import { Tabs, TabItem, Steps, Aside, LinkButton } from '@astrojs/starlight/components';
+
+crowd-cast ships as a single binary with screen-capture (libobs) embedded, so you
+don't need to install OBS or anything else separately. Pick your platform below.
+
+<LinkButton href="https://github.com/p-doom/crowd-cast/releases/latest/download/CrowdCast.dmg">Download for macOS</LinkButton>
+<LinkButton href="https://github.com/p-doom/crowd-cast/releases/latest/download/crowd-cast-setup.exe" variant="secondary">Download for Windows</LinkButton>
+
+You can always grab the latest builds from the
+[GitHub releases page](https://github.com/p-doom/crowd-cast/releases/latest).
+
+<Tabs syncKey="os">
+<TabItem label="macOS">
+
+<Steps>
+
+1. Open **[CrowdCast.dmg](https://github.com/p-doom/crowd-cast/releases/latest/download/CrowdCast.dmg)** and drag the app to your **Applications** folder.
+
+2. Launch **CrowdCast** from Applications. The setup wizard opens automatically on first run.
+
+3. Grant the two macOS permissions the wizard asks for:
+   - **Screen Recording**: required to capture windows.
+   - **Accessibility**: required to record keyboard and mouse input.
+
+4. Choose your preferences (apps to record, start-at-login) and **sign in with Google**. See [First-run setup](/docs/crowd-cast/setup/) for the full walkthrough.
+
+5. Click **Done**. The app restarts and appears as a small icon in your **menu bar**. Recording starts automatically.
+
+</Steps>
+
+<Aside type="note">
+  macOS builds bundle the capture components inside the app, so there's no
+  extra download on first launch. Updates install automatically in the
+  background (via Sparkle).
+</Aside>
+
+</TabItem>
+<TabItem label="Windows">
+
+<Steps>
+
+1. Run **[crowd-cast-setup.exe](https://github.com/p-doom/crowd-cast/releases/latest/download/crowd-cast-setup.exe)**. The installer places the app under your user profile, with no admin rights or UAC prompt required.
+
+2. **SmartScreen warning:** because the app isn't yet widely distributed, Windows may show *"Windows protected your PC"*. Click **More info**, then **Run anyway**.
+
+3. Choose your preferences (apps to record, start-at-login) and **sign in with Google**. See [First-run setup](/docs/crowd-cast/setup/) for details.
+
+4. On first launch, crowd-cast **downloads its capture components** automatically (one-time, needs internet). The app relaunches itself when done. This takes about 30 to 60 seconds.
+
+   <Aside type="caution" title="Don't close the app during the first-launch download">
+     If the download is interrupted, delete the install folder at
+     `%LOCALAPPDATA%\Programs\crowd-cast` and re-run the installer.
+   </Aside>
+
+5. After the relaunch, crowd-cast appears in your **system tray** (bottom-right, near the clock). Recording starts automatically.
+
+</Steps>
+
+</TabItem>
+<TabItem label="Linux">
+
+Linux support is **experimental** and installs into your home directory with a
+script (no root, except adding you to the `input` group). The behaviour and the
+exact compatibility matrix (X11 vs Wayland, which compositors and status bars
+work) differ from macOS and Windows.
+
+<LinkButton href="/docs/crowd-cast/linux/">Read the Linux guide →</LinkButton>
+
+</TabItem>
+</Tabs>
+
+## Next step
+
+Once installed, continue to **[First-run setup](/docs/crowd-cast/setup/)** to grant
+permissions, choose which apps to record, and sign in.
