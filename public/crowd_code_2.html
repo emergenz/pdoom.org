@@ -21,6 +21,44 @@
   <meta charset="utf8">
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="stylesheet" href="marketing.css">
+  <script>
+    function installCrowdCode(event) {
+      event.preventDefault();
+
+      const targets = [
+        'cursor:extension/p-doom.crowd-code',
+        'antigravity-ide:extension/p-doom.crowd-code',
+        'vscode:extension/p-doom.crowd-code'
+      ];
+      let index = 0;
+      let opened = false;
+
+      const markOpened = () => {
+        opened = true;
+      };
+      window.addEventListener('blur', markOpened, { once: true });
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) markOpened();
+      }, { once: true });
+
+      const tryNext = () => {
+        if (opened) return;
+        if (index >= targets.length) {
+          alert('Could not open Cursor, Antigravity IDE, or VS Code. Please install one of them and try again.');
+          return;
+        }
+        try {
+          window.location.href = targets[index];
+        } catch (error) {
+          // Continue to the next IDE link below.
+        }
+        index += 1;
+        window.setTimeout(tryNext, 1200);
+      };
+
+      tryNext();
+    }
+  </script>
 </head>
 
 <body>
@@ -87,14 +125,14 @@
   <d-title>
     <p>
      We introduce <a href="https://github.com/p-doom/crowd-code">crowd-code 2.0</a>, a complete redesign of crowd-code: a VS Code / Cursor extension for crowd-sourcing software engineering traces
-     as action–observation rollouts. <a href="cursor:extension/p-doom.crowd-code">Install</a> once, and forget about it.
+     as action–observation rollouts. <a href="cursor:extension/p-doom.crowd-code" onclick="installCrowdCode(event)">Install</a> once, and forget about it.
     </p>
   </d-title>
   <d-byline></d-byline>
   <d-article>
     <aside><sup>*</sup>Equal contribution</aside>
     <p style="border-top: 1px solid rgba(0, 0, 0, 0.1); border-bottom: 1px solid rgba(0, 0, 0, 0.1); padding: 1rem 0; margin: 1.5rem 0; grid-column: page; text-align: center; font-size: 1.1em;">
-      <strong>Install crowd-code 2.0 on <a href="cursor:extension/p-doom.crowd-code" target="_blank" style="color: #0000ee;">Cursor</a>, <a href="vscode:extension/p-doom.crowd-code" target="_blank" style="color: #0000ee;">VS Code</a>, and <a href="antigravity:extension/p-doom.crowd-code" target="_blank" style="color: #0000ee;">Antigravity</a> </strong>
+      <strong>Install crowd-code 2.0 on <a href="cursor:extension/p-doom.crowd-code" target="_blank" style="color: #0000ee;">Cursor</a>, <a href="vscode:extension/p-doom.crowd-code" target="_blank" style="color: #0000ee;">VS Code</a>, and <a href="antigravity-ide:extension/p-doom.crowd-code" target="_blank" style="color: #0000ee;">Antigravity</a> </strong>
     </p>
     <figure style="grid-column: page; margin: 1rem 0; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center"><video src="cc2_0_1.mp4"
     style="width: calc(50% - 0.5rem); min-width: 280px; border-radius: 8px; border: 1px solid var(--ink); box-sizing: border-box;" controls autoplay loop muted></video><video src="cc2_0_2.mp4"
