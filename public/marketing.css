@@ -1,4 +1,4 @@
-/* p(doom) — marketing site styles
+/* p(doom), marketing site styles
  * Layered on top of ../../colors_and_type.css */
 
 body {
@@ -74,7 +74,7 @@ main { display: block; flex: 1 0 auto; }
 .nav-links a:hover { color: var(--ember); }
 
 /* ===== Section transitions ==================================== */
-/* (Removed — momentum lives between release groups, not at
+/* (Removed, momentum lives between release groups, not at
  * header/footer boundaries.) */
 
 /* ===== Hero ================================================== */
@@ -89,7 +89,7 @@ main { display: block; flex: 1 0 auto; }
 }
 .hero-left { padding-right: 24px; }
 
-/* Manifesto sets the hero — Lora italic at display scale.
+/* Manifesto sets the hero, Lora italic at display scale.
    .display class supplies the family/size/style; this adds the
    hero-specific letterspacing and width cap so the line breaks
    land where they should. */
@@ -98,7 +98,7 @@ h1.hero-manifesto.display {
      Measured at the design viewport: needs ~85% of --fs-display. */
   font-size: calc(var(--fs-display) * 0.85);
   letter-spacing: -0.025em;
-  /* Override .display's text-wrap: balance — manifesto uses explicit <br>s,
+  /* Override .display's text-wrap: balance, manifesto uses explicit <br>s,
      and the balancer was redistributing lines so "turning" landed alone. */
   text-wrap: nowrap;
   color: var(--ink);
@@ -256,7 +256,7 @@ h1.hero-manifesto.display {
 /* The research index descends across four warm-paper substrates.
  * Hero is on --paper; the first release already lands somewhere
  * different (--ash-100). Each subsequent release drops a band
- * deeper. We never reach --void here — the archive stays paper. */
+ * deeper. We never reach --void here, the archive stays paper. */
 .releases-head-wrap {
   background: var(--paper);
 }
@@ -306,7 +306,7 @@ h1.hero-manifesto.display {
 
 /* Hairlines: a single ink-tinted rule reads consistently across
  * all four warm-paper substrates. (Per-band rule tuning was too
- * fragile — the rule disappeared on mid-tone bands.) */
+ * fragile, the rule disappeared on mid-tone bands.) */
 .releases-band { --rule: rgba(22,21,20,0.55); }
 
 .release {

@@ -53,9 +53,11 @@ crowd-cast into the always-visible area.
 </TabItem>
 <TabItem label="Linux">
 
-The tray needs a StatusNotifier (SNI) host. Notably **swaybar doesn't provide
-one, so use waybar instead.** See [Linux → System tray](/docs/crowd-cast/linux/#system-tray).
-The agent keeps running and recording even when the tray isn't visible.
+The tray needs a StatusNotifier (SNI) host, so the icon will not show under
+vanilla GNOME (without the AppIndicator extension) or a bare WM. Under **swaybar**
+the icon appears but its menu will not open, so use **waybar** for a working menu.
+See [Linux → System tray](/docs/crowd-cast/linux/#system-tray). The agent keeps
+running and recording regardless.
 
 </TabItem>
 </Tabs>
@@ -122,8 +124,9 @@ help either, reach out to us.
 </TabItem>
 <TabItem label="Linux">
 
-Run the agent from a terminal to see live logs, or check
-`~/.local/share/crowd-cast/`.
+```text
+~/.local/state/agent/logs/
+```
 
 </TabItem>
 </Tabs>

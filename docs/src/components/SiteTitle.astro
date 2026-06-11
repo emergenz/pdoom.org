@@ -1,12 +1,13 @@
 ---
 // Custom site title: a breadcrumb lockup that doubles as the way back to the
-// main site. The sigil + "p(doom)" wordmark link to pdoom.org (mirroring the
-// main site's own logo behaviour); "crowd-cast docs" links to the docs home.
+// main site. The sigil + "p(doom)" wordmark link to the site root / homepage
+// (mirroring the main site's own logo behaviour); "crowd-cast docs" links to
+// the docs home.
 //
 // Logos are served from public/ and referenced with the base path, rather than
 // imported through astro:assets — the optimizer chokes on these source PNGs,
 // and these marks need no optimization.
-const orgHome = 'https://pdoom.org/';
+const orgHome = '/'; // site root: the main p(doom) homepage — resolves to localhost in dev, pdoom.org in production
 const base = import.meta.env.BASE_URL.replace(/\/$/, ''); // '/docs/crowd-cast' (BASE_URL may lack a trailing slash)
 const docsHome = base + '/';
 const lightThemeLogo = base + '/logo-on-light.png'; // dark sigil, shown in light theme

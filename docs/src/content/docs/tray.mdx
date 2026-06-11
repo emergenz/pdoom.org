@@ -10,9 +10,11 @@ macOS, or the **system tray** on Windows and Linux. Click the icon to open the
 menu.
 
 <Aside type="note" title="Linux tray">
-  On Linux the tray uses the freedesktop **StatusNotifierItem** protocol, which
-  only appears if your desktop runs a compatible host. Notably it works under
-  **waybar** but **not swaybar**. See [Linux → System tray](/docs/crowd-cast/linux/#system-tray).
+  On Linux the tray uses the freedesktop **StatusNotifierItem** protocol, so what
+  you see depends on your status bar. The icon and menu both work under **waybar**
+  and GNOME (with the AppIndicator extension). Under **swaybar** the icon appears
+  but the menu does not open, so use waybar to control crowd-cast. See
+  [Linux → System tray](/docs/crowd-cast/linux/#system-tray).
 </Aside>
 
 ## Status
@@ -42,9 +44,16 @@ need to press Start).
 
 ### Delete last 10 minutes
 
-The **panic button**. If you accidentally recorded something sensitive, this
-discards recent recording from the current session that hasn't been uploaded
-yet, then resumes recording. Use it whenever you want recent footage gone.
+The **panic button**, for when you accidentally record something sensitive. It
+deletes the recent footage straight from your disk and then resumes recording.
+
+This is a guarantee, not a best effort. Completed recordings are held on your
+device for **10 minutes before anything is uploaded**, and this button deletes
+everything still in that hold, with no server request involved. So whatever
+happened in roughly the last 10 minutes is always still on your machine when you
+press it, and it is deleted **before it ever leaves the device**. (Footage older
+than that window has already been uploaded, so the button covers exactly the
+recent 10-minute hold, which is the window it can still guarantee.)
 
 ### Pause Uploads / Resume Uploads
 
@@ -55,10 +64,23 @@ this only affects uploading.)
 
 ### Settings
 
-Opens settings, where you can change **which apps are recorded**. Changes take
-effect on the **next segment** (the current 5-minute segment finishes with the
-old selection). For everything that lives in the config file, see
+Opens a window where you choose **which apps are recorded**: either **Capture
+all applications**, or a specific set ticked from the apps currently running.
+Only apps that are open appear in the list, so to capture one that isn't running,
+launch it first and then open Settings. Saving **restarts the agent** so capture
+is rebuilt with the new selection
+(recording resumes automatically on relaunch); Cancel changes nothing. For
+everything else that lives in the config file, see
 [Configuration](/docs/crowd-cast/configuration/).
+
+<Aside type="note" title="Linux">
+  On compositors that only allow full-screen capture (wlroots-based ones such as
+  sway/Hyprland), the per-app picker is disabled and only the whole screen can be
+  captured, so it is your choice whether to record there. On Wayland, each
+  **newly added** app prompts once for screen-sharing
+  permission through the desktop portal after the restart; apps you picked before
+  are restored silently.
+</Aside>
 
 ### Sign in with Google / Sign out
 
@@ -68,8 +90,8 @@ Signs you in (or out). Signing in links your recordings to your account on the
 
 ### Check for Updates
 
-Checks for and installs a newer version. On macOS this uses Sparkle; updates
-also install automatically in the background.
+Checks for and installs a newer version. Updates also install automatically in
+the background.
 
 ### Quit
 

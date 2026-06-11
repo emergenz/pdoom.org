@@ -28,9 +28,9 @@ For each environment, this is what's currently implemented:
 | --- | --- | --- | --- | --- |
 | **X11** (any WM) | <span class="dot ember">●</span> per-window | <span class="dot ember">●</span> yes | <span class="dot brass">●</span> SNI host | <span class="dot ember">●</span> rdev |
 | **Wayland · wlroots** | <span class="dot dim">○</span> full-screen | <span class="dot ember">●</span> yes | <span class="dot brass">●</span> SNI host | <span class="dot ember">●</span> evdev |
-| **Wayland · GNOME** | <span class="dot dim">○</span> full-screen | <span class="dot brass">●</span> extension | <span class="dot brass">●</span> AppIndicator | <span class="dot ember">●</span> evdev |
-| **Wayland · KDE Plasma** | <span class="dot dim">○</span> full-screen | <span class="dot dim">○</span> blocked | <span class="dot ember">●</span> native | <span class="dot ember">●</span> evdev |
-| **Wayland · other** | <span class="dot dim">○</span> full-screen | <span class="dot dim">○</span> blocked | <span class="dot brass">●</span> SNI host | <span class="dot ember">●</span> evdev |
+| **Wayland · GNOME** | <span class="dot ember">●</span> per-app (portal) | <span class="dot brass">●</span> extension | <span class="dot brass">●</span> AppIndicator | <span class="dot ember">●</span> evdev |
+| **Wayland · KDE Plasma** | <span class="dot ember">●</span> per-app (portal) | <span class="dot dim">○</span> blocked | <span class="dot ember">●</span> native | <span class="dot ember">●</span> evdev |
+| **Wayland · other** | <span class="dot brass">●</span> per-app, if the portal offers it | <span class="dot dim">○</span> blocked | <span class="dot brass">●</span> SNI host | <span class="dot ember">●</span> evdev |
 
 </div>
 
@@ -39,16 +39,18 @@ For each environment, this is what's currently implemented:
 Notes:
 
 - **wlroots** covers Sway, Hyprland, river, Wayfire and labwc.
+- **Per-app video on Wayland** goes through the desktop portal: per-app where the portal offers a window source (GNOME, KDE), and full-screen where it only offers the whole output (wlroots).
 - **Blocked** means recording is gated off until a focus provider exists; the agent fails closed rather than recording incorrectly.
-- **System tray** needs a StatusNotifier host: KDE provides one natively, GNOME via the AppIndicator extension, and most bars (waybar, XFCE, MATE, LXQt) support it. **On Sway, run waybar; swaybar does not implement the protocol.**
+- **System tray** needs a StatusNotifier host: KDE provides one natively, GNOME via the AppIndicator extension, and most bars (waybar, XFCE, MATE, LXQt) support it fully. **On Sway, swaybar shows the icon but does not open the menu, so run waybar instead.**
 - **evdev** input capture needs `input`-group membership; X11 uses `rdev` and needs no group change.
 - **GNOME** follow-focus needs the bundled [extension](#gnome) and a relogin.
 - **Not yet validated:** X11 per-app capture and the GNOME focus path are implemented and unit-tested, but not verified end-to-end on real hardware.
 
-The short version: **X11** and **wlroots compositors (e.g. Sway/Hyprland) with
-waybar** are the best-supported setups today. GNOME works for input gating only
-after installing our shell extension. KDE and other Wayland compositors can show
-the tray but recording is gated off until a focus provider lands.
+The short version: **X11** is the most complete setup, with both per-window
+capture and input gating. On **wlroots compositors (sway, Hyprland)** input
+gating works but the portal only allows full-screen capture. **GNOME** captures
+per-app and needs our shell extension for input gating. **KDE** captures per-app
+but has no input-gating provider yet, so recording is gated off there.
 
 ## Requirements
 
@@ -60,40 +62,16 @@ the tray but recording is gated off until a focus provider lands.
 
 ## Installing
 
-<Aside type="note">
-  One-click packaged downloads aren't published for Linux yet. For now you
-  install with the script in the repo, from a build of the agent.
-</Aside>
+See [Install → Linux](/docs/crowd-cast/install/) for the step-by-step
+instructions. In short, it's a user-space install (into `~/.local`) run from a
+checkout with `packaging/linux/install.sh --local`, plus a single `sudo` step to
+add you to the `input` group. The script lays out:
 
-The installer is **user-space**: it installs into `~/.local` and needs `sudo`
-only once, to add you to the `input` group.
-
-<Steps>
-
-1. Build the agent and run the installer from a checkout:
-
-   ```bash
-   packaging/linux/install.sh --local
-   ```
-
-2. It lays out:
-
-   ```text
-   ~/.local/bin/crowd-cast-agent                   # the agent
-   ~/.local/share/crowd-cast/obs/<abi>/...          # bundled capture components
-   ~/.local/share/applications/crowd-cast.desktop   # menu entry
-   ~/.config/autostart/crowd-cast.desktop           # start at login
-   ```
-
-3. It then adds you to the **`input`** group (the one `sudo` step). **Log out
-   and back in** for that to take effect.
-
-</Steps>
-
-To remove it again (this keeps your config and `input`-group membership):
-
-```bash
-packaging/linux/install.sh --uninstall
+```text
+~/.local/bin/crowd-cast-agent                   # the agent
+~/.local/share/crowd-cast/obs/<abi>/...          # bundled capture components
+~/.local/share/applications/crowd-cast.desktop   # menu entry
+~/.config/autostart/crowd-cast.desktop           # start at login
 ```
 
 ## Display servers & per-app capture
@@ -102,9 +80,26 @@ packaging/linux/install.sh --uninstall
   XComposite, following the focused window. This needs a pure X11 session with
   `_NET_ACTIVE_WINDOW` and the Composite extension (standard on virtually all
   X11 desktops).
-- **Wayland**: per-window video capture isn't available yet, so capture is
-  full-screen. Follow-focus is still used to **gate input** (stop logging
-  keystrokes/mouse when a non-selected app is focused).
+- **Wayland**: per-window capture goes through the **xdg-desktop-portal
+  ScreenCast** API. Where the portal offers a window source (GNOME, KDE),
+  crowd-cast captures the selected apps per-window and prompts once per app to
+  share its window (the choice is remembered afterwards). Where the portal only
+  offers the whole output (**wlroots compositors such as sway and Hyprland**),
+  the per-app picker is disabled and only full-screen capture is available, so it
+  is your choice whether to record there. Either way,
+  follow-focus is used to **gate input** (stop logging keystrokes and mouse when
+  a non-selected app is focused).
+
+## Which monitor
+
+- **X11**: per-app capture follows the window itself, on whichever monitor it is
+  on. Full-screen capture (where per-app isn't available) records the **primary
+  screen**.
+- **Wayland**: you choose the source through the desktop portal. For per-app
+  capture you pick each app's window once and the choice is remembered. For
+  full-screen capture (wlroots compositors such as sway and Hyprland) the portal
+  asks you to pick the **output to share**, and because that choice isn't
+  persisted, it is asked again **each time crowd-cast starts**.
 
 ## Follow-focus by environment
 
@@ -145,20 +140,21 @@ so (e.g. *"No input devices found. Make sure you are in the 'input' group."*). O
 
 ## System tray
 
-The Linux tray uses the freedesktop **StatusNotifierItem (SNI)** protocol. The
-icon and its menu only appear if your desktop runs a **StatusNotifier host**:
+The Linux tray uses the freedesktop **StatusNotifierItem (SNI)** protocol. What
+appears depends on your status bar:
 
-- **Works:** KDE Plasma (native), **waybar**, GNOME with the **AppIndicator**
-  extension, XFCE, MATE, Cinnamon, LXQt.
-- **Doesn't show the tray:** **swaybar** (Sway's default bar does *not* implement
-  the SNI host protocol), and vanilla GNOME without the AppIndicator extension.
+- **Icon and menu both work:** KDE Plasma (native), **waybar**, GNOME with the
+  **AppIndicator** extension, XFCE, MATE, Cinnamon, LXQt.
+- **Icon only:** **swaybar** (Sway's default bar) shows the icon but does not open
+  the menu, so you cannot control crowd-cast from it.
+- **Nothing at all:** with no SNI host (vanilla GNOME without the AppIndicator
+  extension, or a bare tiling WM), the icon does not appear.
 
 <Aside type="caution" title="Sway users">
-  Under **Sway**, the default **swaybar** does not implement the tray protocol,
-  so the crowd-cast menu won't open. Run **waybar** (with its `tray` module)
-  instead and the icon and menu appear normally. The agent still runs and
-  records even with no tray host; you just can't control it from the menu until
-  a host is present.
+  Under **Sway**, the default **swaybar** shows the crowd-cast icon but does not
+  open its menu. Run **waybar** (with its `tray` module) instead and both the icon
+  and the menu work normally. Either way the agent keeps running and recording;
+  the tray is only for control.
 </Aside>
 
 ## Autostart & updates
@@ -166,24 +162,27 @@ icon and its menu only appear if your desktop runs a **StatusNotifier host**:
 - **Start at login** is an XDG autostart entry at
   `~/.config/autostart/crowd-cast.desktop`.
 - **Updates** are delivered as signed (Ed25519) releases that the agent verifies
-  and installs in place, then relaunches, mirroring the Sparkle auto-update on
-  macOS.
+  and installs in place, then relaunches, mirroring the automatic in-app update
+  on macOS.
 
 ## Configuration
 
-Your config lives at `~/.config/dev.crowd-cast.agent/config.toml`. The options
+Your config lives at `~/.config/agent/config.toml`. The options
 are the same across platforms. See [Configuration](/docs/crowd-cast/configuration/).
 
 ## Known limitations
 
-- **Per-app (per-window) video capture is X11-only.** On Wayland, capture is
-  full-screen.
+- **Per-app capture on Wayland depends on the desktop portal.** GNOME and KDE
+  offer a window source, so capture is per-app there; wlroots compositors (sway,
+  Hyprland) only allow full-screen capture. X11 captures per-window via XComposite.
 - **X11 per-app capture is unit-tested but not yet live-validated.**
 - **GNOME follow-focus** compiles but hasn't been exercised on a real GNOME
   session, and requires the bundled extension + a relogin.
 - **KDE Plasma and other Wayland compositors** have no focus provider yet, so
   recording is gated off there.
-- The tray won't appear under **swaybar** or vanilla GNOME (see above).
+- **Tray control depends on your status bar.** Under swaybar the icon appears but
+  its menu does not open (use waybar); with no SNI host at all (vanilla GNOME
+  without AppIndicator) the icon does not appear. See [System tray](#system-tray).
 
 These and other platform quirks are tracked on the
 [Known issues](/docs/crowd-cast/known-issues/) page.

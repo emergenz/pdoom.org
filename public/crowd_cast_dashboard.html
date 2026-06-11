@@ -968,7 +968,7 @@
         const data = topN.map(e => e[1]);
         const colors = topN.map((_, i) => shadeColor(baseColor, i, topN.length));
 
-        document.getElementById('action-chart-title').textContent = family + ' — Top Actions';
+        document.getElementById('action-chart-title').textContent = family + ' · Top Actions';
         document.getElementById('action-back-btn').style.display = 'inline';
 
         // Detail table.
@@ -1457,7 +1457,7 @@
             return '#000000';
         }
 
-        /* Month labels — collect positions first, then drop any that are too close
+        /* Month labels · collect positions first, then drop any that are too close
            to the NEXT label (so the later/more relevant month wins). */
         const weeks = days.length / 7;
         const colW = 16; /* 14px cell + 2px gap */
@@ -1490,7 +1490,7 @@
         });
         dayLabelsHtml += '</div>';
 
-        /* Grid cells — grid-auto-flow: column fills top-to-bottom (Mon→Sun), then next week */
+        /* Grid cells · grid-auto-flow: column fills top-to-bottom (Mon→Sun), then next week */
         let gridHtml = '<div class="heatmap-grid">';
         days.forEach((day, i) => {
             const key = localDateStr(day);
