@@ -25,7 +25,7 @@ export default function(dom, data) {
   const body = dom.body;
   const article = body.querySelector('d-article');
 
-  // If we don't have an article tag, something weird is going on—giving up.
+  // If we don't have an article tag, something weird is going on, giving up.
   if (!article) {
     console.warn('No d-article tag found; skipping adding optional components!');
     return;

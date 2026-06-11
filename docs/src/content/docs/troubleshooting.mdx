@@ -1,0 +1,174 @@
+---
+title: Troubleshooting
+description: Fixes for common crowd-cast problems on macOS, Windows and Linux.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+If your problem is a known limitation rather than a fix-it issue, check
+[Known issues](/docs/crowd-cast/known-issues/) too. Linux-specific setup lives on the
+[Linux page](/docs/crowd-cast/linux/).
+
+## Recording shows "no capture sources"
+
+<Tabs syncKey="os">
+<TabItem label="macOS">
+
+The **Screen Recording** permission was denied or revoked. Open **System
+Settings → Privacy & Security → Screen Recording**, find CrowdCast and toggle it
+on. You may need to quit and relaunch the app.
+
+</TabItem>
+<TabItem label="Windows">
+
+No special permissions are needed on Windows. If you see this, the first-launch
+component download may have failed. Check your internet connection, delete the
+install folder at `%LOCALAPPDATA%\Programs\crowd-cast`, and re-run the installer.
+
+</TabItem>
+<TabItem label="Linux">
+
+Either a focus provider isn't available for your compositor (recording is
+gated off, see the [compatibility matrix](/docs/crowd-cast/linux/#compatibility-matrix)),
+or per-app capture prerequisites aren't met. X11 needs the Composite extension
+and `_NET_ACTIVE_WINDOW`; most Wayland compositors capture full-screen.
+
+</TabItem>
+</Tabs>
+
+## The tray icon doesn't appear
+
+<Tabs syncKey="os">
+<TabItem label="macOS">
+
+Check that the app is running (Activity Monitor). If it is, the icon may be in
+the menu-bar overflow. Look for the arrow on the right side of the menu bar.
+
+</TabItem>
+<TabItem label="Windows">
+
+Click the **^** arrow in the system tray to reveal hidden icons. You can drag
+crowd-cast into the always-visible area.
+
+</TabItem>
+<TabItem label="Linux">
+
+The tray needs a StatusNotifier (SNI) host, so the icon will not show under
+vanilla GNOME (without the AppIndicator extension) or a bare WM. Under **swaybar**
+the icon appears but its menu will not open, so use **waybar** for a working menu.
+See [Linux → System tray](/docs/crowd-cast/linux/#system-tray). The agent keeps
+running and recording regardless.
+
+</TabItem>
+</Tabs>
+
+## Uploads are failing
+
+Segments are retried automatically with exponential backoff (about 30 seconds up
+to 2 hours), so transient failures sort themselves out. Check your internet
+connection. If uploads are **paused**, resume them from the
+[tray menu](/docs/crowd-cast/tray/#pause-uploads--resume-uploads). Segments are kept
+on disk until they upload successfully, so nothing is lost in the meantime.
+
+## Re-run the setup wizard
+
+Quit crowd-cast first, then run the agent with `--setup`:
+
+<Tabs syncKey="os">
+<TabItem label="macOS">
+
+```bash
+/Applications/CrowdCast.app/Contents/MacOS/crowd-cast-agent --setup
+```
+
+</TabItem>
+<TabItem label="Windows">
+
+```powershell
+"%LOCALAPPDATA%\Programs\crowd-cast\crowd-cast-agent.exe" --setup
+```
+
+</TabItem>
+<TabItem label="Linux">
+
+```bash
+~/.local/bin/crowd-cast-agent --setup
+```
+
+</TabItem>
+</Tabs>
+
+## I signed in but can't see my recordings
+
+The [dashboard](https://pdoom.org/crowd_cast_dashboard.html) updates roughly once
+an hour, so new recordings won't appear immediately. If your data still doesn't
+show up after an hour, sign out and back in from the tray menu. If that doesn't
+help either, reach out to us.
+
+## Where are the logs?
+
+<Tabs syncKey="os">
+<TabItem label="macOS">
+
+```text
+~/Library/Logs/crowd-cast/
+```
+
+</TabItem>
+<TabItem label="Windows">
+
+```text
+%LOCALAPPDATA%\crowd-cast\logs\
+```
+
+</TabItem>
+<TabItem label="Linux">
+
+```text
+~/.local/state/agent/logs/
+```
+
+</TabItem>
+</Tabs>
+
+Share these with us on [Discord](https://discord.gg/G4JNuPX2VR) if you need help
+debugging.
+
+## How do I uninstall?
+
+<Tabs syncKey="os">
+<TabItem label="macOS">
+
+Quit the app, then drag **CrowdCast** from Applications to the Trash. To also
+remove configuration and logs, delete:
+
+```text
+~/Library/Application Support/dev.crowd-cast.agent/
+~/Library/Logs/crowd-cast/
+```
+
+</TabItem>
+<TabItem label="Windows">
+
+Open **Settings → Apps → Installed apps**, find crowd-cast and click
+**Uninstall**. The uninstaller stops the agent, removes the autostart entry and
+deletes the install directory.
+
+</TabItem>
+<TabItem label="Linux">
+
+```bash
+packaging/linux/install.sh --uninstall
+```
+
+This removes the user-space install (it keeps your config and `input`-group
+membership).
+
+</TabItem>
+</Tabs>
+
+<Aside type="tip" title="Still stuck?">
+  Running into something not listed here? [Open an
+  issue](https://github.com/p-doom/crowd-cast/issues) or email
+  [mihir@pdoom.org](mailto:mihir@pdoom.org).
+</Aside>

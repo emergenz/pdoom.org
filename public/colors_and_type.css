@@ -1,11 +1,11 @@
 /* ============================================================
- * p(doom) — Colors & Type tokens
+ * p(doom), Colors & Type tokens
  * Load this first on any page using the brand.
  *
- * Type families: Lora (serif — same family as the wordmark) and
+ * Type families: Lora (serif, same family as the wordmark) and
  * IBM Plex Mono (system / labels / code).
  *
- * Icons (substitution): Lucide via CDN — load on pages that
+ * Icons (substitution): Lucide via CDN, load on pages that
  * need UI glyphs:
  *   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
  *   <script>lucide.createIcons();</script>
@@ -17,9 +17,9 @@
   /* -- Substrate / monochrome ramp ----------------------------- */
   --void:      #0B0B0C;   /* inverted strips (header)    */
   --ink:       #161514;   /* text on paper               */
-  --paper:     #F7F4EA;   /* primary surface — warm off-white */
+  --paper:     #F7F4EA;   /* primary surface, warm off-white */
 
-  /* warm gray ramp — neutral but lifted toward sand */
+  /* warm gray ramp, neutral but lifted toward sand */
   --ash-900:   #1B1A18;
   --ash-800:   #2A2825;
   --ash-700:   #3D3A35;
@@ -34,8 +34,8 @@
   --ember:     #B7361E;   /* the only red. links, focus, doom. */
   --ember-deep:#7E2010;
   --ember-bg:  #f6e3df;   /* faint ember tint on paper */
-  --patina:    #5D6E63;   /* oxidized copper — rare */
-  --brass:     #B49254;   /* aged brass — rare highlight */
+  --patina:    #5D6E63;   /* oxidized copper, rare */
+  --brass:     #B49254;   /* aged brass, rare highlight */
 
   /* -- Semantic surfaces (default: paper) ---------------------- */
   --fg1:       var(--ink);       /* primary text */
@@ -102,7 +102,7 @@
   --shadow-bleed: 0 1px 0 var(--ash-800);
 }
 
-/* Inverted (dark) surface override — used for the site header */
+/* Inverted (dark) surface override, used for the site header */
 .on-void, [data-surface="void"] {
   --fg1: var(--paper);
   --fg2: rgba(255,255,255,0.8);
@@ -136,7 +136,7 @@ html, body {
  * Semantic type classes
  * ============================================================ */
 
-/* Eyebrow — mono uppercase label that lives above headlines */
+/* Eyebrow, mono uppercase label that lives above headlines */
 .eyebrow {
   font-family: var(--font-mono);
   font-size: var(--fs-eyebrow);
@@ -147,7 +147,7 @@ html, body {
   line-height: 1;
 }
 
-/* Display — hero italic, the brand at full voice */
+/* Display, hero italic, the brand at full voice */
 .display, h1.display {
   font-family: var(--font-serif);
   font-size: var(--fs-display);
@@ -267,7 +267,7 @@ hr, .rule {
  * Atomic utilities used across the system
  * ============================================================ */
 
-/* Sigil — small inline mark for nav, footer, etc. */
+/* Sigil, small inline mark for nav, footer, etc. */
 .sigil {
   display: inline-block;
   width: 28px;
@@ -283,7 +283,7 @@ hr, .rule {
   background-image: url('../assets/logo-mark-inverted.png');
 }
 
-/* Wordmark — the locked sigil + serif italic "p(doom)" */
+/* Wordmark, the locked sigil + serif italic "p(doom)" */
 .wordmark {
   font-family: var(--font-serif);
   font-style: italic;
@@ -350,7 +350,7 @@ hr, .rule {
   border-color: var(--paper);
 }
 
-/* Eyebrow + rule combo — used to introduce sections */
+/* Eyebrow + rule combo, used to introduce sections */
 .section-mark {
   display: flex;
   align-items: center;
@@ -382,5 +382,5 @@ hr, .rule {
 .dot.patina { color: var(--patina); }
 .dot.dim { color: var(--fg-dim); }
 
-/* Tabular figures — for any numeric tables, scores, dates */
+/* Tabular figures, for any numeric tables, scores, dates */
 .tnum { font-variant-numeric: tabular-nums; }

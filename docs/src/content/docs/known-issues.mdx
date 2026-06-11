@@ -1,0 +1,55 @@
+---
+title: Known issues
+description: Behaviours and limitations we're already aware of in crowd-cast, by platform.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+These are things we already know about. For step-by-step fixes to common
+problems, see [Troubleshooting](/docs/crowd-cast/troubleshooting/).
+
+## macOS
+
+### Stray keystrokes after waking from sleep
+
+If the Mac goes to **standby/sleep while crowd-cast is recording** and you then
+wake it, the **last few (~5) keystrokes** from just before it slept can be
+**re-emitted** on wake. This is a known bug in how input events are flushed
+across a sleep/wake cycle.
+
+<Aside type="note">
+  If those stray keystrokes land in a recording you'd rather not keep, use
+  **[Delete last 10 minutes](/docs/crowd-cast/tray/#delete-last-10-minutes)** in the
+  tray to discard the recent footage.
+</Aside>
+
+## Linux
+
+Linux support is [experimental](/docs/crowd-cast/linux/), and several paths aren't
+fully validated yet:
+
+- **Per-app capture on Wayland depends on the desktop portal.** GNOME and KDE
+  offer a window source, so capture is per-app there; **wlroots compositors
+  (sway, Hyprland) only allow full-screen capture.** X11 captures per-window via
+  XComposite.
+- **X11 per-app capture** is implemented and unit-tested but **not yet
+  live-validated** on real X11 hardware.
+- **GNOME follow-focus** requires installing our shell extension and logging out
+  and back in, and hasn't been validated on a live GNOME session yet.
+- **KDE Plasma and other Wayland compositors** have no focus provider yet, so
+  recording is **gated off** there (by design: crowd-cast fails closed rather
+  than recording incorrectly).
+- **Tray control depends on your status bar.** Under **swaybar** the crowd-cast
+  icon appears but its menu does not open, so use **waybar** on Sway. With no SNI
+  host at all (vanilla GNOME without the AppIndicator extension) the icon does not
+  appear. The agent still runs and records either way; the tray is only for control.
+
+See the [Linux compatibility matrix](/docs/crowd-cast/linux/#compatibility-matrix)
+for the full picture.
+
+## Reporting something new
+
+Found a bug that isn't listed here? Please
+[open an issue](https://github.com/p-doom/crowd-cast/issues) or email
+[mihir@pdoom.org](mailto:mihir@pdoom.org). Include your OS (and, on Linux, your
+compositor / status bar) and the [logs](/docs/crowd-cast/troubleshooting/#where-are-the-logs).

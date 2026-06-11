@@ -1,0 +1,58 @@
+---
+title: Privacy & data
+description: What crowd-cast does and doesn't capture, and how to keep private apps out of your recordings.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+crowd-cast is built so that you decide what gets recorded. This page is the
+single place that spells out what's captured, what isn't, and how to keep
+sensitive things out.
+
+## What is captured
+
+- **Screen video** of the applications you selected, while they're in the
+  foreground.
+- **Keyboard and mouse input** (keys, mouse movement, clicks, scroll), but only
+  while a selected app is in the foreground.
+- Basic metadata such as which app is focused and your display resolution.
+
+## What is **not** captured
+
+- **Anything from apps you didn't select.** When a non-selected app is in front,
+  the video is a **black screen** and input logging stops.
+- **Audio**: it's off by default.
+- **Anything while you're idle.** crowd-cast pauses after 2 minutes without
+  activity and records nothing until you return. See
+  [idle detection](/docs/crowd-cast/recording/#idle-detection).
+
+## How to keep things private
+
+The model is an **allowlist**: only the apps you explicitly choose are ever
+recorded. A few ways to use that:
+
+- **Use a separate app for sensitive work.** The most reliable approach is to
+  keep private activity in an app that simply isn't on the list.
+- **Add only what you're comfortable sharing.** The more apps you record, the
+  more useful the data, but it's entirely your call which ones.
+- **Use the panic button.** If something sensitive slips into a recording, hit
+  **[Delete last 10 minutes](/docs/crowd-cast/tray/#delete-last-10-minutes)** in the
+  tray to discard recent, not-yet-uploaded footage.
+
+<Aside type="tip" title="How we use it ourselves">
+  We record one browser (e.g. Firefox) for research, a text editor (e.g.
+  Cursor), a terminal (e.g. Ghostty) and a PDF viewer (e.g. Preview). We use a
+  *separate* browser (e.g. Chrome) for sensitive things like email, messaging
+  and contracts. That browser simply isn't on the list, so it's never
+  recorded. When we switch to it, crowd-cast captures a black screen and stops
+  logging input. We've found this covers most of the working day while keeping
+  anything private completely out of the recording.
+</Aside>
+
+## Where your data goes
+
+Finished segments upload to p(doom)'s research backend over secure, signed
+URLs, and (when you're [signed in](/docs/crowd-cast/account/)) are attributed to your
+account. Local copies are removed once they've uploaded. To understand how the
+dataset is used, read the research write-up:
+**[crowd-cast: Crowd-Sourcing Months-Long Trajectories of Human Computer Work](https://pdoom.org/crowd_cast.html)**.

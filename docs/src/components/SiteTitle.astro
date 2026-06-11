@@ -1,0 +1,80 @@
+---
+// Custom site title: a breadcrumb lockup that doubles as the way back to the
+// main site. The sigil + "p(doom)" wordmark link to the site root / homepage
+// (mirroring the main site's own logo behaviour); "crowd-cast docs" links to
+// the docs home.
+//
+// Logos are served from public/ and referenced with the base path, rather than
+// imported through astro:assets — the optimizer chokes on these source PNGs,
+// and these marks need no optimization.
+const orgHome = '/'; // site root: the main p(doom) homepage — resolves to localhost in dev, pdoom.org in production
+const base = import.meta.env.BASE_URL.replace(/\/$/, ''); // '/docs/crowd-cast' (BASE_URL may lack a trailing slash)
+const docsHome = base + '/';
+const lightThemeLogo = base + '/logo-on-light.png'; // dark sigil, shown in light theme
+const darkThemeLogo = base + '/logo-on-dark.png'; // light sigil, shown in dark theme
+---
+
+<div class="site-title sl-flex">
+  <a href={orgHome} class="cc-org" aria-label="p(doom) home">
+    <img src={darkThemeLogo} alt="" class="cc-logo light:sl-hidden" width="1024" height="1024" />
+    <img src={lightThemeLogo} alt="" class="cc-logo dark:sl-hidden" width="1024" height="1024" />
+    <span class="cc-wordmark">p(doom)</span>
+  </a>
+  <span class="cc-sep" aria-hidden="true">›</span>
+  <a href={docsHome} class="cc-docs">crowd-cast docs</a>
+</div>
+
+<style>
+  .site-title {
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    white-space: nowrap;
+  }
+  .cc-org {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--sl-color-white);
+  }
+  .cc-logo {
+    height: calc(var(--sl-nav-height) - 2 * var(--sl-nav-pad-y));
+    width: auto;
+    object-fit: contain;
+  }
+  /* The brand wordmark is the canonical serif italic; the docs label is the
+     upright heading style (italic is reserved for the wordmark/display). */
+  .cc-wordmark {
+    font-family: 'Lora', 'Adobe Garamond Pro', Georgia, serif;
+    font-style: italic;
+    font-weight: 400; /* match the homepage wordmark (.brand .wm), which is Lora italic 400 */
+    font-size: 1.25rem;
+    letter-spacing: -0.01em;
+  }
+  .cc-sep {
+    color: var(--sl-color-gray-4);
+    font-family: var(--sl-font-mono);
+  }
+  .cc-docs {
+    font-family: 'Lora', 'Adobe Garamond Pro', Georgia, serif;
+    font-weight: 600;
+    font-size: 1.25rem;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    color: var(--sl-color-white);
+  }
+  .cc-org:hover .cc-wordmark,
+  .cc-docs:hover {
+    color: var(--sl-color-text-accent);
+  }
+
+  /* On narrow screens collapse to sigil + "crowd-cast docs"; the sigil still
+     links back to pdoom.org, so the way back survives. */
+  @media (max-width: 50rem) {
+    .cc-wordmark,
+    .cc-sep {
+      display: none;
+    }
+  }
+</style>

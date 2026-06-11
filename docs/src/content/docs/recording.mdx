@@ -1,0 +1,108 @@
+---
+title: Recording & capture
+description: "How crowd-cast decides what to record: follow-focus, segments, idle detection and video quality."
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+crowd-cast records the apps you selected during setup and nothing else. This
+page explains exactly how that works.
+
+## What gets captured: only your selected apps
+
+Two separate mechanisms decide what ends up in a recording. They give different
+guarantees, so it helps to keep them apart.
+
+### Video is enforced by the compositor
+
+crowd-cast does not record your whole screen and then crop it down. It asks the
+operating system to capture only the **specific applications you selected**: on
+macOS through ScreenCaptureKit's application-capture mode, on Linux/X11 through
+XComposite, and on Linux/Wayland through the desktop portal's ScreenCast window
+source. The pixels of any app you did not select never reach crowd-cast at all,
+so an unselected app cannot appear in the video, even by accident. That guarantee
+is enforced by the compositor or window manager **underneath crowd-cast**, not by
+crowd-cast deciding what to keep after the fact.
+
+When the foreground app is not one you selected, the video is a **blank (black)
+screen**. Switch back to a selected app and it resumes.
+
+<Aside type="note" title="Linux">
+  On Linux/X11 this works through XComposite, and on Wayland through the desktop
+  portal, which mediates access and prompts per app, so the same guarantee holds.
+  The exception is wlroots-based compositors (sway, Hyprland), whose portal only
+  offers full-screen capture; there, only the whole screen can be recorded, so it
+  is your decision whether to record at all on such a setup. See the
+  [Linux compatibility matrix](/docs/crowd-cast/linux/#compatibility-matrix).
+</Aside>
+
+### Which monitor
+
+On **macOS**, crowd-cast captures the **main display** (the monitor set as
+primary in your display settings). On a multi-monitor setup only that monitor is
+captured, so a recorded app's window on a secondary monitor is not.
+
+On **Windows**, a selected app is captured on **whichever monitor it is on**. The
+segment is a single canvas sized to fit all of your monitors at native
+resolution, with black bars wherever they don't tile evenly, and the app is
+placed at its real position on that canvas. As everywhere, only your selected
+apps appear and everything else is black. crowd-cast also records the moments
+when focus moves from one monitor to another, so the native, single-monitor view
+can be reconstructed losslessly in post-processing.
+
+On **Linux**, which monitor is used depends on your session; see the
+[Linux guide](/docs/crowd-cast/linux/#which-monitor).
+
+### Follow-focus is only for input
+
+Keyboard and mouse events are delivered system-wide, not per window, so something
+has to decide **when** to record them. That is the one job follow-focus does:
+crowd-cast tracks which app is in front (about ten times a second) and logs input
+**only while one of your selected apps is focused**. The moment you switch to
+anything else, input logging stops.
+
+So follow-focus governs **input**, not the safety of the video. Even if focus
+detection ever misfired, the worst case would be mis-timed input, never another
+app's screen, because the video is already constrained by the compositor as
+described above. This is the core of crowd-cast's
+[privacy model](/docs/crowd-cast/privacy/).
+
+<Aside type="note" title="One app at a time (macOS and X11)">
+  The frontmost app also decides which of your selected apps is the one actively
+  recorded at any moment (crowd-cast records one at a time to avoid redundant
+  capture). This only ever switches between apps you chose; it can never bring in
+  an app you didn't.
+</Aside>
+
+## Segments
+
+Recordings are split into **segments** (5 minutes each by default). Each finished
+segment (a video file plus its input-event log) is uploaded on its own. This
+is also why **Settings** changes take effect on the *next* segment rather than
+mid-recording.
+
+## Idle detection
+
+If there's **no keyboard or mouse activity for 2 minutes**, crowd-cast
+automatically **pauses** both video and input. The status shows *Idle
+(paused)*. As soon as you move the mouse or press a key, it resumes. **No data
+is recorded while you're idle**, so stepping away from your desk never gets
+captured.
+
+## What gets captured
+
+- **Video** of the selected app's window, encoded efficiently (HEVC/H.265 with
+  hardware acceleration where available, downscaled to 1080p, 30 fps). Audio is
+  **not** recorded.
+- **Input events**: key presses/releases and mouse movement, clicks and scroll,
+  each timestamped, but only while a selected app is in the foreground.
+
+For the full picture of what is and isn't collected, and how to keep things
+private, see [Privacy & data](/docs/crowd-cast/privacy/).
+
+## Reliability
+
+The capture engine is watched by a watchdog: if the underlying capture call
+stalls, crowd-cast restarts itself cleanly to recover rather than sitting in a
+broken state. You may occasionally see the tray icon briefly disappear and
+reappear when this happens.

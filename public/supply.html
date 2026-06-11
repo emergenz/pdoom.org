@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Supply — p(doom)</title>
+    <title>Supply · p(doom)</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="colors_and_type.css">
     <link rel="stylesheet" href="marketing.css">
@@ -422,7 +422,7 @@
             modalTitle.appendChild(price);
 
             modalImg.src = p.images[0].src;
-            modalImg.alt = p.title + ' — ' + p.images[0].alt;
+            modalImg.alt = p.title + ' · ' + p.images[0].alt;
 
             modalThumbs.textContent = '';
             p.images.forEach((img, i) => {
@@ -436,7 +436,7 @@
                 if (i === 0) btn.classList.add('active');
                 btn.addEventListener('click', () => {
                     modalImg.src = img.src;
-                    modalImg.alt = p.title + ' — ' + img.alt;
+                    modalImg.alt = p.title + ' · ' + img.alt;
                     modalThumbs.querySelectorAll('button').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                 });

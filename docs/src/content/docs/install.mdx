@@ -1,0 +1,102 @@
+---
+title: Install crowd-cast
+description: Download and install crowd-cast on macOS, Windows or Linux.
+---
+
+import { Tabs, TabItem, Steps, Aside, LinkButton } from '@astrojs/starlight/components';
+
+crowd-cast ships as a single binary with screen-capture (libobs) embedded, so you
+don't need to install OBS or anything else separately. Pick your platform below.
+
+<LinkButton href="https://github.com/p-doom/crowd-cast/releases/latest/download/CrowdCast.dmg">Download for macOS</LinkButton>
+<LinkButton href="https://github.com/p-doom/crowd-cast/releases/latest/download/crowd-cast-setup.exe" variant="secondary">Download for Windows</LinkButton>
+
+You can always grab the latest builds from the
+[GitHub releases page](https://github.com/p-doom/crowd-cast/releases/latest).
+
+<Tabs syncKey="os">
+<TabItem label="macOS">
+
+<Steps>
+
+1. Open **[CrowdCast.dmg](https://github.com/p-doom/crowd-cast/releases/latest/download/CrowdCast.dmg)** and drag the app to your **Applications** folder.
+
+2. Launch **CrowdCast** from Applications. The setup wizard opens automatically on first run.
+
+3. Grant the two macOS permissions the wizard asks for:
+   - **Screen Recording**: required to capture windows.
+   - **Accessibility**: required to record keyboard and mouse input.
+
+4. Choose your preferences (apps to record, start-at-login) and **sign in with Google**. See [First-run setup](/docs/crowd-cast/setup/) for the full walkthrough.
+
+5. Click **Done**. The app restarts and appears as a small icon in your **menu bar**. Recording starts automatically.
+
+</Steps>
+
+<Aside type="note">
+  On first launch, crowd-cast downloads its capture components once (this needs
+  internet, and a notification shows while it runs). After that they're cached,
+  and updates install automatically in the background.
+</Aside>
+
+</TabItem>
+<TabItem label="Windows">
+
+<Steps>
+
+1. Run **[crowd-cast-setup.exe](https://github.com/p-doom/crowd-cast/releases/latest/download/crowd-cast-setup.exe)**. The installer places the app under your user profile, with no admin rights or UAC prompt required.
+
+2. **SmartScreen warning:** because the app isn't yet widely distributed, Windows may show *"Windows protected your PC"*. Click **More info**, then **Run anyway**.
+
+3. Choose your preferences (apps to record, start-at-login) and **sign in with Google**. See [First-run setup](/docs/crowd-cast/setup/) for details.
+
+4. On first launch, crowd-cast **downloads its capture components** automatically (one-time, needs internet). The app relaunches itself when done. This takes about 30 to 60 seconds.
+
+   <Aside type="caution">
+     Don't close the app during the first-launch download. If it is interrupted,
+     delete the install folder at `%LOCALAPPDATA%\Programs\crowd-cast` and re-run
+     the installer.
+   </Aside>
+
+5. After the relaunch, crowd-cast appears in your **system tray** (bottom-right, near the clock). Recording starts automatically.
+
+</Steps>
+
+</TabItem>
+<TabItem label="Linux">
+
+Linux support is **experimental**, and what works depends on your display server
+and compositor. Skim the [Linux guide](/docs/crowd-cast/linux/) (compatibility
+matrix, tray, and per-monitor notes) before relying on it.
+
+Packaged downloads aren't published for Linux yet, so for now you install from a
+checkout with the bundled script. It's a **user-space** install (into `~/.local`)
+that needs `sudo` only once, to add you to the `input` group.
+
+<Steps>
+
+1. Build the agent, then run the installer from your checkout:
+
+   ```bash
+   packaging/linux/install.sh --local
+   ```
+
+   This installs the agent and its bundled capture components under `~/.local`,
+   adds a menu entry, and enables start-at-login.
+
+2. The script adds you to the **`input`** group (the single `sudo` step, required
+   for input capture on Wayland). **Log out and back in** for it to take effect.
+
+3. Launch crowd-cast. On Wayland the desktop portal prompts you once per app to
+   share its window, and the tray needs an SNI host, so on Sway run **waybar**.
+   See the [Linux guide](/docs/crowd-cast/linux/) for the full picture.
+
+</Steps>
+
+</TabItem>
+</Tabs>
+
+## Next step
+
+Once installed, continue to **[First-run setup](/docs/crowd-cast/setup/)** to grant
+permissions, choose which apps to record, and sign in.

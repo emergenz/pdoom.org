@@ -1,0 +1,304 @@
+/* ============================================================
+ * p(doom) design system, applied to the crowd-cast docs.
+ * Implements the tokens and rules from the p(doom) handoff:
+ * strictly monochrome + a single ember accent, radius 0,
+ * 1px hairlines, no shadows, Lora / IBM Plex Sans / IBM Plex Mono,
+ * mono uppercase eyebrows. No colour beyond ember.
+ * ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --sl-font: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  --sl-font-mono: 'IBM Plex Mono', 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+  /* p(doom) palette */
+  --pd-ember: #b7361e;
+  --pd-ember-deep: #7e2010;
+  --pd-ember-bg: #f6e3df;
+  --pd-brass: #b49254;
+  --pd-patina: #5d6e63;
+
+  /* Expressive Code: square code frames, no shadow. */
+  --ec-brdRad: 0px;
+  --ec-frm-frameBoxShdCssVal: none;
+
+  /* Dark theme (default :root). void/ash, ember accent, paper text. */
+  --sl-color-accent-low: #3a1009;
+  --sl-color-accent: #b7361e;
+  --sl-color-accent-high: #f0c9c0;
+  --sl-color-white: #f7f4ea;        /* --paper, primary text */
+  --sl-color-gray-1: #eee9da;
+  --sl-color-gray-2: #cfc8b8;
+  --sl-color-gray-3: #a39c8e;
+  --sl-color-gray-4: #5a554c;
+  --sl-color-gray-5: #3d3a35;
+  --sl-color-gray-6: #2a2825;
+  --sl-color-gray-7: #1b1a18;
+  --sl-color-black: #0b0b0c;        /* --void surface */
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: #f6e3df;   /* --ember-bg */
+  --sl-color-accent: #b7361e;       /* --ember */
+  --sl-color-accent-high: #7e2010;  /* --ember-deep */
+  --sl-color-white: #161514;        /* --ink, primary text */
+  --sl-color-gray-1: #1b1a18;
+  --sl-color-gray-2: #3d3a35;
+  --sl-color-gray-3: #5a554c;
+  --sl-color-gray-4: #807a6e;
+  --sl-color-gray-5: #cfc8b8;
+  --sl-color-gray-6: #eee9da;
+  --sl-color-gray-7: #f1ede0;
+  --sl-color-black: #f7f4ea;        /* --paper surface */
+}
+
+::selection { background: var(--pd-ember); color: #f7f4ea; }
+
+/* ------------------------------------------------------------
+ * Type — serif (voice) / sans (substance) / mono (system)
+ * ------------------------------------------------------------ */
+
+/* Headlines are Lora, upright (italic is reserved for display sizes,
+   inline emphasis, and the wordmark — never mid-size headings). */
+.sl-markdown-content h1,
+.sl-markdown-content h2,
+.sl-markdown-content h3,
+.sl-markdown-content h4,
+.sl-markdown-content h5,
+h1,
+.content-panel h1 {
+  font-family: 'Lora', 'Adobe Garamond Pro', Georgia, serif;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.sl-markdown-content {
+  line-height: 1.7;
+}
+
+/* The page title — the lab keeps headings sober and upright. */
+.content-panel h1 {
+  font-weight: 600;
+}
+
+/* Site title / wordmark — the same Lora voice as the headings, in the
+   normal text colour (ink on light, paper on dark) — not the ember link
+   colour it would otherwise inherit. */
+.site-title {
+  font-family: 'Lora', 'Adobe Garamond Pro', Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  font-size: 1.25rem;
+  color: var(--sl-color-white);
+  gap: 0.5rem; /* tighter than the default --sl-nav-gap between sigil and wordmark */
+}
+
+/* The sidebar uses the default sans throughout — both the section headers
+   and the page links. Mono is reserved for terse systematic tokens; the
+   "mono nav" rule is about the marketing top-nav row, not the docs tree. */
+
+/* ------------------------------------------------------------
+ * Links — ember, with the underline thickening 1px -> 2px.
+ * ------------------------------------------------------------ */
+.sl-markdown-content a:not(:where(.not-content, .not-content *)) {
+  color: var(--pd-ember);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  transition: text-decoration-thickness 160ms cubic-bezier(0.2, 0, 0, 1),
+              color 160ms cubic-bezier(0.2, 0, 0, 1);
+}
+:root[data-theme='light'] .sl-markdown-content a:not(:where(.not-content, .not-content *)):hover {
+  color: var(--pd-ember-deep);
+}
+.sl-markdown-content a:not(:where(.not-content, .not-content *)):hover {
+  text-decoration-thickness: 2px;
+}
+
+/* ------------------------------------------------------------
+ * Borders & radii — architectural, rectilinear. Radius 0.
+ * ------------------------------------------------------------ */
+.sl-markdown-content :where(pre, table, img, .expressive-code, .expressive-code .frame, .expressive-code .frame pre),
+.card,
+.sl-link-card,
+dialog,
+.starlight-aside,
+input,
+button,
+[role='tablist'] {
+  border-radius: 0 !important;
+}
+
+/* Inline code may use the one small permitted radius (2px chips). */
+.sl-markdown-content code:not(:where(pre code, .expressive-code *)) {
+  font-family: var(--sl-font-mono);
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 2px;
+  padding: 0.1em 0.35em;
+  background: var(--sl-color-gray-7);
+}
+
+/* Code blocks: hairline framed, no shadow. */
+.expressive-code .frame {
+  box-shadow: none !important;
+}
+.sl-markdown-content pre {
+  border: 1px solid var(--sl-color-gray-5);
+}
+
+/* Cards & link-cards are hairline rectangles, no shadow. */
+.card,
+.sl-link-card {
+  border: 1px solid var(--sl-color-gray-5) !important;
+  box-shadow: none !important;
+  background: transparent;
+}
+
+/* ------------------------------------------------------------
+ * Asides — kept strictly monochrome + ember.
+ * Starlight's defaults are blue/purple/yellow/red; override them.
+ * The treatment is a quiet band with a left hairline accent and a
+ * mono uppercase eyebrow title.
+ * ------------------------------------------------------------ */
+.sl-markdown-content .starlight-aside {
+  border-inline-start-width: 2px;
+  border-radius: 0;
+  background-color: var(--sl-color-gray-7);
+}
+.starlight-aside__title {
+  font-family: var(--sl-font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+}
+/* The brand uses no callout icons — hide Starlight's aside glyph. */
+.starlight-aside__icon {
+  display: none;
+}
+.sl-markdown-content .starlight-aside--note,
+.sl-markdown-content .starlight-aside--tip {
+  --sl-color-asides-text-accent: var(--sl-color-white);
+  --sl-color-asides-border: var(--sl-color-gray-4);
+  border-inline-start-color: var(--sl-color-gray-4);
+}
+.sl-markdown-content .starlight-aside--caution,
+.sl-markdown-content .starlight-aside--danger {
+  --sl-color-asides-text-accent: var(--pd-ember);
+  --sl-color-asides-border: var(--pd-ember);
+  border-inline-start-color: var(--pd-ember);
+}
+
+/* ------------------------------------------------------------
+ * Tables — editorial "booktabs" style: horizontal hairlines only
+ * (no grid), mono uppercase headers, even padding, tabular figures.
+ * ------------------------------------------------------------ */
+.sl-markdown-content table {
+  border-collapse: collapse;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+.sl-markdown-content th {
+  font-family: var(--sl-font-mono);
+  font-weight: 500;
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sl-color-gray-2);
+}
+.sl-markdown-content :where(th, td) {
+  border: 0;
+  border-bottom: 1px solid var(--sl-color-gray-5);
+  padding: 0.6rem 1.1rem;
+  text-align: left;
+  vertical-align: baseline;
+}
+.sl-markdown-content thead th {
+  border-bottom: 1px solid var(--sl-color-gray-3);
+}
+.sl-markdown-content :where(th, td):first-child {
+  padding-inline-start: 0;
+}
+.sl-markdown-content :where(th, td):last-child {
+  padding-inline-end: 0;
+}
+
+/* Capability matrix — single-line cells, evenly aligned status dots;
+   scrolls horizontally only when the viewport genuinely can't fit it. */
+.cap-matrix {
+  overflow-x: auto;
+  margin-block: 1.25rem;
+}
+.cap-matrix table {
+  min-width: 46rem;
+}
+.cap-matrix :where(th, td) {
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.cap-matrix tbody td:first-child {
+  font-weight: 600;
+  padding-inline-end: 1.6rem;
+}
+/* The status dot sits in a fixed box so every label starts on the same line. */
+.cap-matrix .dot {
+  width: 1.2em;
+  text-align: center;
+}
+
+/* ------------------------------------------------------------
+ * Status dots — a single filled glyph in ember / brass / patina,
+ * per the design system (never a coloured emoji).
+ * ------------------------------------------------------------ */
+.dot {
+  font-family: var(--sl-font-mono);
+  display: inline-block;
+  width: 1em;
+  color: var(--pd-ember);
+}
+.dot.brass { color: var(--pd-brass); }
+.dot.patina { color: var(--pd-patina); }
+.dot.dim { color: var(--sl-color-gray-4); }
+
+/* ------------------------------------------------------------
+ * Buttons (LinkButton) — the brand's .btn: mono, uppercase, 1px
+ * border, radius 0, NO underline, ember on hover, 1px press shift.
+ * Primary is ink/paper (not Starlight's ember-on-ember). The
+ * doubled class beats Starlight's default specificity.
+ * ------------------------------------------------------------ */
+.sl-link-button.sl-link-button {
+  font-family: var(--sl-font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 0;
+}
+.sl-link-button.sl-link-button:active {
+  transform: translateY(1px);
+}
+.sl-link-button.sl-link-button.primary {
+  background: var(--sl-color-white);
+  color: var(--sl-color-black);
+  border: 1px solid var(--sl-color-white);
+}
+.sl-link-button.sl-link-button.primary:hover {
+  background: var(--pd-ember);
+  border-color: var(--pd-ember);
+  color: #f7f4ea;
+}
+.sl-link-button.sl-link-button.secondary,
+.sl-link-button.sl-link-button.minimal {
+  background: transparent;
+  color: var(--sl-color-white);
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 0;
+}
+.sl-link-button.sl-link-button.secondary:hover,
+.sl-link-button.sl-link-button.minimal:hover {
+  border-color: var(--pd-ember);
+  color: var(--pd-ember);
+  background: transparent;
+}
