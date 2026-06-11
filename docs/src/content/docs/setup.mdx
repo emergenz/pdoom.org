@@ -1,13 +1,15 @@
 ---
 title: First-run setup
-description: "The crowd-cast setup wizard: permissions, choosing apps to record, start-at-login, and signing in."
+description: "The crowd-cast setup wizard (permissions, apps to record, start-at-login), then signing in from the tray."
 ---
 
 import { Steps, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
 The first time you launch crowd-cast, a **setup wizard** opens automatically. It
 walks through three things: granting permissions, choosing which apps to record,
-and whether to start at login. After that, you sign in and you're recording.
+and whether to start at login. When it finishes, recording starts automatically;
+signing in (to attribute your contributions) is a separate step you do from the
+tray menu afterwards.
 
 The wizard also reopens automatically later if a required permission is missing.
 You can re-run it any time. See [re-running the wizard](/docs/crowd-cast/troubleshooting/#re-run-the-setup-wizard).
@@ -82,19 +84,21 @@ The wizard offers to **start crowd-cast automatically on login**. We recommend
 keeping this on so the agent runs whenever you log in without you having to
 remember to launch it.
 
-## 4. Sign in with Google
-
-When prompted, **sign in with Google**. This links your recordings to your
-account on the [dashboard](https://pdoom.org/crowd_cast_dashboard.html) so your
-contributions can be attributed to you. Without signing in, recordings can't be
-linked to you and won't appear on the dashboard.
-
-See [Account, uploads & dashboard](/docs/crowd-cast/account/) for how sign-in works
-and what it does.
-
 ## Done
 
 When you finish the wizard, the app restarts cleanly and its icon appears in
 your **menu bar** (macOS) or **system tray** (Windows/Linux). Recording starts
-automatically. Everything from here on is controlled from
+automatically.
+
+## Sign in with Google
+
+The wizard does **not** ask you to sign in. Once setup is finished and crowd-cast
+is running, open the tray menu and choose **Sign in with Google**. This links
+your recordings to your account on the
+[dashboard](https://pdoom.org/crowd_cast_dashboard.html) so your contributions
+can be attributed to you. Recording works whether or not you sign in, but without
+it your recordings can't be linked to you and won't appear on the dashboard.
+
+See [Account, uploads & dashboard](/docs/crowd-cast/account/) for how sign-in
+works and what it does. Everything from here on is controlled from
 [the tray menu](/docs/crowd-cast/tray/).

@@ -14,9 +14,11 @@ If your problem is a known limitation rather than a fix-it issue, check
 <Tabs syncKey="os">
 <TabItem label="macOS">
 
-The **Screen Recording** permission was denied or revoked. Open **System
-Settings → Privacy & Security → Screen Recording**, find CrowdCast and toggle it
-on. You may need to quit and relaunch the app.
+The **Screen Recording** permission was denied, revoked, or has gone stale. Open
+**System Settings → Privacy & Security → Screen Recording**. If CrowdCast is
+already listed, **remove it from the list** (select it and click the minus
+button), then **add it back**. On macOS this often works where simply toggling
+the switch does not. Quit and relaunch crowd-cast afterwards.
 
 </TabItem>
 <TabItem label="Windows">
@@ -41,8 +43,11 @@ and `_NET_ACTIVE_WINDOW`; most Wayland compositors capture full-screen.
 <Tabs syncKey="os">
 <TabItem label="macOS">
 
-Check that the app is running (Activity Monitor). If it is, the icon may be in
-the menu-bar overflow. Look for the arrow on the right side of the menu bar.
+First check that the app is running (Activity Monitor). If it is, the icon may be
+hidden because the menu bar is full: macOS has no overflow arrow, so when there
+isn't room for every icon (common on notch laptops) it simply doesn't show. Free
+up space by quitting other menu-bar apps or hiding their icons, or use a menu-bar
+manager such as Ice or Bartender to reveal hidden ones.
 
 </TabItem>
 <TabItem label="Windows">
