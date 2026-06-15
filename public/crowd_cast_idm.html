@@ -24,6 +24,17 @@
 </head>
 
 <body>
+    <!-- Paid-recording announcement. -->
+    <aside class="announce" id="announce-bar" aria-label="Announcement">
+        <a class="announce-inner" href="https://docs.google.com/forms/d/e/1FAIpQLSd50ZarNRKoIWDmy5xAn8K8FVGM2Jbk1T52er4YLHiP2P28rQ/viewform" target="_blank" rel="noopener">
+            <span class="announce-msg">
+                We pay <strong class="announce-figure">$300/month</strong> to record your screen for AI research.
+            </span>
+            <span class="announce-cta">Apply<span aria-hidden>→</span></span>
+        </a>
+        <button class="announce-close" type="button" aria-label="Dismiss announcement">×</button>
+    </aside>
+
     <header class="site-header" data-surface="void">
     <div class="container">
       <nav class="nav">
@@ -35,7 +46,7 @@
           <a href="/blog.html">Research</a>
           <a href="/about.html">About</a>
           <a href="/supply.html">Supply</a>
-          <a href="https://discord.gg/G4JNuPX2VR">Join</a>
+          <a href="/open_calls.html">Open calls</a>
         </div>
       </nav>
     </div>
@@ -45,8 +56,8 @@
   -->
   <d-front-matter>
     <script id='distill-front-matter' type="text/json">{
-    "title": "Action-Labeling Any Screencast with an Inverse Dynamics Model",
-    "description": "We train an inverse dynamics model on crowd-cast's paired screencast-action data that recovers key presses, mouse clicks, cursor movements and scroll events from raw video. Trained exclusively on macOS, it generalizes to Windows and Linux.",
+    "title": "Annotating Unlabeled Screencasts with an IDM",
+    "description": "We train an inverse dynamics model on crowd-cast's paired dataset, yielding a model that recovers key presses, mouse clicks, cursor movements and scroll events from unlabeled videos. Trained exclusively on macOS, it generalizes to Windows and Linux.",
     "published": "June 11, 2026",
     "url": "https://pdoom.org/crowd_cast_idm.html",
     "authors": [
@@ -86,7 +97,7 @@
   </d-front-matter>
   <d-title>
     <p>
-      We train an inverse dynamics model on <a href="https://pdoom.org/crowd_cast.html">crowd-cast</a>'s paired screencast-action data that recovers key presses, mouse clicks, cursor movements and scroll events from raw video. Trained exclusively on macOS, it generalizes to Windows and Linux.
+      We train an inverse dynamics model on <a href="https://pdoom.org/crowd_cast.html">crowd-cast</a>'s paired dataset, yielding a model that recovers key presses, mouse clicks, cursor movements and scroll events from unlabeled videos. Trained exclusively on macOS, it generalizes to Windows and Linux.
     </p>
   </d-title>
   <d-byline></d-byline>
@@ -1016,22 +1027,22 @@
          Pick the reader up at zero. Motivation → our data → IDM thesis.
          ============================================================ -->
     <a class="marker" href="#section-1" id="section-1"><span>1</span></a>
-    <h2>Environment maxxing until AGI??</h2>
+    <h2>Long-horizon data for long-horizon models</h2>
     <p>
-      The frontier is spending billions on handcrafted RL environments hoping to lengthen the task horizon to general intelligence.
-      Meanwhile, a billion people are producing months-long economically valuable trajectories of digital work, a data trove that remains entirely uncaptured.
-      We capture exactly this data in form of action-annotated screencasts, and subsequently behavior-clone models, lengthening their task horizon from hours to weeks, and months.
+      Frontier labs are spending billions on handcrafted RL environments hoping to lengthen the task horizon to general intelligence.
+      Meanwhile, a billion people produce months-long trajectories of economically valuable digital work.
+      We capture that data as action-annotated screencasts and use it to behavior-clone models towards longer task horizons.
     </p>
     <p>
-      Previously, we <a href="https://pdoom.org/agi_cast.html">openly released</a> over 600 hours of raw screencasts of AGI research.
-      However, raw screencasts alone are not enough to behavior-clone models.
+      Previously, we <a href="https://pdoom.org/agi_cast.html">openly released</a> over 600 hours of unlabeled screencasts of AGI research.
+      However, unlabeled screencasts alone are insufficent for behaviour-cloning.
       With <a href="https://pdoom.org/crowd_cast.html">crowd-cast</a>, our open-source recording tool, we started capturing paired data: screencasts with synchronized keylogs and mouse movement.
-      To date, we have collected over 2500 hours of paired recordings across dozens of contributors.
+      To date, we have collected 2500+ hours of paired recordings across dozens of contributors.
     </p>
     <p>
-      The crowd-cast recordings are high in quality and span months of continuous work on single projects. However, they are limited in breadth and diversity.
+      The crowd-cast recordings are from highly productive participants and span months of continuous work on single projects. However, they are limited in breadth and diversity.
       The internet, on the other hand, hosts thousands of hours of screencasts covering a far broader distribution of professions, applications and operating systems.
-      To tap into this larger but unlabeled trove, we need to recover the actions behind every frame. In this post we present the first version of our inverse dynamics model, which does exactly that.
+      To tap into this larger, unlabeled trove, we need to recover the actions behind frames. In this post we present the first version of our inverse dynamics model for this setting.
     </p>
 
     <!-- ============================================================
@@ -1039,7 +1050,7 @@
          Task formulation, architecture, training, data quality journey.
          ============================================================ -->
     <a class="marker" href="#section-2" id="section-2"><span>2</span></a>
-    <h2>Inverse Dynamics Model for general screencasts</h2>
+    <h2>IDM for unlabeled screencasts</h2>
     <p>
       When you watch a screencast, you can see text appearing in an editor, a cursor clicking a button, a page scrolling.
       The actions that produced these changes are recoverable: a human watching the recording can infer what was typed, what was clicked, and where the cursor moved.
@@ -1146,7 +1157,7 @@
       We manually curated <a href="https://huggingface.co/datasets/p-doom/idm-eval-set">44 macOS productivity clips</a> (5 seconds each at 5 fps) covering keystroke-heavy, click-heavy, scroll/drag, hotkey and mixed workflows, with hand-verified ground-truth actions.
       <!-- This was a laborious process but paid for itself many times over: it let us iterate on the action format, gauge what frontier models were already capable of zero-shot, catch failure modes before starting to train and offer a way to measure progress while iterating on the model. -->
       Each ground-truth action is annotated with a visibility class: <em>visible</em> (~91%, clear visual change in frames), <em>inferable</em> (~4%, deducible from context), or <em>not predictable</em> (~5%, no visual evidence at this frame rate).
-      Only visible and inferable actions count toward the score. 
+      Only visible and inferable actions count toward the score.
     </p>
     <p>
       Each clip is 25 frames, but the model only sees 10-frame sequences during training.
@@ -1453,4 +1464,18 @@
       </div>
     </div>
   </footer>
+    <script>
+      // Dismiss hides the bar for the current view only; it is not
+      // persisted, so a reload brings the announcement back.
+      (function () {
+        var bar = document.getElementById('announce-bar');
+        if (!bar) return;
+        var close = bar.querySelector('.announce-close');
+        if (close) {
+          close.addEventListener('click', function () {
+            bar.hidden = true;
+          });
+        }
+      })();
+    </script>
 </body>
