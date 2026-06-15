@@ -1,0 +1,1456 @@
+<!--
+  Copyright 2026 p(doom)
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!doctype html>
+
+<head>
+  <script src="template.v2.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf8">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="stylesheet" href="marketing.css">
+</head>
+
+<body>
+    <header class="site-header" data-surface="void">
+    <div class="container">
+      <nav class="nav">
+        <a class="brand" href="/">
+          <img class="sigil-img" src="logo-mark-inverted.png" alt="">
+          <span class="wm">p(doom)</span>
+        </a>
+        <div class="nav-links">
+          <a href="/blog.html">Research</a>
+          <a href="/about.html">About</a>
+          <a href="/supply.html">Supply</a>
+          <a href="https://discord.gg/G4JNuPX2VR">Join</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+<!--
+  <distill-header></distill-header>
+  -->
+  <d-front-matter>
+    <script id='distill-front-matter' type="text/json">{
+    "title": "Action-Labeling Any Screencast with an Inverse Dynamics Model",
+    "description": "We train an inverse dynamics model on crowd-cast's paired screencast-action data that recovers key presses, mouse clicks, cursor movements and scroll events from raw video. Trained exclusively on macOS, it generalizes to Windows and Linux.",
+    "published": "June 11, 2026",
+    "url": "https://pdoom.org/crowd_cast_idm.html",
+    "authors": [
+      {
+        "author":"Mihir Mahajan",
+        "equalContrib": true,
+        "authorURL":"https://maharajamihir.github.io/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
+                         {"name": "TUM"}]
+      },
+      {
+        "author":"Franz Srambical",
+        "equalContrib": true,
+        "authorURL":"https://srambical.fr/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
+                         {"name": "TUM"}]
+      },
+      {
+        "author":"Alfred Nguyen",
+        "equalContrib": true,
+        "authorURL":"https://avocadoali.github.io/",
+        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"},
+                         {"name": "TUM"}]
+      },
+      {
+        "author":"Stefan Bauer",
+        "authorURL":"https://www.professoren.tum.de/en/bauer-stefan",
+        "affiliations": [{"name": "TUM"}]
+      }
+    ],
+    "katex": {
+      "delimiters": [
+        {"left": "$$", "right": "$$", "display": false}
+      ]
+    }
+  }</script>
+  </d-front-matter>
+  <d-title>
+    <p>
+      We train an inverse dynamics model on <a href="https://pdoom.org/crowd_cast.html">crowd-cast</a>'s paired screencast-action data that recovers key presses, mouse clicks, cursor movements and scroll events from raw video. Trained exclusively on macOS, it generalizes to Windows and Linux.
+    </p>
+  </d-title>
+  <d-byline></d-byline>
+  <d-article>
+
+    <!-- ============================================================
+         INTERACTIVE DEMO
+         ============================================================ -->
+    <figure style="grid-column: page; margin: 0 0 2rem 0;">
+      <div id="idm-demo"></div>
+      <figcaption style="grid-column: page; text-align: center; margin-top: 0.5rem; font-size: 0.8em; color: var(--ash-600, #5A554C);">Interactive demo: the model watches a screencast and recovers every user action. Loops automatically; click to interact.</figcaption>
+    </figure>
+
+    <style>
+      /* ── IDM Demo v2 — all styles scoped under #idm-demo ── */
+      #idm-demo {
+        width: 100%;
+        border: 1px solid var(--ash-300, #CFC8B8);
+        border-radius: 2px;
+        background: var(--paper, #F7F4EA);
+        font-family: var(--font-mono, monospace);
+        font-size: 12px;
+        color: var(--ink, #161514);
+        overflow: hidden;
+      }
+      #idm-demo * { box-sizing: border-box; }
+
+      /* ── Main grid: left (canvas + carousel) | right (compass + scroll) ── */
+      #idm-demo .idm-main {
+        display: flex;
+        flex-direction: row;
+      }
+      #idm-demo .idm-left {
+        flex: 1 1 75%;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      #idm-demo .idm-right {
+        flex: 0 0 25%;
+        min-width: 120px;
+        max-width: 180px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-left: 1px solid var(--ash-300, #CFC8B8);
+        background: var(--ash-100, #EEE9DA);
+        padding: 12px 8px;
+        gap: 10px;
+      }
+
+      /* ── Video canvas ── */
+      #idm-demo .idm-canvas-wrap {
+        background: var(--ink, #161514);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+      #idm-demo .idm-canvas-wrap canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      /* ── Keystroke Carousel ── */
+      #idm-demo .idm-carousel-bar {
+        height: 44px;
+        overflow: hidden;
+        position: relative;
+        background: var(--ash-100, #EEE9DA);
+        border-top: 1px solid var(--ash-300, #CFC8B8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #idm-demo .idm-carousel-track {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: transform 0.3s ease;
+        will-change: transform;
+      }
+      #idm-demo .idm-carousel-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        flex-shrink: 0;
+      }
+      #idm-demo .idm-carousel-sep {
+        width: 1px;
+        height: 18px;
+        background: var(--ash-300, #CFC8B8);
+        flex-shrink: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      /* ── Keycap (mechanical keyboard look) ── */
+      #idm-demo .idm-keycap {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 12px;
+        min-width: 34px;
+        border-radius: 5px;
+        font-family: var(--font-mono, monospace);
+        font-size: 15px;
+        font-weight: 500;
+        background: var(--paper, #F7F4EA);
+        border: 1px solid var(--ash-400, #A39C8E);
+        border-bottom: 3px solid var(--ash-500, #807A6E);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+        white-space: nowrap;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        color: var(--ink, #161514);
+        line-height: 1.2;
+      }
+      #idm-demo .idm-keycap.idm-fp {
+        color: var(--ember, #B7361E);
+        border-color: var(--ember, #B7361E);
+        border-bottom-color: #7E2010;
+        background: rgba(183,54,30,0.06);
+      }
+
+      /* ── Compass (right panel, top) ── */
+      #idm-demo .idm-compass-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+      #idm-demo .idm-compass-label {
+        font-size: 8px;
+        font-weight: 600;
+        color: var(--ash-500, #807A6E);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      #idm-demo .idm-compass-canvas {
+        border: 1px solid var(--ash-300, #CFC8B8);
+        border-radius: 2px;
+        background: var(--paper, #F7F4EA);
+      }
+      #idm-demo .idm-compass-detail {
+        font-size: 9px;
+        color: var(--ash-600, #5A554C);
+        text-align: center;
+        min-height: 14px;
+      }
+
+      /* ── Scroll indicator (right panel, below compass) ── */
+      #idm-demo .idm-scroll-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 32px;
+      }
+      #idm-demo .idm-scroll-placeholder {
+        font-size: 10px;
+        color: var(--ash-400, #A39C8E);
+        font-style: italic;
+      }
+
+      /* ── Transport bar ── */
+      #idm-demo .idm-transport {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 10px;
+        border-top: 1px solid var(--ash-300, #CFC8B8);
+        background: var(--ash-100, #EEE9DA);
+        flex-wrap: nowrap;
+      }
+      #idm-demo .idm-btn {
+        background: none;
+        border: 1px solid var(--ash-300, #CFC8B8);
+        border-radius: 2px;
+        font-family: var(--font-mono, monospace);
+        font-size: 13px;
+        color: var(--ink, #161514);
+        cursor: pointer;
+        padding: 2px 8px;
+        line-height: 1.4;
+        transition: background 0.15s;
+      }
+      #idm-demo .idm-btn:hover {
+        background: var(--ash-200, #E2DCCC);
+      }
+      #idm-demo .idm-scrubber {
+        flex: 1;
+        -webkit-appearance: none;
+        appearance: none;
+        height: 4px;
+        background: var(--ash-300, #CFC8B8);
+        border-radius: 2px;
+        outline: none;
+        cursor: pointer;
+      }
+      #idm-demo .idm-scrubber::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 12px; height: 12px;
+        border-radius: 50%;
+        background: var(--ember, #B7361E);
+        border: none;
+        cursor: pointer;
+      }
+      #idm-demo .idm-scrubber::-moz-range-thumb {
+        width: 12px; height: 12px;
+        border-radius: 50%;
+        background: var(--ember, #B7361E);
+        border: none;
+        cursor: pointer;
+      }
+      #idm-demo .idm-frame-counter {
+        font-size: 11px;
+        color: var(--ash-600, #5A554C);
+        white-space: nowrap;
+        min-width: 60px;
+        text-align: center;
+      }
+      #idm-demo .idm-tag-badge {
+        display: inline-block;
+        padding: 1px 6px;
+        border-radius: 2px;
+        font-size: 10px;
+        font-weight: 500;
+        background: var(--ash-200, #E2DCCC);
+        color: var(--ash-700, #3D3A35);
+        white-space: nowrap;
+      }
+      #idm-demo .idm-clip-nav {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-left: auto;
+      }
+      #idm-demo .idm-clip-nav .idm-btn {
+        font-size: 11px;
+        padding: 2px 6px;
+      }
+
+      /* ── Loading state ── */
+      #idm-demo .idm-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 340px;
+        color: var(--ash-500, #807A6E);
+        font-size: 13px;
+      }
+
+      /* ── Mobile: stacked ── */
+      @media (max-width: 767px) {
+        #idm-demo .idm-main {
+          flex-direction: column;
+        }
+        #idm-demo .idm-right {
+          flex: none;
+          max-width: none;
+          flex-direction: row;
+          border-left: none;
+          border-top: 1px solid var(--ash-300, #CFC8B8);
+          padding: 8px 12px;
+          justify-content: center;
+          gap: 20px;
+        }
+        #idm-demo .idm-left {
+          flex: none;
+        }
+      }
+    </style>
+
+    <script>
+    (function() {
+      'use strict';
+
+      /* ── Config ── */
+      var BEST_CLIP_IDS = {
+        'clip_004_keystroke-heavy': 'clips_recording_03e773da-0d27-45a9-a3bb-3cfad231c0e1_seg0002/clip_004_keystroke-heavy',
+        'clip_000_click-heavy': 'clips_recording_38327113-5c36-432c-ab71-7a70bcde4d99_seg0004/clip_000_click-heavy',
+        'clip_002_scroll_drag': 'clips_recording_ab85322d-1f5e-4acb-91fe-f0dc3b7139d9_seg0002/clip_002_scroll_drag',
+        'clip_003_hotkeys': 'clips_recording_654338eb-292a-4c63-9d35-2a8625a9c440_seg0001/clip_003_hotkeys',
+        'clip_006_mixed': 'clips_recording_03e773da-0d27-45a9-a3bb-3cfad231c0e1_seg0002/clip_006_mixed',
+        'clip_004_hard-case': 'clips_recording_b4f34cf9-bc3f-4d45-944f-aea11f609d4d_seg0002/clip_004_hard-case'
+      };
+      var DEMO_CLIP_ORDER = [
+        'clip_004_keystroke-heavy',
+        'clip_003_hotkeys',
+        'clip_006_mixed',
+        'clip_004_hard-case'
+      ];
+      var PAUSE_BETWEEN_CLIPS_MS = 1500;
+      var BASE_PATH = 'idm-demo/';
+
+      var root = document.getElementById('idm-demo');
+      root.innerHTML = '<div class="idm-loading">Loading demo\u2026</div>';
+
+      function escHTML(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      }
+
+      /* ── Fetch manifest and boot ── */
+      fetch(BASE_PATH + 'manifest.json')
+        .then(function(r) { return r.json(); })
+        .then(function(manifest) {
+          var clips = [];
+          DEMO_CLIP_ORDER.forEach(function(suffix) {
+            var bestId = BEST_CLIP_IDS[suffix];
+            var found = manifest.clips.find(function(c) { return c.clip_id === bestId; });
+            if (found) clips.push(found);
+          });
+          if (clips.length === 0) {
+            root.innerHTML = '<div class="idm-loading">No matching clips found.</div>';
+            return;
+          }
+          boot(clips);
+        })
+        .catch(function(err) {
+          root.innerHTML = '<div class="idm-loading">Failed to load demo data.</div>';
+          console.error('IDM demo error:', err);
+        });
+
+      /* ── Build carousel data for a clip ── */
+      function buildCarouselData(clip) {
+        var modelName = Object.keys(clip.models)[0];
+        if (!modelName) return { groups: [], flatItems: [] };
+        var preds = clip.models[modelName].predictions;
+
+        /* Flat array of non-MouseMove predictions */
+        var flat = [];
+        preds.forEach(function(p) {
+          if (p.type === 'MouseMove') return;
+          flat.push({
+            frame: p.frame,
+            type: p.type,
+            detail: p.detail,
+            matched: p.matched
+          });
+        });
+
+        /* Group by frame */
+        var groupMap = {};
+        var groupOrder = [];
+        flat.forEach(function(item) {
+          if (!groupMap[item.frame]) {
+            groupMap[item.frame] = [];
+            groupOrder.push(item.frame);
+          }
+          groupMap[item.frame].push(item);
+        });
+
+        var groups = groupOrder.map(function(f) {
+          return { frame: f, items: groupMap[f] };
+        });
+
+        return { groups: groups, flatItems: flat };
+      }
+
+      /* ── Format keycap text ── */
+      function keycapText(type, detail) {
+        if (type === 'KeyPress') return detail;
+        if (type === 'MouseClick') {
+          if (detail === 'Left') return 'Left Click';
+          if (detail === 'Right') return 'Right Click';
+          if (detail === 'Middle') return 'Middle Click';
+          return detail + ' Click';
+        }
+        /* MouseScroll should not appear in carousel, but just in case */
+        return detail;
+      }
+
+      /* ── Boot the demo ── */
+      function boot(clips) {
+        root.innerHTML = '';
+
+        /* ── Build DOM ── */
+
+        /* Main row: left + right */
+        var main = document.createElement('div');
+        main.className = 'idm-main';
+
+        /* Left column: canvas + carousel */
+        var left = document.createElement('div');
+        left.className = 'idm-left';
+
+        var canvasWrap = document.createElement('div');
+        canvasWrap.className = 'idm-canvas-wrap';
+        var canvas = document.createElement('canvas');
+        canvasWrap.appendChild(canvas);
+        left.appendChild(canvasWrap);
+
+        /* Carousel bar */
+        var carouselBar = document.createElement('div');
+        carouselBar.className = 'idm-carousel-bar';
+        var carouselTrack = document.createElement('div');
+        carouselTrack.className = 'idm-carousel-track';
+        carouselBar.appendChild(carouselTrack);
+        left.appendChild(carouselBar);
+
+        main.appendChild(left);
+
+        /* Right column: compass + scroll */
+        var right = document.createElement('div');
+        right.className = 'idm-right';
+
+        var compassSection = document.createElement('div');
+        compassSection.className = 'idm-compass-section';
+        var compassLabel = document.createElement('div');
+        compassLabel.className = 'idm-compass-label';
+        compassLabel.textContent = 'CURSOR';
+        compassSection.appendChild(compassLabel);
+        var compassCanvas = document.createElement('canvas');
+        compassCanvas.className = 'idm-compass-canvas';
+        compassCanvas.width = 160;
+        compassCanvas.height = 160;
+        compassSection.appendChild(compassCanvas);
+        var compassDetail = document.createElement('div');
+        compassDetail.className = 'idm-compass-detail';
+        compassSection.appendChild(compassDetail);
+        right.appendChild(compassSection);
+
+        var scrollIndicator = document.createElement('div');
+        scrollIndicator.className = 'idm-scroll-indicator';
+        right.appendChild(scrollIndicator);
+
+        main.appendChild(right);
+        root.appendChild(main);
+
+        /* Transport */
+        var transport = document.createElement('div');
+        transport.className = 'idm-transport';
+
+        var playBtn = document.createElement('button');
+        playBtn.className = 'idm-btn';
+        playBtn.textContent = '\u25B6';
+        playBtn.title = 'Play / Pause (Space)';
+        transport.appendChild(playBtn);
+
+        var scrubber = document.createElement('input');
+        scrubber.type = 'range';
+        scrubber.className = 'idm-scrubber';
+        scrubber.min = '0';
+        scrubber.value = '0';
+        transport.appendChild(scrubber);
+
+        var frameCounter = document.createElement('span');
+        frameCounter.className = 'idm-frame-counter';
+        transport.appendChild(frameCounter);
+
+        var clipNav = document.createElement('div');
+        clipNav.className = 'idm-clip-nav';
+
+        var prevBtn = document.createElement('button');
+        prevBtn.className = 'idm-btn';
+        prevBtn.textContent = '\u25C4';
+        prevBtn.title = 'Previous clip (Up)';
+        clipNav.appendChild(prevBtn);
+
+        var tagBadge = document.createElement('span');
+        tagBadge.className = 'idm-tag-badge';
+        clipNav.appendChild(tagBadge);
+
+        var nextBtn = document.createElement('button');
+        nextBtn.className = 'idm-btn';
+        nextBtn.textContent = '\u25BA';
+        nextBtn.title = 'Next clip (Down)';
+        clipNav.appendChild(nextBtn);
+
+        transport.appendChild(clipNav);
+        root.appendChild(transport);
+
+        /* ── State ── */
+        var currentClipIdx = 0;
+        var currentFrame = 0;
+        var playing = false;
+        var autoplay = true;
+        var lastFrameTime = 0;
+        var animId = null;
+        var spriteImages = {};
+        var carouselCache = {};
+        var cursorTrails = {};
+        var pauseTimeout = null;
+
+        var ctx = canvas.getContext('2d');
+
+        function buildCursorTrail(clip) {
+          var modelName = Object.keys(clip.models)[0];
+          var preds = clip.models[modelName].predictions;
+          var trail = [];
+          var x = 0, y = 0;
+          for (var f = 0; f < clip.num_frames; f++) {
+            trail.push({ x: x, y: y });
+            var move = null;
+            for (var i = 0; i < preds.length; i++) {
+              if (preds[i].frame === f && preds[i].type === 'MouseMove') { move = preds[i]; break; }
+            }
+            if (move) {
+              var parts = String(move.detail || move.details).split(',');
+              if (parts.length === 2) { x += (+parts[0]) / 1000; y += (+parts[1]) / 1000; }
+            }
+          }
+          return trail;
+        }
+
+        /* ── Preload sprites ── */
+        var loadCount = 0;
+        clips.forEach(function(clip) {
+          var img = new Image();
+          img.onload = function() {
+            spriteImages[clip.clip_id] = img;
+            loadCount++;
+            if (loadCount === clips.length) {
+              setClip(0);
+              autoplay = true;
+              playing = true;
+              playBtn.textContent = '\u23F8';
+              lastFrameTime = performance.now();
+              animId = requestAnimationFrame(tick);
+            }
+          };
+          img.onerror = function() {
+            loadCount++;
+            if (loadCount === clips.length) setClip(0);
+          };
+          img.src = BASE_PATH + clip.sprite;
+          carouselCache[clip.clip_id] = buildCarouselData(clip);
+          cursorTrails[clip.clip_id] = buildCursorTrail(clip);
+        });
+
+        /* ── Canvas sizing via ResizeObserver ── */
+        function sizeCanvas(clip) {
+          var w = canvasWrap.clientWidth;
+          var aspect = clip.frame_h / clip.frame_w;
+          var h = Math.round(w * aspect);
+          canvas.style.width = w + 'px';
+          canvas.style.height = h + 'px';
+          canvas.width = clip.frame_w;
+          canvas.height = clip.frame_h;
+        }
+
+        var resizeObs = new ResizeObserver(function() {
+          if (clips[currentClipIdx]) {
+            sizeCanvas(clips[currentClipIdx]);
+            drawFrame();
+            slideCarousel();
+          }
+        });
+        resizeObs.observe(canvasWrap);
+
+        /* ── Draw sprite frame ── */
+        function drawFrame() {
+          var clip = clips[currentClipIdx];
+          if (!clip) return;
+          var img = spriteImages[clip.clip_id];
+          if (!img) {
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            return;
+          }
+          var col = currentFrame % clip.grid_cols;
+          var row = Math.floor(currentFrame / clip.grid_cols);
+          var sx = col * clip.frame_w;
+          var sy = row * clip.frame_h;
+          ctx.drawImage(img, sx, sy, clip.frame_w, clip.frame_h, 0, 0, clip.frame_w, clip.frame_h);
+        }
+
+        /* ── Render compass as cursor trail ── */
+        function renderCompass() {
+          var clip = clips[currentClipIdx];
+          if (!clip) return;
+          var trail = cursorTrails[clip.clip_id];
+          if (!trail) return;
+          var cctx = compassCanvas.getContext('2d');
+          var W = compassCanvas.width, H = compassCanvas.height;
+          var cx = W / 2, cy = H / 2;
+          var pad = 10;
+
+          cctx.clearRect(0, 0, W, H);
+
+          /* Faint crosshair */
+          cctx.strokeStyle = 'rgba(0,0,0,0.06)';
+          cctx.lineWidth = 1;
+          cctx.beginPath();
+          cctx.moveTo(cx, pad); cctx.lineTo(cx, H - pad);
+          cctx.moveTo(pad, cy); cctx.lineTo(W - pad, cy);
+          cctx.stroke();
+
+          /* Scale to fit all trail points */
+          var maxExt = 0.01;
+          for (var i = 0; i < trail.length; i++) {
+            maxExt = Math.max(maxExt, Math.abs(trail[i].x), Math.abs(trail[i].y));
+          }
+          var scale = (W / 2 - pad) / (maxExt * 1.15);
+
+          /* Full trail faintly (future context) */
+          cctx.strokeStyle = 'rgba(0,0,0,0.05)';
+          cctx.lineWidth = 1;
+          cctx.beginPath();
+          cctx.moveTo(cx + trail[0].x * scale, cy + trail[0].y * scale);
+          for (var j = 1; j < trail.length; j++) {
+            cctx.lineTo(cx + trail[j].x * scale, cy + trail[j].y * scale);
+          }
+          cctx.stroke();
+
+          /* Trail up to current frame, fading */
+          var TRAIL_LEN = 8;
+          var startF = Math.max(0, currentFrame - TRAIL_LEN);
+          for (var k = startF; k < currentFrame; k++) {
+            var age = currentFrame - k;
+            var alpha = Math.max(0.08, 1 - (age / TRAIL_LEN) * 0.85);
+            var lw = Math.max(1, 2.5 - (age / TRAIL_LEN) * 1.5);
+            cctx.strokeStyle = 'rgba(93, 110, 99, ' + alpha + ')';
+            cctx.lineWidth = lw;
+            cctx.beginPath();
+            cctx.moveTo(cx + trail[k].x * scale, cy + trail[k].y * scale);
+            cctx.lineTo(cx + trail[k + 1].x * scale, cy + trail[k + 1].y * scale);
+            cctx.stroke();
+          }
+
+          /* Start dot */
+          cctx.fillStyle = 'rgba(0,0,0,0.15)';
+          cctx.beginPath();
+          cctx.arc(cx + trail[0].x * scale, cy + trail[0].y * scale, 2, 0, Math.PI * 2);
+          cctx.fill();
+
+          /* Current position dot (ember) */
+          var cur = trail[currentFrame];
+          cctx.fillStyle = '#B7361E';
+          cctx.beginPath();
+          cctx.arc(cx + cur.x * scale, cy + cur.y * scale, 4, 0, Math.PI * 2);
+          cctx.fill();
+          cctx.fillStyle = '#fff';
+          cctx.beginPath();
+          cctx.arc(cx + cur.x * scale, cy + cur.y * scale, 1.5, 0, Math.PI * 2);
+          cctx.fill();
+
+          /* Detail text */
+          var modelName = Object.keys(clip.models)[0];
+          var preds = clip.models[modelName].predictions;
+          var predMove = null;
+          for (var m = 0; m < preds.length; m++) {
+            if (preds[m].frame === currentFrame && preds[m].type === 'MouseMove') { predMove = preds[m]; break; }
+          }
+          compassDetail.textContent = predMove ? (predMove.detail || predMove.details) : '';
+        }
+
+        /* ── Render scroll indicator ── */
+        function renderScrollIndicator() {
+          var clip = clips[currentClipIdx];
+          if (!clip) return;
+          var modelName = Object.keys(clip.models)[0];
+          var preds = clip.models[modelName].predictions;
+          var scrollPred = null;
+          for (var i = 0; i < preds.length; i++) {
+            if (preds[i].frame === currentFrame && preds[i].type === 'MouseScroll') {
+              scrollPred = preds[i];
+              break;
+            }
+          }
+
+          if (!scrollPred) {
+            scrollIndicator.innerHTML = '<span class="idm-scroll-placeholder">no scroll</span>';
+            return;
+          }
+
+          var val = parseInt(scrollPred.detail, 10) || 0;
+          var arrow = val > 0 ? '\u2193' : '\u2191';
+          var mag = Math.abs(val);
+          var text = arrow + ' ' + mag;
+          var cls = 'idm-keycap' + (scrollPred.matched ? '' : ' idm-fp');
+          scrollIndicator.innerHTML = '<span class="' + cls + '" style="font-size:12px;padding:3px 8px;">' + escHTML(text) + '</span>';
+        }
+
+        /* ── Build carousel DOM for current clip ── */
+        var carouselElements = []; /* { frame, el } for each group/sep */
+        function buildCarouselDOM() {
+          carouselTrack.innerHTML = '';
+          carouselElements = [];
+          var data = carouselCache[clips[currentClipIdx].clip_id];
+          if (!data || data.groups.length === 0) return;
+
+          var lastFrame = -1;
+          data.groups.forEach(function(group) {
+            /* Insert separators for frame gaps */
+            if (lastFrame >= 0 && group.frame > lastFrame + 1) {
+              var sep = document.createElement('div');
+              sep.className = 'idm-carousel-sep';
+              carouselTrack.appendChild(sep);
+              /* Assign to midpoint frame for distance calc */
+              carouselElements.push({ frame: Math.floor((lastFrame + group.frame) / 2), el: sep, isSep: true });
+            }
+
+            var groupEl = document.createElement('div');
+            groupEl.className = 'idm-carousel-group';
+            groupEl.setAttribute('data-frame', group.frame);
+
+            group.items.forEach(function(item) {
+              var cap = document.createElement('span');
+              cap.className = 'idm-keycap' + (item.matched ? '' : ' idm-fp');
+              cap.textContent = keycapText(item.type, item.detail);
+              groupEl.appendChild(cap);
+            });
+
+            carouselTrack.appendChild(groupEl);
+            carouselElements.push({ frame: group.frame, el: groupEl, isSep: false });
+            lastFrame = group.frame;
+          });
+        }
+
+        /* ── Slide carousel to center current frame ── */
+        function slideCarousel() {
+          if (carouselElements.length === 0) {
+            carouselTrack.style.transform = 'translateX(0px)';
+            return;
+          }
+
+          var barW = carouselBar.clientWidth;
+          var barCenter = barW / 2;
+
+          /* Find the group closest to current frame */
+          var bestIdx = 0;
+          var bestDist = Infinity;
+          carouselElements.forEach(function(ce, i) {
+            if (ce.isSep) return;
+            var d = Math.abs(ce.frame - currentFrame);
+            if (d < bestDist) { bestDist = d; bestIdx = i; }
+          });
+
+          /* Calculate offset to center that group */
+          var targetEl = carouselElements[bestIdx].el;
+          var elLeft = targetEl.offsetLeft;
+          var elW = targetEl.offsetWidth;
+          var elCenter = elLeft + elW / 2;
+          var tx = barCenter - elCenter;
+          carouselTrack.style.transform = 'translateX(' + tx + 'px)';
+
+          /* Apply scale + opacity based on frame distance */
+          carouselElements.forEach(function(ce) {
+            var dist = Math.abs(ce.frame - currentFrame);
+            var scale, opacity;
+            if (dist === 0) {
+              scale = 1; opacity = 1;
+            } else if (dist === 1) {
+              scale = 0.85; opacity = 0.65;
+            } else if (dist === 2) {
+              scale = 0.7; opacity = 0.35;
+            } else {
+              scale = 0.6; opacity = 0.15;
+            }
+
+            if (ce.isSep) {
+              ce.el.style.opacity = opacity;
+            } else {
+              ce.el.style.transform = 'scale(' + scale + ')';
+              ce.el.style.opacity = opacity;
+            }
+          });
+        }
+
+        /* ── Update all visuals for current frame ── */
+        function updateVisuals() {
+          drawFrame();
+          renderCompass();
+          renderScrollIndicator();
+          slideCarousel();
+          updateUI();
+        }
+
+        /* ── Set clip ── */
+        function setClip(idx) {
+          currentClipIdx = idx;
+          currentFrame = 0;
+          var clip = clips[idx];
+          scrubber.max = String(clip.num_frames - 1);
+          scrubber.value = '0';
+          tagBadge.textContent = clip.tag;
+          sizeCanvas(clip);
+          buildCarouselDOM();
+          updateVisuals();
+        }
+
+        /* ── Update UI state ── */
+        function updateUI() {
+          var clip = clips[currentClipIdx];
+          var fStr = 'F' + String(currentFrame).padStart(2, '0') + ' / ' + (clip.num_frames - 1);
+          frameCounter.textContent = fStr;
+          scrubber.value = String(currentFrame);
+        }
+
+        /* ── Animation tick ── */
+        function tick(now) {
+          if (!playing) return;
+          var clip = clips[currentClipIdx];
+          var interval = 1000 / (clip.fps * 0.75);
+
+          if (now - lastFrameTime >= interval) {
+            lastFrameTime = now;
+            if (currentFrame < clip.num_frames - 1) {
+              currentFrame++;
+              updateVisuals();
+            } else {
+              if (autoplay) {
+                playing = false;
+                playBtn.textContent = '\u25B6';
+                pauseTimeout = setTimeout(function() {
+                  var nextIdx = (currentClipIdx + 1) % clips.length;
+                  setClip(nextIdx);
+                  playing = true;
+                  playBtn.textContent = '\u23F8';
+                  lastFrameTime = performance.now();
+                  animId = requestAnimationFrame(tick);
+                }, PAUSE_BETWEEN_CLIPS_MS);
+                return;
+              } else {
+                playing = false;
+                playBtn.textContent = '\u25B6';
+              }
+            }
+          }
+          animId = requestAnimationFrame(tick);
+        }
+
+        /* ── User interaction pauses autoplay ── */
+        function userInteract() {
+          autoplay = false;
+          if (pauseTimeout) {
+            clearTimeout(pauseTimeout);
+            pauseTimeout = null;
+          }
+        }
+
+        /* ── Controls ── */
+        function togglePlay() {
+          if (playing) {
+            playing = false;
+            playBtn.textContent = '\u25B6';
+          } else {
+            playing = true;
+            playBtn.textContent = '\u23F8';
+            lastFrameTime = performance.now();
+            animId = requestAnimationFrame(tick);
+          }
+        }
+
+        playBtn.addEventListener('click', function() {
+          userInteract();
+          togglePlay();
+        });
+
+        scrubber.addEventListener('input', function() {
+          userInteract();
+          playing = false;
+          playBtn.textContent = '\u25B6';
+          currentFrame = parseInt(scrubber.value, 10);
+          updateVisuals();
+        });
+
+        prevBtn.addEventListener('click', function() {
+          userInteract();
+          playing = false;
+          playBtn.textContent = '\u25B6';
+          var idx = (currentClipIdx - 1 + clips.length) % clips.length;
+          setClip(idx);
+        });
+
+        nextBtn.addEventListener('click', function() {
+          userInteract();
+          playing = false;
+          playBtn.textContent = '\u25B6';
+          var idx = (currentClipIdx + 1) % clips.length;
+          setClip(idx);
+        });
+
+        /* ── Keyboard ── */
+        document.addEventListener('keydown', function(e) {
+          var rect = root.getBoundingClientRect();
+          var inView = rect.top < window.innerHeight && rect.bottom > 0;
+          if (!inView) return;
+
+          if (e.code === 'Space' && !e.target.matches('input,textarea,button,select')) {
+            e.preventDefault();
+            userInteract();
+            togglePlay();
+          } else if (e.code === 'ArrowRight') {
+            e.preventDefault();
+            userInteract();
+            playing = false;
+            playBtn.textContent = '\u25B6';
+            var clip = clips[currentClipIdx];
+            if (currentFrame < clip.num_frames - 1) {
+              currentFrame++;
+              updateVisuals();
+            }
+          } else if (e.code === 'ArrowLeft') {
+            e.preventDefault();
+            userInteract();
+            playing = false;
+            playBtn.textContent = '\u25B6';
+            if (currentFrame > 0) {
+              currentFrame--;
+              updateVisuals();
+            }
+          } else if (e.code === 'ArrowUp') {
+            e.preventDefault();
+            userInteract();
+            playing = false;
+            playBtn.textContent = '\u25B6';
+            var idx = (currentClipIdx - 1 + clips.length) % clips.length;
+            setClip(idx);
+          } else if (e.code === 'ArrowDown') {
+            e.preventDefault();
+            userInteract();
+            playing = false;
+            playBtn.textContent = '\u25B6';
+            var idx2 = (currentClipIdx + 1) % clips.length;
+            setClip(idx2);
+          }
+        });
+      }
+    })();
+    </script>
+
+    <!-- ============================================================
+         §1  WHY + CONTEXT
+         Pick the reader up at zero. Motivation → our data → IDM thesis.
+         ============================================================ -->
+    <a class="marker" href="#section-1" id="section-1"><span>1</span></a>
+    <h2>Environment maxxing until AGI??</h2>
+    <p>
+      The frontier is spending billions on handcrafted RL environments hoping to lengthen the task horizon to general intelligence.
+      Meanwhile, a billion people are producing months-long economically valuable trajectories of digital work, a data trove that remains entirely uncaptured.
+      We capture exactly this data in form of action-annotated screencasts, and subsequently behavior-clone models, lengthening their task horizon from hours to weeks, and months.
+    </p>
+    <p>
+      Previously, we <a href="https://pdoom.org/agi_cast.html">openly released</a> over 600 hours of raw screencasts of AGI research.
+      However, raw screencasts alone are not enough to behavior-clone models.
+      With <a href="https://pdoom.org/crowd_cast.html">crowd-cast</a>, our open-source recording tool, we started capturing paired data: screencasts with synchronized keylogs and mouse movement.
+      To date, we have collected over 2500 hours of paired recordings across dozens of contributors.
+    </p>
+    <p>
+      The crowd-cast recordings are high in quality and span months of continuous work on single projects. However, they are limited in breadth and diversity.
+      The internet, on the other hand, hosts thousands of hours of screencasts covering a far broader distribution of professions, applications and operating systems.
+      To tap into this larger but unlabeled trove, we need to recover the actions behind every frame. In this post we present the first version of our inverse dynamics model, which does exactly that.
+    </p>
+
+    <!-- ============================================================
+         §2  IDM: THE MEAT
+         Task formulation, architecture, training, data quality journey.
+         ============================================================ -->
+    <a class="marker" href="#section-2" id="section-2"><span>2</span></a>
+    <h2>Inverse Dynamics Model for general screencasts</h2>
+    <p>
+      When you watch a screencast, you can see text appearing in an editor, a cursor clicking a button, a page scrolling.
+      The actions that produced these changes are recoverable: a human watching the recording can infer what was typed, what was clicked, and where the cursor moved.
+      An inverse dynamics model does exactly that. Trained on crowd-cast's paired data (where we have both the video and the ground-truth actions), our model learns to recover the actions from the pixels alone.
+    </p>
+    <p>
+      Given a short window of consecutive screen frames, the model outputs a sparse list of user actions: key presses, mouse clicks, mouse movements and scroll events.
+      While most frames have no action, some have several, and the model only emits the events it detects.
+      We deliberately avoid per-frame action/no-op classification. At 5 fps, ~70% of frames have no associated input event; a naive per-frame classifier collapses to "always predict no-op" and gets 70% accuracy with zero useful signal.
+      The sparse formulation sidesteps this entirely: the empty list <code>[]</code> is a valid response for clips where nothing happened.
+    </p>
+    <p>
+      The action space stays close to raw OS input events:
+    </p>
+    <ul>
+      <li><code>KeyPress</code>: key name + modifiers (e.g. <code>Cmd+S</code>), attributed to the frame where the visual effect appears</li>
+      <li><code>MouseClick</code>: button only (<code>Left</code> / <code>Right</code> / <code>Middle</code>), one per press event. Position is implied by the preceding MouseMove sequence</li>
+      <li><code>MouseMove</code>: per-frame relative displacement (dx, dy) as signed integers on a 0-1000 per-axis normalized scale</li>
+      <li><code>MouseScroll</code>: direction and magnitude</li>
+    </ul>
+    <p>An example model output for a 10-frame clip:</p>
+    <pre style="font-size: 0.85em; line-height: 1.5; background: var(--ash-100, #f5f5f5); border: 1px solid var(--ash-300, #ddd); border-radius: 4px; padding: 1rem; overflow-x: auto;">[
+  {"frame": "F01", "type": "MouseMove",   "details": "120,45"},
+  {"frame": "F02", "type": "MouseClick",  "details": "Left"},
+  {"frame": "F04", "type": "KeyPress",    "details": "Shift+H"},
+  {"frame": "F04", "type": "KeyPress",    "details": "E"},
+  {"frame": "F05", "type": "KeyPress",    "details": "L"},
+  {"frame": "F05", "type": "KeyPress",    "details": "L"},
+  {"frame": "F05", "type": "KeyPress",    "details": "O"},
+  {"frame": "F07", "type": "MouseMove",   "details": "-340,12"},
+  {"frame": "F08", "type": "MouseScroll", "details": "-150"}
+]</pre>
+
+    <a class="marker" href="#section-2b" id="section-2b"><span>2.1</span></a>
+    <h3>Data processing</h3>
+    <p>
+      Each crowd-cast recording consists of a screen-captured mp4 and a paired msgpack keylog containing raw OS-level input events with microsecond timestamps.
+      We process these into training clips as follows:
+    </p>
+    <ol>
+      <li>
+        <strong>Frame extraction.</strong>
+        We downsample each recording to 5 fps and resize to 1280x720.
+        crowd-cast records a black screen when the focused application is not in the user's predefined recording list. These black frames carry no visual information and have no associated actions, so we detect and drop them.
+        To reliably identify black frames, we crop the top 15% of the screen first, removing the macOS menubar, which would otherwise prevent fully-black detection even on unrecorded applications.
+        We then slide a 10-frame window with stride 5 across each recording (50% overlap).
+        At 5 fps, roughly 70% of the 2-second windows contain no user action at all.
+        We keep only 5% of these zero-action clips as negative examples, enough for the model to learn that <code>[]</code> is a valid response without dominating the training loss.
+      </li>
+      <li>
+        <strong>Action extraction.</strong>
+        Raw OS-level keylog events are converted into the four emitted action types.
+        Modifier keys never emit standalone; they are tracked as held state and prefixed to the details of the next non-modifier KeyPress. For example, holding Cmd+Shift then pressing P yields one event with details <code>"Cmd+Shift+P"</code>.
+        MouseMove deltas are signed integers on a per-axis [-1000, +1000] scale, where ±1000 corresponds to a full screen-width (dx) or screen-height (dy) traversal. MouseScroll magnitude is normalized the same way.
+        Multiple raw events often land on the same frame after downsampling; we coalesce scrolls and mouse movements by summing their per-frame vectors.
+        We index action $$a_{i}$$ as the action that led to the change in frame $$f_{i+1}$$.
+      </li>
+    </ol>
+    <p>
+      We use a snapshot of the crowd-cast dataset from May 19, 2026, comprising ~18,000 recording segments across ~3,800 sessions. After processing, this yields approximately 1.5M training clips and 210K validation clips, split at the session level with zero overlap.
+    </p>
+
+    <a class="marker" href="#section-2c" id="section-2c"><span>2.2</span></a>
+    <h3>Model and training</h3>
+    <p>
+      We fine-tune <a href="https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct">Qwen3-VL-8B</a> with LoRA applied to both the language model (attention + MLP projections) and the vision encoder (QKV, output projection, MLP).
+      Frames are interleaved with text labels (<code>"Frame F00:"</code>, <code>"Frame F01:"</code>, ...) in the input sequence, giving the model text-space anchors across the 10 images.
+      The model receives the frames and a task prompt as input and produces a JSON array of actions as output. Only the assistant response contributes to the loss.
+    </p>
+    <p>
+      At the pixel budget used for training, each frame produces 480 visual tokens after Qwen3-VL's spatial merge.
+      A 10-frame training sample totals ~5,300 tokens: 4,800 visual tokens, ~500 for the prompt and interleave labels, and ~110 for the output (varying with the number of actions).
+    </p>
+
+    <div style="margin: 1.5rem 0; font-size: 0.85em;">
+    <table style="width: 100%; border-collapse: collapse;">
+      <caption style="text-align: left; font-weight: bold; margin-bottom: 0.5rem;">Training hyperparameters</caption>
+      <tr><td style="padding: 4px 12px 4px 0; border-bottom: 1px solid #eee;">LoRA rank / alpha</td><td style="padding: 4px 0; border-bottom: 1px solid #eee;">256 / 512</td></tr>
+      <tr><td style="padding: 4px 12px 4px 0; border-bottom: 1px solid #eee;">LoRA dropout</td><td style="padding: 4px 0; border-bottom: 1px solid #eee;">0.05</td></tr>
+      <tr><td style="padding: 4px 12px 4px 0; border-bottom: 1px solid #eee;">Optimizer</td><td style="padding: 4px 0; border-bottom: 1px solid #eee;">AdamW</td></tr>
+      <tr><td style="padding: 4px 12px 4px 0; border-bottom: 1px solid #eee;">Peak learning rate</td><td style="padding: 4px 0; border-bottom: 1px solid #eee;">2e-5</td></tr>
+      <tr><td style="padding: 4px 12px 4px 0; border-bottom: 1px solid #eee;">Schedule</td><td style="padding: 4px 0; border-bottom: 1px solid #eee;">WSD (warmup 500 steps, decay last 4000 steps to 10% of peak)</td></tr>
+      <tr><td style="padding: 4px 12px 4px 0; border-bottom: 1px solid #eee;">Batch size</td><td style="padding: 4px 0; border-bottom: 1px solid #eee;">16 (2 per GPU × 8 GPUs)</td></tr>
+      <tr><td style="padding: 4px 12px 4px 0; border-bottom: 1px solid #eee;">Max steps</td><td style="padding: 4px 0; border-bottom: 1px solid #eee;">5,000 (saturates; see ablations)</td></tr>
+      <tr><td style="padding: 4px 12px 4px 0; border-bottom: 1px solid #eee;">Max pixels (train)</td><td style="padding: 4px 0; border-bottom: 1px solid #eee;">524,288 (~544p)</td></tr>
+      <tr><td style="padding: 4px 12px 4px 0; border-bottom: 1px solid #eee;">Max sequence length</td><td style="padding: 4px 0; border-bottom: 1px solid #eee;">10,000 tokens</td></tr>
+      <tr><td style="padding: 4px 12px 4px 0;">Hardware</td><td style="padding: 4px 0;">8× H100, DDP</td></tr>
+    </table>
+    </div>
+
+    <!-- TODO: related work paragraph (VPT, FDM-1, VideoAgentTrek) — deferred -->
+
+    <!-- ============================================================
+         §3  EXPERIMENTS
+         Paper-style: eval setup, baselines, ablations, main results.
+         ============================================================ -->
+    <a class="marker" href="#section-3" id="section-3"><span>3</span></a>
+    <h2>Experiments</h2>
+
+    <a class="marker" href="#section-3a" id="section-3a"><span>3.1</span></a>
+    <h3>Evaluation setup</h3>
+    <p>
+      <!-- Building the eval set was one of the first things we did, before iterating on training. -->
+      We manually curated <a href="https://huggingface.co/datasets/p-doom/idm-eval-set">44 macOS productivity clips</a> (5 seconds each at 5 fps) covering keystroke-heavy, click-heavy, scroll/drag, hotkey and mixed workflows, with hand-verified ground-truth actions.
+      <!-- This was a laborious process but paid for itself many times over: it let us iterate on the action format, gauge what frontier models were already capable of zero-shot, catch failure modes before starting to train and offer a way to measure progress while iterating on the model. -->
+      Each ground-truth action is annotated with a visibility class: <em>visible</em> (~91%, clear visual change in frames), <em>inferable</em> (~4%, deducible from context), or <em>not predictable</em> (~5%, no visual evidence at this frame rate).
+      Only visible and inferable actions count toward the score. 
+    </p>
+    <p>
+      Each clip is 25 frames, but the model only sees 10-frame sequences during training.
+      Thus, at inference we run four overlapping windows (stride 5, margin 2) and merge predictions across non-overlapping scoring zones so each frame's prediction comes from exactly one window.
+      We match predictions to ground truth with a per-type frame tolerance.
+      For KeyPress and MouseClick, we allow a 5-frame tolerance since the visual effect of a press or click can be delayed by several frames.
+      For MouseScroll and MouseMove, we require an exact frame match: their GT is aggregated per-frame, so any tolerance would introduce significant complexity due to the risk of double-counting.
+    </p>
+    <p>
+      We report per-type precision, recall and F1.
+      For KeyPress, a prediction is correct if the right key (including modifiers) was predicted on the right frame. For MouseClick, the button must match.
+      For MouseMove and MouseScroll, F1 measures detection only: did the model predict movement or scroll on the correct frame?
+      To measure MouseMove quality beyond detection, we additionally report R² between predicted and ground-truth displacement vectors, and cosine similarity for directional alignment.
+    </p>
+
+    <a class="marker" href="#section-3b" id="section-3b"><span>3.2</span></a>
+    <h3>Results</h3>
+
+    <figure style="grid-column: page; margin: 1.5rem 0;">
+    <div id="f1-chart" style="position: relative; max-width: 800px; margin: 0 auto; padding: 2rem 0 0;">
+      <!-- Y-axis -->
+      <div style="position: absolute; left: 0; top: 2rem; bottom: 3.5rem; width: 40px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; padding-right: 8px;">
+        <span style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">1.0</span>
+        <span style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">0.8</span>
+        <span style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">0.6</span>
+        <span style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">0.4</span>
+        <span style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">0.2</span>
+        <span style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">0</span>
+      </div>
+      <!-- Chart area -->
+      <div style="margin-left: 48px; position: relative; aspect-ratio: 2.2 / 1; border-left: 1px solid var(--ash-300, #CFC8B8); border-bottom: 1px solid var(--ash-300, #CFC8B8);">
+        <!-- Grid lines -->
+        <div style="position: absolute; left: 0; right: 0; top: 0%;  border-top: 1px solid var(--ash-200, #E2DCCC);"></div>
+        <div style="position: absolute; left: 0; right: 0; top: 20%; border-top: 1px solid var(--ash-200, #E2DCCC);"></div>
+        <div style="position: absolute; left: 0; right: 0; top: 40%; border-top: 1px solid var(--ash-200, #E2DCCC);"></div>
+        <div style="position: absolute; left: 0; right: 0; top: 60%; border-top: 1px solid var(--ash-200, #E2DCCC);"></div>
+        <div style="position: absolute; left: 0; right: 0; top: 80%; border-top: 1px solid var(--ash-200, #E2DCCC);"></div>
+        <!-- Bars: percentage heights of the absolutely positioned container -->
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; top: 0; display: flex; align-items: flex-end; justify-content: space-around; padding: 0 12px;">
+          <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
+            <div style="font-family: var(--font-mono, monospace); font-size: 11px; font-weight: 600; color: var(--ink, #161514); margin-bottom: 4px;">0.86</div>
+            <div style="width: 60%; flex: 0 0 85.5%; background: var(--ember, #B7361E); border-radius: 2px 2px 0 0;"></div>
+          </div>
+          <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
+            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.73</div>
+            <div style="width: 60%; flex: 0 0 73.2%; background: var(--ash-500, #807A6E); border-radius: 2px 2px 0 0;"></div>
+          </div>
+          <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
+            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.70</div>
+            <div style="width: 60%; flex: 0 0 70.3%; background: var(--ash-500, #807A6E); border-radius: 2px 2px 0 0;"></div>
+          </div>
+          <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
+            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.53</div>
+            <div style="width: 60%; flex: 0 0 53.4%; background: var(--ash-300, #CFC8B8); border-radius: 2px 2px 0 0;"></div>
+          </div>
+          <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
+            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.42</div>
+            <div style="width: 60%; flex: 0 0 42.2%; background: var(--ash-300, #CFC8B8); border-radius: 2px 2px 0 0;"></div>
+          </div>
+          <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
+            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.34</div>
+            <div style="width: 60%; flex: 0 0 33.9%; background: var(--ash-300, #CFC8B8); border-radius: 2px 2px 0 0;"></div>
+          </div>
+        </div>
+      </div>
+      <!-- X-axis labels -->
+      <div style="margin-left: 48px; display: flex; justify-content: space-around; padding: 8px 12px 0;">
+        <span style="flex: 1; max-width: 110px; text-align: center; font-family: var(--font-mono, monospace); font-size: 10px; white-space: nowrap; font-weight: 600; color: var(--ember, #B7361E);">Ours (8B)</span>
+        <span style="flex: 1; max-width: 110px; text-align: center; font-family: var(--font-mono, monospace); font-size: 10px; white-space: nowrap; color: var(--ash-700, #3D3A35);">Gemini 3.5 Flash</span>
+        <span style="flex: 1; max-width: 110px; text-align: center; font-family: var(--font-mono, monospace); font-size: 10px; white-space: nowrap; color: var(--ash-700, #3D3A35);">GPT 5.5</span>
+        <span style="flex: 1; max-width: 110px; text-align: center; font-family: var(--font-mono, monospace); font-size: 10px; white-space: nowrap; color: var(--ash-700, #3D3A35);">Kimi K2.6</span>
+        <span style="flex: 1; max-width: 110px; text-align: center; font-family: var(--font-mono, monospace); font-size: 10px; white-space: nowrap; color: var(--ash-700, #3D3A35);">Gemma 4 31B</span>
+        <span style="flex: 1; max-width: 110px; text-align: center; font-family: var(--font-mono, monospace); font-size: 10px; white-space: nowrap; color: var(--ash-700, #3D3A35);">Qwen3-VL 8B</span>
+      </div>
+      <!-- Legend -->
+      <div style="margin-left: 48px; display: flex; gap: 18px; padding: 12px 12px 0; font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">
+        <span><span style="display: inline-block; width: 10px; height: 10px; background: var(--ember, #B7361E); border-radius: 1px; vertical-align: middle; margin-right: 4px;"></span>Ours (fine-tuned)</span>
+        <span><span style="display: inline-block; width: 10px; height: 10px; background: var(--ash-500, #807A6E); border-radius: 1px; vertical-align: middle; margin-right: 4px;"></span>Closed-source</span>
+        <span><span style="display: inline-block; width: 10px; height: 10px; background: var(--ash-300, #CFC8B8); border-radius: 1px; vertical-align: middle; margin-right: 4px;"></span>Open-source</span>
+      </div>
+    </div>
+    <figcaption style="text-align: center; margin-top: 0.5rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Overall F1 on the 44-clip eval set. All models scored under identical rules.</figcaption>
+    </figure>
+
+    <p>
+      Our fine-tuned 8B model achieves F1=0.855 at 5,000 training steps, surpassing the strongest zero-shot model, Gemini 3.5 Flash, by +12 points on this task.
+      On MouseMove, the trained model reaches R²=0.66 with a median cosine similarity of 0.987, meaning predicted cursor displacements closely track both the direction and magnitude of ground truth.
+    </p>
+
+    <!-- TODO: insert per-type P/R/F1 breakdown for our model once available -->
+    <!-- TODO: figure — qualitative comparison: ground truth vs IDM predictions on held-out clips -->
+
+    <p>
+      Without fine-tuning, even the best zero-shot model leaves significant room for improvement, and most open models cluster at F1 0.34-0.42.
+      <!-- These models have likely not been trained on our output format (sparse event lists with per-frame relative mouse deltas).-->
+      We observed two failure modes across nearly all models: they are competent at single-frame grounding and OCR but struggle with multi-frame tracking, and they severely underpredict, missing the majority of actions.
+      Gemini 3.5 Flash, GPT 5.5 and Kimi K2.6 had thinking enabled, while Gemma 4, Qwen3-VL and our fine-tuned version were evaluated without.
+    </p>
+    <!--p>
+      Our fine-tuned model inverts the failure mode of zero-shot models. Where they are precise but miss most events, ours achieves high recall (0.914) while maintaining reasonable precision (0.803).
+    </p-->
+
+    <a class="marker" href="#section-3e" id="section-3e"><span>3.5</span></a>
+    <h3>Ablations</h3>
+    <p>
+      We ablate training decisions by changing one variable at a time against our final recipe.
+    </p>
+
+    <div style="margin: 1.5rem 0; font-size: 0.85em; overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; white-space: nowrap;">
+      <!--caption style="text-align: left; font-weight: bold; margin-bottom: 0.5rem;">Single-variable ablations against final recipe</caption-->
+      <tr style="border-bottom: 2px solid #333;">
+        <th style="padding: 6px 12px 6px 0; text-align: left;">Config</th>
+        <th style="padding: 6px 8px; text-align: right;">F1</th>
+        <th style="padding: 6px 8px; text-align: right;">R²</th>
+        <th style="padding: 6px 8px; text-align: right;">cos</th>
+      </tr>
+      <tr style="border-bottom: 1px solid #eee; font-weight: 600;">
+        <td style="padding: 4px 12px 4px 0;">Final recipe (8B, r=256)</td>
+        <td style="padding: 4px 8px; text-align: right;">0.86</td>
+        <td style="padding: 4px 8px; text-align: right;">0.66</td>
+        <td style="padding: 4px 8px; text-align: right;">0.99</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #eee;">
+        <td style="padding: 4px 12px 4px 0;">2B model</td>
+        <td style="padding: 4px 8px; text-align: right;">0.86</td>
+        <td style="padding: 4px 8px; text-align: right;">0.61</td>
+        <td style="padding: 4px 8px; text-align: right;">0.97</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #eee;">
+        <td style="padding: 4px 12px 4px 0;">4B model</td>
+        <td style="padding: 4px 8px; text-align: right;">0.84</td>
+        <td style="padding: 4px 8px; text-align: right;">0.55</td>
+        <td style="padding: 4px 8px; text-align: right;">0.91</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #eee;">
+        <td style="padding: 4px 12px 4px 0;">No vision-LoRA</td>
+        <td style="padding: 4px 8px; text-align: right;">0.84</td>
+        <td style="padding: 4px 8px; text-align: right;">0.64</td>
+        <td style="padding: 4px 8px; text-align: right;">0.76</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #eee;">
+        <td style="padding: 4px 12px 4px 0;">No interleave</td>
+        <td style="padding: 4px 8px; text-align: right;">0.77</td>
+        <td style="padding: 4px 8px; text-align: right;">-0.03</td>
+        <td style="padding: 4px 8px; text-align: right;">0.57</td>
+      </tr>
+    </table>
+    </div>
+
+    <p>
+      Removing interleaved frame labels materially affects all metrics, dropping F1 by 9pp and destroying mouse prediction.
+      Without text anchors between frames, the model loses track of frame identity and enters repetitive prediction loops.
+    </p>
+    <p>
+      Model size, LoRA rank and vision-LoRA have no measurable effect on action detection.
+      However, smaller model sizes and removing vision-LoRA degrades mouse prediction.
+      Similarly, mouse direction accuracy scales monotonically with LoRA rank.
+    </p>
+
+    <!-- LoRA rank sweep -->
+    <figure style="grid-column: page; margin: 1.5rem 0;">
+    <div style="display: flex; gap: 24px; max-width: 700px; margin: 0 auto; flex-wrap: wrap; justify-content: center;">
+      <div style="flex: 1; min-width: 280px;">
+        <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); text-align: center; margin-bottom: 8px;">F1 vs LoRA rank</div>
+        <svg viewBox="0 0 200 130" style="width: 100%; font-family: var(--font-mono, monospace);">
+          <line x1="40" y1="10" x2="40" y2="100" stroke="#CFC8B8" stroke-width="0.5"/>
+          <line x1="40" y1="100" x2="190" y2="100" stroke="#CFC8B8" stroke-width="0.5"/>
+          <line x1="40" y1="10" x2="190" y2="10" stroke="#E2DCCC" stroke-width="0.5" stroke-dasharray="2"/>
+          <line x1="40" y1="55" x2="190" y2="55" stroke="#E2DCCC" stroke-width="0.5" stroke-dasharray="2"/>
+          <text x="36" y="103" font-size="7" fill="#5A554C" text-anchor="end">0.70</text>
+          <text x="36" y="58" font-size="7" fill="#5A554C" text-anchor="end">0.80</text>
+          <text x="36" y="13" font-size="7" fill="#5A554C" text-anchor="end">0.90</text>
+          <polyline points="55,36 95,32 135,35 175,30" fill="none" stroke="#B7361E" stroke-width="2"/>
+          <circle cx="55" cy="36" r="3.5" fill="#B7361E"/>
+          <circle cx="95" cy="32" r="3.5" fill="#B7361E"/>
+          <circle cx="135" cy="35" r="3.5" fill="#B7361E"/>
+          <circle cx="175" cy="30" r="3.5" fill="#B7361E"/>
+          <text x="55" y="31" font-size="7" fill="#161514" text-anchor="middle">.84</text>
+          <text x="95" y="27" font-size="7" fill="#161514" text-anchor="middle">.85</text>
+          <text x="135" y="30" font-size="7" fill="#161514" text-anchor="middle">.85</text>
+          <text x="175" y="25" font-size="7" fill="#161514" text-anchor="middle">.86</text>
+          <text x="55" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">16</text>
+          <text x="95" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">64</text>
+          <text x="135" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">128</text>
+          <text x="175" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">256</text>
+        </svg>
+      </div>
+      <div style="flex: 1; min-width: 280px;">
+        <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); text-align: center; margin-bottom: 8px;">cos vs LoRA rank</div>
+        <svg viewBox="0 0 200 130" style="width: 100%; font-family: var(--font-mono, monospace);">
+          <line x1="40" y1="10" x2="40" y2="100" stroke="#CFC8B8" stroke-width="0.5"/>
+          <line x1="40" y1="100" x2="190" y2="100" stroke="#CFC8B8" stroke-width="0.5"/>
+          <line x1="40" y1="10" x2="190" y2="10" stroke="#E2DCCC" stroke-width="0.5" stroke-dasharray="2"/>
+          <line x1="40" y1="55" x2="190" y2="55" stroke="#E2DCCC" stroke-width="0.5" stroke-dasharray="2"/>
+          <text x="36" y="103" font-size="7" fill="#5A554C" text-anchor="end">0.70</text>
+          <text x="36" y="58" font-size="7" fill="#5A554C" text-anchor="end">0.85</text>
+          <text x="36" y="13" font-size="7" fill="#5A554C" text-anchor="end">1.00</text>
+          <polyline points="55,59 95,44 135,27 175,14" fill="none" stroke="#5D6E63" stroke-width="2"/>
+          <circle cx="55" cy="59" r="3.5" fill="#5D6E63"/>
+          <circle cx="95" cy="44" r="3.5" fill="#5D6E63"/>
+          <circle cx="135" cy="27" r="3.5" fill="#5D6E63"/>
+          <circle cx="175" cy="14" r="3.5" fill="#5D6E63"/>
+          <text x="55" y="54" font-size="7" fill="#161514" text-anchor="middle">.84</text>
+          <text x="95" y="39" font-size="7" fill="#161514" text-anchor="middle">.89</text>
+          <text x="135" y="22" font-size="7" fill="#161514" text-anchor="middle">.94</text>
+          <text x="175" y="9" font-size="7" fill="#161514" text-anchor="middle">.99</text>
+          <text x="55" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">16</text>
+          <text x="95" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">64</text>
+          <text x="135" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">128</text>
+          <text x="175" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">256</text>
+        </svg>
+      </div>
+    </div>
+    <figcaption style="text-align: center; margin-top: 0.5rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">LoRA rank sweep. F1 is stable across ranks; cursor direction quality (cos) scales monotonically with adapter capacity.</figcaption>
+    </figure>
+    <!--p>
+      Training saturates early. F1 peaks at 5K steps (0.86), then declines at 10K (0.81) and 15K (0.81) as the model begins overpredicting, increasing false positives without recovering additional true positives.
+      R² remains stable across step counts (0.66-0.69), suggesting that mouse displacement quality is not the bottleneck.
+      We have likely exhausted the LoRA adapter's capacity; full fine-tuning may push further, though naive SFT on our dataset destroyed the base model's distribution in early experiments.
+    </p-->
+
+    <a class="marker" href="#section-4" id="section-4"><span>4</span></a>
+    <h2>Out-of-distribution generalization</h2>
+    <p>
+      The model was trained exclusively on macOS paired data from crowd-cast. All training recordings come from macOS users running applications like Cursor, Firefox, Preview and Terminal.
+      We evaluated the same model on Windows and Linux screencasts without any adaptation.
+    </p>
+    <p>
+      TODO: Insert OOD numbers. Pre-fix AgentNet Ubuntu F1 was 0.680 (with write-collapse; 0.092 without,
+      due to typing-density artifact on synthetic videos). Post-fix numbers pending retrain.
+      Windows OOD eval not yet run (AgentNet has Windows trajectories, ~3h to set up).
+    </p>
+    <p>
+      <strong>What generalizes.</strong>
+      Mouse movement and click detection transfer well across operating systems.
+      Cursor behavior looks similar regardless of OS: the model tracks the cursor position from pixel evidence, and the visual effect of a click (UI element activating, page navigation, modal appearing) is largely OS-agnostic.
+    </p>
+    <p>
+      <strong>What breaks down.</strong>
+      Keyboard shortcuts are the most predictable failure: the model predicts <code>Cmd+key</code> instead of <code>Ctrl+key</code> on Linux and Windows, having never seen the Ctrl modifier during training.
+      Write density also degrades on synthetic or tutorial-style content where the editing pattern (e.g. code being typed character-by-character in a tutorial) differs from the real productivity work in our training set, where editing is bursty and interspersed with long pauses.
+    </p>
+    <p>
+      These failures are predictable and correctable.
+      The Cmd/Ctrl confusion is a pure vocabulary issue that disappears with cross-platform training data.
+      The write-density gap narrows as the training distribution broadens beyond macOS productivity workflows.
+      crowd-cast now runs on all three operating systems, and cross-platform paired data collection is underway.
+    </p>
+
+    <!-- TODO: table — OOD per-type breakdown (macOS in-domain vs Linux vs Windows) -->
+    <!-- TODO: figure — Cmd vs Ctrl confusion matrix -->
+    <!-- TODO: figure — qualitative OOD examples -->
+
+    <!-- ============================================================
+         §6  ZOOM OUT: what this means + what's next
+         Tie IDM results back to the bigger picture. CTA.
+         ============================================================ -->
+    <a class="marker" href="#section-5" id="section-5"><span>5</span></a>
+    <h2>crowd-cast on every platform, and what comes next</h2>
+    <p>
+      We have shown that an inverse dynamics model trained on macOS paired data generalizes surprisingly well to Windows and Linux screencasts.
+      The obvious next step is to close the remaining OOD gap by collecting paired data on these operating systems too.
+      As of today, <a href="https://github.com/p-doom/crowd-cast/releases">crowd-cast</a> runs natively on macOS, Windows and Linux.
+    </p>
+    <p>
+      With cross-platform support, anyone can now contribute to the dataset.
+      We are <a href="/crowd-cast-flyer.pdf">paying participants</a> to record their normal work sessions using crowd-cast.
+      You are not asked to do tasks for us. You record yourself doing your own work that you would be doing anyway.
+      If you are interested, <a href="https://forms.gle/YKJn7m4X7WhtVfRm7">apply here</a> or check the <a href="https://pdoom.org/crowd_cast_dashboard.html">live dashboard</a> to see collection progress.
+    </p>
+    <p>
+      More paired data across all three operating systems will make the IDM better. A better IDM lets us action-annotate the millions of hours of unlabeled screencasts that already exist on the internet.
+      And action-annotated screencasts at that scale are what we need to behaviour-clone models that can do real, long-horizon digital work.
+    </p>
+
+  </d-article>
+
+  <d-appendix>
+
+    <h3>Contributions</h3>
+    <p>TODO: Author contributions.</p>
+    <d-bibliography src="bibliography.bib"></d-bibliography>
+    <distill-appendix>
+    </distill-appendix>
+  </d-appendix>
+
+
+  <footer class="site-footer" data-surface="void">
+    <div class="container">
+      <div class="footer-row">
+        <a class="brand" href="/">
+          <img class="sigil-img" src="logo-mark-inverted.png" alt="">
+          <span class="wm">p(doom)</span>
+        </a>
+        <nav class="footer-links">
+          <a href="https://github.com/p-doom/">GitHub</a>
+          <a href="https://discord.gg/G4JNuPX2VR">Discord</a>
+          <a href="https://x.com/@prob_doom">Twitter</a>
+          <a href="https://www.linkedin.com/company/p-doom">LinkedIn</a>
+          <a href="https://huggingface.co/p-doom">HuggingFace</a>
+          <a href="/imprint.html">Imprint</a>
+        </nav>
+      </div>
+    </div>
+  </footer>
+</body>
