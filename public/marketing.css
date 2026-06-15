@@ -522,6 +522,328 @@ h1.hero-manifesto.display {
 .releases--paper > .release { border-top: 1px solid var(--rule); }
 .releases--paper > .release:first-of-type { border-top: 0; padding-top: 24px; }
 
+/* ===== Open calls ============================================ */
+/* Pages: /open_calls.html (index) and /open_calls/*.html (details).
+ * Card is a no-media sibling of .booklet — same meta-rule-tag eyebrow,
+ * serif title, mono foot. The featured variant inverts to --void on
+ * paper, used for the public-facing crowd-cast contribution call. */
+
+.calls-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 96px 48px 24px;
+}
+.calls-page .section-mark { margin-bottom: var(--s-6); }
+.calls-page h1 {
+  font-family: var(--font-serif);
+  font-size: var(--fs-h1);
+  font-weight: 500;
+  line-height: var(--lh-tight);
+  letter-spacing: -.015em;
+  margin: 0 0 var(--s-5);
+  max-width: 14ch;
+  color: var(--ink);
+  text-wrap: balance;
+}
+/* Page prose — long-form sans body shared by content pages.
+ * Wrap one or more <p> in <div class="page-prose page-prose--narrow|--wide">.
+ * Width modifiers choose the reading measure (58ch focused / 66ch long-form). */
+.page-prose p {
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--ash-700);
+  margin: 0 0 var(--s-6);
+}
+.page-prose p:first-child { color: var(--ink); }
+.page-prose p:last-child { margin-bottom: 0; }
+.page-prose--narrow { max-width: 58ch; }
+.page-prose--wide { max-width: 66ch; }
+
+.calls-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 48px var(--s-9);
+}
+.calls-section-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: var(--s-8) 0 var(--s-6);
+}
+.calls-section-head .eyebrow { color: var(--ash-600); }
+.calls-section-head::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(22,21,20,0.18);
+}
+
+.calls-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+.calls-grid--single { grid-template-columns: 1fr; }
+
+/* The card */
+.call {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: var(--ink);
+  border: 1px solid var(--ash-400);
+  padding: 28px 28px 22px;
+  background: transparent;
+  min-height: 300px;
+  transition: border-color var(--dur-fast) var(--ease-ink),
+              background var(--dur-fast) var(--ease-ink);
+}
+.call:hover { border-color: var(--ink); }
+.call:hover .call-title { color: var(--ember); }
+.call:hover .call-foot { color: var(--ember); }
+
+.call-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  margin-bottom: var(--s-5);
+}
+.call-no { color: var(--ink); font-weight: 600; }
+.call-rule {
+  flex: 1 1 0;
+  min-width: 18px;
+  display: block;
+  height: 1px;
+  background: var(--ash-500);
+}
+.call-tag { color: var(--ash-600); font-weight: 400; }
+
+.call-title {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 26px;
+  line-height: 1.15;
+  letter-spacing: -.015em;
+  margin: 0 0 var(--s-4);
+  color: var(--ink);
+  text-wrap: pretty;
+  transition: color var(--dur-fast) var(--ease-ink);
+}
+.call-body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ash-700);
+  margin: 0 0 var(--s-5);
+}
+.call-foot {
+  margin-top: auto;
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--ash-400);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ash-700);
+  transition: color var(--dur-fast) var(--ease-ink);
+}
+.call-foot span[aria-hidden] { font-size: 14px; }
+
+/* ===== Open call detail pages ================================= */
+/* Reuses .page (from per-page <style>) for shell; .call-detail
+ * holds the long-form scope copy below the headline. */
+.call-detail {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 96px 48px 24px;
+}
+.call-detail .section-mark { margin-bottom: var(--s-6); }
+.call-detail h1 {
+  font-family: var(--font-serif);
+  font-size: var(--fs-h1);
+  font-weight: 500;
+  line-height: var(--lh-tight);
+  letter-spacing: -.015em;
+  margin: 0 0 var(--s-5);
+  max-width: 18ch;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.call-detail .detail-tag {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ash-600);
+  margin: 0 0 var(--s-7);
+}
+.call-detail .detail-tag .dot { color: var(--ember); margin-right: 6px; }
+.detail-section {
+  margin-top: var(--s-8);
+  max-width: 66ch;
+}
+.detail-section-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: var(--s-5);
+}
+.detail-section-head .eyebrow { color: var(--ash-600); }
+.detail-section-head::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(22,21,20,0.18);
+}
+.detail-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.detail-list li {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--ash-300);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ash-700);
+  display: flex;
+  gap: 18px;
+}
+.detail-list li:first-child { border-top: 1px solid var(--ash-300); }
+.detail-list li .mark {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: var(--ash-500);
+  flex: 0 0 28px;
+  padding-top: 5px;
+}
+
+.detail-cta {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: var(--s-8);
+  flex-wrap: wrap;
+}
+.detail-back {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ash-700);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-ink);
+}
+.detail-back:hover { color: var(--ember); }
+
+/* Apply button — uses .btn-primary from colors_and_type.css */
+.btn-apply {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  padding: 14px 24px;
+  background: var(--ink);
+  color: var(--paper);
+  border: 1px solid var(--ink);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  transition: background var(--dur-fast) var(--ease-ink),
+              border-color var(--dur-fast) var(--ease-ink);
+}
+.btn-apply:hover { background: var(--ember); border-color: var(--ember); color: var(--paper); }
+
+/* ===== Inline form (crowd-cast signup) ======================== */
+.signup-form {
+  margin-top: var(--s-7);
+  max-width: 540px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+.signup-form .field { display: flex; flex-direction: column; gap: 8px; }
+.signup-form .field label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ash-600);
+}
+.signup-form input[type=text],
+.signup-form input[type=email],
+.signup-form input[type=url],
+.signup-form textarea {
+  background: transparent;
+  color: var(--ink);
+  border: 0;
+  border-bottom: 1px solid var(--ash-400);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  padding: 8px 0;
+  outline: none;
+  letter-spacing: 0;
+  transition: border-color var(--dur-fast) var(--ease-ink),
+              border-bottom-width var(--dur-fast) var(--ease-ink);
+  width: 100%;
+  resize: none;
+}
+.signup-form textarea {
+  min-height: 96px;
+  line-height: 1.5;
+}
+.signup-form input:focus,
+.signup-form textarea:focus {
+  border-bottom-color: var(--ember);
+  border-bottom-width: 2px;
+  padding-bottom: 7px;
+}
+.signup-form .submit-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: var(--s-3);
+}
+.signup-form .submit-note {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .04em;
+  color: var(--ash-600);
+}
+
+/* Responsive: open calls */
+@media (max-width: 960px) {
+  .calls-grid { grid-template-columns: repeat(2, 1fr); gap: 22px; }
+  .calls-page { padding: 64px 32px 16px; }
+  .calls-section { padding: 0 32px var(--s-8); }
+  .call--featured { padding: 32px 32px 26px; }
+  .call--featured .call-title { font-size: 30px; }
+  .call-detail { padding: 64px 32px 16px; }
+}
+@media (max-width: 640px) {
+  .calls-grid { grid-template-columns: 1fr; gap: 18px; }
+  .calls-page { padding: 48px 20px 12px; }
+  .calls-section { padding: 0 20px var(--s-7); }
+  .calls-section-head { padding: var(--s-7) 0 var(--s-5); }
+  .call { padding: 22px 22px 18px; min-height: 240px; }
+  .call--featured { padding: 26px 24px 22px; }
+  .call--featured .call-title { font-size: 26px; }
+  .call-detail { padding: 40px 20px 8px; }
+  .call-detail h1 { font-size: 40px; }
+}
+
 /* ===== Footer (dark, single hairline row) ==================== */
 .site-footer {
   background: var(--void);

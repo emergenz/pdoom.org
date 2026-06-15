@@ -14,11 +14,11 @@
             padding: var(--s-9) var(--s-7) var(--s-10);
         }
         .page .section-mark {
-            margin-bottom: var(--s-8);
+            margin-bottom: var(--s-6);
         }
         .page h1 {
             font-size: var(--fs-h1);
-            margin: 0 0 var(--s-9);
+            margin: 0 0 var(--s-5);
         }
 
         .product-grid {
@@ -259,6 +259,17 @@
     </style>
 </head>
 <body>
+    <!-- Paid-recording announcement. -->
+    <aside class="announce" id="announce-bar" aria-label="Announcement">
+        <a class="announce-inner" href="https://docs.google.com/forms/d/e/1FAIpQLSd50ZarNRKoIWDmy5xAn8K8FVGM2Jbk1T52er4YLHiP2P28rQ/viewform" target="_blank" rel="noopener">
+            <span class="announce-msg">
+                We pay <strong class="announce-figure">$300/month</strong> to record your screen for AI research.
+            </span>
+            <span class="announce-cta">Apply<span aria-hidden>→</span></span>
+        </a>
+        <button class="announce-close" type="button" aria-label="Dismiss announcement">×</button>
+    </aside>
+
     <header class="site-header" data-surface="void">
         <div class="container">
             <nav class="nav">
@@ -270,7 +281,7 @@
                     <a href="/blog.html">Research</a>
                     <a href="/about.html">About</a>
                     <a href="/supply.html">Supply</a>
-                    <a href="https://discord.gg/G4JNuPX2VR">Join</a>
+                    <a href="/open_calls.html">Open calls</a>
                 </div>
             </nav>
         </div>
@@ -279,7 +290,7 @@
     <main>
         <article class="page">
             <header class="section-mark">
-                <span class="eyebrow">§ Supply</span>
+                <span class="eyebrow">Supply</span>
             </header>
             <h1>For the hands that build it.</h1>
 
@@ -480,6 +491,20 @@
             setInterval(triggerWiggle, 4000);
             setTimeout(triggerWiggle, 1500);
         }
+    </script>
+    <script>
+      // Dismiss hides the bar for the current view only; it is not
+      // persisted, so a reload brings the announcement back.
+      (function () {
+        var bar = document.getElementById('announce-bar');
+        if (!bar) return;
+        var close = bar.querySelector('.announce-close');
+        if (close) {
+          close.addEventListener('click', function () {
+            bar.hidden = true;
+          });
+        }
+      })();
     </script>
 </body>
 </html>

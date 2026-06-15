@@ -9123,7 +9123,7 @@ distill-header .nav a:hover {
     <a href="/blog.html">Research</a>
     <a href="/about.html">About</a>
     <a href="/supply.html">Supply</a>
-    <a href="https://discord.gg/G4JNuPX2VR">Join</a>
+    <a href="/open_calls.html">Open calls</a>
   </nav>
 </div>
 `;

@@ -24,6 +24,17 @@
 </head>
 
 <body>
+    <!-- Paid-recording announcement. -->
+    <aside class="announce" id="announce-bar" aria-label="Announcement">
+        <a class="announce-inner" href="https://docs.google.com/forms/d/e/1FAIpQLSd50ZarNRKoIWDmy5xAn8K8FVGM2Jbk1T52er4YLHiP2P28rQ/viewform" target="_blank" rel="noopener">
+            <span class="announce-msg">
+                We pay <strong class="announce-figure">$300/month</strong> to record your screen for AI research.
+            </span>
+            <span class="announce-cta">Apply<span aria-hidden>→</span></span>
+        </a>
+        <button class="announce-close" type="button" aria-label="Dismiss announcement">×</button>
+    </aside>
+
     <header class="site-header" data-surface="void">
     <div class="container">
       <nav class="nav">
@@ -35,7 +46,7 @@
           <a href="/blog.html">Research</a>
           <a href="/about.html">About</a>
           <a href="/supply.html">Supply</a>
-          <a href="https://discord.gg/G4JNuPX2VR">Join</a>
+          <a href="/open_calls.html">Open calls</a>
         </div>
       </nav>
     </div>
@@ -135,4 +146,18 @@
       </div>
     </div>
   </footer>
+    <script>
+      // Dismiss hides the bar for the current view only; it is not
+      // persisted, so a reload brings the announcement back.
+      (function () {
+        var bar = document.getElementById('announce-bar');
+        if (!bar) return;
+        var close = bar.querySelector('.announce-close');
+        if (close) {
+          close.addEventListener('click', function () {
+            bar.hidden = true;
+          });
+        }
+      })();
+    </script>
 </body>

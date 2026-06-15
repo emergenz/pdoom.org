@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI Tutor · p(doom)</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="stylesheet" href="/colors_and_type.css">
+    <link rel="stylesheet" href="/marketing.css">
+</head>
+<body>
+    <!-- Paid-recording announcement. -->
+    <aside class="announce" id="announce-bar" aria-label="Announcement">
+        <a class="announce-inner" href="https://docs.google.com/forms/d/e/1FAIpQLSd50ZarNRKoIWDmy5xAn8K8FVGM2Jbk1T52er4YLHiP2P28rQ/viewform" target="_blank" rel="noopener">
+            <span class="announce-msg">
+                We pay <strong class="announce-figure">$300/month</strong> to record your screen for AI research.
+            </span>
+            <span class="announce-cta">Apply<span aria-hidden>→</span></span>
+        </a>
+        <button class="announce-close" type="button" aria-label="Dismiss announcement">×</button>
+    </aside>
+
+    <header class="site-header" data-surface="void">
+        <div class="container">
+            <nav class="nav">
+                <a class="brand" href="/">
+                    <img class="sigil-img" src="/logo-mark-inverted.png" alt="">
+                    <span class="wm">p(doom)</span>
+                </a>
+                <div class="nav-links">
+                    <a href="/blog.html">Research</a>
+                    <a href="/about.html">About</a>
+                    <a href="/supply.html">Supply</a>
+                    <a href="/open_calls.html">Open calls</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <article class="call-detail">
+            <header class="section-mark">
+                <span class="eyebrow">Open call · № 01</span>
+            </header>
+            <h1>AI Tutor.</h1>
+            <p class="detail-tag"><span class="dot">●</span>live · remote · $300 per month</p>
+
+            <div class="page-prose page-prose--wide">
+                <p><a href="/docs/crowd-cast/">crowd-cast</a> is our desktop app for recording long-horizon computer-use data. The <a href="/crowd_cast_dashboard.html">live dashboard</a> shows current collection progress.</p>
+                <p>We pay accepted participants <strong>$300 per month</strong> to record open-source work. Eligible work includes research, engineering, design, editing, and other long-horizon computer tasks.</p>
+                <p>To participate, apply through the <a href="https://docs.google.com/forms/d/e/1FAIpQLSd50ZarNRKoIWDmy5xAn8K8FVGM2Jbk1T52er4YLHiP2P28rQ/viewform" target="_blank" rel="noopener">signup form</a>. If accepted, you install crowd-cast, choose which applications can be recorded, and keep working as usual.</p>
+            </div>
+
+            <section class="detail-section">
+                <header class="detail-section-head">
+                    <span class="eyebrow">How it works</span>
+                </header>
+                <ul class="detail-list">
+                    <li><span class="mark">01</span><span>Apply through the <a href="https://docs.google.com/forms/d/e/1FAIpQLSd50ZarNRKoIWDmy5xAn8K8FVGM2Jbk1T52er4YLHiP2P28rQ/viewform" target="_blank" rel="noopener">signup form</a>.</span></li>
+                    <li><span class="mark">02</span><span>If accepted, install <a href="https://github.com/p-doom/crowd-cast/releases">crowd-cast</a> on macOS, Windows, or Linux.</span></li>
+                    <li><span class="mark">03</span><span>On first launch, you choose which applications get recorded. Everything outside that list is automatically excluded.</span></li>
+                    <li><span class="mark">04</span><span>We capture five-minute segments and upload to a private S3 bucket. The local copy is deleted on each segment boundary.</span></li>
+                </ul>
+            </section>
+
+            <section class="detail-section">
+                <header class="detail-section-head">
+                    <span class="eyebrow">Sign up</span>
+                </header>
+                <div class="page-prose page-prose--wide">
+                    <p>To sign up, fill out the <a href="https://docs.google.com/forms/d/e/1FAIpQLSd50ZarNRKoIWDmy5xAn8K8FVGM2Jbk1T52er4YLHiP2P28rQ/viewform" target="_blank" rel="noopener">application form</a>.</p>
+                </div>
+            </section>
+
+            <div class="detail-cta">
+                <a class="detail-back" href="/open_calls.html">← All open calls</a>
+            </div>
+        </article>
+    </main>
+
+    <footer class="site-footer" data-surface="void">
+        <div class="container">
+            <div class="footer-row">
+                <a class="brand" href="/">
+                    <img class="sigil-img" src="/logo-mark-inverted.png" alt="">
+                    <span class="wm">p(doom)</span>
+                </a>
+                <nav class="footer-links">
+                    <a href="https://github.com/p-doom/">GitHub</a>
+                    <a href="https://discord.gg/G4JNuPX2VR">Discord</a>
+                    <a href="https://x.com/@prob_doom">Twitter</a>
+                    <a href="https://www.linkedin.com/company/p-doom">LinkedIn</a>
+                    <a href="https://huggingface.co/p-doom">HuggingFace</a>
+                    <a href="/imprint.html">Imprint</a>
+                </nav>
+            </div>
+        </div>
+    </footer>
+    <script>
+      // Dismiss hides the bar for the current view only; it is not
+      // persisted, so a reload brings the announcement back.
+      (function () {
+        var bar = document.getElementById('announce-bar');
+        if (!bar) return;
+        var close = bar.querySelector('.announce-close');
+        if (close) {
+          close.addEventListener('click', function () {
+            bar.hidden = true;
+          });
+        }
+      })();
+    </script>
+</body>
+</html>

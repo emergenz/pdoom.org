@@ -3,33 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>About · p(doom)</title>
-    <link rel="icon" type="image/png" href="favicon.png">
-    <link rel="stylesheet" href="colors_and_type.css">
-    <link rel="stylesheet" href="marketing.css">
-    <style>
-        .page {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: var(--s-9) var(--s-7) var(--s-10);
-        }
-        .page .section-mark {
-            margin-bottom: var(--s-6);
-        }
-        .page h1 {
-            font-size: var(--fs-h1);
-            margin: 0 0 var(--s-5);
-            max-width: 14ch;
-        }
-        @media (max-width: 960px) {
-            .page { padding: var(--s-8) var(--s-6) var(--s-9); }
-            .page h1 { font-size: 44px; }
-        }
-        @media (max-width: 600px) {
-            .page { padding: var(--s-7) var(--s-5) var(--s-8); }
-            .page h1 { font-size: 36px; }
-        }
-    </style>
+    <title>Member of Technical Staff, Fixed-size state · p(doom)</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="stylesheet" href="/colors_and_type.css">
+    <link rel="stylesheet" href="/marketing.css">
 </head>
 <body>
     <!-- Paid-recording announcement. -->
@@ -47,7 +24,7 @@
         <div class="container">
             <nav class="nav">
                 <a class="brand" href="/">
-                    <img class="sigil-img" src="logo-mark-inverted.png" alt="">
+                    <img class="sigil-img" src="/logo-mark-inverted.png" alt="">
                     <span class="wm">p(doom)</span>
                 </a>
                 <div class="nav-links">
@@ -61,13 +38,29 @@
     </header>
 
     <main>
-        <article class="page">
+        <article class="call-detail">
             <header class="section-mark">
-                <span class="eyebrow">About</span>
+                <span class="eyebrow">Open call · № 02</span>
             </header>
-            <h1>One bitter lesson at a time.</h1>
-            <div class="page-prose page-prose--narrow">
-                <p>Pretraining unlocked one direction to scale. As did self-play, RLHF and RLVR. We work on the scalable methods of the future: learning from real-world human behavior, continual improvement through deployment, architectures that carry memory forever. Removing scaling bottlenecks, one bitter lesson at a time.</p>
+            <h1>Member of Technical Staff, Fixed-size state.</h1>
+            <p class="detail-tag">Munich · full-time · remote</p>
+
+            <div class="page-prose page-prose--wide">
+                <p>We train on trajectories that can span weeks or months. Dense attention makes those horizons infeasible, and context compression is not enough for reliable memory.</p>
+                <p>This role develops fixed-size state architectures for long-horizon computer-use models. You will run architecture ablations, test scaling behavior, study failure modes such as state collapse and loss of long-range dependencies, and publish the results.</p>
+            </div>
+
+            <section class="detail-section">
+                <header class="detail-section-head">
+                    <span class="eyebrow">Apply</span>
+                </header>
+                <div class="page-prose page-prose--wide">
+                    <p>Email <a href="mailto:franz@pdoom.org?subject=Fixed-size%20state">franz@pdoom.org</a> with five bullet points about evidence of exceptional ability.</p>
+                </div>
+            </section>
+
+            <div class="detail-cta">
+                <a class="detail-back" href="/open_calls.html">← All open calls</a>
             </div>
         </article>
     </main>
@@ -76,7 +69,7 @@
         <div class="container">
             <div class="footer-row">
                 <a class="brand" href="/">
-                    <img class="sigil-img" src="logo-mark-inverted.png" alt="">
+                    <img class="sigil-img" src="/logo-mark-inverted.png" alt="">
                     <span class="wm">p(doom)</span>
                 </a>
                 <nav class="footer-links">

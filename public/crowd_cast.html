@@ -24,6 +24,17 @@
 </head>
 
 <body>
+    <!-- Paid-recording announcement. -->
+    <aside class="announce" id="announce-bar" aria-label="Announcement">
+        <a class="announce-inner" href="https://docs.google.com/forms/d/e/1FAIpQLSd50ZarNRKoIWDmy5xAn8K8FVGM2Jbk1T52er4YLHiP2P28rQ/viewform" target="_blank" rel="noopener">
+            <span class="announce-msg">
+                We pay <strong class="announce-figure">$300/month</strong> to record your screen for AI research.
+            </span>
+            <span class="announce-cta">Apply<span aria-hidden>→</span></span>
+        </a>
+        <button class="announce-close" type="button" aria-label="Dismiss announcement">×</button>
+    </aside>
+
     <header class="site-header" data-surface="void">
     <div class="container">
       <nav class="nav">
@@ -35,7 +46,7 @@
           <a href="/blog.html">Research</a>
           <a href="/about.html">About</a>
           <a href="/supply.html">Supply</a>
-          <a href="https://discord.gg/G4JNuPX2VR">Join</a>
+          <a href="/open_calls.html">Open calls</a>
         </div>
       </nav>
     </div>
@@ -86,15 +97,14 @@
   </d-front-matter>
   <d-title>
     <p>
-    We introduce <a href="https://github.com/p-doom/crowd-cast">crowd-cast</a>, a privacy-preserving desktop application that allows anyone to participate in crowd-sourcing an action-annotated long-horizon behaviour-cloning dataset of computer work. <a href="/crowd-cast-quickstart.html">Install</a> once, and forget about it.
+    We introduce <a href="/docs/crowd-cast/">crowd-cast</a>, a privacy-preserving desktop application for crowd-sourcing an action-annotated long-horizon behaviour-cloning dataset of computer work.
     </p>
   </d-title>
   <d-byline></d-byline>
   <d-article>
     <aside><sup>*</sup>Equal contribution</aside>
     <p style="border-top: 1px solid rgba(0, 0, 0, 0.1); border-bottom: 1px solid rgba(0, 0, 0, 0.1); padding: 1rem 0; margin: 1.5rem 0; grid-column: page; text-align: center; font-size: 1.1em;">
-      <strong><a href="/crowd-cast-quickstart.html">Install crowd-cast</a> and start recording today.</strong><br>
-      We are now paying people to participate in the data collection: <a href="https://x.com/prob_doom/status/2056306074722996482" target="_blank">read the announcement</a>.
+      We now pay participants <strong>$300/month</strong> to use crowd-cast. <strong><a href="https://docs.google.com/forms/d/e/1FAIpQLSd50ZarNRKoIWDmy5xAn8K8FVGM2Jbk1T52er4YLHiP2P28rQ/viewform" target="_blank" rel="noopener">Apply</a></strong>.
     </p>
     <figure style="grid-column: page; margin: 1rem 0; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center"><video src="crowd-cast-2.mp4"
     style="width: 100%; min-width: 280px; border-radius: 8px; border: 1px solid var(--ink); box-sizing: border-box;" controls autoplay loop muted></video>
@@ -128,7 +138,7 @@
     <a class="marker" href="#section-3" id="section-3"><span>3</span></a>
     <h2>...and millions more thanks to you?</h2>
     <p>
-      We introduce <a href="https://github.com/p-doom/crowd-cast/releases">crowd-cast</a>, a native desktop application that allows anyone to participate in crowd-sourcing an action-annotated long-horizon behaviour-cloning dataset of computer work.
+      We introduce <a href="/docs/crowd-cast/">crowd-cast</a>, a native desktop application that allows anyone to participate in crowd-sourcing an action-annotated long-horizon behaviour-cloning dataset of computer work.
       Originally intended for internal rollout to construct a paired dataset of screencast observations and corresponding actions (key presses and mouse movement), we are now <a href="https://github.com/p-doom/crowd-cast">open-sourcing</a> crowd-cast and allowing anyone to participate in crowd-sourcing.
     </p>
     <p>
@@ -137,8 +147,7 @@
       immensely helps adoption while still covering the majority of our working day. If you work on open-source projects, you will likely be surprised that you wouldn't be bothered by publicly streaming on YouTube with this setup (something <a href="https://www.youtube.com/playlist?list=PLjRnysMzVojeW07tbldm5sIDrVIqAWiHy">we did for months</a>).
     </p>
     <p>
-      We strive to make crowd-cast as unobtrusive as possible: by default, we capture five-minute segments, upload each segment to a private S3 bucket, and delete the local copy on segment boundaries. As with <a href="https://pdoom.org/crowd_code_2.html">crowd-code</a>
-      and <a href="https://huggingface.co/datasets/p-doom/AGI-CAST-0.6k">AGI-CAST</a>, we will publish the cleaned dataset under the most permissive Creative Commons license (CC0). A live <a href="https://pdoom.org/crowd_cast_dashboard.html">dashboard</a> shows collection progress and summary statistics.
+      We strive to make crowd-cast as unobtrusive as possible: by default, we capture five-minute segments, upload each segment to a private S3 bucket, and delete the local copy on segment boundaries. We will publish the cleaned dataset under the most permissive Creative Commons license (CC0). A live <a href="https://pdoom.org/crowd_cast_dashboard.html">dashboard</a> shows collection progress and summary statistics.
     </p>
 
     <figure style="grid-column: page; margin: 1rem 0; display: flex; justify-content: center"><img src="crowd-cast-1.png"
@@ -155,7 +164,7 @@
     <figcaption style="grid-column: page; text-align: center; margin-bottom: 2rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Figure 3: Both screen recording and action recording stop when switching focus to an app that should not be recorded (Discord in this example).</figcaption>
     <p>
       The open research community produces half a billion hours of uncaptured screencasts every single week, yet all of that data is lost. If you openly publish your work, consider
-      participating in crowd-sourcing by installing crowd-cast. We are greater than the sum of our parts. <strong>Together.</strong>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSd50ZarNRKoIWDmy5xAn8K8FVGM2Jbk1T52er4YLHiP2P28rQ/viewform" target="_blank" rel="noopener">applying to participate</a>.
     </p>
 
     <!--
@@ -193,4 +202,18 @@
       </div>
     </div>
   </footer>
+    <script>
+      // Dismiss hides the bar for the current view only; it is not
+      // persisted, so a reload brings the announcement back.
+      (function () {
+        var bar = document.getElementById('announce-bar');
+        if (!bar) return;
+        var close = bar.querySelector('.announce-close');
+        if (close) {
+          close.addEventListener('click', function () {
+            bar.hidden = true;
+          });
+        }
+      })();
+    </script>
 </body>
