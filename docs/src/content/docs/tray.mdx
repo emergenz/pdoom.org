@@ -11,10 +11,10 @@ menu.
 
 <Aside type="note" title="Linux tray">
   On Linux the tray uses the freedesktop **StatusNotifierItem** protocol, so what
-  you see depends on your status bar. The icon and menu both work under **waybar**
-  and GNOME (with the AppIndicator extension). Under **swaybar** the icon appears
-  but the menu does not open, so use waybar to control crowd-cast. See
-  [Linux → System tray](/docs/crowd-cast/linux/#system-tray).
+  you see depends on your status bar. The icon and menu both work under **GNOME**
+  (with the AppIndicator extension) and **waybar**. Under **swaybar** the icon
+  appears but the menu does not open, so on sway run **waybar** to control
+  crowd-cast.
 </Aside>
 
 ## Status
@@ -65,21 +65,21 @@ this only affects uploading.)
 ### Settings
 
 Opens a window where you choose **which apps are recorded**: either **Capture
-all applications**, or a specific set ticked from the apps currently running.
-Only apps that are open appear in the list, so to capture one that isn't running,
-launch it first and then open Settings. Saving **restarts the agent** so capture
+all applications**, or a specific set ticked from a list. On macOS and Linux the
+list shows the apps **currently running** (on Wayland, apps that have an open
+window); to capture one that isn't running, launch it first, then open Settings.
+Saving **restarts the agent** so capture
 is rebuilt with the new selection
 (recording resumes automatically on relaunch); Cancel changes nothing. For
 everything else that lives in the config file, see
 [Configuration](/docs/crowd-cast/configuration/).
 
 <Aside type="note" title="Linux">
-  On compositors that only allow full-screen capture (wlroots-based ones such as
-  sway/Hyprland), the per-app picker is disabled and only the whole screen can be
-  captured, so it is your choice whether to record there. On Wayland, each
-  **newly added** app prompts once for screen-sharing
-  permission through the desktop portal after the restart; apps you picked before
-  are restored silently.
+  On **GNOME (Wayland)** you pick your apps once and they capture with no picker
+  (apps you picked before are restored silently). On **sway**, only full-screen
+  capture is available, so the per-app picker is disabled and the whole screen is
+  recorded (the desktop portal asks which output to share each time crowd-cast
+  starts): it's your choice whether to record there.
 </Aside>
 
 ### Sign in with Google / Sign out

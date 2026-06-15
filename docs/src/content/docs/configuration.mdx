@@ -10,8 +10,10 @@ Most settings are handled by the [setup wizard](/docs/crowd-cast/setup/) and the
 not exposed there, you can edit the config file directly.
 
 <Aside type="caution">
-  Quit crowd-cast before editing the config file, and restart it afterwards.
-  Changes to which apps are recorded otherwise take effect on the next segment.
+  crowd-cast reads its config at startup only, so quit crowd-cast before editing
+  the config file and restart it afterwards. (Changing the recorded apps from the
+  tray **Settings** dialog instead applies right away, restarting recording with
+  the new selection.)
 </Aside>
 
 ## Location
@@ -70,7 +72,7 @@ max_concurrent_uploads = 2
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `target_apps` | `[]` | The apps to record. macOS uses bundle IDs; Linux uses the process name. Managed for you by the wizard / **Settings**. |
+| `target_apps` | `[]` | The apps to record. macOS uses bundle IDs; Linux uses the window app id on Wayland (the `app_id`/`wm_class`, e.g. `org.gnome.Evince`). On sway, capture is full-screen, so this is ignored. Managed for you by the wizard / **Settings**. |
 | `capture_all` | `false` | Record **every** app, ignoring `target_apps`. |
 | `start_on_login` | `false` | Launch crowd-cast automatically at login. The wizard recommends turning this on. |
 | `idle_timeout_secs` | `120` | Seconds of no keyboard/mouse activity before auto-pausing. `0` disables idle pausing. |

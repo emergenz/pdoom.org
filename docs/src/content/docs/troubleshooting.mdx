@@ -6,8 +6,7 @@ description: Fixes for common crowd-cast problems on macOS, Windows and Linux.
 import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 
 If your problem is a known limitation rather than a fix-it issue, check
-[Known issues](/docs/crowd-cast/known-issues/) too. Linux-specific setup lives on the
-[Linux page](/docs/crowd-cast/linux/).
+[Known issues](/docs/crowd-cast/known-issues/) too.
 
 ## Recording shows "no capture sources"
 
@@ -30,10 +29,12 @@ install folder at `%LOCALAPPDATA%\Programs\crowd-cast`, and re-run the installer
 </TabItem>
 <TabItem label="Linux">
 
-Either a focus provider isn't available for your compositor (recording is
-gated off, see the [compatibility matrix](/docs/crowd-cast/linux/#compatibility-matrix)),
-or per-app capture prerequisites aren't met. X11 needs the Composite extension
-and `_NET_ACTIVE_WINDOW`; most Wayland compositors capture full-screen.
+crowd-cast supports only **GNOME on Wayland** and **sway**; on any other session
+it won't start (the setup wizard blocks until you're in a supported one). On
+**GNOME**, this usually means the bundled focus extension isn't active yet:
+install it from the wizard and **log out and back in once**, then recording can
+start. On **sway**, capture is full-screen and the portal asks which output to
+share when crowd-cast starts.
 
 </TabItem>
 </Tabs>
@@ -59,10 +60,33 @@ crowd-cast into the always-visible area.
 <TabItem label="Linux">
 
 The tray needs a StatusNotifier (SNI) host, so the icon will not show under
-vanilla GNOME (without the AppIndicator extension) or a bare WM. Under **swaybar**
-the icon appears but its menu will not open, so use **waybar** for a working menu.
-See [Linux → System tray](/docs/crowd-cast/linux/#system-tray). The agent keeps
-running and recording regardless.
+vanilla GNOME (without the AppIndicator extension). Under **swaybar** the icon
+appears but its menu will not open, so on sway run **waybar** for a working menu.
+The agent keeps running and recording regardless.
+
+</TabItem>
+</Tabs>
+
+## Notifications don't appear
+
+<Tabs syncKey="os">
+<TabItem label="macOS">
+
+Notifications need permission. Open **System Settings → Notifications**, find
+**CrowdCast**, and make sure notifications are allowed.
+
+</TabItem>
+<TabItem label="Windows">
+
+crowd-cast does not currently show desktop notifications on Windows.
+
+</TabItem>
+<TabItem label="Linux">
+
+Notifications go through the freedesktop notification service, which needs a
+**notification daemon** to be running. GNOME provides one out of the box. On a
+bare **sway** session, run **mako** or **dunst**. Recording is unaffected either
+way.
 
 </TabItem>
 </Tabs>

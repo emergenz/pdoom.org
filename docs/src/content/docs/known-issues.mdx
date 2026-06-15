@@ -25,27 +25,25 @@ across a sleep/wake cycle.
 
 ## Linux
 
-Linux support is [experimental](/docs/crowd-cast/linux/), and several paths aren't
-fully validated yet:
+Linux support is **experimental**. crowd-cast works on exactly two setups and
+**won't start on anything else** (X11, KDE, or other wlroots compositors such as
+Hyprland): it refuses rather than record the wrong thing.
 
-- **Per-app capture on Wayland depends on the desktop portal.** GNOME and KDE
-  offer a window source, so capture is per-app there; **wlroots compositors
-  (sway, Hyprland) only allow full-screen capture.** X11 captures per-window via
-  XComposite.
-- **X11 per-app capture** is implemented and unit-tested but **not yet
-  live-validated** on real X11 hardware.
-- **GNOME follow-focus** requires installing our shell extension and logging out
-  and back in, and hasn't been validated on a live GNOME session yet.
-- **KDE Plasma and other Wayland compositors** have no focus provider yet, so
-  recording is **gated off** there (by design: crowd-cast fails closed rather
-  than recording incorrectly).
-- **Tray control depends on your status bar.** Under **swaybar** the crowd-cast
-  icon appears but its menu does not open, so use **waybar** on Sway. With no SNI
-  host at all (vanilla GNOME without the AppIndicator extension) the icon does not
-  appear. The agent still runs and records either way; the tray is only for control.
-
-See the [Linux compatibility matrix](/docs/crowd-cast/linux/#compatibility-matrix)
-for the full picture.
+- **GNOME (Wayland): records the apps you select**, each captured wherever it is,
+  including across multiple monitors. **First-time setup needs one log out and
+  back in** to finish enabling capture; until you do, recording stays off and
+  you'll be prompted. No window picker ever appears, so the wrong window can't be
+  captured by accident.
+- **sway: records a whole monitor**, not individual apps. There's no per-app
+  selection, so on sway it's your call whether to record at all. crowd-cast asks
+  which monitor to share each time it starts.
+- **The tray icon needs a compatible status bar.** On sway, use **waybar** (with
+  swaybar the icon shows but its menu won't open). On a GNOME session without the
+  AppIndicator extension, the icon won't appear at all. Recording works either
+  way; the tray is only for controlling it.
+- **Notifications need a notification daemon.** GNOME has one built in; on a bare
+  sway session, run **mako** or **dunst** or you won't see notifications.
+  Recording is unaffected.
 
 ## Reporting something new
 

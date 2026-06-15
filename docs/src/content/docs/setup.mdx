@@ -3,7 +3,7 @@ title: First-run setup
 description: "The crowd-cast setup wizard (permissions, apps to record, start-at-login), then signing in from the tray."
 ---
 
-import { Steps, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
 The first time you launch crowd-cast, a **setup wizard** opens automatically. It
 walks through three things: granting permissions, choosing which apps to record,
@@ -39,43 +39,53 @@ choosing which apps to record.
 </TabItem>
 <TabItem label="Linux">
 
-On Wayland, crowd-cast captures input via `evdev`, which requires your user to
-be in the `input` group. The Linux installer handles this for you (it's the one
-step that needs `sudo`). See the [Linux guide](/docs/crowd-cast/linux/#input-capture)
-for details. Per-app capture and follow-focus availability depend on your
-display server and compositor. See the [compatibility matrix](/docs/crowd-cast/linux/#compatibility-matrix).
+crowd-cast supports two Linux sessions: **GNOME on Wayland** (application
+capture) and **sway** (full-screen capture). On anything else the wizard won't
+let you finish, so log into one of those first. Input is captured via `evdev`,
+which requires your user to be in the `input` group; the installer handles this
+for you (it's the one step that needs `sudo`), then you log out and back in once
+for it to take effect. On **GNOME** you also install the bundled focus extension
+and relog in once, so per-app capture and input gating work.
 
 </TabItem>
 </Tabs>
 
 ## 2. Choose which apps to record
 
-<Steps>
+The wizard asks whether to **capture all applications** or to pick a specific
+set. If you pick a set, **only those apps are captured**: when a non-selected app
+is in the foreground, crowd-cast records a black screen and stops logging input.
+It is a one-time step: a selected app is remembered and keeps being captured on
+later launches, even after you close and reopen it.
 
-1. The wizard asks whether to **capture all applications**, or to pick specific
-   ones.
+What the app list shows depends on your platform:
 
-2. If you pick specific apps, it lists the applications currently running and
-   you select the ones you want recorded (for example your browser, terminal,
-   IDE and PDF viewer).
+<Tabs syncKey="os">
+<TabItem label="macOS">
 
-3. Only the apps you select are captured. **Everything else is ignored**: when
-   a non-selected app is in the foreground, crowd-cast records a black screen
-   and stops logging input.
+The list shows the applications **currently running**. To record one that isn't
+open, launch it first, then select it.
 
-</Steps>
+</TabItem>
+<TabItem label="Windows">
 
-<Aside type="note" title="Only running apps are listed">
-  The picker shows the applications **currently open** on your machine. To record
-  something that is not running, **launch it first**, then select it. This is a
-  one-time step: once an app is selected it is remembered and keeps being captured
-  on later launches, even after you close and reopen it.
-</Aside>
+The list shows the applications **currently running**. To record one that isn't
+open, launch it first, then select it.
+
+</TabItem>
+<TabItem label="Linux">
+
+The list shows the applications **currently running** (on Wayland, applications
+that have an open window). To record one that isn't open, launch it first, then
+select it.
+
+</TabItem>
+</Tabs>
 
 <Aside type="tip">
   You can change this selection at any time later from **Settings** in the tray
-  menu. Changes take effect on the next recording segment. For the privacy
-  rationale (and our own setup), see [Privacy & data](/docs/crowd-cast/privacy/).
+  menu. Saving applies it immediately: recording restarts with the new selection.
+  For the privacy rationale (and our own setup), see [Privacy & data](/docs/crowd-cast/privacy/).
 </Aside>
 
 ## 3. Start at login

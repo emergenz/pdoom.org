@@ -73,6 +73,117 @@ main { display: block; flex: 1 0 auto; }
 }
 .nav-links a:hover { color: var(--ember); }
 
+/* ===== Announcement bar (paid-recording call) ================ */
+/* A solid ember strip above the sticky header. Ember is the brand's
+ * one saturated colour, so as a surface it separates hard from both
+ * the dark header below it and the paper body, instead of blending
+ * into the void header. Type goes cream-on-ember; the dollar figure
+ * sits on an oxblood chip, the one focal accent, like a stamped price.
+ * The whole strip is one link: on hover it lifts in brightness so the
+ * hover reads across the full bar, not only at the CTA. */
+.announce {
+  position: relative;
+  background: var(--ember);
+  border-bottom: 1px solid var(--ember-deep);
+  transition: filter var(--dur-fast) var(--ease-ink);
+}
+.announce:hover { filter: brightness(1.1); }
+.announce[hidden] { display: none; }
+.announce-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px 56px;
+  min-height: 40px;
+  text-decoration: none;
+  color: var(--paper);
+  transition: color var(--dur-fast) var(--ease-ink);
+}
+/* Hold cream on hover; without this the global a:hover (ember-deep)
+ * would tint the message text dark red on the ember surface. */
+.announce-inner:hover { color: var(--paper); }
+
+/* The dispatch line itself */
+.announce-msg {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: .02em;
+  line-height: 1.3;
+}
+.announce-figure {
+  color: var(--paper);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  background: var(--ember-deep);
+  padding: 1px 7px;
+  border-radius: var(--r-1);
+}
+
+/* CTA, mono uppercase with a hairline divider on its left */
+.announce-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  flex: 0 0 auto;
+  padding-left: 18px;
+  border-left: 1px solid rgba(247,244,234,0.35);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--paper);
+}
+.announce-cta span[aria-hidden] {
+  font-size: 13px;
+  transition: transform var(--dur-fast) var(--ease-ink);
+}
+.announce-inner:hover .announce-cta { text-decoration: underline; text-underline-offset: 0.22em; }
+.announce-inner:hover .announce-cta span[aria-hidden] { transform: translateX(3px); }
+
+/* Dismiss, parked at the far right and outside the link so it never
+ * steals the bar's click */
+.announce-close {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  line-height: 1;
+  color: rgba(247,244,234,0.65);
+  transition: color var(--dur-fast) var(--ease-ink);
+}
+.announce-close:hover { color: var(--paper); }
+
+@media (max-width: 960px) {
+  .announce-inner { padding-left: 40px; padding-right: 44px; }
+}
+@media (max-width: 600px) {
+  .announce-inner {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 12px;
+    padding: 9px 38px 9px 20px;
+    text-align: center;
+  }
+  .announce-msg { font-size: 12px; }
+  .announce-cta { padding-left: 12px; }
+  .announce-close { right: 8px; }
+}
+
 /* ===== Section transitions ==================================== */
 /* (Removed, momentum lives between release groups, not at
  * header/footer boundaries.) */

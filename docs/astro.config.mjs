@@ -51,10 +51,6 @@ export default defineConfig({
           ],
         },
         {
-          label: 'Platforms',
-          items: [{ label: 'Linux (experimental)', slug: 'linux' }],
-        },
-        {
           label: 'Reference',
           items: [
             { label: 'Configuration', slug: 'configuration' },

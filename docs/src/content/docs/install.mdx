@@ -65,9 +65,11 @@ You can always grab the latest builds from the
 </TabItem>
 <TabItem label="Linux">
 
-Linux support is **experimental**, and what works depends on your display server
-and compositor. Skim the [Linux guide](/docs/crowd-cast/linux/) (compatibility
-matrix, tray, and per-monitor notes) before relying on it.
+Linux support is **experimental**. crowd-cast currently supports exactly two
+sessions: **GNOME on Wayland** (per-app *application* capture) and **sway**
+(full-screen capture only). On any other session (X11, KDE, or other wlroots
+compositors such as Hyprland) the agent will not start: the setup wizard blocks
+until you log into a supported session.
 
 Packaged downloads aren't published for Linux yet, so for now you install from a
 checkout with the bundled script. It's a **user-space** install (into `~/.local`)
@@ -85,11 +87,15 @@ that needs `sudo` only once, to add you to the `input` group.
    adds a menu entry, and enables start-at-login.
 
 2. The script adds you to the **`input`** group (the single `sudo` step, required
-   for input capture on Wayland). **Log out and back in** for it to take effect.
+   for input capture). **Log out and back in** for it to take effect.
 
-3. Launch crowd-cast. On Wayland the desktop portal prompts you once per app to
-   share its window, and the tray needs an SNI host, so on Sway run **waybar**.
-   See the [Linux guide](/docs/crowd-cast/linux/) for the full picture.
+3. Launch crowd-cast.
+   - On **GNOME**, the wizard also installs a bundled GNOME Shell extension for
+     picker-free per-app capture and follow-focus; **log out and back in once**
+     so GNOME loads it. After that, your selected apps capture with no picker.
+   - On **sway**, crowd-cast records full-screen (the desktop portal asks which
+     output to share each time it starts), and the tray needs an SNI host, so run
+     **waybar** (swaybar shows the icon but won't open its menu).
 
 </Steps>
 
