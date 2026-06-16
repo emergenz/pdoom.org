@@ -97,8 +97,7 @@
   </d-front-matter>
   <d-title>
     <p>
-      <!--TODO: check whether the urls are correct-->
-      We train an inverse dynamics model on <a href="https://pdoom.org/crowd_cast.html">crowd-cast</a>'s paired dataset, yielding a model that recovers key presses, mouse clicks, cursor movements and scroll events from unlabeled videos. Along with the <a href="https://huggingface.co/p-doom/idm-1">model</a>, we <a href="https://huggingface.co/datasets/p-doom/AGI-CAST-0.6k-IDM-annotated">openly release</a> 600 hours of IDM-annotated screencasts. Trained exclusively on macOS, the model generalizes to Windows and Linux.
+      We train an inverse dynamics model on <a href="https://pdoom.org/crowd_cast.html">crowd-cast</a>'s paired dataset, yielding a model that recovers key presses, mouse clicks, cursor movements and scroll events from unlabeled videos. Along with the <a href="https://huggingface.co/p-doom/idm">model</a>, we <a href="https://huggingface.co/datasets/p-doom/AGI-CAST-idm-actions">openly release</a> 600 hours of IDM-annotated screencasts. Trained exclusively on macOS, the model generalizes to Windows and Linux.
     </p>
   </d-title>
   <d-byline></d-byline>
@@ -1313,7 +1312,7 @@
     </p>
     <p>
       The internet contains thousands of hours of unlabeled screencasts across more professions, applications and operating systems. To use them for behavior cloning, we first need to recover the actions behind the frames.
-      We start with an inverse dynamics model trained on crowd-cast, then use it to action-label all 600 hours of <a href="https://pdoom.org/agi_cast.html">AGI-CAST</a>. We <a href="https://huggingface.co/datasets/p-doom/AGI-CAST-0.6k-IDM-annotated">openly release</a> that annotated dataset alongside the model.
+      We start with an inverse dynamics model trained on crowd-cast, and use it to action-label all 600 hours of <a href="https://pdoom.org/agi_cast.html">AGI-CAST</a>. We <a href="https://huggingface.co/datasets/p-doom/AGI-CAST-idm-actions">openly release</a> that annotated dataset alongside the model.
     </p>
 
     <!-- ============================================================
@@ -1324,7 +1323,10 @@
     <h2>An IDM for unlabeled screencasts</h2>
     <p>
       A human watching screen recordings can infer what was typed, what was clicked, and how the mouse moved.
-      An inverse dynamics model is no different. Trained on crowd-cast's paired data (videos and ground-truth actions), our model learns to recover the actions from pixels alone.
+      An inverse dynamics model is no different. Trained on crowd-cast's paired data (videos and ground-truth actions), our model learns to recover actions from pixels alone.
+    </p>
+    <p>
+      Unlike previous work <d-cite key="song2026watch, lu2025videoagenttrek"></d-cite>, our IDM predicts sparse, low-level input events over multi-frame clips. Its action space is close to raw OS input logs: individual key presses, mouse clicks, scrolls and relative mouse movement, rather than GUI-level action steps. To our knowledge, this is the first openly released IDM for recovering raw computer input events from screen recordings.
     </p>
 
     <figure style="grid-column: page; margin: 1.5rem 0;">
@@ -1386,21 +1388,20 @@
       </div>
       <!-- Legend -->
       <div style="margin-left: 48px; display: flex; gap: 18px; padding: 12px 12px 0; font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">
-        <span><span style="display: inline-block; width: 10px; height: 10px; background: var(--ember, #B7361E); border-radius: 1px; vertical-align: middle; margin-right: 4px;"></span>Ours (fine-tuned)</span>
+        <span><span style="display: inline-block; width: 10px; height: 10px; background: var(--ember, #B7361E); border-radius: 1px; vertical-align: middle; margin-right: 4px;"></span>Ours (Qwen3-VL 8B fine-tuned)</span>
         <span><span style="display: inline-block; width: 10px; height: 10px; background: var(--ash-500, #807A6E); border-radius: 1px; vertical-align: middle; margin-right: 4px;"></span>Closed-source</span>
         <span><span style="display: inline-block; width: 10px; height: 10px; background: var(--ash-300, #CFC8B8); border-radius: 1px; vertical-align: middle; margin-right: 4px;"></span>Open-source</span>
       </div>
     </div>
-    <figcaption style="text-align: center; margin-top: 0.5rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">F1 on the 44-clip eval set. All models scored under identical rules.</figcaption>
+    <figcaption style="text-align: center; margin-top: 0.5rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">F1 on the 44-clip eval set.</figcaption>
     </figure>
 
+    <!-- TODO: related work paragraph (VPT, FDM-1, VideoAgentTrek) — deferred -->
     <p>
-      Our fine-tune of Qwen3-VL 8B surpasses the strongest few-shot off-the-shelf model, Gemini 3.5 Flash.
+      Our fine-tune of Qwen3-VL 8B surpasses the strongest zero-shot off-the-shelf model, Gemini 3.5 Flash.
       Our qualitative evaluations (see interactive demo) show that predicted cursor displacements closely track both the direction and magnitude of ground truth.
     </p>
 
-    <!-- TODO: insert per-type P/R/F1 breakdown for our model once available -->
-    <!-- TODO: figure — qualitative comparison: ground truth vs IDM predictions on held-out clips -->
 
     <p>
       Without fine-tuning, even the best off-the-shelf model leaves significant room for improvement.
@@ -1433,12 +1434,12 @@
         <tr style="border-bottom: 1px solid #eee;">
           <td style="padding: 4px 12px 4px 0;"><code>KeyPress</code></td>
           <td style="padding: 4px 12px 4px 0;">key name + modifiers, e.g. <code>Cmd+S</code></td>
-          <td style="padding: 4px 0 4px 0;">attributed to the frame where the visual effect appears</td>
+          <td style="padding: 4px 0 4px 0;"></td>
         </tr>
         <tr style="border-bottom: 1px solid #eee;">
           <td style="padding: 4px 12px 4px 0;"><code>MouseClick</code></td>
           <td style="padding: 4px 12px 4px 0;"><code>Left</code>, <code>Right</code>, or <code>Middle</code></td>
-          <td style="padding: 4px 0 4px 0;">one per press event; position is implied by the preceding MouseMove sequence</td>
+          <td style="padding: 4px 0 4px 0;">position is implied by the preceding MouseMove sequence</td>
         </tr>
         <tr style="border-bottom: 1px solid #eee;">
           <td style="padding: 4px 12px 4px 0;"><code>MouseMove</code></td>
@@ -1480,14 +1481,13 @@
         <strong>Frame extraction.</strong>
         We downsample each recording to 5 FPS and resize to 720p.
         crowd-cast records a black screen when the focused application is not in the user's predefined recording list. These black frames carry no visual information and have no associated actions, so we detect and drop them.
-        We then slide a 10-frame window with stride 5 across each recording (50% overlap).
-        <!--TODO: ask mihir what he means by this and fix this -->
+        We then slide a 10-frame window across each recording (stride=5).
         At 5 FPS, roughly 70% of the 2-second windows contain no user action at all.
         We keep only 5% of these zero-action clips as negative examples, enough for the model to learn that <code>[]</code> is a valid response without dominating the training loss.
       </li>
       <li>
         <strong>Action extraction.</strong>
-        Raw OS-level keylog events are converted into the four emitted action types.
+        Raw OS-level keylog events are converted into the four action types.
         Modifier keys never emit standalone, they are tracked as held state and prefixed to the next non-modifier key press. For example, holding <code>Cmd+Shift</code> and subsequently pressing <code>P</code> yields one event <code>Cmd+Shift+P</code>.
         Mouse movement deltas are $$(dx, dy) \in [-1000, 1000]^2$$, where $$\pm1000$$ corresponds to a full screen-width or screen-height traversal. Scroll magnitudes are normalized the same way.
         Since multiple events sometimes land on the same frame, we coalesce scrolling and mouse movement by summing their per-frame vectors.
@@ -1527,7 +1527,6 @@
 
     <aside>If you are wondering about the weird decay step count, that was a small mishap in our training config</aside>
 
-    <!-- TODO: related work paragraph (VPT, FDM-1, VideoAgentTrek) — deferred -->
 
     <!-- ============================================================
          §3  EXPERIMENTS
@@ -1543,14 +1542,15 @@
       Only visible and inferable actions count toward the score.
     </p>
     <p>
-      Each clip is 25 frames, but the model only sees 10-frame sequences during training.
-      Thus, during inference we run four overlapping windows (stride 5, margin 2) and merge predictions across non-overlapping scoring zones so each frame's prediction comes from exactly one window.
+      Each evaluation clip is 25 frames, but the model only sees 10-frame sequences during training.
+      Thus, during inference we run four overlapping windows (stride=5) and only evaluate predictions from frame indices 2 to 7.
       We match predictions to ground truth with a type-dependent frame tolerance (5 frames for key presses and mouse clicks, 0 frames for scrolling and mouse movement).
-      <aside>We allow a 5-frame tolerance since the visual effect of a press or click can be delayed by several frames</aside>
     </p>
+      <aside>The model has less context at the edges of its window. We take this approach from VPT <d-cite key="NEURIPS2022_9c7008af"></d-cite>.
+      We allow a 5-frame tolerance since the visual effect of a press or click can be delayed by several frames</aside>
     <!--TODO: upload the model to hf and make sure that the eval table is in the readme-->
     <p>
-      We <a href="https://huggingface.co/p-doom/idm-1">report</a> per-type precision, recall and F1. For mouse movement we additionally report R² between predicted and ground-truth displacement vectors, and cosine similarity for directional alignment.
+      We <a href="https://huggingface.co/p-doom/idm">report</a> per-type precision, recall and F1. For mouse movement we additionally report R² between predicted and ground-truth displacement vectors, and cosine similarity for directional alignment.
       Reasoning was enabled for Gemini 3.5 Flash, GPT 5.5 and Kimi K2.6, and disabled for Gemma 4, Qwen3-VL and our fine-tuned model.
     </p>
 
@@ -1685,12 +1685,6 @@
     <p>
       We additionally evaluate the model on AgentNet, which is even more out-of-distribution than mere cross-platform clips due to each frame depicting one logical action (like inserting one full command into the terminal). Since the model has never seen non-uniformly sampled frames, it hallucinates dynamics that could explain extensive changes between frames.
     </p>
-    <!-- TODO: insert a caption under the demo of the terminal text insertion, explaining that the model first fails by only predicting part of the text (because it has never seen such behaviour), and later 'fails' by 'explaining' that frame change by the user going back in terminal history-->
-    <p>
-      TODO: Insert OOD numbers. Pre-fix AgentNet Ubuntu F1 was 0.680 (with write-collapse; 0.092 without,
-      due to typing-density artifact on synthetic videos). Post-fix numbers pending retrain.
-      Windows OOD eval not yet run (AgentNet has Windows trajectories, ~3h to set up).
-    </p>
     <figure class="ood-example-grid">
       <div>
         <p><strong>Positive example</strong></p>
@@ -1699,6 +1693,7 @@
       <div>
         <p><strong>Negative example</strong></p>
         <div class="ood-inline-demo" id="ood-negative-demo"></div>
+        <p style="font-size: 0.8em; color: rgba(0, 0, 0, 0.5); margin-top: 0.5rem;">The model has not seen this kind of terminal text insertion during training. It first predicts only part of the inserted text, and subsequently explains large frame changes as terminal-history navigation.</p>
       </div>
     </figure>
     <script>
@@ -2106,14 +2101,6 @@
     })();
     </script>
 
-    <!-- TODO: table — OOD per-type breakdown (macOS in-domain vs Linux vs Windows) -->
-    <!-- TODO: figure — Cmd vs Ctrl confusion matrix -->
-    <!-- TODO: figure — qualitative OOD examples -->
-
-    <!-- ============================================================
-         §6  ZOOM OUT: what this means + what's next
-         Tie IDM results back to the bigger picture. CTA.
-         ============================================================ -->
     <a class="marker" href="#section-3" id="section-3"><span>3</span></a>
     <h2>What's next</h2>
     <p>
@@ -2124,9 +2111,9 @@
       While our firm believe has always been that you need to train models on trajectories that span months if you want them to exhibit month-long horizons, a dataset alone will not suffice. While we are scaling our data collection effort orders of magnitude, we are investigating alternatives to dense attention for retaining memory over months-long rollouts (fixed-size state), continually training off-the-shelf models, inserting goals and synthetic thinking traces, and letting the model learn from experience.
     </p>
     <p>
-      With cross-platform support, anyone can now contribute to the dataset.
-      We are paying participants to record their work sessions using crowd-cast.
-      You are not asked to do tasks for us. You record yourself doing your own work that you would be doing anyway.
+      With cross-platform support, anyone can now contribute to crowd-cast.
+      We are paying participants to record their work sessions.
+      You are not asked to do tasks for us, you record yourself doing work you would be doing anyway.
       If you are interested, <a href="https://forms.gle/YKJn7m4X7WhtVfRm7">apply here</a> or check the <a href="https://pdoom.org/crowd_cast_dashboard.html">live dashboard</a> to see collection progress.
     </p>
 
@@ -2135,7 +2122,7 @@
   <d-appendix>
 
     <h3>Contributions</h3>
-    <p>TODO: Author contributions.</p>
+    <p>MM worked on data sourcing, training, evaluation, and wrote large parts of the manuscript and the crowd-cast codebase. MM ported crowd-cast to Linux. FS ported crowd-cast to Linux and helped with the manuscript. The p(doom) team jointly contributed to crowd-cast.</p>
     <d-bibliography src="bibliography.bib"></d-bibliography>
     <distill-appendix>
     </distill-appendix>
