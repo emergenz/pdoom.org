@@ -379,6 +379,255 @@
           flex: none;
         }
       }
+
+      .ood-example-grid {
+        grid-column: page;
+        display: block;
+        margin: 1.5rem 0;
+      }
+      .ood-example-grid > div + div {
+        margin-top: 24px;
+      }
+      .ood-example-grid p {
+        margin: 0 0 0.35rem;
+        font-family: var(--font-mono, monospace);
+        font-size: 11px;
+      }
+      .ood-inline-demo {
+        width: 100%;
+        border: 1px solid var(--ash-300, #CFC8B8);
+        border-radius: 2px;
+        background: var(--paper, #F7F4EA);
+        font-family: var(--font-mono, monospace);
+        font-size: 12px;
+        color: var(--ink, #161514);
+        overflow: hidden;
+      }
+      .ood-inline-demo * { box-sizing: border-box; }
+      .ood-inline-demo .ood-main {
+        display: flex;
+        flex-direction: row;
+      }
+      .ood-inline-demo .ood-left {
+        flex: 1 1 75%;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .ood-inline-demo .ood-right {
+        flex: 0 0 25%;
+        min-width: 120px;
+        max-width: 180px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-left: 1px solid var(--ash-300, #CFC8B8);
+        background: var(--ash-100, #EEE9DA);
+        padding: 12px 8px;
+        gap: 10px;
+      }
+      .ood-inline-demo .ood-canvas-wrap {
+        background: var(--ink, #161514);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+      .ood-inline-demo .ood-canvas-wrap canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .ood-inline-demo .ood-carousel-bar {
+        height: 44px;
+        overflow: hidden;
+        position: relative;
+        background: var(--ash-100, #EEE9DA);
+        border-top: 1px solid var(--ash-300, #CFC8B8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .ood-inline-demo .ood-carousel-track {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: transform 0.3s ease;
+        will-change: transform;
+      }
+      .ood-inline-demo .ood-carousel-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        flex-shrink: 0;
+      }
+      .ood-inline-demo .ood-carousel-sep {
+        width: 1px;
+        height: 18px;
+        background: var(--ash-300, #CFC8B8);
+        flex-shrink: 0;
+        transition: opacity 0.3s ease;
+      }
+      .ood-inline-demo .ood-keycap {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 12px;
+        min-width: 34px;
+        border-radius: 5px;
+        font-family: var(--font-mono, monospace);
+        font-size: 15px;
+        font-weight: 500;
+        background: var(--paper, #F7F4EA);
+        border: 1px solid var(--ash-400, #A39C8E);
+        border-bottom: 3px solid var(--ash-500, #807A6E);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+        white-space: nowrap;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        color: var(--ink, #161514);
+        line-height: 1.2;
+      }
+      .ood-inline-demo .ood-keycap.ood-fp {
+        color: var(--ember, #B7361E);
+        border-color: var(--ember, #B7361E);
+        border-bottom-color: #7E2010;
+        background: rgba(183,54,30,0.06);
+      }
+      .ood-inline-demo .ood-compass-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+      .ood-inline-demo .ood-compass-label {
+        font-size: 8px;
+        font-weight: 600;
+        color: var(--ash-500, #807A6E);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .ood-inline-demo .ood-compass-canvas {
+        border: 1px solid var(--ash-300, #CFC8B8);
+        border-radius: 2px;
+        background: var(--paper, #F7F4EA);
+      }
+      .ood-inline-demo .ood-compass-detail {
+        font-size: 9px;
+        color: var(--ash-600, #5A554C);
+        text-align: center;
+        min-height: 14px;
+      }
+      .ood-inline-demo .ood-scroll-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 32px;
+      }
+      .ood-inline-demo .ood-scroll-placeholder {
+        font-size: 10px;
+        color: var(--ash-400, #A39C8E);
+        font-style: italic;
+      }
+      .ood-inline-demo .ood-transport {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 10px;
+        border-top: 1px solid var(--ash-300, #CFC8B8);
+        background: var(--ash-100, #EEE9DA);
+        flex-wrap: nowrap;
+      }
+      .ood-inline-demo .ood-btn {
+        background: none;
+        border: 1px solid var(--ash-300, #CFC8B8);
+        border-radius: 2px;
+        font-family: var(--font-mono, monospace);
+        font-size: 13px;
+        color: var(--ink, #161514);
+        cursor: pointer;
+        padding: 2px 8px;
+        line-height: 1.4;
+        transition: background 0.15s;
+      }
+      .ood-inline-demo .ood-btn:hover {
+        background: var(--ash-200, #E2DCCC);
+      }
+      .ood-inline-demo .ood-scrubber {
+        flex: 1;
+        -webkit-appearance: none;
+        appearance: none;
+        height: 4px;
+        background: var(--ash-300, #CFC8B8);
+        border-radius: 2px;
+        outline: none;
+        cursor: pointer;
+      }
+      .ood-inline-demo .ood-scrubber::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 12px; height: 12px;
+        border-radius: 50%;
+        background: var(--ember, #B7361E);
+        border: none;
+        cursor: pointer;
+      }
+      .ood-inline-demo .ood-scrubber::-moz-range-thumb {
+        width: 12px; height: 12px;
+        border-radius: 50%;
+        background: var(--ember, #B7361E);
+        border: none;
+        cursor: pointer;
+      }
+      .ood-inline-demo .ood-frame-counter {
+        font-size: 11px;
+        color: var(--ash-600, #5A554C);
+        white-space: nowrap;
+        min-width: 60px;
+        text-align: center;
+      }
+      .ood-inline-demo .ood-clip-nav {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-left: auto;
+      }
+      .ood-inline-demo .ood-tag-badge {
+        display: inline-block;
+        padding: 1px 6px;
+        border-radius: 2px;
+        font-size: 10px;
+        font-weight: 500;
+        background: var(--ash-200, #E2DCCC);
+        color: var(--ash-700, #3D3A35);
+        white-space: nowrap;
+      }
+      .ood-inline-demo .ood-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 340px;
+        color: var(--ash-500, #807A6E);
+        font-size: 13px;
+      }
+      @media (max-width: 767px) {
+        .ood-inline-demo .ood-main {
+          flex-direction: column;
+        }
+        .ood-inline-demo .ood-right {
+          flex: none;
+          max-width: none;
+          flex-direction: row;
+          border-left: none;
+          border-top: 1px solid var(--ash-300, #CFC8B8);
+          padding: 8px 12px;
+          justify-content: center;
+          gap: 20px;
+        }
+        .ood-inline-demo .ood-left {
+          flex: none;
+        }
+      }
     </style>
 
     <script>
@@ -1433,6 +1682,420 @@
       due to typing-density artifact on synthetic videos). Post-fix numbers pending retrain.
       Windows OOD eval not yet run (AgentNet has Windows trajectories, ~3h to set up).
     </p>
+    <figure class="ood-example-grid">
+      <div>
+        <p><strong>Positive example</strong></p>
+        <div class="ood-inline-demo" id="ood-positive-demo"></div>
+      </div>
+      <div>
+        <p><strong>Negative example</strong></p>
+        <div class="ood-inline-demo" id="ood-negative-demo"></div>
+      </div>
+    </figure>
+    <script>
+    (function() {
+      'use strict';
+
+      var OOD_BASE_PATH = 'idm-ood-demo/agentnet_ubuntu/';
+      var OOD_MANIFEST = OOD_BASE_PATH + 'manifest.json';
+      var OOD_EXAMPLES = [
+        { rootId: 'ood-positive-demo', clipId: 'c112b369-28c1-4226-ac42-5f2b9c143a87' },
+        { rootId: 'ood-negative-demo', clipId: '930d77f9-93d4-4de2-8bf3-f13dfc3eabcb' }
+      ];
+
+      function escHTML(s) {
+        return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      }
+
+      function frameNumber(frame) {
+        if (typeof frame === 'number') return frame;
+        var match = String(frame || '').match(/\d+/);
+        return match ? parseInt(match[0], 10) : 0;
+      }
+
+      function predictionDetail(pred) {
+        return pred.detail == null ? pred.details : pred.detail;
+      }
+
+      function predictionsForClip(clip) {
+        var modelName = Object.keys(clip.models || {})[0];
+        return modelName ? (clip.models[modelName].predictions || []) : [];
+      }
+
+      function keycapText(type, detail) {
+        if (type === 'KeyPress') return detail;
+        if (type === 'MouseClick') {
+          if (detail === 'Left') return 'Left Click';
+          if (detail === 'Right') return 'Right Click';
+          if (detail === 'Middle') return 'Middle Click';
+          return detail + ' Click';
+        }
+        return detail;
+      }
+
+      function initOodDemo(root, clip) {
+        root.innerHTML = '';
+
+        var main = document.createElement('div');
+        main.className = 'ood-main';
+
+        var left = document.createElement('div');
+        left.className = 'ood-left';
+        var canvasWrap = document.createElement('div');
+        canvasWrap.className = 'ood-canvas-wrap';
+        var canvas = document.createElement('canvas');
+        canvasWrap.appendChild(canvas);
+        left.appendChild(canvasWrap);
+
+        var carouselBar = document.createElement('div');
+        carouselBar.className = 'ood-carousel-bar';
+        var carouselTrack = document.createElement('div');
+        carouselTrack.className = 'ood-carousel-track';
+        carouselBar.appendChild(carouselTrack);
+        left.appendChild(carouselBar);
+        main.appendChild(left);
+
+        var right = document.createElement('div');
+        right.className = 'ood-right';
+        var compassSection = document.createElement('div');
+        compassSection.className = 'ood-compass-section';
+        var compassLabel = document.createElement('div');
+        compassLabel.className = 'ood-compass-label';
+        compassLabel.textContent = 'CURSOR';
+        compassSection.appendChild(compassLabel);
+        var compassCanvas = document.createElement('canvas');
+        compassCanvas.className = 'ood-compass-canvas';
+        compassCanvas.width = 160;
+        compassCanvas.height = 160;
+        compassSection.appendChild(compassCanvas);
+        var compassDetail = document.createElement('div');
+        compassDetail.className = 'ood-compass-detail';
+        compassSection.appendChild(compassDetail);
+        right.appendChild(compassSection);
+        var scrollIndicator = document.createElement('div');
+        scrollIndicator.className = 'ood-scroll-indicator';
+        right.appendChild(scrollIndicator);
+        main.appendChild(right);
+        root.appendChild(main);
+
+        var transport = document.createElement('div');
+        transport.className = 'ood-transport';
+        var playBtn = document.createElement('button');
+        playBtn.className = 'ood-btn';
+        playBtn.textContent = '\u25B6';
+        playBtn.title = 'Play / Pause (Space)';
+        transport.appendChild(playBtn);
+        var scrubber = document.createElement('input');
+        scrubber.type = 'range';
+        scrubber.className = 'ood-scrubber';
+        scrubber.min = '0';
+        scrubber.max = String(clip.num_frames - 1);
+        scrubber.value = '0';
+        transport.appendChild(scrubber);
+        var frameCounter = document.createElement('span');
+        frameCounter.className = 'ood-frame-counter';
+        transport.appendChild(frameCounter);
+        var clipNav = document.createElement('div');
+        clipNav.className = 'ood-clip-nav';
+        var tagBadge = document.createElement('span');
+        tagBadge.className = 'ood-tag-badge';
+        tagBadge.textContent = clip.tag || 'Ubuntu';
+        clipNav.appendChild(tagBadge);
+        transport.appendChild(clipNav);
+        root.appendChild(transport);
+
+        var ctx = canvas.getContext('2d');
+        var currentFrame = 0;
+        var playing = false;
+        var lastFrameTime = 0;
+        var animId = null;
+        var image = new Image();
+        var preds = predictionsForClip(clip);
+        var carouselElements = [];
+        var demoAspect = clip.frame_h / clip.frame_w;
+
+        var cursorTrail = (function() {
+          var byFrame = {};
+          preds.forEach(function(pred) {
+            if (pred.type !== 'MouseMove') return;
+            var frame = frameNumber(pred.frame);
+            if (!byFrame[frame]) byFrame[frame] = [];
+            byFrame[frame].push(pred);
+          });
+          var trail = [];
+          var x = 0, y = 0;
+          for (var frame = 0; frame < clip.num_frames; frame++) {
+            trail.push({ x: x, y: y });
+            (byFrame[frame] || []).forEach(function(move) {
+              var parts = String(predictionDetail(move) || '').split(',');
+              if (parts.length === 2) {
+                x += (+parts[0]) / 1000;
+                y += (+parts[1]) / 1000;
+              }
+            });
+          }
+          return trail;
+        })();
+
+        function sizeCanvas() {
+          var w = canvasWrap.clientWidth;
+          var h = Math.round(w * demoAspect);
+          canvas.style.width = w + 'px';
+          canvas.style.height = h + 'px';
+          canvas.width = clip.frame_w;
+          canvas.height = Math.round(clip.frame_w * demoAspect);
+        }
+
+        function drawFrame() {
+          ctx.fillStyle = '#111';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          if (!image.complete || !image.naturalWidth) return;
+          var col = currentFrame % clip.grid_cols;
+          var row = Math.floor(currentFrame / clip.grid_cols);
+          var sx = col * clip.frame_w;
+          var sy = row * clip.frame_h;
+          var scale = Math.min(canvas.width / clip.frame_w, canvas.height / clip.frame_h);
+          var dw = Math.round(clip.frame_w * scale);
+          var dh = Math.round(clip.frame_h * scale);
+          var dx = Math.round((canvas.width - dw) / 2);
+          var dy = Math.round((canvas.height - dh) / 2);
+          ctx.drawImage(image, sx, sy, clip.frame_w, clip.frame_h, dx, dy, dw, dh);
+        }
+
+        function buildCarouselDOM() {
+          carouselTrack.innerHTML = '';
+          carouselElements = [];
+          var groupsByFrame = {};
+          var frameOrder = [];
+          preds.forEach(function(pred) {
+            if (pred.type === 'MouseMove') return;
+            var frame = frameNumber(pred.frame);
+            if (!groupsByFrame[frame]) {
+              groupsByFrame[frame] = [];
+              frameOrder.push(frame);
+            }
+            groupsByFrame[frame].push(pred);
+          });
+
+          var lastFrame = -1;
+          frameOrder.forEach(function(frame) {
+            if (lastFrame >= 0 && frame > lastFrame + 1) {
+              var sep = document.createElement('div');
+              sep.className = 'ood-carousel-sep';
+              carouselTrack.appendChild(sep);
+              carouselElements.push({ frame: Math.floor((lastFrame + frame) / 2), el: sep, isSep: true });
+            }
+            var groupEl = document.createElement('div');
+            groupEl.className = 'ood-carousel-group';
+            groupsByFrame[frame].forEach(function(pred) {
+              var cap = document.createElement('span');
+              cap.className = 'ood-keycap' + (pred.matched === false ? ' ood-fp' : '');
+              cap.textContent = keycapText(pred.type, predictionDetail(pred));
+              groupEl.appendChild(cap);
+            });
+            carouselTrack.appendChild(groupEl);
+            carouselElements.push({ frame: frame, el: groupEl, isSep: false });
+            lastFrame = frame;
+          });
+        }
+
+        function slideCarousel() {
+          if (carouselElements.length === 0) {
+            carouselTrack.style.transform = 'translateX(0px)';
+            return;
+          }
+          var barRect = carouselBar.getBoundingClientRect();
+          if (!barRect.width) return;
+          var barCenter = barRect.left + barRect.width / 2;
+          var bestIdx = 0;
+          var bestDist = Infinity;
+          carouselElements.forEach(function(ce, i) {
+            if (ce.isSep) return;
+            var d = Math.abs(ce.frame - currentFrame);
+            if (d < bestDist) { bestDist = d; bestIdx = i; }
+          });
+          var targetRect = carouselElements[bestIdx].el.getBoundingClientRect();
+          var targetCenter = targetRect.left + targetRect.width / 2;
+          var currentTransform = window.getComputedStyle(carouselTrack).transform;
+          var currentTx = 0;
+          if (currentTransform && currentTransform !== 'none') {
+            var parts = currentTransform.match(/matrix(3d)?\(([^)]+)\)/);
+            if (parts) {
+              var nums = parts[2].split(',').map(function(n) { return parseFloat(n); });
+              currentTx = parts[1] ? nums[12] : nums[4];
+            }
+          }
+          var tx = currentTx + (barCenter - targetCenter);
+          carouselTrack.style.transform = 'translateX(' + tx + 'px)';
+          carouselElements.forEach(function(ce) {
+            var dist = Math.abs(ce.frame - currentFrame);
+            var scale = dist === 0 ? 1 : dist === 1 ? 0.85 : dist === 2 ? 0.7 : 0.6;
+            var opacity = dist === 0 ? 1 : dist === 1 ? 0.65 : dist === 2 ? 0.35 : 0.15;
+            ce.el.style.opacity = opacity;
+            if (!ce.isSep) ce.el.style.transform = 'scale(' + scale + ')';
+          });
+        }
+
+        function renderCompass() {
+          var cctx = compassCanvas.getContext('2d');
+          var W = compassCanvas.width, H = compassCanvas.height;
+          var cx = W / 2, cy = H / 2;
+          var pad = 10;
+          cctx.clearRect(0, 0, W, H);
+          cctx.strokeStyle = 'rgba(0,0,0,0.06)';
+          cctx.lineWidth = 1;
+          cctx.beginPath();
+          cctx.moveTo(cx, pad); cctx.lineTo(cx, H - pad);
+          cctx.moveTo(pad, cy); cctx.lineTo(W - pad, cy);
+          cctx.stroke();
+
+          var maxExt = 0.01;
+          cursorTrail.forEach(function(point) {
+            maxExt = Math.max(maxExt, Math.abs(point.x), Math.abs(point.y));
+          });
+          var scale = (W / 2 - pad) / (maxExt * 1.15);
+          cctx.strokeStyle = 'rgba(0,0,0,0.05)';
+          cctx.lineWidth = 1;
+          cctx.beginPath();
+          cctx.moveTo(cx + cursorTrail[0].x * scale, cy + cursorTrail[0].y * scale);
+          for (var i = 1; i < cursorTrail.length; i++) {
+            cctx.lineTo(cx + cursorTrail[i].x * scale, cy + cursorTrail[i].y * scale);
+          }
+          cctx.stroke();
+
+          var startF = Math.max(0, currentFrame - 8);
+          for (var k = startF; k < currentFrame && k + 1 < cursorTrail.length; k++) {
+            var age = currentFrame - k;
+            var alpha = Math.max(0.08, 1 - (age / 8) * 0.85);
+            cctx.strokeStyle = 'rgba(93, 110, 99, ' + alpha + ')';
+            cctx.lineWidth = Math.max(1, 2.5 - (age / 8) * 1.5);
+            cctx.beginPath();
+            cctx.moveTo(cx + cursorTrail[k].x * scale, cy + cursorTrail[k].y * scale);
+            cctx.lineTo(cx + cursorTrail[k + 1].x * scale, cy + cursorTrail[k + 1].y * scale);
+            cctx.stroke();
+          }
+
+          var cur = cursorTrail[currentFrame] || cursorTrail[cursorTrail.length - 1];
+          cctx.fillStyle = '#B7361E';
+          cctx.beginPath();
+          cctx.arc(cx + cur.x * scale, cy + cur.y * scale, 4, 0, Math.PI * 2);
+          cctx.fill();
+          cctx.fillStyle = '#fff';
+          cctx.beginPath();
+          cctx.arc(cx + cur.x * scale, cy + cur.y * scale, 1.5, 0, Math.PI * 2);
+          cctx.fill();
+
+          var move = preds.find(function(pred) {
+            return pred.type === 'MouseMove' && frameNumber(pred.frame) === currentFrame;
+          });
+          compassDetail.textContent = move ? predictionDetail(move) : '';
+        }
+
+        function renderScrollIndicator() {
+          var scroll = preds.find(function(pred) {
+            return pred.type === 'MouseScroll' && frameNumber(pred.frame) === currentFrame;
+          });
+          if (!scroll) {
+            scrollIndicator.innerHTML = '<span class="ood-scroll-placeholder">no scroll</span>';
+            return;
+          }
+          var val = parseInt(predictionDetail(scroll), 10) || 0;
+          var arrow = val > 0 ? '\u2193' : '\u2191';
+          var cls = 'ood-keycap' + (scroll.matched === false ? ' ood-fp' : '');
+          scrollIndicator.innerHTML = '<span class="' + cls + '" style="font-size:12px;padding:3px 8px;">' + escHTML(arrow + ' ' + Math.abs(val)) + '</span>';
+        }
+
+        function updateVisuals() {
+          drawFrame();
+          renderCompass();
+          renderScrollIndicator();
+          slideCarousel();
+          frameCounter.textContent = 'F' + String(currentFrame).padStart(2, '0') + ' / ' + (clip.num_frames - 1);
+          scrubber.value = String(currentFrame);
+        }
+
+        function tick(now) {
+          if (!playing) return;
+          var interval = 1000 / ((clip.fps || 5) * 0.75);
+          if (now - lastFrameTime >= interval) {
+            lastFrameTime = now;
+            currentFrame = currentFrame < clip.num_frames - 1 ? currentFrame + 1 : 0;
+            updateVisuals();
+          }
+          animId = requestAnimationFrame(tick);
+        }
+
+        function togglePlay() {
+          if (playing) {
+            playing = false;
+            playBtn.textContent = '\u25B6';
+            if (animId) cancelAnimationFrame(animId);
+          } else {
+            playing = true;
+            playBtn.textContent = '\u23F8';
+            lastFrameTime = performance.now();
+            animId = requestAnimationFrame(tick);
+          }
+        }
+
+        playBtn.addEventListener('click', togglePlay);
+        scrubber.addEventListener('input', function() {
+          playing = false;
+          playBtn.textContent = '\u25B6';
+          currentFrame = parseInt(scrubber.value, 10);
+          updateVisuals();
+        });
+
+        image.onload = function() {
+          sizeCanvas();
+          buildCarouselDOM();
+          updateVisuals();
+          requestAnimationFrame(function() {
+            slideCarousel();
+            requestAnimationFrame(slideCarousel);
+          });
+          togglePlay();
+        };
+        image.onerror = function() {
+          root.innerHTML = '<div class="ood-loading">Failed to load OOD sprite.</div>';
+        };
+        image.src = OOD_BASE_PATH + clip.sprite;
+
+        new ResizeObserver(function() {
+          sizeCanvas();
+          drawFrame();
+          requestAnimationFrame(slideCarousel);
+        }).observe(canvasWrap);
+      }
+
+      OOD_EXAMPLES.forEach(function(example) {
+        var root = document.getElementById(example.rootId);
+        if (root) root.innerHTML = '<div class="ood-loading">Loading OOD example...</div>';
+      });
+
+      fetch(OOD_MANIFEST)
+        .then(function(r) { return r.json(); })
+        .then(function(manifest) {
+          OOD_EXAMPLES.forEach(function(example) {
+            var root = document.getElementById(example.rootId);
+            var clip = manifest.clips.find(function(c) { return c.clip_id === example.clipId; });
+            if (!root) return;
+            if (!clip) {
+              root.innerHTML = '<div class="ood-loading">Missing OOD clip.</div>';
+              return;
+            }
+            initOodDemo(root, clip);
+          });
+        })
+        .catch(function(err) {
+          OOD_EXAMPLES.forEach(function(example) {
+            var root = document.getElementById(example.rootId);
+            if (root) root.innerHTML = '<div class="ood-loading">Failed to load OOD manifest.</div>';
+          });
+          console.error('OOD demo error:', err);
+        });
+    })();
+    </script>
     <p>
       <strong>What generalizes.</strong>
       Mouse movement and click detection transfer well across operating systems.
