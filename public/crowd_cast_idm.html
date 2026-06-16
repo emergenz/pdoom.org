@@ -591,6 +591,9 @@
         var carouselCache = {};
         var cursorTrails = {};
         var pauseTimeout = null;
+        var demoAspect = clips.reduce(function(maxAspect, clip) {
+          return Math.max(maxAspect, clip.frame_h / clip.frame_w);
+        }, 0);
 
         var ctx = canvas.getContext('2d');
 
@@ -641,12 +644,11 @@
         /* ── Canvas sizing via ResizeObserver ── */
         function sizeCanvas(clip) {
           var w = canvasWrap.clientWidth;
-          var aspect = clip.frame_h / clip.frame_w;
-          var h = Math.round(w * aspect);
+          var h = Math.round(w * demoAspect);
           canvas.style.width = w + 'px';
           canvas.style.height = h + 'px';
           canvas.width = clip.frame_w;
-          canvas.height = clip.frame_h;
+          canvas.height = Math.round(clip.frame_w * demoAspect);
         }
 
         var resizeObs = new ResizeObserver(function() {
@@ -668,11 +670,19 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             return;
           }
+          ctx.fillStyle = '#111';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
           var col = currentFrame % clip.grid_cols;
           var row = Math.floor(currentFrame / clip.grid_cols);
           var sx = col * clip.frame_w;
           var sy = row * clip.frame_h;
-          ctx.drawImage(img, sx, sy, clip.frame_w, clip.frame_h, 0, 0, clip.frame_w, clip.frame_h);
+          var scale = Math.min(canvas.width / clip.frame_w, canvas.height / clip.frame_h);
+          var dw = Math.round(clip.frame_w * scale);
+          var dh = Math.round(clip.frame_h * scale);
+          var dx = Math.round((canvas.width - dw) / 2);
+          var dy = Math.round((canvas.height - dh) / 2);
+          ctx.drawImage(img, sx, sy, clip.frame_w, clip.frame_h, dx, dy, dw, dh);
         }
 
         /* ── Render compass as cursor trail ── */
@@ -1150,15 +1160,15 @@
     </p-->
 
 
-    <a class="marker" href="#section-2b" id="section-2b"><span>2.1</span></a>
+    <a class="marker" href="#section-2a" id="section-2a"><span>2.1</span></a>
     <h3>Format</h3>
     <p>
       Given a short window of consecutive frames, the model outputs a sparse list of user actions: key presses, mouse clicks, mouse movement and scroll events.
       While most frames have no action, some have several, and the model is trained to emit only those.
-      We deliberately avoid per-frame action classification. At 5 fps, ~70% of frames have no associated input event; a naive per-frame classifier collapses to always predicting no-ops and gets 70% accuracy with zero useful signal.
+      We deliberately avoid per-frame action classification. At 5 FPS, ~70% of frames have no associated input event, hence a naive per-frame classifier collapses to always predicting no-ops, getting 70% accuracy with zero useful signal.
       The sparse formulation sidesteps this entirely: the empty list <code>[]</code> is a valid response for clips where nothing happened.
-      The action space stays close to raw OS input events.
     </p>
+    <figure style="margin: 1rem 0 0;">
     <table style="width: 100%; border-collapse: collapse;">
       <thead>
         <tr style="border-bottom: 1px solid #ddd;">
@@ -1190,6 +1200,8 @@
         </tr>
       </tbody>
     </table>
+    <figcaption style="text-align: center; margin-top: 0.5rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">The action space stays close to raw OS input events.</figcaption>
+    </figure>
     <figure style="margin: 1rem 0 0;">
     <pre style="font-size: 0.85em; line-height: 1.5; background: var(--ash-100, #f5f5f5); border: 1px solid var(--ash-300, #ddd); border-radius: 4px; padding: 1rem; overflow-x: auto;">[
   {"frame": "F01", "type": "MouseMove",   "details": "120,45"},
@@ -1205,45 +1217,39 @@
     <figcaption style="text-align: center; margin-top: 0.5rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Example model output for a 10-frame clip.</figcaption>
     </figure>
 
-    <a class="marker" href="#section-2b" id="section-2b"><span>2.1</span></a>
+    <a class="marker" href="#section-2b" id="section-2b"><span>2.2</span></a>
     <h3>Data processing</h3>
     <p>
-      Each crowd-cast recording consists of a screen-captured mp4 and a paired msgpack keylog containing raw OS-level input events with microsecond timestamps.
+      Each crowd-cast recording consists of a screencast and the corresponding keylog containing raw OS-level input events with microsecond-level timestamps.
       We process these into training clips as follows:
     </p>
     <ol>
       <li>
         <strong>Frame extraction.</strong>
-        We downsample each recording to 5 fps and resize to 1280x720.
+        We downsample each recording to 5 FPS and resize to 720p.
         crowd-cast records a black screen when the focused application is not in the user's predefined recording list. These black frames carry no visual information and have no associated actions, so we detect and drop them.
-        To reliably identify black frames, we crop the top 15% of the screen first, removing the macOS menubar, which would otherwise prevent fully-black detection even on unrecorded applications.
         We then slide a 10-frame window with stride 5 across each recording (50% overlap).
-        At 5 fps, roughly 70% of the 2-second windows contain no user action at all.
+        At 5 FPS, roughly 70% of the 2-second windows contain no user action at all.
         We keep only 5% of these zero-action clips as negative examples, enough for the model to learn that <code>[]</code> is a valid response without dominating the training loss.
       </li>
       <li>
         <strong>Action extraction.</strong>
         Raw OS-level keylog events are converted into the four emitted action types.
-        Modifier keys never emit standalone; they are tracked as held state and prefixed to the details of the next non-modifier KeyPress. For example, holding Cmd+Shift then pressing P yields one event with details <code>"Cmd+Shift+P"</code>.
-        MouseMove deltas are signed integers on a per-axis [-1000, +1000] scale, where ±1000 corresponds to a full screen-width (dx) or screen-height (dy) traversal. MouseScroll magnitude is normalized the same way.
-        Multiple raw events often land on the same frame after downsampling; we coalesce scrolls and mouse movements by summing their per-frame vectors.
-        We index action $$a_{i}$$ as the action that led to the change in frame $$f_{i+1}$$.
+        Modifier keys never emit standalone, they are tracked as held state and prefixed to the next non-modifier key press. For example, holding <code>Cmd+Shift</code> and subsequently pressing <code>P</code> yields one event <code>Cmd+Shift+P</code>.
+        Mouse movement deltas are $$(dx, dy) \in [-1000, 1000]^2$$, where $$\pm1000$$ corresponds to a full screen-width or screen-height traversal. Scroll magnitudes are normalized the same way.
+        Since multiple events sometimes land on the same frame, we coalesce scrolling and mouse movement by summing their per-frame vectors.
       </li>
     </ol>
     <p>
-      We use a snapshot of the crowd-cast dataset from May 19, 2026, comprising ~18,000 recording segments across ~3,800 sessions. After processing, this yields approximately 1.5M training clips and 210K validation clips, split at the session level with zero overlap.
+      We use a snapshot of the crowd-cast dataset from May 19, 2026, comprising ~18,000 5-minute recordings. After processing, this yields approximately 1.5m training clips and 210k validation clips, split at the session level.
     </p>
 
-    <a class="marker" href="#section-2c" id="section-2c"><span>2.2</span></a>
+    <a class="marker" href="#section-2c" id="section-2c"><span>2.3</span></a>
     <h3>Model and training</h3>
     <p>
-      We fine-tune <a href="https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct">Qwen3-VL-8B</a> with LoRA applied to both the language model (attention + MLP projections) and the vision encoder (QKV, output projection, MLP).
-      Frames are interleaved with text labels (<code>"Frame F00:"</code>, <code>"Frame F01:"</code>, ...) in the input sequence, giving the model text-space anchors across the 10 images.
-      The model receives the frames and a task prompt as input and produces a JSON array of actions as output. Only the assistant response contributes to the loss.
-    </p>
-    <p>
-      At the pixel budget used for training, each frame produces 480 visual tokens after Qwen3-VL's spatial merge.
-      A 10-frame training sample totals ~5,300 tokens: 4,800 visual tokens, ~500 for the prompt and interleave labels, and ~110 for the output (varying with the number of actions).
+      We fine-tune <a href="https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct">Qwen3-VL-8B</a> with LoRA applied to both the language model and the vision encoder.
+      Frames are interleaved with text labels (<code>"Frame F00:"</code>, <code>"Frame F01:"</code>, ...) in the input sequence, giving the model text-based anchors across the images.
+      The model produces a JSON array of actions as output, where only model responses contribute to the loss.
     </p>
 
     <div style="margin: 1.5rem 0; font-size: 0.85em;">
@@ -1256,15 +1262,17 @@
       <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">LoRA dropout</td><td style="padding: 4px 0 4px 8px; text-align: right;">0.05</td></tr>
       <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">Optimizer</td><td style="padding: 4px 0 4px 8px; text-align: right;">AdamW</td></tr>
       <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">Peak learning rate</td><td style="padding: 4px 0 4px 8px; text-align: right;">2e-5</td></tr>
-      <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">Schedule</td><td style="padding: 4px 0 4px 8px; text-align: right;">WSD (500-step warmup, 10%; 1,333-step decay, 26.7%, to 10% of peak)</td></tr>
+      <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">Schedule</td><td style="padding: 4px 0 4px 8px; text-align: right;">WSD (500-step warmup; 1,333-step decay to 10% of peak)</td></tr>
       <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">Per-GPU batch size</td><td style="padding: 4px 0 4px 8px; text-align: right;">2</td></tr>
       <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">DDP world size</td><td style="padding: 4px 0 4px 8px; text-align: right;">8</td></tr>
-      <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">Max steps</td><td style="padding: 4px 0 4px 8px; text-align: right;">5,000 (saturates; see ablations)</td></tr>
-      <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">Max pixels (train)</td><td style="padding: 4px 0 4px 8px; text-align: right;">524,288</td></tr>
-      <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">Max sequence length</td><td style="padding: 4px 0 4px 8px; text-align: right;">8192 tokens</td></tr>
+      <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">Number of steps</td><td style="padding: 4px 0 4px 8px; text-align: right;">5,000</td></tr>
+      <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">Max. pixels</td><td style="padding: 4px 0 4px 8px; text-align: right;">524,288</td></tr>
+      <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">Sequence length</td><td style="padding: 4px 0 4px 8px; text-align: right;">8192</td></tr>
       <tr><td style="padding: 4px 12px 4px 0;">Hardware</td><td style="padding: 4px 0 4px 8px; text-align: right;">8× H100</td></tr>
     </table>
     </div>
+
+    <aside>If you are wondering about the weird decay step count, that was a small mishap in our training config</aside>
 
     <!-- TODO: related work paragraph (VPT, FDM-1, VideoAgentTrek) — deferred -->
 
@@ -1272,11 +1280,11 @@
          §3  EXPERIMENTS
          Paper-style: eval setup, baselines, ablations, main results.
          ============================================================ -->
-    <a class="marker" href="#section-2c" id="section-2c"><span>2.3</span></a>
+    <a class="marker" href="#section-2d" id="section-2d"><span>2.4</span></a>
     <h3>Evaluation setup</h3>
     <p>
       <!-- Building the eval set was one of the first things we did, before iterating on training. -->
-      We manually curated <a href="https://huggingface.co/datasets/p-doom/idm-eval-set">44 macOS productivity clips</a> (5 seconds each at 5 fps) covering keystroke-heavy, click-heavy, scroll/drag, hotkey and mixed workflows, with hand-verified ground-truth actions.
+      We manually curated <a href="https://huggingface.co/datasets/p-doom/idm-eval-set">44 macOS productivity clips</a> (5 seconds each at 5 FPS) covering keystroke-heavy, click-heavy, scroll/drag, hotkey and mixed workflows, with hand-verified ground-truth actions.
       <!-- This was a laborious process but paid for itself many times over: it let us iterate on the action format, gauge what frontier models were already capable of zero-shot, catch failure modes before starting to train and offer a way to measure progress while iterating on the model. -->
       Each ground-truth action is annotated with a visibility class: <em>visible</em> (~91%, clear visual change in frames), <em>inferable</em> (~4%, deducible from context), or <em>not predictable</em> (~5%, no visual evidence at this frame rate).
       Only visible and inferable actions count toward the score.
@@ -1295,9 +1303,6 @@
       To measure MouseMove quality beyond detection, we additionally report R² between predicted and ground-truth displacement vectors, and cosine similarity for directional alignment.
       Gemini 3.5 Flash, GPT 5.5 and Kimi K2.6 had thinking enabled, while Gemma 4, Qwen3-VL and our fine-tuned version were evaluated without.
     </p>
-
-    <a class="marker" href="#section-2d" id="section-2d"><span>2.4</span></a>
-    <h3>Results</h3>
 
     <a class="marker" href="#section-2e" id="section-2e"><span>2.5</span></a>
     <h3>Ablations</h3>
@@ -1455,7 +1460,7 @@
          §6  ZOOM OUT: what this means + what's next
          Tie IDM results back to the bigger picture. CTA.
          ============================================================ -->
-    <a class="marker" href="#section-4" id="section-4"><span>4</span></a>
+    <a class="marker" href="#section-3" id="section-3"><span>3</span></a>
     <h2>Expanding data collection and what's next</h2>
     <p>
       We have shown that an inverse dynamics model trained on macOS paired data generalizes surprisingly well to Windows and Linux screencasts.
