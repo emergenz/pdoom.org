@@ -1050,15 +1050,14 @@
          Task formulation, architecture, training, data quality journey.
          ============================================================ -->
     <a class="marker" href="#section-2" id="section-2"><span>2</span></a>
-    <h2>IDM for unlabeled screencasts</h2>
+    <h2>An IDM for unlabeled screencasts</h2>
     <p>
-      When you watch a screencast, you can see text appearing in an editor, a cursor clicking a button, a page scrolling.
-      The actions that produced these changes are recoverable: a human watching the recording can infer what was typed, what was clicked, and where the cursor moved.
-      An inverse dynamics model does exactly that. Trained on crowd-cast's paired data (where we have both the video and the ground-truth actions), our model learns to recover the actions from the pixels alone.
+      A human watching screen recordings can infer what was typed, what was clicked, and how the mouse moved.
+      An inverse dynamics model is no different. Trained on crowd-cast's paired data (videos and the ground-truth actions), our model learns to recover the actions from pixels alone.
     </p>
     <p>
-      Given a short window of consecutive screen frames, the model outputs a sparse list of user actions: key presses, mouse clicks, mouse movements and scroll events.
-      While most frames have no action, some have several, and the model only emits the events it detects.
+      Given a short window of consecutive frames, the model outputs a sparse list of user actions: key presses, mouse clicks, mouse movement and scroll events.
+      While most frames have no action, some have several, and the model is trained to emit only those.
       We deliberately avoid per-frame action/no-op classification. At 5 fps, ~70% of frames have no associated input event; a naive per-frame classifier collapses to "always predict no-op" and gets 70% accuracy with zero useful signal.
       The sparse formulation sidesteps this entirely: the empty list <code>[]</code> is a valid response for clips where nothing happened.
     </p>
