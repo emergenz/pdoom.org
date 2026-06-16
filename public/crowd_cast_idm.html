@@ -1077,7 +1077,7 @@
 
     <figure style="grid-column: page; margin: 1.5rem 0;">
     <div id="f1-chart" style="position: relative; max-width: 800px; margin: 0 auto; padding: 2rem 0 0;">
-      <div style="position: absolute; left: 0; top: 0.25rem; width: 40px; text-align: right; padding-right: 8px; font-family: var(--font-mono, monospace); font-size: 10px; font-weight: 600; color: var(--ash-700, #3D3A35);">F1</div>
+      <div style="position: absolute; left: 48px; top: 0.25rem; transform: translateX(-50%); font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">F1</div>
       <!-- Y-axis -->
       <div style="position: absolute; left: 0; top: 2rem; bottom: 3.5rem; width: 40px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; padding-right: 8px;">
         <span style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">1.0</span>
@@ -1284,30 +1284,27 @@
     <h3>Evaluation setup</h3>
     <p>
       <!-- Building the eval set was one of the first things we did, before iterating on training. -->
-      We manually curated <a href="https://huggingface.co/datasets/p-doom/idm-eval-set">44 macOS productivity clips</a> (5 seconds each at 5 FPS) covering keystroke-heavy, click-heavy, scroll/drag, hotkey and mixed workflows, with hand-verified ground-truth actions.
+      We manually curate <a href="https://huggingface.co/datasets/p-doom/idm-eval-set">44 macOS clips</a> from a held-out set of crowd-cast (5 seconds each at 5 FPS) covering keystroke-heavy, click-heavy, scroll/drag, hotkey and mixed workflows, with hand-verified ground-truth actions.
       <!-- This was a laborious process but paid for itself many times over: it let us iterate on the action format, gauge what frontier models were already capable of zero-shot, catch failure modes before starting to train and offer a way to measure progress while iterating on the model. -->
       Each ground-truth action is annotated with a visibility class: <em>visible</em> (~91%, clear visual change in frames), <em>inferable</em> (~4%, deducible from context), or <em>not predictable</em> (~5%, no visual evidence at this frame rate).
       Only visible and inferable actions count toward the score.
     </p>
     <p>
       Each clip is 25 frames, but the model only sees 10-frame sequences during training.
-      Thus, at inference we run four overlapping windows (stride 5, margin 2) and merge predictions across non-overlapping scoring zones so each frame's prediction comes from exactly one window.
-      We match predictions to ground truth with a per-type frame tolerance.
-      For KeyPress and MouseClick, we allow a 5-frame tolerance since the visual effect of a press or click can be delayed by several frames.
-      For MouseScroll and MouseMove, we require an exact frame match: their GT is aggregated per-frame, so any tolerance would introduce significant complexity due to the risk of double-counting.
+      Thus, during inference we run four overlapping windows (stride 5, margin 2) and merge predictions across non-overlapping scoring zones so each frame's prediction comes from exactly one window.
+      We match predictions to ground truth with a type-dependent frame tolerance (5 frames for key presses and mouse clicks, 0 frames for scrolling and mouse movement).
+      <aside>We allow a 5-frame tolerance since the visual effect of a press or click can be delayed by several frames</aside>
     </p>
+    <!--TODO: upload the model to hf and make sure that the eval table is in the readme-->
     <p>
-      We report per-type precision, recall and F1.
-      For KeyPress, a prediction is correct if the right key (including modifiers) was predicted on the right frame. For MouseClick, the button must match.
-      For MouseMove and MouseScroll, F1 measures detection only: did the model predict movement or scroll on the correct frame?
-      To measure MouseMove quality beyond detection, we additionally report R² between predicted and ground-truth displacement vectors, and cosine similarity for directional alignment.
-      Gemini 3.5 Flash, GPT 5.5 and Kimi K2.6 had thinking enabled, while Gemma 4, Qwen3-VL and our fine-tuned version were evaluated without.
+      We <a href="https://huggingface.co/p-doom/idm-1">report</a> per-type precision, recall and F1. For mouse movement we additionally report R² between predicted and ground-truth displacement vectors, and cosine similarity for directional alignment.
+      Reasoning was enabled for Gemini 3.5 Flash, GPT 5.5 and Kimi K2.6, and disabled for Gemma 4, Qwen3-VL and our fine-tuned model.
     </p>
 
     <a class="marker" href="#section-2e" id="section-2e"><span>2.5</span></a>
     <h3>Ablations</h3>
     <p>
-      We ablate training decisions by changing one variable at a time against our final recipe.
+      Our ablations each change one component of the final recipe.
     </p>
 
     <div style="margin: 1.5rem 0; font-size: 0.85em; overflow-x: auto;">
@@ -1353,20 +1350,18 @@
     </div>
 
     <p>
-      Removing interleaved frame labels materially affects all metrics, dropping F1 by 9pp and destroying mouse prediction.
+      Removing interleaved frame labels materially affects all metrics and degenerates mouse movement prediction.
       Without text anchors between frames, the model loses track of frame identity and enters repetitive prediction loops.
     </p>
     <p>
-      Model size, LoRA rank and vision-LoRA have no measurable effect on action detection.
-      However, smaller model sizes and removing vision-LoRA degrades mouse prediction.
-      Similarly, mouse direction accuracy scales monotonically with LoRA rank.
+      Model size, LoRA rank and ablating vision-LoRA have no measurable effect on action detection.
+      However, bigger models and vision-LoRA improve mouse movement prediction, and direction accuracy scales monotonically with LoRA rank.
     </p>
 
     <!-- LoRA rank sweep -->
     <figure style="grid-column: page; margin: 1.5rem 0;">
     <div style="display: flex; gap: 24px; max-width: 700px; margin: 0 auto; flex-wrap: wrap; justify-content: center;">
       <div style="flex: 1; min-width: 280px;">
-        <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); text-align: center; margin-bottom: 8px;">F1 vs LoRA rank</div>
         <svg viewBox="0 0 200 130" style="width: 100%; font-family: var(--font-mono, monospace);">
           <line x1="40" y1="10" x2="40" y2="100" stroke="#CFC8B8" stroke-width="0.5"/>
           <line x1="40" y1="100" x2="190" y2="100" stroke="#CFC8B8" stroke-width="0.5"/>
@@ -1388,10 +1383,11 @@
           <text x="95" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">64</text>
           <text x="135" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">128</text>
           <text x="175" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">256</text>
+          <text x="115" y="126" font-size="8" fill="#5A554C" text-anchor="middle">LoRA rank</text>
+          <text x="40" y="6" font-size="8" fill="#5A554C" text-anchor="middle">F1</text>
         </svg>
       </div>
       <div style="flex: 1; min-width: 280px;">
-        <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); text-align: center; margin-bottom: 8px;">cos vs LoRA rank</div>
         <svg viewBox="0 0 200 130" style="width: 100%; font-family: var(--font-mono, monospace);">
           <line x1="40" y1="10" x2="40" y2="100" stroke="#CFC8B8" stroke-width="0.5"/>
           <line x1="40" y1="100" x2="190" y2="100" stroke="#CFC8B8" stroke-width="0.5"/>
@@ -1413,10 +1409,12 @@
           <text x="95" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">64</text>
           <text x="135" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">128</text>
           <text x="175" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">256</text>
+          <text x="115" y="126" font-size="8" fill="#5A554C" text-anchor="middle">LoRA rank</text>
+          <text x="40" y="6" font-size="8" fill="#5A554C" text-anchor="middle">cos</text>
         </svg>
       </div>
     </div>
-    <figcaption style="text-align: center; margin-top: 0.5rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">LoRA rank sweep. F1 is stable across ranks; cursor direction quality (cos) scales monotonically with adapter capacity.</figcaption>
+    <figcaption style="text-align: center; margin-top: 0.5rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">F1 is stable across ranks. Mouse direction quality scales monotonically with adapter capacity.</figcaption>
     </figure>
     <!--p>
       Training saturates early. F1 peaks at 5K steps (0.86), then declines at 10K (0.81) and 15K (0.81) as the model begins overpredicting, increasing false positives without recovering additional true positives.
