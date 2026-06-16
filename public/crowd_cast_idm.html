@@ -112,6 +112,15 @@
     </figure>
 
     <style>
+      d-article :not(pre) > code {
+        background: var(--ash-100, #EEE9DA);
+        border: 1px solid var(--ash-300, #CFC8B8);
+        border-radius: 3px;
+        padding: 0.08em 0.32em;
+        font-size: 0.9em;
+        white-space: nowrap;
+      }
+
       /* ── IDM Demo v2 — all styles scoped under #idm-demo ── */
       #idm-demo {
         width: 100%;
@@ -1042,7 +1051,7 @@
     <p>
       The crowd-cast recordings are from highly productive participants and span months of continuous work on single projects. However, they are limited in breadth and diversity.
       The internet, on the other hand, hosts thousands of hours of screencasts covering a far broader distribution of professions, applications and operating systems.
-      To tap into this larger, unlabeled trove, we need to recover the actions behind frames. In this post we present the first version of our inverse dynamics model for this setting.
+      To tap into this larger, unlabeled trove, we need to recover the actions behind frames. We start with an inverse dynamics model trained on crowd-cast.
     </p>
 
     <!-- ============================================================
@@ -1053,24 +1062,135 @@
     <h2>An IDM for unlabeled screencasts</h2>
     <p>
       A human watching screen recordings can infer what was typed, what was clicked, and how the mouse moved.
-      An inverse dynamics model is no different. Trained on crowd-cast's paired data (videos and the ground-truth actions), our model learns to recover the actions from pixels alone.
+      An inverse dynamics model is no different. Trained on crowd-cast's paired data (videos and ground-truth actions), our model learns to recover the actions from pixels alone.
     </p>
+
+    <figure style="grid-column: page; margin: 1.5rem 0;">
+    <div id="f1-chart" style="position: relative; max-width: 800px; margin: 0 auto; padding: 2rem 0 0;">
+      <div style="position: absolute; left: 0; top: 0.25rem; width: 40px; text-align: right; padding-right: 8px; font-family: var(--font-mono, monospace); font-size: 10px; font-weight: 600; color: var(--ash-700, #3D3A35);">F1</div>
+      <!-- Y-axis -->
+      <div style="position: absolute; left: 0; top: 2rem; bottom: 3.5rem; width: 40px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; padding-right: 8px;">
+        <span style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">1.0</span>
+        <span style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">0.8</span>
+        <span style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">0.6</span>
+        <span style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">0.4</span>
+        <span style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">0.2</span>
+        <span style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">0</span>
+      </div>
+      <!-- Chart area -->
+      <div style="margin-left: 48px; position: relative; aspect-ratio: 2.2 / 1; border-left: 1px solid var(--ash-300, #CFC8B8); border-bottom: 1px solid var(--ash-300, #CFC8B8);">
+        <!-- Grid lines -->
+        <div style="position: absolute; left: 0; right: 0; top: 0%;  border-top: 1px solid var(--ash-200, #E2DCCC);"></div>
+        <div style="position: absolute; left: 0; right: 0; top: 20%; border-top: 1px solid var(--ash-200, #E2DCCC);"></div>
+        <div style="position: absolute; left: 0; right: 0; top: 40%; border-top: 1px solid var(--ash-200, #E2DCCC);"></div>
+        <div style="position: absolute; left: 0; right: 0; top: 60%; border-top: 1px solid var(--ash-200, #E2DCCC);"></div>
+        <div style="position: absolute; left: 0; right: 0; top: 80%; border-top: 1px solid var(--ash-200, #E2DCCC);"></div>
+        <!-- Bars: percentage heights of the absolutely positioned container -->
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; top: 0; display: flex; align-items: flex-end; justify-content: space-around; padding: 0 12px;">
+          <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
+            <div style="font-family: var(--font-mono, monospace); font-size: 11px; font-weight: 600; color: var(--ink, #161514); margin-bottom: 4px;">0.86</div>
+            <div style="width: 60%; flex: 0 0 85.5%; background: var(--ember, #B7361E); border-radius: 2px 2px 0 0;"></div>
+          </div>
+          <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
+            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.73</div>
+            <div style="width: 60%; flex: 0 0 73.2%; background: var(--ash-500, #807A6E); border-radius: 2px 2px 0 0;"></div>
+          </div>
+          <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
+            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.70</div>
+            <div style="width: 60%; flex: 0 0 70.3%; background: var(--ash-500, #807A6E); border-radius: 2px 2px 0 0;"></div>
+          </div>
+          <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
+            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.53</div>
+            <div style="width: 60%; flex: 0 0 53.4%; background: var(--ash-300, #CFC8B8); border-radius: 2px 2px 0 0;"></div>
+          </div>
+          <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
+            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.42</div>
+            <div style="width: 60%; flex: 0 0 42.2%; background: var(--ash-300, #CFC8B8); border-radius: 2px 2px 0 0;"></div>
+          </div>
+          <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
+            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.34</div>
+            <div style="width: 60%; flex: 0 0 33.9%; background: var(--ash-300, #CFC8B8); border-radius: 2px 2px 0 0;"></div>
+          </div>
+        </div>
+      </div>
+      <!-- X-axis labels -->
+      <div style="margin-left: 48px; display: flex; justify-content: space-around; padding: 8px 12px 0;">
+        <span style="flex: 1; max-width: 110px; text-align: center; font-family: var(--font-mono, monospace); font-size: 10px; white-space: nowrap; font-weight: 600; color: var(--ember, #B7361E);">Ours (8B)</span>
+        <span style="flex: 1; max-width: 110px; text-align: center; font-family: var(--font-mono, monospace); font-size: 10px; white-space: nowrap; color: var(--ash-700, #3D3A35);">Gemini 3.5 Flash</span>
+        <span style="flex: 1; max-width: 110px; text-align: center; font-family: var(--font-mono, monospace); font-size: 10px; white-space: nowrap; color: var(--ash-700, #3D3A35);">GPT 5.5</span>
+        <span style="flex: 1; max-width: 110px; text-align: center; font-family: var(--font-mono, monospace); font-size: 10px; white-space: nowrap; color: var(--ash-700, #3D3A35);">Kimi K2.6</span>
+        <span style="flex: 1; max-width: 110px; text-align: center; font-family: var(--font-mono, monospace); font-size: 10px; white-space: nowrap; color: var(--ash-700, #3D3A35);">Gemma 4 31B</span>
+        <span style="flex: 1; max-width: 110px; text-align: center; font-family: var(--font-mono, monospace); font-size: 10px; white-space: nowrap; color: var(--ash-700, #3D3A35);">Qwen3-VL 8B</span>
+      </div>
+      <!-- Legend -->
+      <div style="margin-left: 48px; display: flex; gap: 18px; padding: 12px 12px 0; font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">
+        <span><span style="display: inline-block; width: 10px; height: 10px; background: var(--ember, #B7361E); border-radius: 1px; vertical-align: middle; margin-right: 4px;"></span>Ours (fine-tuned)</span>
+        <span><span style="display: inline-block; width: 10px; height: 10px; background: var(--ash-500, #807A6E); border-radius: 1px; vertical-align: middle; margin-right: 4px;"></span>Closed-source</span>
+        <span><span style="display: inline-block; width: 10px; height: 10px; background: var(--ash-300, #CFC8B8); border-radius: 1px; vertical-align: middle; margin-right: 4px;"></span>Open-source</span>
+      </div>
+    </div>
+    <figcaption style="text-align: center; margin-top: 0.5rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">F1 on the 44-clip eval set. All models scored under identical rules.</figcaption>
+    </figure>
+
+    <p>
+      Our fine-tune of Qwen3-VL 8B surpasses the strongest few-shot off-the-shelf model, Gemini 3.5 Flash.
+      Our qualitative evaluations (see interactive demo) show that predicted cursor displacements closely track both the direction and magnitude of ground truth.
+    </p>
+
+    <!-- TODO: insert per-type P/R/F1 breakdown for our model once available -->
+    <!-- TODO: figure — qualitative comparison: ground truth vs IDM predictions on held-out clips -->
+
+    <p>
+      Without fine-tuning, even the best off-the-shelf model leaves significant room for improvement.
+      <!-- These models have likely not been trained on our output format (sparse event lists with per-frame relative mouse deltas).-->
+      We observe two failure modes across nearly all models: they are competent at single-frame grounding and OCR but struggle with multi-frame tracking, and they severely underpredict, missing the majority of actions.
+    </p>
+    <!--p>
+      Our fine-tuned model inverts the failure mode of zero-shot models. Where they are precise but miss most events, ours achieves high recall (0.914) while maintaining reasonable precision (0.803).
+    </p-->
+
+
+    <a class="marker" href="#section-2b" id="section-2b"><span>2.1</span></a>
+    <h3>Format</h3>
     <p>
       Given a short window of consecutive frames, the model outputs a sparse list of user actions: key presses, mouse clicks, mouse movement and scroll events.
       While most frames have no action, some have several, and the model is trained to emit only those.
-      We deliberately avoid per-frame action/no-op classification. At 5 fps, ~70% of frames have no associated input event; a naive per-frame classifier collapses to "always predict no-op" and gets 70% accuracy with zero useful signal.
+      We deliberately avoid per-frame action classification. At 5 fps, ~70% of frames have no associated input event; a naive per-frame classifier collapses to always predicting no-ops and gets 70% accuracy with zero useful signal.
       The sparse formulation sidesteps this entirely: the empty list <code>[]</code> is a valid response for clips where nothing happened.
+      The action space stays close to raw OS input events.
     </p>
-    <p>
-      The action space stays close to raw OS input events:
-    </p>
-    <ul>
-      <li><code>KeyPress</code>: key name + modifiers (e.g. <code>Cmd+S</code>), attributed to the frame where the visual effect appears</li>
-      <li><code>MouseClick</code>: button only (<code>Left</code> / <code>Right</code> / <code>Middle</code>), one per press event. Position is implied by the preceding MouseMove sequence</li>
-      <li><code>MouseMove</code>: per-frame relative displacement (dx, dy) as signed integers on a 0-1000 per-axis normalized scale</li>
-      <li><code>MouseScroll</code>: direction and magnitude</li>
-    </ul>
-    <p>An example model output for a 10-frame clip:</p>
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="border-bottom: 1px solid #ddd;">
+          <th style="text-align: left; padding: 4px 12px 4px 0; font-weight: 600;">Type</th>
+          <th style="text-align: left; padding: 4px 12px 4px 0; font-weight: 600;">Details</th>
+          <th style="text-align: left; padding: 4px 0 4px 0; font-weight: 600;">Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom: 1px solid #eee;">
+          <td style="padding: 4px 12px 4px 0;"><code>KeyPress</code></td>
+          <td style="padding: 4px 12px 4px 0;">key name + modifiers, e.g. <code>Cmd+S</code></td>
+          <td style="padding: 4px 0 4px 0;">attributed to the frame where the visual effect appears</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #eee;">
+          <td style="padding: 4px 12px 4px 0;"><code>MouseClick</code></td>
+          <td style="padding: 4px 12px 4px 0;"><code>Left</code>, <code>Right</code>, or <code>Middle</code></td>
+          <td style="padding: 4px 0 4px 0;">one per press event; position is implied by the preceding MouseMove sequence</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #eee;">
+          <td style="padding: 4px 12px 4px 0;"><code>MouseMove</code></td>
+          <td style="padding: 4px 12px 4px 0;">signed <code>dx,dy</code></td>
+          <td style="padding: 4px 0 4px 0;">relative displacement on a 0-1000 per-axis normalized scale</td>
+        </tr>
+        <tr>
+          <td style="padding: 4px 12px 4px 0;"><code>MouseScroll</code></td>
+          <td style="padding: 4px 12px 4px 0;">signed magnitude</td>
+          <td style="padding: 4px 0 4px 0;">direction and magnitude</td>
+        </tr>
+      </tbody>
+    </table>
+    <figure style="margin: 1rem 0 0;">
     <pre style="font-size: 0.85em; line-height: 1.5; background: var(--ash-100, #f5f5f5); border: 1px solid var(--ash-300, #ddd); border-radius: 4px; padding: 1rem; overflow-x: auto;">[
   {"frame": "F01", "type": "MouseMove",   "details": "120,45"},
   {"frame": "F02", "type": "MouseClick",  "details": "Left"},
@@ -1082,6 +1202,8 @@
   {"frame": "F07", "type": "MouseMove",   "details": "-340,12"},
   {"frame": "F08", "type": "MouseScroll", "details": "-150"}
 ]</pre>
+    <figcaption style="text-align: center; margin-top: 0.5rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Example model output for a 10-frame clip.</figcaption>
+    </figure>
 
     <a class="marker" href="#section-2b" id="section-2b"><span>2.1</span></a>
     <h3>Data processing</h3>
@@ -1171,94 +1293,11 @@
       For KeyPress, a prediction is correct if the right key (including modifiers) was predicted on the right frame. For MouseClick, the button must match.
       For MouseMove and MouseScroll, F1 measures detection only: did the model predict movement or scroll on the correct frame?
       To measure MouseMove quality beyond detection, we additionally report R² between predicted and ground-truth displacement vectors, and cosine similarity for directional alignment.
+      Gemini 3.5 Flash, GPT 5.5 and Kimi K2.6 had thinking enabled, while Gemma 4, Qwen3-VL and our fine-tuned version were evaluated without.
     </p>
 
     <a class="marker" href="#section-2d" id="section-2d"><span>2.4</span></a>
     <h3>Results</h3>
-
-    <figure style="grid-column: page; margin: 1.5rem 0;">
-    <div id="f1-chart" style="position: relative; max-width: 800px; margin: 0 auto; padding: 2rem 0 0;">
-      <!-- Y-axis -->
-      <div style="position: absolute; left: 0; top: 2rem; bottom: 3.5rem; width: 40px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; padding-right: 8px;">
-        <span style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">1.0</span>
-        <span style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">0.8</span>
-        <span style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">0.6</span>
-        <span style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">0.4</span>
-        <span style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">0.2</span>
-        <span style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">0</span>
-      </div>
-      <!-- Chart area -->
-      <div style="margin-left: 48px; position: relative; aspect-ratio: 2.2 / 1; border-left: 1px solid var(--ash-300, #CFC8B8); border-bottom: 1px solid var(--ash-300, #CFC8B8);">
-        <!-- Grid lines -->
-        <div style="position: absolute; left: 0; right: 0; top: 0%;  border-top: 1px solid var(--ash-200, #E2DCCC);"></div>
-        <div style="position: absolute; left: 0; right: 0; top: 20%; border-top: 1px solid var(--ash-200, #E2DCCC);"></div>
-        <div style="position: absolute; left: 0; right: 0; top: 40%; border-top: 1px solid var(--ash-200, #E2DCCC);"></div>
-        <div style="position: absolute; left: 0; right: 0; top: 60%; border-top: 1px solid var(--ash-200, #E2DCCC);"></div>
-        <div style="position: absolute; left: 0; right: 0; top: 80%; border-top: 1px solid var(--ash-200, #E2DCCC);"></div>
-        <!-- Bars: percentage heights of the absolutely positioned container -->
-        <div style="position: absolute; bottom: 0; left: 0; right: 0; top: 0; display: flex; align-items: flex-end; justify-content: space-around; padding: 0 12px;">
-          <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
-            <div style="font-family: var(--font-mono, monospace); font-size: 11px; font-weight: 600; color: var(--ink, #161514); margin-bottom: 4px;">0.86</div>
-            <div style="width: 60%; flex: 0 0 85.5%; background: var(--ember, #B7361E); border-radius: 2px 2px 0 0;"></div>
-          </div>
-          <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
-            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.73</div>
-            <div style="width: 60%; flex: 0 0 73.2%; background: var(--ash-500, #807A6E); border-radius: 2px 2px 0 0;"></div>
-          </div>
-          <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
-            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.70</div>
-            <div style="width: 60%; flex: 0 0 70.3%; background: var(--ash-500, #807A6E); border-radius: 2px 2px 0 0;"></div>
-          </div>
-          <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
-            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.53</div>
-            <div style="width: 60%; flex: 0 0 53.4%; background: var(--ash-300, #CFC8B8); border-radius: 2px 2px 0 0;"></div>
-          </div>
-          <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
-            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.42</div>
-            <div style="width: 60%; flex: 0 0 42.2%; background: var(--ash-300, #CFC8B8); border-radius: 2px 2px 0 0;"></div>
-          </div>
-          <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
-            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.34</div>
-            <div style="width: 60%; flex: 0 0 33.9%; background: var(--ash-300, #CFC8B8); border-radius: 2px 2px 0 0;"></div>
-          </div>
-        </div>
-      </div>
-      <!-- X-axis labels -->
-      <div style="margin-left: 48px; display: flex; justify-content: space-around; padding: 8px 12px 0;">
-        <span style="flex: 1; max-width: 110px; text-align: center; font-family: var(--font-mono, monospace); font-size: 10px; white-space: nowrap; font-weight: 600; color: var(--ember, #B7361E);">Ours (8B)</span>
-        <span style="flex: 1; max-width: 110px; text-align: center; font-family: var(--font-mono, monospace); font-size: 10px; white-space: nowrap; color: var(--ash-700, #3D3A35);">Gemini 3.5 Flash</span>
-        <span style="flex: 1; max-width: 110px; text-align: center; font-family: var(--font-mono, monospace); font-size: 10px; white-space: nowrap; color: var(--ash-700, #3D3A35);">GPT 5.5</span>
-        <span style="flex: 1; max-width: 110px; text-align: center; font-family: var(--font-mono, monospace); font-size: 10px; white-space: nowrap; color: var(--ash-700, #3D3A35);">Kimi K2.6</span>
-        <span style="flex: 1; max-width: 110px; text-align: center; font-family: var(--font-mono, monospace); font-size: 10px; white-space: nowrap; color: var(--ash-700, #3D3A35);">Gemma 4 31B</span>
-        <span style="flex: 1; max-width: 110px; text-align: center; font-family: var(--font-mono, monospace); font-size: 10px; white-space: nowrap; color: var(--ash-700, #3D3A35);">Qwen3-VL 8B</span>
-      </div>
-      <!-- Legend -->
-      <div style="margin-left: 48px; display: flex; gap: 18px; padding: 12px 12px 0; font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C);">
-        <span><span style="display: inline-block; width: 10px; height: 10px; background: var(--ember, #B7361E); border-radius: 1px; vertical-align: middle; margin-right: 4px;"></span>Ours (fine-tuned)</span>
-        <span><span style="display: inline-block; width: 10px; height: 10px; background: var(--ash-500, #807A6E); border-radius: 1px; vertical-align: middle; margin-right: 4px;"></span>Closed-source</span>
-        <span><span style="display: inline-block; width: 10px; height: 10px; background: var(--ash-300, #CFC8B8); border-radius: 1px; vertical-align: middle; margin-right: 4px;"></span>Open-source</span>
-      </div>
-    </div>
-    <figcaption style="text-align: center; margin-top: 0.5rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Overall F1 on the 44-clip eval set. All models scored under identical rules.</figcaption>
-    </figure>
-
-    <p>
-      Our fine-tuned 8B model achieves F1=0.855 at 5,000 training steps, surpassing the strongest zero-shot model, Gemini 3.5 Flash, by +12 points on this task.
-      On MouseMove, the trained model reaches R²=0.66 with a median cosine similarity of 0.987, meaning predicted cursor displacements closely track both the direction and magnitude of ground truth.
-    </p>
-
-    <!-- TODO: insert per-type P/R/F1 breakdown for our model once available -->
-    <!-- TODO: figure — qualitative comparison: ground truth vs IDM predictions on held-out clips -->
-
-    <p>
-      Without fine-tuning, even the best zero-shot model leaves significant room for improvement, and most open models cluster at F1 0.34-0.42.
-      <!-- These models have likely not been trained on our output format (sparse event lists with per-frame relative mouse deltas).-->
-      We observed two failure modes across nearly all models: they are competent at single-frame grounding and OCR but struggle with multi-frame tracking, and they severely underpredict, missing the majority of actions.
-      Gemini 3.5 Flash, GPT 5.5 and Kimi K2.6 had thinking enabled, while Gemma 4, Qwen3-VL and our fine-tuned version were evaluated without.
-    </p>
-    <!--p>
-      Our fine-tuned model inverts the failure mode of zero-shot models. Where they are precise but miss most events, ours achieves high recall (0.914) while maintaining reasonable precision (0.803).
-    </p-->
 
     <a class="marker" href="#section-2e" id="section-2e"><span>2.5</span></a>
     <h3>Ablations</h3>
