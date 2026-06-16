@@ -57,8 +57,8 @@
   <d-front-matter>
     <script id='distill-front-matter' type="text/json">{
     "title": "Annotating Unlabeled Screencasts with an IDM",
-    "description": "We train an inverse dynamics model on crowd-cast's paired dataset, yielding a model that recovers key presses, mouse clicks, cursor movements and scroll events from unlabeled videos. Trained exclusively on macOS, it generalizes to Windows and Linux.",
-    "published": "June 11, 2026",
+    "description": "We train an inverse dynamics model on crowd-cast's paired dataset, yielding a model that recovers key presses, mouse clicks, cursor movements and scroll events from unlabeled videos. Along with the model, we openly release 600 hours of IDM-annotated screencasts. Trained exclusively on macOS, the model generalizes to Windows and Linux.",
+    "published": "June 16, 2026",
     "url": "https://pdoom.org/crowd_cast_idm.html",
     "authors": [
       {
@@ -97,7 +97,8 @@
   </d-front-matter>
   <d-title>
     <p>
-      We train an inverse dynamics model on <a href="https://pdoom.org/crowd_cast.html">crowd-cast</a>'s paired dataset, yielding a model that recovers key presses, mouse clicks, cursor movements and scroll events from unlabeled videos. Trained exclusively on macOS, it generalizes to Windows and Linux.
+      <!--TODO: check whether the urls are correct-->
+      We train an inverse dynamics model on <a href="https://pdoom.org/crowd_cast.html">crowd-cast</a>'s paired dataset, yielding a model that recovers key presses, mouse clicks, cursor movements and scroll events from unlabeled videos. Along with the <a href="https://huggingface.co/p-doom/idm-1">model</a>, we <a href="https://huggingface.co/datasets/p-doom/AGI-CAST-0.6k-IDM-annotated">openly release</a> 600 hours of IDM-annotated screencasts. Trained exclusively on macOS, the model generalizes to Windows and Linux.
     </p>
   </d-title>
   <d-byline></d-byline>
@@ -1059,9 +1060,11 @@
       To date, we have collected 2500+ hours of paired recordings across dozens of contributors.
     </p>
     <p>
-      The crowd-cast recordings are from highly productive participants and span months of continuous work on single projects. However, they are limited in breadth and diversity.
-      The internet, on the other hand, hosts thousands of hours of screencasts covering a far broader distribution of professions, applications and operating systems.
-      To tap into this larger, unlabeled trove, we need to recover the actions behind frames. We start with an inverse dynamics model trained on crowd-cast.
+      While crowd-cast gives us paired screencasts and input logs from highly productive participants, often spanning months of work on single projects, it is still limited in breadth.
+    </p>
+    <p>
+      The internet contains thousands of hours of unlabeled screencasts across more professions, applications and operating systems. To use them for behavior cloning, we first need to recover the actions behind the frames.
+      We start with an inverse dynamics model trained on crowd-cast, then use it to action-label all 600 hours of <a href="https://pdoom.org/agi_cast.html">AGI-CAST</a>. We <a href="https://huggingface.co/datasets/p-doom/AGI-CAST-0.6k-IDM-annotated">openly release</a> that annotated dataset alongside the model.
     </p>
 
     <!-- ============================================================
@@ -1229,6 +1232,7 @@
         We downsample each recording to 5 FPS and resize to 720p.
         crowd-cast records a black screen when the focused application is not in the user's predefined recording list. These black frames carry no visual information and have no associated actions, so we detect and drop them.
         We then slide a 10-frame window with stride 5 across each recording (50% overlap).
+        <!--TODO: ask mihir what he means by this and fix this -->
         At 5 FPS, roughly 70% of the 2-second windows contain no user action at all.
         We keep only 5% of these zero-action clips as negative examples, enough for the model to learn that <code>[]</code> is a valid response without dominating the training loss.
       </li>
@@ -1425,29 +1429,18 @@
     <a class="marker" href="#section-2f" id="section-2f"><span>2.6</span></a>
     <h3>Out-of-distribution generalization</h3>
     <p>
-      The model was trained exclusively on macOS paired data from crowd-cast. All training recordings come from macOS users running applications like Cursor, Firefox, Preview and Terminal.
-      We evaluated the same model on Windows and Linux screencasts without any adaptation.
+      Although the IDM has only been trained on macOS data, it largely transfers to Windows and Linux screencasts without adaptation.
+      Mouse movement and click detection generalize best, while keyboard shortcuts are the main failure mode.
     </p>
+    <aside>The remaining cross-platform errors are mostly <code>Cmd</code>/<code>Ctrl</code> confusion from macOS-only training.</aside>
+    <p>
+      We additionally evaluate the model on AgentNet, which is even more out-of-distribution than mere cross-platform clips due to each frame depicting one logical action (like inserting one full command into the terminal). Since the model has never seen non-uniformly sampled frames, it hallucinates dynamics that could explain extensive changes between frames.
+    </p>
+    <!-- TODO: insert a caption under the demo of the terminal text insertion, explaining that the model first fails by only predicting part of the text (because it has never seen such behaviour), and later 'fails' by 'explaining' that frame change by the user going back in terminal history-->
     <p>
       TODO: Insert OOD numbers. Pre-fix AgentNet Ubuntu F1 was 0.680 (with write-collapse; 0.092 without,
       due to typing-density artifact on synthetic videos). Post-fix numbers pending retrain.
       Windows OOD eval not yet run (AgentNet has Windows trajectories, ~3h to set up).
-    </p>
-    <p>
-      <strong>What generalizes.</strong>
-      Mouse movement and click detection transfer well across operating systems.
-      Cursor behavior looks similar regardless of OS: the model tracks the cursor position from pixel evidence, and the visual effect of a click (UI element activating, page navigation, modal appearing) is largely OS-agnostic.
-    </p>
-    <p>
-      <strong>What breaks down.</strong>
-      Keyboard shortcuts are the most predictable failure: the model predicts <code>Cmd+key</code> instead of <code>Ctrl+key</code> on Linux and Windows, having never seen the Ctrl modifier during training.
-      Write density also degrades on synthetic or tutorial-style content where the editing pattern (e.g. code being typed character-by-character in a tutorial) differs from the real productivity work in our training set, where editing is bursty and interspersed with long pauses.
-    </p>
-    <p>
-      These failures are predictable and correctable.
-      The Cmd/Ctrl confusion is a pure vocabulary issue that disappears with cross-platform training data.
-      The write-density gap narrows as the training distribution broadens beyond macOS productivity workflows.
-      crowd-cast now runs on all three operating systems, and cross-platform paired data collection is underway.
     </p>
 
     <!-- TODO: table — OOD per-type breakdown (macOS in-domain vs Linux vs Windows) -->
@@ -1459,21 +1452,19 @@
          Tie IDM results back to the bigger picture. CTA.
          ============================================================ -->
     <a class="marker" href="#section-3" id="section-3"><span>3</span></a>
-    <h2>Expanding data collection and what's next</h2>
+    <h2>What's next</h2>
     <p>
-      We have shown that an inverse dynamics model trained on macOS paired data generalizes surprisingly well to Windows and Linux screencasts.
-      The obvious next step is to close the remaining OOD gap by collecting paired data on these operating systems too.
-      As of today, <a href="https://github.com/p-doom/crowd-cast/releases">crowd-cast</a> runs natively on macOS, Windows and Linux.
+      Today, we expand <a href="https://pdoom.org/docs/crowd-cast/">crowd-cast</a> support to Linux and Windows, thus covering all major operating systems. We expect our IDM to get better with more diverse data.
+    </p>
+    <p>
+      Our ultimate goal is to lengthen model's task horizons from days to weeks and months. With crowd-cast, we now have our in-house data supply chain of such months-long trajectories, and with our IDM we unlock the internet as a data trove.
+      While our firm believe has always been that you need to train models on trajectories that span months if you want them to exhibit month-long horizons, a dataset alone will not suffice. While we are scaling our data collection effort orders of magnitude, we are investigating alternatives to dense attention for retaining memory over months-long rollouts (fixed-size state), continually training off-the-shelf models, inserting goals and synthetic thinking traces, and letting the model learn from experience.
     </p>
     <p>
       With cross-platform support, anyone can now contribute to the dataset.
-      We are <a href="/crowd-cast-flyer.pdf">paying participants</a> to record their normal work sessions using crowd-cast.
+      We are paying participants to record their work sessions using crowd-cast.
       You are not asked to do tasks for us. You record yourself doing your own work that you would be doing anyway.
       If you are interested, <a href="https://forms.gle/YKJn7m4X7WhtVfRm7">apply here</a> or check the <a href="https://pdoom.org/crowd_cast_dashboard.html">live dashboard</a> to see collection progress.
-    </p>
-    <p>
-      More paired data across all three operating systems will make the IDM better. A better IDM lets us action-annotate the millions of hours of unlabeled screencasts that already exist on the internet.
-      And action-annotated screencasts at that scale are what we need to behaviour-clone models that can do real, long-horizon digital work.
     </p>
 
   </d-article>
