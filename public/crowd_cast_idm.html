@@ -1126,17 +1126,21 @@
 
     <div style="margin: 1.5rem 0; font-size: 0.85em;">
     <table style="width: 100%; border-collapse: collapse;">
-      <caption style="text-align: left; font-weight: bold; margin-bottom: 0.5rem;">Training hyperparameters</caption>
-      <tr><td style="padding: 4px 12px 4px 0; border-bottom: 1px solid #eee;">LoRA rank / alpha</td><td style="padding: 4px 0; border-bottom: 1px solid #eee;">256 / 512</td></tr>
-      <tr><td style="padding: 4px 12px 4px 0; border-bottom: 1px solid #eee;">LoRA dropout</td><td style="padding: 4px 0; border-bottom: 1px solid #eee;">0.05</td></tr>
-      <tr><td style="padding: 4px 12px 4px 0; border-bottom: 1px solid #eee;">Optimizer</td><td style="padding: 4px 0; border-bottom: 1px solid #eee;">AdamW</td></tr>
-      <tr><td style="padding: 4px 12px 4px 0; border-bottom: 1px solid #eee;">Peak learning rate</td><td style="padding: 4px 0; border-bottom: 1px solid #eee;">2e-5</td></tr>
-      <tr><td style="padding: 4px 12px 4px 0; border-bottom: 1px solid #eee;">Schedule</td><td style="padding: 4px 0; border-bottom: 1px solid #eee;">WSD (warmup 500 steps, decay last 4000 steps to 10% of peak)</td></tr>
-      <tr><td style="padding: 4px 12px 4px 0; border-bottom: 1px solid #eee;">Batch size</td><td style="padding: 4px 0; border-bottom: 1px solid #eee;">16 (2 per GPU × 8 GPUs)</td></tr>
-      <tr><td style="padding: 4px 12px 4px 0; border-bottom: 1px solid #eee;">Max steps</td><td style="padding: 4px 0; border-bottom: 1px solid #eee;">5,000 (saturates; see ablations)</td></tr>
-      <tr><td style="padding: 4px 12px 4px 0; border-bottom: 1px solid #eee;">Max pixels (train)</td><td style="padding: 4px 0; border-bottom: 1px solid #eee;">524,288 (~544p)</td></tr>
-      <tr><td style="padding: 4px 12px 4px 0; border-bottom: 1px solid #eee;">Max sequence length</td><td style="padding: 4px 0; border-bottom: 1px solid #eee;">10,000 tokens</td></tr>
-      <tr><td style="padding: 4px 12px 4px 0;">Hardware</td><td style="padding: 4px 0;">8× H100, DDP</td></tr>
+      <tr style="border-bottom: 2px solid #333;">
+        <th style="padding: 6px 12px 6px 0; text-align: left;">Hyperparameter</th>
+        <th style="padding: 6px 0 6px 8px; text-align: right;">Value</th>
+      </tr>
+      <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">LoRA rank / alpha</td><td style="padding: 4px 0 4px 8px; text-align: right;">256 / 512</td></tr>
+      <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">LoRA dropout</td><td style="padding: 4px 0 4px 8px; text-align: right;">0.05</td></tr>
+      <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">Optimizer</td><td style="padding: 4px 0 4px 8px; text-align: right;">AdamW</td></tr>
+      <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">Peak learning rate</td><td style="padding: 4px 0 4px 8px; text-align: right;">2e-5</td></tr>
+      <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">Schedule</td><td style="padding: 4px 0 4px 8px; text-align: right;">WSD (warmup 500 steps, decay last 4000 steps to 10% of peak)</td></tr>
+      <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">Per-GPU batch size</td><td style="padding: 4px 0 4px 8px; text-align: right;">2</td></tr>
+      <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">DDP world size</td><td style="padding: 4px 0 4px 8px; text-align: right;">8</td></tr>
+      <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">Max steps</td><td style="padding: 4px 0 4px 8px; text-align: right;">5,000 (saturates; see ablations)</td></tr>
+      <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">Max pixels (train)</td><td style="padding: 4px 0 4px 8px; text-align: right;">524,288 (~544p)</td></tr>
+      <tr style="border-bottom: 1px solid #eee;"><td style="padding: 4px 12px 4px 0;">Max sequence length</td><td style="padding: 4px 0 4px 8px; text-align: right;">10,000 tokens</td></tr>
+      <tr><td style="padding: 4px 12px 4px 0;">Hardware</td><td style="padding: 4px 0 4px 8px; text-align: right;">8× H100</td></tr>
     </table>
     </div>
 
@@ -1146,10 +1150,7 @@
          §3  EXPERIMENTS
          Paper-style: eval setup, baselines, ablations, main results.
          ============================================================ -->
-    <a class="marker" href="#section-3" id="section-3"><span>3</span></a>
-    <h2>Experiments</h2>
-
-    <a class="marker" href="#section-3a" id="section-3a"><span>3.1</span></a>
+    <a class="marker" href="#section-2c" id="section-2c"><span>2.3</span></a>
     <h3>Evaluation setup</h3>
     <p>
       <!-- Building the eval set was one of the first things we did, before iterating on training. -->
@@ -1172,7 +1173,7 @@
       To measure MouseMove quality beyond detection, we additionally report R² between predicted and ground-truth displacement vectors, and cosine similarity for directional alignment.
     </p>
 
-    <a class="marker" href="#section-3b" id="section-3b"><span>3.2</span></a>
+    <a class="marker" href="#section-2d" id="section-2d"><span>2.4</span></a>
     <h3>Results</h3>
 
     <figure style="grid-column: page; margin: 1.5rem 0;">
@@ -1259,7 +1260,7 @@
       Our fine-tuned model inverts the failure mode of zero-shot models. Where they are precise but miss most events, ours achieves high recall (0.914) while maintaining reasonable precision (0.803).
     </p-->
 
-    <a class="marker" href="#section-3e" id="section-3e"><span>3.5</span></a>
+    <a class="marker" href="#section-2e" id="section-2e"><span>2.5</span></a>
     <h3>Ablations</h3>
     <p>
       We ablate training decisions by changing one variable at a time against our final recipe.
@@ -1281,25 +1282,25 @@
         <td style="padding: 4px 8px; text-align: right;">0.99</td>
       </tr>
       <tr style="border-bottom: 1px solid #eee;">
-        <td style="padding: 4px 12px 4px 0;">2B model</td>
+        <td style="padding: 4px 12px 4px 0;">2B backbone</td>
         <td style="padding: 4px 8px; text-align: right;">0.86</td>
         <td style="padding: 4px 8px; text-align: right;">0.61</td>
         <td style="padding: 4px 8px; text-align: right;">0.97</td>
       </tr>
       <tr style="border-bottom: 1px solid #eee;">
-        <td style="padding: 4px 12px 4px 0;">4B model</td>
+        <td style="padding: 4px 12px 4px 0;">4B backbone</td>
         <td style="padding: 4px 8px; text-align: right;">0.84</td>
         <td style="padding: 4px 8px; text-align: right;">0.55</td>
         <td style="padding: 4px 8px; text-align: right;">0.91</td>
       </tr>
       <tr style="border-bottom: 1px solid #eee;">
-        <td style="padding: 4px 12px 4px 0;">No vision-LoRA</td>
+        <td style="padding: 4px 12px 4px 0;">− vision LoRA</td>
         <td style="padding: 4px 8px; text-align: right;">0.84</td>
         <td style="padding: 4px 8px; text-align: right;">0.64</td>
         <td style="padding: 4px 8px; text-align: right;">0.76</td>
       </tr>
       <tr style="border-bottom: 1px solid #eee;">
-        <td style="padding: 4px 12px 4px 0;">No interleave</td>
+        <td style="padding: 4px 12px 4px 0;">− interleaved frame labels</td>
         <td style="padding: 4px 8px; text-align: right;">0.77</td>
         <td style="padding: 4px 8px; text-align: right;">-0.03</td>
         <td style="padding: 4px 8px; text-align: right;">0.57</td>
@@ -1379,8 +1380,8 @@
       We have likely exhausted the LoRA adapter's capacity; full fine-tuning may push further, though naive SFT on our dataset destroyed the base model's distribution in early experiments.
     </p-->
 
-    <a class="marker" href="#section-4" id="section-4"><span>4</span></a>
-    <h2>Out-of-distribution generalization</h2>
+    <a class="marker" href="#section-2f" id="section-2f"><span>2.6</span></a>
+    <h3>Out-of-distribution generalization</h3>
     <p>
       The model was trained exclusively on macOS paired data from crowd-cast. All training recordings come from macOS users running applications like Cursor, Firefox, Preview and Terminal.
       We evaluated the same model on Windows and Linux screencasts without any adaptation.
@@ -1415,8 +1416,8 @@
          §6  ZOOM OUT: what this means + what's next
          Tie IDM results back to the bigger picture. CTA.
          ============================================================ -->
-    <a class="marker" href="#section-5" id="section-5"><span>5</span></a>
-    <h2>crowd-cast on every platform, and what comes next</h2>
+    <a class="marker" href="#section-4" id="section-4"><span>4</span></a>
+    <h2>Expanding data collection and what's next</h2>
     <p>
       We have shown that an inverse dynamics model trained on macOS paired data generalizes surprisingly well to Windows and Linux screencasts.
       The obvious next step is to close the remaining OOD gap by collecting paired data on these operating systems too.
