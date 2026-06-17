@@ -58,10 +58,6 @@
             50% { opacity: 0.25; }
         }
 
-        .countdown-head .display {
-            font-size: clamp(40px, 8vw, 96px);
-            color: var(--fg1);
-        }
         .countdown-head .lede {
             margin: var(--s-4) auto 0;
             color: var(--fg2);
@@ -148,11 +144,6 @@
             </span>
         </div>
 
-        <div class="countdown-head">
-            <h1 class="display"><em>turning sand<br>into intelligence</em></h1>
-            <p class="lede">The model goes live July 31, 2026 at 23:59 CEST.</p>
-        </div>
-
         <div class="clock" id="clock" role="timer" aria-live="polite" aria-label="Time until launch">
             <div class="clock-unit">
                 <span class="clock-value tnum" id="d">00</span>
@@ -172,6 +163,10 @@
             </div>
         </div>
         <p class="countdown-live">The model is live.</p>
+
+        <div class="countdown-head">
+            <p class="lede">The model goes live July 31, 2026 at 23:59 CEST.</p>
+        </div>
 
         <p class="countdown-foot">
             <span class="wm-ink">p(doom)</span> · launch dispatch
