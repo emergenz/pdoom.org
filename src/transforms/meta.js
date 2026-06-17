@@ -61,8 +61,9 @@ export default function(dom, data) {
   }
 
   (data.authors || []).forEach((a) => {
+    const authorName = a.citationName || `${a.firstName} ${a.lastName}`.trim();
     appendHtml(head, `
-    <meta property="article:author" content="${escape(a.firstName)} ${escape(a.lastName)}" />`);
+    <meta property="article:author" content="${escape(authorName)}" />`);
   });
 
   appendHead(`
@@ -112,7 +113,7 @@ export default function(dom, data) {
     }
 
     (data.authors || []).forEach((a) => {
-      meta('citation_author', `${a.lastName}, ${a.firstName}`);
+      meta('citation_author', a.citationName || `${a.lastName}, ${a.firstName}`);
       meta('citation_author_institution', a.affiliation);
     });
   } else {

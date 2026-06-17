@@ -57,29 +57,16 @@
   <d-front-matter>
     <script id='distill-front-matter' type="text/json">{
     "title": "Annotating Unlabeled Screencasts with an IDM",
-    "description": "We train an inverse dynamics model on crowd-cast's paired dataset, yielding a model that recovers key presses, mouse clicks, cursor movements and scroll events from unlabeled videos. Along with the model, we openly release 600 hours of IDM-annotated screencasts. Trained exclusively on macOS, the model generalizes to Windows and Linux.",
+    "description": "We train an inverse dynamics model on crowd-cast's action-labeled dataset, yielding a model that recovers key presses, mouse clicks, cursor movements and scroll events from unlabeled videos. Trained exclusively on macOS, the model outperforms orders-of-magnitude larger off-the-shelf models and generalizes to Windows and Linux. Along with the model, we openly release 600 hours of IDM-annotated screencasts.",
     "published": "June 16, 2026",
     "url": "https://pdoom.org/crowd_cast_idm.html",
+    "bibtexKey": "pdoom2026annotating",
     "authors": [
       {
-        "author":"Mihir Mahajan",
-        "authorURL":"https://maharajamihir.github.io/",
-        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"}]
-      },
-      {
-        "author":"Franz Srambical",
-        "authorURL":"https://srambical.fr/",
-        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"}]
-      },
-      {
-        "author":"Alfred Nguyen",
-        "authorURL":"https://avocadoali.github.io/",
-        "affiliations": [{"name": "p(doom)", "url": "https://pdoom.org/"}]
-      },
-      {
-        "author":"Stefan Bauer",
-        "authorURL":"https://www.professoren.tum.de/en/bauer-stefan",
-        "affiliations": [{"name": "TUM"}]
+        "author":"p(doom) Team",
+        "authorURL":"https://pdoom.org/about.html",
+        "citationAuthor":"p(doom) Team",
+        "bibtexAuthor":"{p(doom) Team}"
       }
     ],
     "katex": {
@@ -91,7 +78,7 @@
   </d-front-matter>
   <d-title>
     <p>
-      We train an inverse dynamics model on <a href="https://pdoom.org/crowd_cast.html">crowd-cast</a>'s paired dataset, yielding a model that recovers key presses, mouse clicks, cursor movements and scroll events from unlabeled videos. Along with the <a href="https://huggingface.co/p-doom/idm">model</a>, we <a href="https://huggingface.co/datasets/p-doom/AGI-CAST-idm-actions">openly release</a> 600 hours of IDM-annotated screencasts. Trained exclusively on macOS, the model generalizes to Windows and Linux.
+      We train an inverse dynamics model on <a href="https://pdoom.org/crowd_cast.html">crowd-cast</a>'s action-labeled dataset, yielding a model that recovers key presses, mouse clicks, cursor movements and scroll events from unlabeled videos. Trained exclusively on macOS, the model outperforms orders-of-magnitude larger off-the-shelf models and generalizes to Windows and Linux. Along with the <a href="https://huggingface.co/p-doom/idm">model</a>, we <a href="https://huggingface.co/datasets/p-doom/AGI-CAST-idm-actions">openly release</a> 600 hours of IDM-annotated screencasts.
     </p>
   </d-title>
   <d-byline></d-byline>
@@ -113,6 +100,64 @@
         padding: 0.08em 0.32em;
         font-size: 0.9em;
         white-space: nowrap;
+      }
+
+      .f1-chart-mobile {
+        display: none;
+        max-width: 420px;
+        margin: 0 auto;
+        padding: 0.25rem 0.25rem 0;
+        font-family: var(--font-mono, monospace);
+      }
+      .f1-mobile-row {
+        display: grid;
+        grid-template-columns: 112px minmax(0, 1fr) 34px;
+        gap: 8px;
+        align-items: center;
+        margin: 7px 0;
+      }
+      .f1-mobile-label {
+        font-size: 10px;
+        line-height: 1.15;
+        color: var(--ash-700, #3D3A35);
+      }
+      .f1-mobile-label.f1-mobile-ours {
+        color: var(--ember, #B7361E);
+        font-weight: 600;
+      }
+      .f1-mobile-track {
+        height: 12px;
+        background: var(--ash-200, #E2DCCC);
+        border-radius: 1px;
+        overflow: hidden;
+      }
+      .f1-mobile-bar {
+        height: 100%;
+        border-radius: 1px;
+      }
+      .f1-mobile-value {
+        font-size: 10px;
+        color: var(--ash-600, #5A554C);
+        text-align: right;
+        white-space: nowrap;
+      }
+      .f1-mobile-axis {
+        display: flex;
+        justify-content: space-between;
+        margin: 4px 42px 0 120px;
+        padding-top: 3px;
+        border-top: 1px solid var(--ash-300, #CFC8B8);
+        font-size: 9px;
+        color: var(--ash-600, #5A554C);
+      }
+
+      d-byline .authors-affiliations {
+        grid-template-columns: 1fr;
+        grid-column-end: span 1;
+      }
+      d-byline .authors-affiliations h3:nth-of-type(2),
+      d-byline .authors-affiliations p.affiliation {
+        display: none;
       }
 
       /* ── IDM Demo v2 — all styles scoped under #idm-demo ── */
@@ -277,6 +322,7 @@
         flex-wrap: nowrap;
       }
       #idm-demo .idm-btn {
+        flex: 0 0 auto;
         background: none;
         border: 1px solid var(--ash-300, #CFC8B8);
         border-radius: 2px;
@@ -293,6 +339,7 @@
       }
       #idm-demo .idm-scrubber {
         flex: 1;
+        min-width: 0;
         -webkit-appearance: none;
         appearance: none;
         height: 4px;
@@ -336,6 +383,7 @@
       #idm-demo .idm-clip-nav {
         display: flex;
         align-items: center;
+        flex: 0 0 auto;
         gap: 4px;
         margin-left: auto;
       }
@@ -356,6 +404,12 @@
 
       /* ── Mobile: stacked ── */
       @media (max-width: 767px) {
+        #f1-chart {
+          display: none !important;
+        }
+        .f1-chart-mobile {
+          display: block;
+        }
         #idm-demo .idm-main {
           flex-direction: column;
         }
@@ -371,6 +425,25 @@
         }
         #idm-demo .idm-left {
           flex: none;
+        }
+        #idm-demo .idm-transport {
+          gap: 6px;
+          padding: 6px;
+        }
+        #idm-demo .idm-frame-counter {
+          min-width: 50px;
+          font-size: 10px;
+        }
+        #idm-demo .idm-tag-badge {
+          max-width: 96px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        #idm-demo .idm-clip-nav {
+          margin-left: 0;
+        }
+        #idm-demo .idm-clip-nav .idm-btn {
+          padding: 2px 5px;
         }
       }
 
@@ -1078,8 +1151,9 @@
             return;
           }
 
-          var barW = carouselBar.clientWidth;
-          var barCenter = barW / 2;
+          var barRect = carouselBar.getBoundingClientRect();
+          if (!barRect.width) return;
+          var barCenter = barRect.left + barRect.width / 2;
 
           /* Find the group closest to current frame */
           var bestIdx = 0;
@@ -1091,11 +1165,18 @@
           });
 
           /* Calculate offset to center that group */
-          var targetEl = carouselElements[bestIdx].el;
-          var elLeft = targetEl.offsetLeft;
-          var elW = targetEl.offsetWidth;
-          var elCenter = elLeft + elW / 2;
-          var tx = barCenter - elCenter;
+          var targetRect = carouselElements[bestIdx].el.getBoundingClientRect();
+          var targetCenter = targetRect.left + targetRect.width / 2;
+          var currentTransform = window.getComputedStyle(carouselTrack).transform;
+          var currentTx = 0;
+          if (currentTransform && currentTransform !== 'none') {
+            var parts = currentTransform.match(/matrix(3d)?\(([^)]+)\)/);
+            if (parts) {
+              var nums = parts[2].split(',').map(function(n) { return parseFloat(n); });
+              currentTx = parts[1] ? nums[12] : nums[4];
+            }
+          }
+          var tx = currentTx + (barCenter - targetCenter);
           carouselTrack.style.transform = 'translateX(' + tx + 'px)';
 
           /* Apply scale + opacity based on frame distance */
@@ -1292,21 +1373,16 @@
     <h2>Long-horizon data for long-horizon models</h2>
     <p>
       Frontier labs are spending billions on handcrafted RL environments hoping to lengthen the task horizon to general intelligence.
-      Meanwhile, a billion people produce months-long trajectories of economically valuable digital work.
-      We capture that data as action-annotated screencasts and use it to behaviour-clone models towards longer task horizons.
+      Meanwhile, a billion people produce months-long trajectories of economically valuable digital work:
+      Data that can be used to behaviour-clone models towards longer task horizons. We believe that if you want models to work on tasks for weeks and months at a time, you must train them on trajectories that span months.
     </p>
     <p>
-      Previously, we <a href="https://pdoom.org/agi_cast.html">openly released</a> over 600 hours of unlabeled screencasts of AGI research.
-      However, unlabeled screencasts alone are insufficent for behaviour-cloning.
-      With <a href="https://pdoom.org/crowd_cast.html">crowd-cast</a>, our open-source recording tool, we started capturing paired data: screencasts with synchronized keylogs and mouse movement.
-      To date, we have collected 2500+ hours of paired recordings across dozens of contributors.
+      We previously started capturing that data as screencasts with synchronized keylogs and mouse movement using <a href="https://pdoom.org/crowd_cast.html">crowd-cast</a>.
+      While crowd-cast yields data from highly productive participants, often spanning months of work on single projects, it is still limited in breadth.
     </p>
     <p>
-      While crowd-cast gives us paired screencasts and input logs from highly productive participants, often spanning months of work on single projects, it is still limited in breadth.
-    </p>
-    <p>
-      The internet contains thousands of hours of unlabeled screencasts across more professions, applications and operating systems. To use them for behaviour-cloning, we first need to recover the actions behind the frames.
-      We start with an inverse dynamics model trained on crowd-cast, and use it to action-label all 600 hours of <a href="https://pdoom.org/agi_cast.html">AGI-CAST</a>. We <a href="https://huggingface.co/datasets/p-doom/AGI-CAST-idm-actions">openly release</a> that annotated dataset alongside the model.
+      At the same time, the internet contains thousands of hours of unlabeled screencasts across diverse professions, applications and operating systems. To use that data for behaviour-cloning, we first need to recover the actions behind frames.
+      As a first step towards unlocking internet-scale screencasts, we train an inverse dynamics model on crowd-cast data, and use it to action-label all 600 hours of <a href="https://pdoom.org/agi_cast.html">AGI-CAST</a>, a dataset of unlabeled long-horizon screencasts. We <a href="https://huggingface.co/datasets/p-doom/AGI-CAST-idm-actions">openly release</a> that annotated dataset alongside our model.
     </p>
 
     <!-- ============================================================
@@ -1346,28 +1422,28 @@
         <!-- Bars: percentage heights of the absolutely positioned container -->
         <div style="position: absolute; bottom: 0; left: 0; right: 0; top: 0; display: flex; align-items: flex-end; justify-content: space-around; padding: 0 12px;">
           <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
-            <div style="font-family: var(--font-mono, monospace); font-size: 11px; font-weight: 600; color: var(--ink, #161514); margin-bottom: 4px;">0.86</div>
-            <div style="width: 60%; flex: 0 0 85.5%; background: var(--ember, #B7361E); border-radius: 2px 2px 0 0;"></div>
+            <div style="font-family: var(--font-mono, monospace); font-size: 11px; font-weight: 600; color: var(--ink, #161514); margin-bottom: 4px;">0.79</div>
+            <div style="width: 60%; flex: 0 0 78.7%; background: var(--ember, #B7361E); border-radius: 2px 2px 0 0;"></div>
           </div>
           <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
-            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.73</div>
-            <div style="width: 60%; flex: 0 0 73.2%; background: var(--ash-500, #807A6E); border-radius: 2px 2px 0 0;"></div>
+            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.74</div>
+            <div style="width: 60%; flex: 0 0 74.0%; background: var(--ash-500, #807A6E); border-radius: 2px 2px 0 0;"></div>
           </div>
           <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
-            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.70</div>
-            <div style="width: 60%; flex: 0 0 70.3%; background: var(--ash-500, #807A6E); border-radius: 2px 2px 0 0;"></div>
+            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.71</div>
+            <div style="width: 60%; flex: 0 0 70.9%; background: var(--ash-500, #807A6E); border-radius: 2px 2px 0 0;"></div>
           </div>
           <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
-            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.53</div>
-            <div style="width: 60%; flex: 0 0 53.4%; background: var(--ash-300, #CFC8B8); border-radius: 2px 2px 0 0;"></div>
+            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.54</div>
+            <div style="width: 60%; flex: 0 0 54.0%; background: var(--ash-300, #CFC8B8); border-radius: 2px 2px 0 0;"></div>
           </div>
           <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
-            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.42</div>
-            <div style="width: 60%; flex: 0 0 42.2%; background: var(--ash-300, #CFC8B8); border-radius: 2px 2px 0 0;"></div>
+            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.43</div>
+            <div style="width: 60%; flex: 0 0 43.0%; background: var(--ash-300, #CFC8B8); border-radius: 2px 2px 0 0;"></div>
           </div>
           <div style="flex: 1; max-width: 110px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
-            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.34</div>
-            <div style="width: 60%; flex: 0 0 33.9%; background: var(--ash-300, #CFC8B8); border-radius: 2px 2px 0 0;"></div>
+            <div style="font-family: var(--font-mono, monospace); font-size: 10px; color: var(--ash-600, #5A554C); margin-bottom: 4px;">0.36</div>
+            <div style="width: 60%; flex: 0 0 36.0%; background: var(--ash-300, #CFC8B8); border-radius: 2px 2px 0 0;"></div>
           </div>
         </div>
       </div>
@@ -1387,7 +1463,40 @@
         <span><span style="display: inline-block; width: 10px; height: 10px; background: var(--ash-300, #CFC8B8); border-radius: 1px; vertical-align: middle; margin-right: 4px;"></span>Open-source</span>
       </div>
     </div>
-    <figcaption style="text-align: center; margin-top: 0.5rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">F1 on the 44-clip eval set.</figcaption>
+    <div class="f1-chart-mobile" aria-label="Overall F1 on the 44-clip eval set">
+      <div class="f1-mobile-row">
+        <div class="f1-mobile-label f1-mobile-ours">Ours (8B)</div>
+        <div class="f1-mobile-track"><div class="f1-mobile-bar" style="width: 78.7%; background: var(--ember, #B7361E);"></div></div>
+        <div class="f1-mobile-value">0.79</div>
+      </div>
+      <div class="f1-mobile-row">
+        <div class="f1-mobile-label">Gemini 3.5 Flash</div>
+        <div class="f1-mobile-track"><div class="f1-mobile-bar" style="width: 74.0%; background: var(--ash-500, #807A6E);"></div></div>
+        <div class="f1-mobile-value">0.74</div>
+      </div>
+      <div class="f1-mobile-row">
+        <div class="f1-mobile-label">GPT 5.5</div>
+        <div class="f1-mobile-track"><div class="f1-mobile-bar" style="width: 70.9%; background: var(--ash-500, #807A6E);"></div></div>
+        <div class="f1-mobile-value">0.71</div>
+      </div>
+      <div class="f1-mobile-row">
+        <div class="f1-mobile-label">Kimi K2.6</div>
+        <div class="f1-mobile-track"><div class="f1-mobile-bar" style="width: 54.0%; background: var(--ash-300, #CFC8B8);"></div></div>
+        <div class="f1-mobile-value">0.54</div>
+      </div>
+      <div class="f1-mobile-row">
+        <div class="f1-mobile-label">Gemma 4 31B</div>
+        <div class="f1-mobile-track"><div class="f1-mobile-bar" style="width: 43.0%; background: var(--ash-300, #CFC8B8);"></div></div>
+        <div class="f1-mobile-value">0.43</div>
+      </div>
+      <div class="f1-mobile-row">
+        <div class="f1-mobile-label">Qwen3-VL 8B</div>
+        <div class="f1-mobile-track"><div class="f1-mobile-bar" style="width: 36.0%; background: var(--ash-300, #CFC8B8);"></div></div>
+        <div class="f1-mobile-value">0.36</div>
+      </div>
+      <div class="f1-mobile-axis"><span>0</span><span>F1</span><span>1.0</span></div>
+    </div>
+    <figcaption style="text-align: center; margin-top: 0.5rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Overall F1 on the 44-clip eval set.</figcaption>
     </figure>
 
     <!-- TODO: related work paragraph (VPT, FDM-1, VideoAgentTrek) — deferred -->
@@ -1415,8 +1524,9 @@
       We deliberately avoid per-frame action classification. At 5 FPS, ~70% of frames have no associated input event, hence a naive per-frame classifier collapses to always predicting no-ops, getting 70% accuracy with zero useful signal.
       The sparse formulation sidesteps this entirely: the empty list <code>[]</code> is a valid response for clips where nothing happened.
     </p>
-    <figure style="margin: 1rem 0 0;">
-    <table style="width: 100%; border-collapse: collapse;">
+    <figure style="grid-column: page; margin: 1rem 0 0;">
+    <div style="max-width: 900px; margin: 0 auto; overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; white-space: nowrap;">
       <thead>
         <tr style="border-bottom: 1px solid #ddd;">
           <th style="text-align: left; padding: 4px 12px 4px 0; font-weight: 600;">Type</th>
@@ -1447,6 +1557,7 @@
         </tr>
       </tbody>
     </table>
+    </div>
     <figcaption style="text-align: center; margin-top: 0.5rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">The action space stays close to raw OS input events.</figcaption>
     </figure>
     <figure style="margin: 1rem 0 0;">
@@ -1494,7 +1605,7 @@
     <a class="marker" href="#section-2c" id="section-2c"><span>2.3</span></a>
     <h3>Model and training</h3>
     <p>
-      We fine-tune <a href="https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct">Qwen3-VL-8B</a> with LoRA applied to both the language model and the vision encoder.
+      We fine-tune <a href="https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct">Qwen3-VL 8B</a> with LoRA applied to both the language model and the vision encoder.
       Frames are interleaved with text labels (<code>"Frame F00:"</code>, <code>"Frame F01:"</code>, ...) in the input sequence, giving the model text-based anchors across the images.
       The model produces a JSON array of actions as output, where only model responses contribute to the loss.
     </p>
@@ -1544,7 +1655,7 @@
       We allow a 5-frame tolerance since the visual effect of a press or click can be delayed by several frames</aside>
     <!--TODO: upload the model to hf and make sure that the eval table is in the readme-->
     <p>
-      We <a href="https://huggingface.co/p-doom/idm">report</a> per-type precision, recall and F1. For mouse movement we additionally report R² between predicted and ground-truth displacement vectors, and cosine similarity for directional alignment.
+      We <a href="https://huggingface.co/p-doom/idm">report</a> per-type precision, recall and F1. For mouse movement we additionally report R² between predicted and ground-truth displacement vectors, and mean cosine similarity for directional alignment.
       Reasoning was enabled for Gemini 3.5 Flash, GPT 5.5 and Kimi K2.6, and disabled for Gemma 4, Qwen3-VL and our fine-tuned model.
     </p>
 
@@ -1565,33 +1676,33 @@
       </tr>
       <tr style="border-bottom: 1px solid #eee; font-weight: 600;">
         <td style="padding: 4px 12px 4px 0;">Final recipe (8B, r=256)</td>
-        <td style="padding: 4px 8px; text-align: right;">0.86</td>
-        <td style="padding: 4px 8px; text-align: right;">0.66</td>
-        <td style="padding: 4px 8px; text-align: right;">0.99</td>
+        <td style="padding: 4px 8px; text-align: right;">0.79</td>
+        <td style="padding: 4px 8px; text-align: right;">0.71</td>
+        <td style="padding: 4px 8px; text-align: right;">0.64</td>
       </tr>
       <tr style="border-bottom: 1px solid #eee;">
         <td style="padding: 4px 12px 4px 0;">2B backbone</td>
-        <td style="padding: 4px 8px; text-align: right;">0.86</td>
-        <td style="padding: 4px 8px; text-align: right;">0.61</td>
-        <td style="padding: 4px 8px; text-align: right;">0.97</td>
+        <td style="padding: 4px 8px; text-align: right;">0.74</td>
+        <td style="padding: 4px 8px; text-align: right;">0.65</td>
+        <td style="padding: 4px 8px; text-align: right;">0.57</td>
       </tr>
       <tr style="border-bottom: 1px solid #eee;">
         <td style="padding: 4px 12px 4px 0;">4B backbone</td>
-        <td style="padding: 4px 8px; text-align: right;">0.84</td>
-        <td style="padding: 4px 8px; text-align: right;">0.55</td>
-        <td style="padding: 4px 8px; text-align: right;">0.91</td>
+        <td style="padding: 4px 8px; text-align: right;">0.76</td>
+        <td style="padding: 4px 8px; text-align: right;">0.54</td>
+        <td style="padding: 4px 8px; text-align: right;">0.40</td>
       </tr>
       <tr style="border-bottom: 1px solid #eee;">
         <td style="padding: 4px 12px 4px 0;">− vision LoRA</td>
-        <td style="padding: 4px 8px; text-align: right;">0.84</td>
-        <td style="padding: 4px 8px; text-align: right;">0.64</td>
         <td style="padding: 4px 8px; text-align: right;">0.76</td>
+        <td style="padding: 4px 8px; text-align: right;">0.63</td>
+        <td style="padding: 4px 8px; text-align: right;">0.42</td>
       </tr>
       <tr style="border-bottom: 1px solid #eee;">
         <td style="padding: 4px 12px 4px 0;">− interleaved frame labels</td>
-        <td style="padding: 4px 8px; text-align: right;">0.77</td>
-        <td style="padding: 4px 8px; text-align: right;">-0.03</td>
-        <td style="padding: 4px 8px; text-align: right;">0.57</td>
+        <td style="padding: 4px 8px; text-align: right;">0.73</td>
+        <td style="padding: 4px 8px; text-align: right;">-0.08</td>
+        <td style="padding: 4px 8px; text-align: right;">0.23</td>
       </tr>
     </table>
     </div>
@@ -1601,31 +1712,31 @@
       Without text anchors between frames, the model loses track of frame identity and enters repetitive prediction loops.
     </p>
     <p>
-      Model size, LoRA rank and ablating vision-LoRA have no measurable effect on action detection.
-      However, bigger models and vision-LoRA improve mouse movement prediction, and direction accuracy scales monotonically with LoRA rank.
+      Performance scales cleanly with both model size and LoRA rank: overall F1 improves along both axes, and mouse-direction quality improves sharply with LoRA rank.
+      Removing vision LoRA hurts performance, especially mouse-direction quality.
     </p>
 
-    <!-- LoRA rank sweep -->
+    <!-- Scaling sweeps -->
     <figure style="grid-column: page; margin: 1.5rem 0;">
-    <div style="display: flex; gap: 24px; max-width: 700px; margin: 0 auto; flex-wrap: wrap; justify-content: center;">
-      <div style="flex: 1; min-width: 280px;">
+    <div style="display: flex; gap: 22px; max-width: 920px; margin: 0 auto; flex-wrap: wrap; justify-content: center;">
+      <div style="flex: 1; min-width: 240px;">
         <svg viewBox="0 0 200 130" style="width: 100%; font-family: var(--font-mono, monospace);">
           <line x1="40" y1="10" x2="40" y2="100" stroke="#CFC8B8" stroke-width="0.5"/>
           <line x1="40" y1="100" x2="190" y2="100" stroke="#CFC8B8" stroke-width="0.5"/>
           <line x1="40" y1="10" x2="190" y2="10" stroke="#E2DCCC" stroke-width="0.5" stroke-dasharray="2"/>
           <line x1="40" y1="55" x2="190" y2="55" stroke="#E2DCCC" stroke-width="0.5" stroke-dasharray="2"/>
           <text x="36" y="103" font-size="7" fill="#5A554C" text-anchor="end">0.70</text>
-          <text x="36" y="58" font-size="7" fill="#5A554C" text-anchor="end">0.80</text>
-          <text x="36" y="13" font-size="7" fill="#5A554C" text-anchor="end">0.90</text>
-          <polyline points="55,36 95,32 135,35 175,30" fill="none" stroke="#B7361E" stroke-width="2"/>
-          <circle cx="55" cy="36" r="3.5" fill="#B7361E"/>
-          <circle cx="95" cy="32" r="3.5" fill="#B7361E"/>
-          <circle cx="135" cy="35" r="3.5" fill="#B7361E"/>
-          <circle cx="175" cy="30" r="3.5" fill="#B7361E"/>
-          <text x="55" y="31" font-size="7" fill="#161514" text-anchor="middle">.84</text>
-          <text x="95" y="27" font-size="7" fill="#161514" text-anchor="middle">.85</text>
-          <text x="135" y="30" font-size="7" fill="#161514" text-anchor="middle">.85</text>
-          <text x="175" y="25" font-size="7" fill="#161514" text-anchor="middle">.86</text>
+          <text x="36" y="58" font-size="7" fill="#5A554C" text-anchor="end">0.75</text>
+          <text x="36" y="13" font-size="7" fill="#5A554C" text-anchor="end">0.80</text>
+          <polyline points="55,71 95,37 135,28 175,22" fill="none" stroke="#B7361E" stroke-width="2"/>
+          <circle cx="55" cy="71" r="3.5" fill="#B7361E"/>
+          <circle cx="95" cy="37" r="3.5" fill="#B7361E"/>
+          <circle cx="135" cy="28" r="3.5" fill="#B7361E"/>
+          <circle cx="175" cy="22" r="3.5" fill="#B7361E"/>
+          <text x="55" y="66" font-size="7" fill="#161514" text-anchor="middle">.73</text>
+          <text x="95" y="32" font-size="7" fill="#161514" text-anchor="middle">.77</text>
+          <text x="135" y="23" font-size="7" fill="#161514" text-anchor="middle">.78</text>
+          <text x="175" y="17" font-size="7" fill="#161514" text-anchor="middle">.79</text>
           <text x="55" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">16</text>
           <text x="95" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">64</text>
           <text x="135" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">128</text>
@@ -1634,24 +1745,47 @@
           <text x="40" y="6" font-size="8" fill="#5A554C" text-anchor="middle">F1</text>
         </svg>
       </div>
-      <div style="flex: 1; min-width: 280px;">
+      <div style="flex: 1; min-width: 240px;">
         <svg viewBox="0 0 200 130" style="width: 100%; font-family: var(--font-mono, monospace);">
           <line x1="40" y1="10" x2="40" y2="100" stroke="#CFC8B8" stroke-width="0.5"/>
           <line x1="40" y1="100" x2="190" y2="100" stroke="#CFC8B8" stroke-width="0.5"/>
           <line x1="40" y1="10" x2="190" y2="10" stroke="#E2DCCC" stroke-width="0.5" stroke-dasharray="2"/>
           <line x1="40" y1="55" x2="190" y2="55" stroke="#E2DCCC" stroke-width="0.5" stroke-dasharray="2"/>
           <text x="36" y="103" font-size="7" fill="#5A554C" text-anchor="end">0.70</text>
-          <text x="36" y="58" font-size="7" fill="#5A554C" text-anchor="end">0.85</text>
-          <text x="36" y="13" font-size="7" fill="#5A554C" text-anchor="end">1.00</text>
-          <polyline points="55,59 95,44 135,27 175,14" fill="none" stroke="#5D6E63" stroke-width="2"/>
-          <circle cx="55" cy="59" r="3.5" fill="#5D6E63"/>
-          <circle cx="95" cy="44" r="3.5" fill="#5D6E63"/>
-          <circle cx="135" cy="27" r="3.5" fill="#5D6E63"/>
-          <circle cx="175" cy="14" r="3.5" fill="#5D6E63"/>
-          <text x="55" y="54" font-size="7" fill="#161514" text-anchor="middle">.84</text>
-          <text x="95" y="39" font-size="7" fill="#161514" text-anchor="middle">.89</text>
-          <text x="135" y="22" font-size="7" fill="#161514" text-anchor="middle">.94</text>
-          <text x="175" y="9" font-size="7" fill="#161514" text-anchor="middle">.99</text>
+          <text x="36" y="58" font-size="7" fill="#5A554C" text-anchor="end">0.75</text>
+          <text x="36" y="13" font-size="7" fill="#5A554C" text-anchor="end">0.80</text>
+          <polyline points="65,60 115,48 165,22" fill="none" stroke="#B7361E" stroke-width="2"/>
+          <circle cx="65" cy="60" r="3.5" fill="#B7361E"/>
+          <circle cx="115" cy="48" r="3.5" fill="#B7361E"/>
+          <circle cx="165" cy="22" r="3.5" fill="#B7361E"/>
+          <text x="65" y="55" font-size="7" fill="#161514" text-anchor="middle">.74</text>
+          <text x="115" y="43" font-size="7" fill="#161514" text-anchor="middle">.76</text>
+          <text x="165" y="17" font-size="7" fill="#161514" text-anchor="middle">.79</text>
+          <text x="65" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">2B</text>
+          <text x="115" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">4B</text>
+          <text x="165" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">8B</text>
+          <text x="115" y="126" font-size="8" fill="#5A554C" text-anchor="middle">Model size</text>
+          <text x="40" y="6" font-size="8" fill="#5A554C" text-anchor="middle">F1</text>
+        </svg>
+      </div>
+      <div style="flex: 1; min-width: 240px;">
+        <svg viewBox="0 0 200 130" style="width: 100%; font-family: var(--font-mono, monospace);">
+          <line x1="40" y1="10" x2="40" y2="100" stroke="#CFC8B8" stroke-width="0.5"/>
+          <line x1="40" y1="100" x2="190" y2="100" stroke="#CFC8B8" stroke-width="0.5"/>
+          <line x1="40" y1="10" x2="190" y2="10" stroke="#E2DCCC" stroke-width="0.5" stroke-dasharray="2"/>
+          <line x1="40" y1="55" x2="190" y2="55" stroke="#E2DCCC" stroke-width="0.5" stroke-dasharray="2"/>
+          <text x="36" y="103" font-size="7" fill="#5A554C" text-anchor="end">0.20</text>
+          <text x="36" y="58" font-size="7" fill="#5A554C" text-anchor="end">0.45</text>
+          <text x="36" y="13" font-size="7" fill="#5A554C" text-anchor="end">0.70</text>
+          <polyline points="55,67 95,43 135,41 175,20" fill="none" stroke="#5D6E63" stroke-width="2"/>
+          <circle cx="55" cy="67" r="3.5" fill="#5D6E63"/>
+          <circle cx="95" cy="43" r="3.5" fill="#5D6E63"/>
+          <circle cx="135" cy="41" r="3.5" fill="#5D6E63"/>
+          <circle cx="175" cy="20" r="3.5" fill="#5D6E63"/>
+          <text x="55" y="62" font-size="7" fill="#161514" text-anchor="middle">.38</text>
+          <text x="95" y="38" font-size="7" fill="#161514" text-anchor="middle">.52</text>
+          <text x="135" y="36" font-size="7" fill="#161514" text-anchor="middle">.53</text>
+          <text x="175" y="15" font-size="7" fill="#161514" text-anchor="middle">.64</text>
           <text x="55" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">16</text>
           <text x="95" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">64</text>
           <text x="135" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">128</text>
@@ -1661,7 +1795,7 @@
         </svg>
       </div>
     </div>
-    <figcaption style="text-align: center; margin-top: 0.5rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">F1 is stable across ranks. Mouse direction quality scales monotonically with adapter capacity.</figcaption>
+    <figcaption style="text-align: center; margin-top: 0.5rem; font-size: 0.8em; color: rgba(0, 0, 0, 0.5);">Scaling sweeps. Overall F1 improves with LoRA rank and model size; mouse-direction cosine improves with LoRA rank.</figcaption>
     </figure>
     <!--p>
       Training saturates early. F1 peaks at 5K steps (0.86), then declines at 10K (0.81) and 15K (0.81) as the model begins overpredicting, increasing false positives without recovering additional true positives.
@@ -2116,7 +2250,7 @@
   <d-appendix>
 
     <h3>Contributions</h3>
-    <p>MM worked on data sourcing, training, evaluation, and wrote large parts of the manuscript and the crowd-cast codebase. MM ported crowd-cast to Windows. FS ported crowd-cast to Linux and helped with the manuscript. The p(doom) team jointly contributed to crowd-cast.</p>
+    <p>Mihir Mahajan worked on data sourcing, training, evaluation, and wrote large parts of the manuscript and the crowd-cast codebase, and ported crowd-cast to Windows. Franz Srambical ported crowd-cast to Linux and helped with the manuscript. Alfred Nguyen contributed to the data pipeline of the IDM. Stefan Bauer provided feedback and guidance. The p(doom) team jointly contributed to crowd-cast.</p>
     <d-bibliography src="bibliography.bib"></d-bibliography>
     <distill-appendix>
     </distill-appendix>
