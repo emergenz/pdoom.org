@@ -262,6 +262,7 @@ h1.hero-manifesto.display {
   border: 1px solid var(--booklet-frame);
   box-sizing: border-box;
 }
+.booklet-media--wide { aspect-ratio: 320 / 179; }
 .booklet-media::before {
   content: '';
   position: absolute;

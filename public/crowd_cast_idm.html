@@ -1373,15 +1373,15 @@
     <p>
       Frontier labs are spending billions on handcrafted RL environments hoping to lengthen the task horizon to general intelligence.
       Meanwhile, a billion people produce months-long trajectories of economically valuable digital work:
-      Data that can be used to behaviour-clone models towards longer task horizons. We believe that if you want models to exhibit month-long task horizons, you must train them on trajectories that span months.
+      Data that can be used to behaviour-clone models towards longer task horizons. We believe that if you want models to work on tasks for weeks and months at a time, you must train them on trajectories that span months.
     </p>
     <p>
-      We capture that data as screencasts with synchronized keylogs and mouse movement using <a href="https://pdoom.org/crowd_cast.html">crowd-cast</a>.
+      We previously started capturing that data as screencasts with synchronized keylogs and mouse movement using <a href="https://pdoom.org/crowd_cast.html">crowd-cast</a>.
       While crowd-cast yields data from highly productive participants, often spanning months of work on single projects, it is still limited in breadth.
     </p>
     <p>
-      At the same time, the internet contains thousands of hours of unlabeled screencasts across diverse professions, applications and operating systems. To use that data for behaviour-cloning, we first need to recover the actions behind the frames.
-      As a first step, we train an inverse dynamics model on crowd-cast data, and use it to action-label all 600 hours of <a href="https://pdoom.org/agi_cast.html">AGI-CAST</a>, a dataset of unlabeled long-horizon screencasts. We <a href="https://huggingface.co/datasets/p-doom/AGI-CAST-idm-actions">openly release</a> that annotated dataset alongside our model.
+      At the same time, the internet contains thousands of hours of unlabeled screencasts across diverse professions, applications and operating systems. To use that data for behaviour-cloning, we first need to recover the actions behind frames.
+      As a first step towards unlocking internet-scale screencasts, we train an inverse dynamics model on crowd-cast data, and use it to action-label all 600 hours of <a href="https://pdoom.org/agi_cast.html">AGI-CAST</a>, a dataset of unlabeled long-horizon screencasts. We <a href="https://huggingface.co/datasets/p-doom/AGI-CAST-idm-actions">openly release</a> that annotated dataset alongside our model.
     </p>
 
     <!-- ============================================================
@@ -2249,7 +2249,7 @@
   <d-appendix>
 
     <h3>Contributions</h3>
-    <p>MM worked on data sourcing, training, evaluation, and wrote large parts of the manuscript and the crowd-cast codebase. MM ported crowd-cast to Windows. FS ported crowd-cast to Linux and helped with the manuscript. The p(doom) team jointly contributed to crowd-cast.</p>
+    <p>Mihir Mahajan worked on data sourcing, training, evaluation, and wrote large parts of the manuscript and the crowd-cast codebase, and ported crowd-cast to Windows. Franz Srambical ported crowd-cast to Linux and helped with the manuscript. Alfred Nguyen contributed to the data pipeline of the IDM. Stefan Bauer provided feedback and guidance. The p(doom) team jointly contributed to crowd-cast.</p>
     <d-bibliography src="bibliography.bib"></d-bibliography>
     <distill-appendix>
     </distill-appendix>
