@@ -39,6 +39,10 @@
     return object;
   };
 
+  const bibtexKeyPart = function(value) {
+    return String(value).replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
+  };
+
   const mapFromObject = function(object) {
     const map = new Map();
     for (var property in object) {
@@ -108,6 +112,12 @@
       }
     }
     target.description = source.description;
+    if (source.url) {
+      target.url = source.url;
+    }
+    if (source.bibtexKey) {
+      target.bibtexKey = source.bibtexKey;
+    }
     target.authors = source.authors.map( (authorObject) => new Author(authorObject));
     target.katex = source.katex;
     target.password = source.password;
@@ -299,11 +309,14 @@
 
     // 'olah2016attention'
     get slug() {
+      if (this.bibtexKey) {
+        return this.bibtexKey;
+      }
       let slug = '';
       if (this.authors.length) {
-        slug += this.authors[0].lastName.toLowerCase();
+        slug += bibtexKeyPart(this.authors[0].lastName);
         slug += this.publishedYear;
-        slug += this.title.split(' ')[0].toLowerCase();
+        slug += bibtexKeyPart(this.title.split(' ')[0]);
       }
       return slug || 'Untitled';
     }
