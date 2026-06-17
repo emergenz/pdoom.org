@@ -1654,7 +1654,7 @@
       We allow a 5-frame tolerance since the visual effect of a press or click can be delayed by several frames</aside>
     <!--TODO: upload the model to hf and make sure that the eval table is in the readme-->
     <p>
-      We <a href="https://huggingface.co/p-doom/idm">report</a> per-type precision, recall and F1. For mouse movement we additionally report R² between predicted and ground-truth displacement vectors, and cosine similarity for directional alignment.
+      We <a href="https://huggingface.co/p-doom/idm">report</a> per-type precision, recall and F1. For mouse movement we additionally report R² between predicted and ground-truth displacement vectors, and mean cosine similarity for directional alignment.
       Reasoning was enabled for Gemini 3.5 Flash, GPT 5.5 and Kimi K2.6, and disabled for Gemma 4, Qwen3-VL and our fine-tuned model.
     </p>
 
@@ -1677,31 +1677,31 @@
         <td style="padding: 4px 12px 4px 0;">Final recipe (8B, r=256)</td>
         <td style="padding: 4px 8px; text-align: right;">0.79</td>
         <td style="padding: 4px 8px; text-align: right;">0.71</td>
-        <td style="padding: 4px 8px; text-align: right;">0.97</td>
+        <td style="padding: 4px 8px; text-align: right;">0.64</td>
       </tr>
       <tr style="border-bottom: 1px solid #eee;">
         <td style="padding: 4px 12px 4px 0;">2B backbone</td>
         <td style="padding: 4px 8px; text-align: right;">0.74</td>
         <td style="padding: 4px 8px; text-align: right;">0.65</td>
-        <td style="padding: 4px 8px; text-align: right;">0.91</td>
+        <td style="padding: 4px 8px; text-align: right;">0.57</td>
       </tr>
       <tr style="border-bottom: 1px solid #eee;">
         <td style="padding: 4px 12px 4px 0;">4B backbone</td>
         <td style="padding: 4px 8px; text-align: right;">0.76</td>
         <td style="padding: 4px 8px; text-align: right;">0.54</td>
-        <td style="padding: 4px 8px; text-align: right;">0.80</td>
+        <td style="padding: 4px 8px; text-align: right;">0.40</td>
       </tr>
       <tr style="border-bottom: 1px solid #eee;">
         <td style="padding: 4px 12px 4px 0;">− vision LoRA</td>
         <td style="padding: 4px 8px; text-align: right;">0.76</td>
         <td style="padding: 4px 8px; text-align: right;">0.63</td>
-        <td style="padding: 4px 8px; text-align: right;">0.71</td>
+        <td style="padding: 4px 8px; text-align: right;">0.42</td>
       </tr>
       <tr style="border-bottom: 1px solid #eee;">
         <td style="padding: 4px 12px 4px 0;">− interleaved frame labels</td>
         <td style="padding: 4px 8px; text-align: right;">0.73</td>
         <td style="padding: 4px 8px; text-align: right;">-0.08</td>
-        <td style="padding: 4px 8px; text-align: right;">0.21</td>
+        <td style="padding: 4px 8px; text-align: right;">0.23</td>
       </tr>
     </table>
     </div>
@@ -1773,18 +1773,18 @@
           <line x1="40" y1="100" x2="190" y2="100" stroke="#CFC8B8" stroke-width="0.5"/>
           <line x1="40" y1="10" x2="190" y2="10" stroke="#E2DCCC" stroke-width="0.5" stroke-dasharray="2"/>
           <line x1="40" y1="55" x2="190" y2="55" stroke="#E2DCCC" stroke-width="0.5" stroke-dasharray="2"/>
-          <text x="36" y="103" font-size="7" fill="#5A554C" text-anchor="end">0.60</text>
-          <text x="36" y="58" font-size="7" fill="#5A554C" text-anchor="end">0.80</text>
-          <text x="36" y="13" font-size="7" fill="#5A554C" text-anchor="end">1.00</text>
-          <polyline points="55,82 95,53 135,34 175,16" fill="none" stroke="#5D6E63" stroke-width="2"/>
-          <circle cx="55" cy="82" r="3.5" fill="#5D6E63"/>
-          <circle cx="95" cy="53" r="3.5" fill="#5D6E63"/>
-          <circle cx="135" cy="34" r="3.5" fill="#5D6E63"/>
-          <circle cx="175" cy="16" r="3.5" fill="#5D6E63"/>
-          <text x="55" y="77" font-size="7" fill="#161514" text-anchor="middle">.68</text>
-          <text x="95" y="48" font-size="7" fill="#161514" text-anchor="middle">.81</text>
-          <text x="135" y="29" font-size="7" fill="#161514" text-anchor="middle">.89</text>
-          <text x="175" y="11" font-size="7" fill="#161514" text-anchor="middle">.97</text>
+          <text x="36" y="103" font-size="7" fill="#5A554C" text-anchor="end">0.20</text>
+          <text x="36" y="58" font-size="7" fill="#5A554C" text-anchor="end">0.45</text>
+          <text x="36" y="13" font-size="7" fill="#5A554C" text-anchor="end">0.70</text>
+          <polyline points="55,67 95,43 135,41 175,20" fill="none" stroke="#5D6E63" stroke-width="2"/>
+          <circle cx="55" cy="67" r="3.5" fill="#5D6E63"/>
+          <circle cx="95" cy="43" r="3.5" fill="#5D6E63"/>
+          <circle cx="135" cy="41" r="3.5" fill="#5D6E63"/>
+          <circle cx="175" cy="20" r="3.5" fill="#5D6E63"/>
+          <text x="55" y="62" font-size="7" fill="#161514" text-anchor="middle">.38</text>
+          <text x="95" y="38" font-size="7" fill="#161514" text-anchor="middle">.52</text>
+          <text x="135" y="36" font-size="7" fill="#161514" text-anchor="middle">.53</text>
+          <text x="175" y="15" font-size="7" fill="#161514" text-anchor="middle">.64</text>
           <text x="55" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">16</text>
           <text x="95" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">64</text>
           <text x="135" y="113" font-size="7" fill="#3D3A35" text-anchor="middle">128</text>
