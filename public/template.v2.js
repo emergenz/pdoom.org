@@ -62,6 +62,8 @@
       this.name = object.author; // 'Chris Olah'
       this.equalContrib = !!(object.equalContrib);
       this.personalURL = object.authorURL; // 'https://colah.github.io'
+      this.citationName = object.citationAuthor; // 'Google DeepMind'
+      this.bibtexName = object.bibtexAuthor; // '{Google DeepMind}'
       this.affiliation = object.affiliation; // 'Google Brain'
       this.affiliationURL = object.affiliationURL; // 'https://g.co/brain'
       this.affiliations = object.affiliations || []; // new-style affiliations
@@ -69,14 +71,21 @@
 
     // 'Chris'
     get firstName() {
+      if (this.citationName) return '';
       const names = this.name.split(' ');
       return names.slice(0, names.length - 1).join(' ');
     }
 
     // 'Olah'
     get lastName() {
+      if (this.citationName) return this.citationName;
       const names = this.name.split(' ');
       return names[names.length -1];
+    }
+
+    get bibtexAuthor() {
+      if (this.bibtexName) return this.bibtexName;
+      return this.firstName ? `${this.lastName}, ${this.firstName}` : this.lastName;
     }
   }
 
@@ -284,7 +293,7 @@
     // 'Olah, Chris and Carter, Shan',
     get bibtexAuthors() {
       return this.authors.map(author => {
-        return author.lastName + ', ' + author.firstName;
+        return author.bibtexAuthor;
       }).join(' and ');
     }
 
