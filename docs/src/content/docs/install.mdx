@@ -88,14 +88,14 @@ group for input capture.
    If the installer reports that a required tool is missing, install that
    package with your distro's package manager and run the command again.
 
-2. Launch crowd-cast. The wizard checks the current session, screen-capture
-   components, the `input` group, and (on GNOME) the focus extension. If it flags
-   anything, follow the instructions it shows.
+2. Launch crowd-cast. The wizard checks whether your Linux session is ready to
+   record. If it flags anything, follow the instructions it shows.
    - If the wizard tells you to **log out and back in**, do that once, then
      launch crowd-cast again.
-   - On **GNOME**, installing the bundled focus extension from the wizard and
-     activating the `input` group both take effect on that one relogin. After
-     that, your selected apps capture with no picker.
+   - The app picker only lists applications that are open when setup starts. If
+     an app is missing, open it, quit and relaunch crowd-cast, then pick it.
+   - On **GNOME**, once setup finishes, your selected apps capture with no
+     picker.
    - On **sway**, crowd-cast records full-screen (the desktop portal asks which
      output to share each time it starts), and the tray needs an SNI host, so run
      **waybar** (swaybar shows the icon but won't open its menu).

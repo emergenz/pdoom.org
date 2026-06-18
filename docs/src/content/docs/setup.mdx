@@ -41,12 +41,10 @@ choosing which apps to record.
 
 crowd-cast supports two Linux sessions: **GNOME on Wayland** (application
 capture) and **sway** (full-screen capture). On anything else the wizard won't
-let you finish, so log into one of those first. The wizard checks every required
-Linux component, including `input` group membership and, on **GNOME**, the
-bundled focus extension. The installer already adds you to the `input` group
-(the one step that needs `sudo`), but your current session may not see that until
-the next login. Follow the wizard's flagged instructions; if it tells you to log
-out and back in, do that once, then launch crowd-cast again.
+let you finish, so log into one of those first. The wizard checks whether your
+session is ready to record and shows any setup steps that still need attention.
+If it tells you to log out and back in, do that once, then launch crowd-cast
+again.
 
 </TabItem>
 </Tabs>
@@ -76,9 +74,9 @@ open, launch it first, then select it.
 </TabItem>
 <TabItem label="Linux">
 
-The list shows the applications **currently running** (on Wayland, applications
-that have an open window). To record one that isn't open, launch it first, then
-select it.
+The list shows the applications **currently running when setup starts** (on
+Wayland, applications that have an open window). To record one that isn't listed,
+open it, quit and relaunch crowd-cast, then select it.
 
 </TabItem>
 </Tabs>
