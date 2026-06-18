@@ -162,19 +162,15 @@ group for input capture.</p><ol role="list" class="sl-steps">
 package with your distro’s package manager and run the command again.</p>
 </li>
 <li>
-<p>If you’re on <strong>GNOME</strong>, launch crowd-cast once before logging out and follow
-the wizard’s instruction to install the bundled GNOME Shell focus extension.
-The wizard may still say setup cannot finish yet; that’s expected until the
-next step.</p>
-</li>
-<li>
-<p><strong>Log out and back in once.</strong> This activates the <code dir="auto">input</code> group membership from
-the installer and, on GNOME, loads the focus extension.</p>
-</li>
-<li>
-<p>Launch crowd-cast.</p>
+<p>Launch crowd-cast. The wizard checks the current session, screen-capture
+components, the <code dir="auto">input</code> group, and (on GNOME) the focus extension. If it flags
+anything, follow the instructions it shows.</p>
 <ul>
-<li>On <strong>GNOME</strong>, your selected apps capture with no picker after that relogin.</li>
+<li>If the wizard tells you to <strong>log out and back in</strong>, do that once, then
+launch crowd-cast again.</li>
+<li>On <strong>GNOME</strong>, installing the bundled focus extension from the wizard and
+activating the <code dir="auto">input</code> group both take effect on that one relogin. After
+that, your selected apps capture with no picker.</li>
 <li>On <strong>sway</strong>, crowd-cast records full-screen (the desktop portal asks which
 output to share each time it starts), and the tray needs an SNI host, so run
 <strong>waybar</strong> (swaybar shows the icon but won’t open its menu).</li>
