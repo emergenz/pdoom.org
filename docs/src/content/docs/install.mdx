@@ -66,17 +66,6 @@ You can always grab the latest builds from the
 </TabItem>
 <TabItem label="Linux">
 
-Linux support is **limited**. crowd-cast currently supports exactly two sessions:
-**GNOME on Wayland** (per-app *application* capture) and **sway** (full-screen
-capture only). On any other session (X11, KDE, or other wlroots compositors such
-as Hyprland) the agent will not start: the setup wizard blocks until you log into
-a supported session.
-
-The Linux installer is a **user-space** install into `~/.local`. It downloads the
-signed Linux appcast, verifies the binary and libobs bundle, adds a menu entry,
-and enables start-at-login. It needs `sudo` only once, to add you to the `input`
-group for input capture.
-
 <Steps>
 
 1. Run the published installer:
@@ -88,23 +77,24 @@ group for input capture.
    If the installer reports that a required tool is missing, install that
    package with your distro's package manager and run the command again.
 
-2. Launch crowd-cast. The wizard checks whether your Linux session is ready to
-   record. If it flags anything, follow the instructions it shows.
-   - If the wizard tells you to **log out and back in**, do that once, then
-     launch crowd-cast again.
-   - The app picker only lists applications that are open when setup starts. If
-     an app is missing, open it, quit and relaunch crowd-cast, then pick it.
-   - On **GNOME**, once setup finishes, your selected apps capture with no
-     picker.
-   - On **sway**, crowd-cast records full-screen (the desktop portal asks which
-     output to share each time it starts), and the tray needs an SNI host, so run
-     **waybar** (swaybar shows the icon but won't open its menu).
+2. Open **crowd-cast** from your app menu.
+
+3. Follow the setup wizard. If it tells you to **log out and back in**, do that
+   once, then open crowd-cast again.
+
+4. Choose the apps you want to record and finish setup.
 
 </Steps>
 
-<Aside type="note" title="Developer build">
-  From a checkout, use `packaging/linux/install.sh --local` to install your local
-  build outputs instead of the published release.
+<Aside type="note" title="Supported Linux sessions">
+  Linux support currently covers **GNOME on Wayland** and **sway**. On other
+  Linux desktops or sessions, setup stops and asks you to log into a supported
+  session.
+</Aside>
+
+<Aside type="tip" title="Open apps before setup">
+  The app picker only lists applications that are open when setup starts. If an
+  app is missing, open it, quit and relaunch crowd-cast, then pick it.
 </Aside>
 
 </TabItem>
