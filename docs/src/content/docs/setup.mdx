@@ -43,9 +43,10 @@ crowd-cast supports two Linux sessions: **GNOME on Wayland** (application
 capture) and **sway** (full-screen capture). On anything else the wizard won't
 let you finish, so log into one of those first. Input is captured via `evdev`,
 which requires your user to be in the `input` group; the installer handles this
-for you (it's the one step that needs `sudo`), then you log out and back in once
-for it to take effect. On **GNOME** you also install the bundled focus extension
-and relog in once, so per-app capture and input gating work.
+for you (it's the one step that needs `sudo`). On **GNOME**, launch crowd-cast
+once before logging out and follow the wizard's instruction to install the
+bundled focus extension. Then log out and back in once: that single relogin
+activates both the `input` group membership and the GNOME extension.
 
 </TabItem>
 </Tabs>

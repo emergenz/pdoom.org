@@ -88,13 +88,16 @@ group for input capture.
    If the installer reports that a required tool is missing, install that
    package with your distro's package manager and run the command again.
 
-2. The script adds you to the **`input`** group (the single `sudo` step, required
-   for input capture). **Log out and back in** for it to take effect.
+2. If you're on **GNOME**, launch crowd-cast once before logging out and follow
+   the wizard's instruction to install the bundled GNOME Shell focus extension.
+   The wizard may still say setup cannot finish yet; that's expected until the
+   next step.
 
-3. Launch crowd-cast.
-   - On **GNOME**, the wizard also installs a bundled GNOME Shell extension for
-     picker-free per-app capture and follow-focus; **log out and back in once**
-     so GNOME loads it. After that, your selected apps capture with no picker.
+3. **Log out and back in once.** This activates the `input` group membership from
+   the installer and, on GNOME, loads the focus extension.
+
+4. Launch crowd-cast.
+   - On **GNOME**, your selected apps capture with no picker after that relogin.
    - On **sway**, crowd-cast records full-screen (the desktop portal asks which
      output to share each time it starts), and the tray needs an SNI host, so run
      **waybar** (swaybar shows the icon but won't open its menu).
