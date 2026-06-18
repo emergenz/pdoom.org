@@ -10,6 +10,7 @@ don't need to install OBS or anything else separately. Pick your platform below.
 
 <LinkButton href="https://github.com/p-doom/crowd-cast/releases/latest/download/CrowdCast.dmg">Download for macOS</LinkButton>
 <LinkButton href="https://github.com/p-doom/crowd-cast/releases/latest/download/crowd-cast-setup.exe" variant="secondary">Download for Windows</LinkButton>
+<LinkButton href="https://github.com/p-doom/crowd-cast/releases/latest/download/install-linux.sh" variant="secondary">Download for Linux</LinkButton>
 
 You can always grab the latest builds from the
 [GitHub releases page](https://github.com/p-doom/crowd-cast/releases/latest).
@@ -65,26 +66,27 @@ You can always grab the latest builds from the
 </TabItem>
 <TabItem label="Linux">
 
-Linux support is **experimental**. crowd-cast currently supports exactly two
-sessions: **GNOME on Wayland** (per-app *application* capture) and **sway**
-(full-screen capture only). On any other session (X11, KDE, or other wlroots
-compositors such as Hyprland) the agent will not start: the setup wizard blocks
-until you log into a supported session.
+Linux support is **limited**. crowd-cast currently supports exactly two sessions:
+**GNOME on Wayland** (per-app *application* capture) and **sway** (full-screen
+capture only). On any other session (X11, KDE, or other wlroots compositors such
+as Hyprland) the agent will not start: the setup wizard blocks until you log into
+a supported session.
 
-Packaged downloads aren't published for Linux yet, so for now you install from a
-checkout with the bundled script. It's a **user-space** install (into `~/.local`)
-that needs `sudo` only once, to add you to the `input` group.
+The Linux installer is a **user-space** install into `~/.local`. It downloads the
+signed Linux appcast, verifies the binary and libobs bundle, adds a menu entry,
+and enables start-at-login. It needs `sudo` only once, to add you to the `input`
+group for input capture.
 
 <Steps>
 
-1. Build the agent, then run the installer from your checkout:
+1. Run the published installer:
 
    ```bash
-   packaging/linux/install.sh --local
+   curl -fsSL https://github.com/p-doom/crowd-cast/releases/latest/download/install-linux.sh | bash
    ```
 
-   This installs the agent and its bundled capture components under `~/.local`,
-   adds a menu entry, and enables start-at-login.
+   If the installer reports that a required tool is missing, install that
+   package with your distro's package manager and run the command again.
 
 2. The script adds you to the **`input`** group (the single `sudo` step, required
    for input capture). **Log out and back in** for it to take effect.
@@ -98,6 +100,11 @@ that needs `sudo` only once, to add you to the `input` group.
      **waybar** (swaybar shows the icon but won't open its menu).
 
 </Steps>
+
+<Aside type="note" title="Developer build">
+  From a checkout, use `packaging/linux/install.sh --local` to install your local
+  build outputs instead of the published release.
+</Aside>
 
 </TabItem>
 </Tabs>

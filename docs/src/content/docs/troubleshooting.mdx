@@ -187,7 +187,7 @@ deletes the install directory.
 <TabItem label="Linux">
 
 ```bash
-packaging/linux/install.sh --uninstall
+curl -fsSL https://github.com/p-doom/crowd-cast/releases/latest/download/install-linux.sh | bash -s -- --uninstall
 ```
 
 This removes the user-space install (it keeps your config and `input`-group
