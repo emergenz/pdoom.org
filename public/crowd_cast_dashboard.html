@@ -462,8 +462,18 @@
             <h2>crowd-cast</h2>
             <!-- Loading animation attribution: Juergen Schmidhuber, 1987. -->
             <img class="loading-animation" src="robby_30frames_v3_once.gif" width="800" height="592" alt="" data-attribution="Juergen Schmidhuber, 1987">
-            <p style="font-size:11px;color:#999;font-family:'SF Mono',monospace;letter-spacing:1px;text-transform:uppercase;">Loading data</p>
+            <p id="loading-dots" style="font-size:11px;color:#999;font-family:'SF Mono',monospace;letter-spacing:1px;text-transform:uppercase;text-align:left;display:inline-block;width:10ch;">Loading</p>
         </div>
+        <script>
+        (function() {
+            var el = document.getElementById('loading-dots');
+            var dots = 0;
+            setInterval(function() {
+                dots = (dots + 1) % 4;
+                el.textContent = 'Loading' + '.'.repeat(dots);
+            }, 500);
+        })();
+        </script>
 
         <!-- Dashboard (hidden until data loads) -->
         <div id="dashboard" style="display:none;">
@@ -488,6 +498,7 @@
             <div id="dashboard-tabs" style="display:none;margin-bottom:20px;">
                 <span class="tab-btn active" id="tab-my" onclick="switchTab('my')" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;border-bottom:2px solid #000;">My Overview</span>
                 <span class="tab-btn" id="tab-all" onclick="switchTab('all')" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">All Users</span>
+                <span class="tab-btn" id="tab-participants" onclick="switchTab('participants')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Participants</span>
             </div>
 
             <!-- My Overview (only visible when logged in) -->
@@ -622,6 +633,9 @@
             </div>
 
             </div><!-- end all-users-view -->
+
+            <!-- Participants view (admin only) -->
+            <div id="participants-view" style="display:none;"></div>
 
             <!-- Footer -->
             <div class="site-footer">
@@ -1032,6 +1046,7 @@
     let _cachedDailyDates = [];
     let _cachedUserNames = {};
     let _cachedSummaries = {};
+    let _monitoredUsers = [];
 
     /** Resolve a user UUID to a display name (abbreviated name, email, or short hash). */
     function displayName(hash) {
@@ -1564,7 +1579,9 @@
     function switchTab(tab) {
         var myEl = document.getElementById('my-overview');
         var allEl = document.getElementById('all-users-view');
+        var partEl = document.getElementById('participants-view');
         myEl.style.display = tab === 'my' ? 'block' : 'none';
+        partEl.style.display = tab === 'participants' ? 'block' : 'none';
         /* Use position:absolute + visibility:hidden for all-users to preserve chart layout */
         if (tab === 'all') {
             allEl.style.display = 'block';
@@ -1581,7 +1598,10 @@
         document.getElementById('tab-my').style.color = tab === 'my' ? '#000' : '#999';
         document.getElementById('tab-all').style.borderBottomColor = tab === 'all' ? '#000' : 'transparent';
         document.getElementById('tab-all').style.color = tab === 'all' ? '#000' : '#999';
+        document.getElementById('tab-participants').style.borderBottomColor = tab === 'participants' ? '#000' : 'transparent';
+        document.getElementById('tab-participants').style.color = tab === 'participants' ? '#000' : '#999';
         if (tab === 'my') renderMyOverview();
+        if (tab === 'participants') renderParticipantsView();
     }
 
     function renderMyOverview() {
@@ -1678,6 +1698,273 @@
         renderActivitySummaries(_authUser.uuids, 'my-activity-summaries');
     }
 
+    /* =================================================================
+       Participants view (admin only)
+       ================================================================= */
+    const ROLES_API = DASHBOARD_API.replace('/dashboard', '/roles');
+
+    /** Compute participant status and stats from per_user_daily data. */
+    function computeParticipantStats(email) {
+        var perUserDaily = (window._lastMeta && window._lastMeta.per_user_daily) || {};
+        /* Find all UUIDs for this email */
+        var uuids = [];
+        for (var uid in _cachedUserNames) {
+            if (_cachedUserNames[uid].email === email) uuids.push(uid);
+        }
+
+        /* Merge daily data across all UUIDs */
+        var merged = {};
+        for (var i = 0; i < uuids.length; i++) {
+            var days = perUserDaily[uuids[i]] || {};
+            for (var date in days) {
+                if (!merged[date]) merged[date] = { estimated_minutes: 0 };
+                merged[date].estimated_minutes += days[date].estimated_minutes || 0;
+            }
+        }
+
+        /* Calculate idle days */
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        var allDates = Object.keys(merged).sort();
+        var lastDate = allDates.length > 0 ? allDates[allDates.length - 1] : null;
+        var idleDays = 999;
+        if (lastDate) {
+            var last = new Date(lastDate + 'T00:00:00');
+            idleDays = Math.floor((today - last) / (1000 * 60 * 60 * 24));
+        }
+
+        /* Rolling 7-day windows (avoids misleading stats early in the week) */
+        var day7ago = new Date(today);
+        day7ago.setDate(day7ago.getDate() - 7);
+        var day14ago = new Date(today);
+        day14ago.setDate(day14ago.getDate() - 14);
+
+        var last7dMins = 0;
+        var prior7dMins = 0;
+        for (var date in merged) {
+            var d = new Date(date + 'T00:00:00');
+            if (d > day7ago && d <= today) {
+                last7dMins += merged[date].estimated_minutes;
+            } else if (d > day14ago && d <= day7ago) {
+                prior7dMins += merged[date].estimated_minutes;
+            }
+        }
+
+        var last7dHours = last7dMins / 60;
+        var prior7dHours = prior7dMins / 60;
+
+        /* Determine status */
+        var status = 'green';
+        if (idleDays >= 3 || last7dHours < 10) status = 'orange';
+        if (idleDays >= 5 || (last7dHours < 10 && prior7dHours < 10)) status = 'red';
+
+        /* Last active text */
+        var lastActive = 'never';
+        if (lastDate) {
+            if (idleDays === 0) lastActive = 'today';
+            else if (idleDays === 1) lastActive = '1 day ago';
+            else lastActive = idleDays + ' days ago';
+        }
+
+        return {
+            status: status,
+            last7dHours: last7dHours,
+            prior7dHours: prior7dHours,
+            lastActive: lastActive,
+            idleDays: idleDays
+        };
+    }
+
+    /** Get the display name for an email from _cachedUserNames. */
+    function nameForEmail(email) {
+        for (var uid in _cachedUserNames) {
+            var info = _cachedUserNames[uid];
+            if (info.email === email && info.name) {
+                var parts = info.name.trim().split(/\s+/);
+                if (parts.length >= 2) return parts[0] + ' ' + parts[parts.length - 1][0] + '.';
+                return parts[0];
+            }
+        }
+        return email;
+    }
+
+    function statusDotColor(status) {
+        if (status === 'red') return '#cf222e';
+        if (status === 'orange') return '#f0a030';
+        return '#2ea043';
+    }
+
+    function renderParticipantsView() {
+        if (!_isAdmin || !window._lastMeta) return;
+        var container = document.getElementById('participants-view');
+
+        var participants = [];
+        var admins = [];
+        for (var i = 0; i < _monitoredUsers.length; i++) {
+            var mu = _monitoredUsers[i];
+            if (mu.role === 'admin') admins.push(mu);
+            else participants.push(mu);
+        }
+
+        var html = '';
+        html += _buildParticipantSection('PARTICIPANTS', participants, 'participant');
+        html += _buildParticipantSection('ADMINS', admins, 'admin');
+        container.innerHTML = html;
+
+        /* Wire up remove buttons */
+        container.querySelectorAll('.participant-remove-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                var email = btn.dataset.email;
+                if (!confirm('Remove ' + email + '?')) return;
+                btn.textContent = '...';
+                btn.style.pointerEvents = 'none';
+                fetch(ROLES_API, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, role: null })
+                }).then(function(resp) {
+                    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                    return fetchAuthData();
+                }).catch(function(err) {
+                    console.error('Remove failed:', err);
+                    btn.textContent = 'Remove';
+                    btn.style.pointerEvents = '';
+                });
+            });
+        });
+
+        /* Wire up add buttons */
+        container.querySelectorAll('.participant-add-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var role = btn.dataset.role;
+                var selectId = 'add-select-' + role;
+                var existing = document.getElementById(selectId);
+                if (existing) { existing.remove(); return; }
+
+                /* Build list of users not yet monitored */
+                var monitoredEmails = {};
+                for (var i = 0; i < _monitoredUsers.length; i++) {
+                    monitoredEmails[_monitoredUsers[i].email] = true;
+                }
+                var availableEmails = {};
+                for (var uid in _cachedUserNames) {
+                    var info = _cachedUserNames[uid];
+                    if (info.email && !monitoredEmails[info.email]) {
+                        availableEmails[info.email] = info.name || info.email;
+                    }
+                }
+                var emails = Object.keys(availableEmails).sort();
+                if (emails.length === 0) {
+                    alert('No unassigned users available.');
+                    return;
+                }
+
+                var select = document.createElement('select');
+                select.id = selectId;
+                select.style.cssText = 'margin-left:12px;font-size:12px;font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;padding:4px 8px;border:1px solid #000;background:#fff;cursor:pointer;';
+                var optDefault = document.createElement('option');
+                optDefault.value = '';
+                optDefault.textContent = '-- select user --';
+                select.appendChild(optDefault);
+                for (var j = 0; j < emails.length; j++) {
+                    var opt = document.createElement('option');
+                    opt.value = emails[j];
+                    opt.textContent = availableEmails[emails[j]] + ' (' + emails[j] + ')';
+                    select.appendChild(opt);
+                }
+                btn.parentNode.insertBefore(select, btn.nextSibling);
+
+                select.addEventListener('change', function() {
+                    var selectedEmail = select.value;
+                    if (!selectedEmail) return;
+                    select.disabled = true;
+                    fetch(ROLES_API, {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: selectedEmail, role: role })
+                    }).then(function(resp) {
+                        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                        return fetchAuthData();
+                    }).catch(function(err) {
+                        console.error('Add failed:', err);
+                        select.disabled = false;
+                    });
+                });
+            });
+        });
+
+        /* Wire up row clicks to drill into user detail */
+        container.querySelectorAll('.participant-row').forEach(function(row) {
+            row.addEventListener('click', function(e) {
+                /* Don't drill if they clicked the Remove button */
+                if (e.target.closest('.participant-remove-btn')) return;
+                var email = row.dataset.email;
+                /* Find the matching entry in usersData by email */
+                var match = usersData.find(function(r) {
+                    var uuids = r.uuids || [r.user];
+                    return uuids.some(function(uid) {
+                        var info = _cachedUserNames[uid];
+                        return info && info.email === email;
+                    });
+                });
+                if (match) {
+                    switchTab('all');
+                    drillIntoUser(match.user);
+                }
+            });
+        });
+    }
+
+    function _buildParticipantSection(title, users, role) {
+        var html = '<div class="outline-box" style="padding:24px;margin-bottom:20px;">';
+        html += '<span class="section-title">' + escapeHtml(title) + '</span>';
+        html += '<div style="overflow-x:auto;">';
+        html += '<table style="width:100%;border-collapse:collapse;">';
+        html += '<thead><tr>';
+        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;white-space:nowrap;">Status</th>';
+        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;white-space:nowrap;">Name</th>';
+        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;white-space:nowrap;">Email</th>';
+        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:right;padding:8px 12px;border-bottom:2px solid #000;white-space:nowrap;">Last 7d</th>';
+        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:right;padding:8px 12px;border-bottom:2px solid #000;white-space:nowrap;">Prior 7d</th>';
+        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;white-space:nowrap;">Last Active</th>';
+        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;white-space:nowrap;">Actions</th>';
+        html += '</tr></thead>';
+        html += '<tbody>';
+
+        if (users.length === 0) {
+            html += '<tr><td colspan="7" style="padding:12px;font-size:13px;color:#999;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;">No users in this group.</td></tr>';
+        }
+
+        for (var i = 0; i < users.length; i++) {
+            var email = users[i].email;
+            var stats = computeParticipantStats(email);
+            var name = nameForEmail(email);
+            var dotColor = statusDotColor(stats.status);
+
+            html += '<tr class="participant-row" data-email="' + escapeHtml(email) + '" style="cursor:pointer;">';
+            html += '<td style="padding:7px 12px;font-size:13px;border-bottom:1px solid #eee;"><span class="status-dot" style="background:' + dotColor + ';"></span></td>';
+            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;border-bottom:1px solid #eee;">' + escapeHtml(name) + '</td>';
+            html += '<td style="padding:7px 12px;font-size:12px;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;color:#777;border-bottom:1px solid #eee;">' + escapeHtml(email) + '</td>';
+            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;text-align:right;border-bottom:1px solid #eee;">' + fmtDec(stats.last7dHours, 1) + 'h</td>';
+            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;text-align:right;border-bottom:1px solid #eee;">' + fmtDec(stats.prior7dHours, 1) + 'h</td>';
+            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;border-bottom:1px solid #eee;">' + escapeHtml(stats.lastActive) + '</td>';
+            html += '<td style="padding:7px 12px;font-size:13px;border-bottom:1px solid #eee;"><a href="#" class="participant-remove-btn" data-email="' + escapeHtml(email) + '" style="color:#cf222e;font-size:12px;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;text-decoration:none;border-bottom:1px solid #cf222e;">Remove</a></td>';
+            html += '</tr>';
+        }
+
+        html += '</tbody></table></div>';
+
+        /* Add button */
+        var btnLabel = role === 'admin' ? 'Add Admin' : 'Add Participant';
+        html += '<div style="margin-top:14px;">';
+        html += '<span class="participant-add-btn" data-role="' + escapeHtml(role) + '" style="display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:6px 16px;border:1px solid #000;background:#fff;color:#000;cursor:pointer;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;">' + escapeHtml(btnLabel) + '</span>';
+        html += '</div>';
+
+        html += '</div>';
+        return html;
+    }
+
     function initGoogleSignIn() {
         if (typeof google === 'undefined') {
             setTimeout(initGoogleSignIn, 200);
@@ -1705,11 +1992,14 @@
         _isAdmin = false;
         _cachedUserNames = {};
         _cachedSummaries = {};
+        _monitoredUsers = [];
         localStorage.removeItem('cc_auth_token');
         document.getElementById('auth-signin').style.display = '';
         document.getElementById('auth-user').style.display = 'none';
         document.getElementById('dashboard-tabs').style.display = 'none';
         document.getElementById('my-overview').style.display = 'none';
+        document.getElementById('participants-view').style.display = 'none';
+        document.getElementById('tab-participants').style.display = 'none';
         document.getElementById('all-users-view').style.display = 'block';
         document.getElementById('all-users-view').style.visibility = 'visible';
         document.getElementById('all-users-view').style.position = 'static';
@@ -1768,10 +2058,16 @@
             /* Populate summaries */
             _cachedSummaries = data.summaries || {};
 
+            /* Populate monitored users (admin-only field) */
+            _monitoredUsers = data.monitored_users || [];
+
             /* Update auth UI */
             document.getElementById('auth-signin').style.display = 'none';
             document.getElementById('auth-user').style.display = '';
             document.getElementById('auth-user-name').textContent = data.user.name || data.user.email;
+
+            /* Show participants tab for admins */
+            document.getElementById('tab-participants').style.display = _isAdmin ? 'inline' : 'none';
 
             /* Restore My Overview HTML from skeleton and render */
             document.getElementById('my-overview').innerHTML = _myOverviewOrigHTML;
