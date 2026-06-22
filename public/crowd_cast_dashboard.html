@@ -1258,13 +1258,35 @@
         const container = document.getElementById(_summaryContainerId);
         _pinnedDate = null;
 
-        /* Merge summaries from all UUIDs for this user (store full entry for stats) */
+        /* Merge summaries from all UUIDs for this user, combining stats across devices */
         _summaryByDate = {};
         for (const uid of uuids) {
             const entries = _cachedSummaries[uid] || [];
             for (const entry of entries) {
-                if (!_summaryByDate[entry.date] || (_summaryByDate[entry.date].summary || '').length < (entry.summary || '').length) {
-                    _summaryByDate[entry.date] = entry;
+                if (!_summaryByDate[entry.date]) {
+                    _summaryByDate[entry.date] = {
+                        date: entry.date,
+                        segment_count: 0,
+                        total_hours: 0,
+                        visible_fraction: null,
+                        _vis_segments: 0,
+                        _devices: [],
+                    };
+                }
+                var merged = _summaryByDate[entry.date];
+                merged.segment_count += entry.segment_count || 0;
+                merged.total_hours += entry.total_hours || 0;
+                var segs = (entry.visible_fraction != null && entry.segment_count) ? entry.segment_count : 0;
+                if (segs > 0) {
+                    var totalSegs = merged._vis_segments + segs;
+                    merged.visible_fraction = (
+                        (merged.visible_fraction || 0) * merged._vis_segments +
+                        entry.visible_fraction * segs
+                    ) / totalSegs;
+                    merged._vis_segments = totalSegs;
+                }
+                if (entry.summary) {
+                    merged._devices.push(entry.summary);
                 }
             }
         }
@@ -1320,13 +1342,26 @@
         var statsHtml = '';
         var parts = [];
         if (entry.segment_count != null) parts.push(entry.segment_count + ' segments');
-        if (entry.total_hours != null) parts.push(entry.total_hours + 'h');
+        if (entry.total_hours != null) parts.push(fmtDec(entry.total_hours, 1) + 'h');
         if (entry.visible_fraction != null) parts.push(Math.round(entry.visible_fraction * 100) + '% visible');
         if (parts.length > 0) statsHtml = ' · ' + parts.join(' · ');
         var unpinHint = pinned ? ' <span style="font-size:9px;color:#999;letter-spacing:0;">(click day again to unpin)</span>' : '';
+        var devices = entry._devices || [];
+        var bodyHtml = '';
+        if (devices.length > 1) {
+            bodyHtml += '<div style="font-size:12px;color:#555;font-family:\'SF Mono\',monospace;margin-bottom:10px;">Recorded on ' + devices.length + ' devices.</div>';
+            for (var di = 0; di < devices.length; di++) {
+                bodyHtml += '<div style="margin-bottom:10px;">' +
+                    '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:4px;">Device ' + (di + 1) + '</div>' +
+                    '<div class="activity-summary-text">' + renderMd(devices[di]) + '</div>' +
+                    '</div>';
+            }
+        } else {
+            bodyHtml = '<div class="activity-summary-text">' + renderMd(devices[0] || '') + '</div>';
+        }
         container.innerHTML = '<div class="activity-summary-entry' + (pinned ? ' pinned' : '') + '">' +
             '<div class="activity-summary-date">' + escapeHtml(date) + '<span style="font-weight:400;color:#777;">' + statsHtml + '</span>' + unpinHint + '</div>' +
-            '<div class="activity-summary-text">' + renderMd(entry.summary || '') + '</div>' +
+            bodyHtml +
             '</div>';
     }
 
