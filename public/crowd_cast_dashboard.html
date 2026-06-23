@@ -472,6 +472,13 @@
                 dots = (dots + 1) % 4;
                 el.textContent = 'Loading' + '.'.repeat(dots);
             }, 500);
+            /* Replay the gif every 4s (3s animation + 1s pause) */
+            var img = document.querySelector('.loading-animation');
+            var src = img.src;
+            setInterval(function() {
+                img.src = '';
+                img.src = src;
+            }, 4000);
         })();
         </script>
 
