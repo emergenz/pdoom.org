@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>crowd-cast · onboarding</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="colors_and_type.css">
+    <link rel="stylesheet" href="marketing.css">
+    <style>
+        .onboard-wrap {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: var(--s-8) 48px var(--s-10);
+        }
+
+        .onboard-eyebrow {
+            font-family: var(--font-mono);
+            font-size: var(--fs-eyebrow);
+            font-weight: 500;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--fg3);
+            margin-bottom: var(--s-3);
+        }
+
+        .onboard-title {
+            font-family: var(--font-serif);
+            font-size: var(--fs-h2);
+            font-weight: 500;
+            line-height: var(--lh-snug);
+            letter-spacing: -0.01em;
+            margin-bottom: var(--s-3);
+        }
+
+        .onboard-lede {
+            font-family: var(--font-serif);
+            font-size: var(--fs-lede);
+            line-height: var(--lh-body);
+            color: var(--fg2);
+            margin-bottom: var(--s-7);
+        }
+
+        /* Steps indicator */
+        .steps {
+            display: flex;
+            gap: var(--s-2);
+            margin-bottom: var(--s-7);
+        }
+        .step-pip {
+            flex: 1;
+            height: 3px;
+            background: var(--ash-300);
+            transition: background var(--dur-base) var(--ease-ink);
+        }
+        .step-pip.active { background: var(--ink); }
+        .step-pip.done { background: var(--ember); }
+
+        .step-label {
+            font-family: var(--font-mono);
+            font-size: var(--fs-eyebrow);
+            font-weight: 500;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--fg-dim);
+            margin-bottom: var(--s-5);
+        }
+
+        /* Form fields */
+        .field {
+            margin-bottom: var(--s-5);
+        }
+        .field-label {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: var(--fs-caption);
+            font-weight: 500;
+            color: var(--fg2);
+            margin-bottom: var(--s-2);
+        }
+        .field-input {
+            width: 100%;
+            font-family: var(--font-sans);
+            font-size: 15px;
+            padding: 12px 16px;
+            border: 1px solid var(--rule);
+            background: transparent;
+            color: var(--fg1);
+            outline: none;
+            transition: border-color var(--dur-fast) var(--ease-ink);
+        }
+        .field-input:focus {
+            border-color: var(--ink);
+        }
+        .field-input::placeholder {
+            color: var(--ash-400);
+        }
+
+        /* Select */
+        .field-select {
+            width: 100%;
+            font-family: var(--font-sans);
+            font-size: 15px;
+            padding: 12px 16px;
+            border: 1px solid var(--rule);
+            background: var(--paper);
+            color: var(--fg1);
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' stroke='%235A554C' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+        }
+
+        /* Radio group */
+        .radio-group {
+            display: flex;
+            gap: var(--s-3);
+        }
+        .radio-option {
+            flex: 1;
+            padding: 14px 18px;
+            border: 1px solid var(--rule);
+            cursor: pointer;
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: var(--fs-caption);
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            transition: border-color var(--dur-fast) var(--ease-ink),
+                        background var(--dur-fast) var(--ease-ink);
+        }
+        .radio-option:hover {
+            border-color: var(--ash-600);
+        }
+        .radio-option.selected {
+            border-color: var(--ink);
+            background: var(--ash-100);
+        }
+        .radio-option input { display: none; }
+
+        /* Checkbox */
+        .check-row {
+            display: flex;
+            gap: var(--s-3);
+            align-items: flex-start;
+            margin-bottom: var(--s-4);
+        }
+        .check-row input[type="checkbox"] {
+            margin-top: 4px;
+            accent-color: var(--ember);
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+        .check-row label {
+            font-family: var(--font-sans);
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--fg2);
+            cursor: pointer;
+        }
+
+        /* Agreement text box */
+        .agreement-box {
+            border: 1px solid var(--rule);
+            padding: var(--s-5);
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: var(--s-5);
+            background: var(--bg2);
+        }
+        .agreement-box h2 {
+            font-family: var(--font-serif);
+            font-size: var(--fs-h4);
+            font-weight: 600;
+            margin: var(--s-5) 0 var(--s-3);
+        }
+        .agreement-box h2:first-child {
+            margin-top: 0;
+        }
+        .agreement-box p, .agreement-box li {
+            font-family: var(--font-sans);
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--fg2);
+        }
+        .agreement-box ul {
+            margin: var(--s-2) 0 var(--s-4) var(--s-5);
+        }
+        .agreement-box li {
+            margin-bottom: var(--s-1);
+        }
+        .agreement-box strong {
+            color: var(--fg1);
+        }
+
+        /* Conditional fields */
+        .payout-fields { display: none; }
+        .payout-fields.visible { display: block; }
+
+        /* Buttons */
+        .btn-row {
+            display: flex;
+            gap: var(--s-3);
+            margin-top: var(--s-6);
+        }
+
+        .btn-back {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 12px 22px;
+            border: 1px solid var(--rule);
+            background: transparent;
+            color: var(--fg2);
+            cursor: pointer;
+            transition: border-color var(--dur-fast) var(--ease-ink);
+        }
+        .btn-back:hover { border-color: var(--ink); color: var(--fg1); }
+
+        .btn-next {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 12px 28px;
+            border: 1px solid var(--ink);
+            background: var(--ink);
+            color: var(--paper);
+            cursor: pointer;
+            margin-left: auto;
+            transition: background var(--dur-fast) var(--ease-ink),
+                        border-color var(--dur-fast) var(--ease-ink);
+        }
+        .btn-next:hover { background: var(--ember); border-color: var(--ember); }
+        .btn-next:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* Step panels */
+        .step-panel { display: none; }
+        .step-panel.active { display: block; }
+
+        /* Success state */
+        .success-icon {
+            font-size: 48px;
+            margin-bottom: var(--s-4);
+        }
+
+        /* Field error */
+        .field-input.error { border-color: var(--ember); }
+
+        /* Payout hint */
+        .field-hint {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--fg-dim);
+            margin-top: var(--s-1);
+        }
+
+        /* Token error */
+        .token-error {
+            text-align: center;
+            padding: var(--s-10) 0;
+        }
+        .token-error h2 {
+            font-family: var(--font-serif);
+            margin-bottom: var(--s-3);
+        }
+        .token-error p {
+            color: var(--fg2);
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header" data-surface="void">
+        <div class="container">
+            <nav class="nav">
+                <a class="brand" href="/">
+                    <img class="sigil-img" src="logo-mark-inverted.png" alt="">
+                    <span class="wm">p(doom)</span>
+                </a>
+                <div class="nav-links">
+                    <a href="/blog.html">Research</a>
+                    <a href="/about.html">About</a>
+                    <a href="/supply.html">Supply</a>
+                    <a href="/open_calls.html">Open calls</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="onboard-wrap" id="app">
+            <!-- Loading state while token validates -->
+            <div id="token-loading" style="text-align:center;padding:var(--s-10) 0;">
+                <div class="onboard-eyebrow">crowd-cast</div>
+                <h1 class="onboard-title" style="margin-top:var(--s-4);">Validating invitation...</h1>
+                <p class="onboard-lede">Please wait.</p>
+            </div>
+
+            <div id="onboard-content" style="display:none;">
+                <div class="onboard-eyebrow">crowd-cast</div>
+                <h1 class="onboard-title">Participant onboarding</h1>
+                <p class="onboard-lede">Set up your participation in three quick steps.</p>
+
+                <div class="steps">
+                    <div class="step-pip active" id="pip-0"></div>
+                    <div class="step-pip" id="pip-1"></div>
+                    <div class="step-pip" id="pip-2"></div>
+                </div>
+            </div>
+
+            <!-- STEP 1: Personal info & payout -->
+            <div class="step-panel" id="step-0">
+                <div class="step-label">Step 1 of 3 · Your details</div>
+
+                <div class="field">
+                    <label class="field-label">Full legal name</label>
+                    <input class="field-input" type="text" id="f-name" placeholder="Jane Doe" required>
+                </div>
+                <div class="field">
+                    <label class="field-label">Email address</label>
+                    <input class="field-input" type="email" id="f-email" placeholder="jane@university.edu" required>
+                </div>
+                <div class="field">
+                    <label class="field-label">Mailing address</label>
+                    <input class="field-input" type="text" id="f-address" placeholder="Street, City, Postal Code" required>
+                </div>
+                <div class="field">
+                    <label class="field-label">Country of residence</label>
+                    <input class="field-input" type="text" id="f-country" placeholder="Germany" required>
+                </div>
+
+                <div class="check-row">
+                    <input type="checkbox" id="f-age">
+                    <label for="f-age">I confirm that I am 18 years of age or older.</label>
+                </div>
+                <div class="check-row">
+                    <input type="checkbox" id="f-private">
+                    <label for="f-private">I participate as a private individual, not as a company, VAT-registered business, freelancer, or employee of p(doom).</label>
+                </div>
+                <div class="check-row">
+                    <input type="checkbox" id="f-tax">
+                    <label for="f-tax">I am responsible for determining and fulfilling any tax obligations arising from payments I receive, in my country of residence or tax jurisdiction.</label>
+                </div>
+                <div class="check-row">
+                    <input type="checkbox" id="f-sanctions">
+                    <label for="f-sanctions">I confirm that I am not a resident of, or located in, a country or territory subject to comprehensive international sanctions.</label>
+                </div>
+
+                <hr class="rule">
+
+                <div class="field">
+                    <label class="field-label">Bank details (for payouts via bank transfer)</label>
+                </div>
+
+                <div class="field">
+                    <label class="field-label">Account holder name</label>
+                    <input class="field-input" type="text" id="f-holder" placeholder="As shown on your bank account">
+                </div>
+                <div class="field">
+                    <label class="field-label">IBAN or account number</label>
+                    <input class="field-input" type="text" id="f-iban" placeholder="DE89 3704 0044 0532 0130 00">
+                </div>
+                <div class="field">
+                    <label class="field-label">BIC/SWIFT (if applicable)</label>
+                    <input class="field-input" type="text" id="f-bic" placeholder="COBADEFFXXX">
+                </div>
+                <div class="field">
+                    <label class="field-label">Bank name and country</label>
+                    <input class="field-input" type="text" id="f-bank" placeholder="Commerzbank, Germany">
+                </div>
+                <div class="field">
+                    <label class="field-label">Currency preference</label>
+                    <select class="field-select" id="f-currency">
+                        <option value="EUR">EUR (Euro)</option>
+                        <option value="GBP">GBP (British Pound)</option>
+                        <option value="CHF">CHF (Swiss Franc)</option>
+                        <option value="USD">USD (US Dollar)</option>
+                        <option value="SEK">SEK (Swedish Krona)</option>
+                        <option value="DKK">DKK (Danish Krone)</option>
+                        <option value="NOK">NOK (Norwegian Krone)</option>
+                        <option value="CZK">CZK (Czech Koruna)</option>
+                        <option value="HUF">HUF (Hungarian Forint)</option>
+                        <option value="RON">RON (Romanian Leu)</option>
+                        <option value="INR">INR (Indian Rupee)</option>
+                        <option value="CAD">CAD (Canadian Dollar)</option>
+                        <option value="AUD">AUD (Australian Dollar)</option>
+                        <option value="JPY">JPY (Japanese Yen)</option>
+                        <option value="CNY">CNY (Chinese Yuan)</option>
+                        <option value="HKD">HKD (Hong Kong Dollar)</option>
+                        <option value="SGD">SGD (Singapore Dollar)</option>
+                        <option value="ILS">ILS (Israeli Shekel)</option>
+                        <option value="TRY">TRY (Turkish Lira)</option>
+                        <option value="THB">THB (Thai Baht)</option>
+                        <option value="AED">AED (UAE Dirham)</option>
+                        <option value="ZAR">ZAR (South African Rand)</option>
+                        <option value="MXN">MXN (Mexican Peso)</option>
+                        <option value="MAD">MAD (Moroccan Dirham)</option>
+                        <option value="VND">VND (Vietnamese Dong)</option>
+                        <option value="CLP">CLP (Chilean Peso)</option>
+                        <option value="CRC">CRC (Costa Rican Colon)</option>
+                        <option value="UYU">UYU (Uruguayan Peso)</option>
+                    </select>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn-next" onclick="goStep(1)">Continue</button>
+                </div>
+            </div>
+
+            <!-- STEP 2: Data Purchase Agreement -->
+            <div class="step-panel" id="step-1">
+                <div class="step-label">Step 2 of 3 · Data purchase agreement</div>
+
+                <div class="agreement-box" id="agreement-1">
+                    <h2>What this agreement covers</h2>
+                    <p>You are participating in crowd-cast, a research data collection project run by p(doom). crowd-cast is a desktop recorder that captures screen recordings, keyboard/mouse events, and app/window metadata from applications you choose. The goal is to collect real human computer-work data for AI research.</p>
+                    <p>This agreement sets out the terms under which p(doom) purchases accepted research data from you.</p>
+
+                    <h2>Your role</h2>
+                    <ul>
+                        <li>You are a <strong>private individual</strong>, not an employee, freelancer, contractor-for-hours, agent, or representative of p(doom).</li>
+                        <li>There is <strong>no employment relationship</strong> between you and p(doom).</li>
+                        <li>You may install and use crowd-cast to passively record your own computer work.</li>
+                        <li>You decide when and whether to record. p(doom) does not assign tasks, working hours, deliverables, methods, or a work schedule.</li>
+                        <li>p(doom) does not supervise your work.</li>
+                    </ul>
+
+                    <h2>What you are paid for</h2>
+                    <p>Payment is <strong>fixed data acquisition compensation for accepted research data</strong>, not compensation for labor time. You are selling data, not working for p(doom).</p>
+                    <p>p(doom) reviews submitted recordings for project relevance, technical quality, and legal/privacy safety. p(doom) may reject or delete data that is staged, mostly idle, private/sensitive, corrupted, legally risky, or otherwise non-qualifying. Only accepted data is eligible for payment.</p>
+
+                    <h2>What you may record</h2>
+                    <ul>
+                        <li>Your own pre-existing computer work (work you would be doing anyway).</li>
+                        <li>Work you own or have permission to share.</li>
+                    </ul>
+
+                    <h2>What you must NOT record</h2>
+                    <ul>
+                        <li>Employer-confidential or client-confidential material</li>
+                        <li>NDA-covered work</li>
+                        <li>Private messages or personal conversations</li>
+                        <li>Meetings or calls</li>
+                        <li>Passwords, credentials, or login screens</li>
+                        <li>Medical, legal, or financial records</li>
+                        <li>Any material you do not have the right to share</li>
+                    </ul>
+
+                    <h2>Rights in accepted data</h2>
+                    <p>Once data is accepted and paid for, <strong>all rights, title, and interest</strong> in that data transfer to p(doom). This is a purchase, not a license. Specifically:</p>
+                    <ul>
+                        <li>You assign to p(doom) all rights (including any copyright, database rights, and related rights) in the accepted recordings, worldwide, irrevocably, and in perpetuity.</li>
+                        <li>p(doom) may use, copy, modify, sublicense, sell, license, publish, distribute, and create derivative works from accepted data without restriction. This includes research, dataset construction, AI model training and evaluation, public dataset release, and commercial distribution or sale of the data or derivative works.</li>
+                        <li>To the extent permitted by applicable law, you waive any moral rights or similar rights in the accepted data.</li>
+                        <li>These rights survive termination of this agreement. Once data is accepted and paid for, the rights transfer is permanent regardless of whether your participation continues.</li>
+                    </ul>
+                    <p>Both parties acknowledge that all types of use listed in this agreement (including research, dataset construction, AI model training and evaluation, public dataset release, and commercial distribution) are known and established types of use at the time of this agreement.</p>
+
+                    <p>You represent and warrant that you have the legal right to provide and sell this data, and that the recordings do not infringe the intellectual property rights, privacy rights, or other rights of any third party.</p>
+
+                    <h2>Indemnification</h2>
+                    <p>You agree to indemnify and hold p(doom) harmless from any claims, damages, losses, or expenses (including reasonable legal fees) arising from: (a) your breach of this agreement, (b) your recording of material you did not have the right to share, or (c) any third-party claim that your submitted data infringes intellectual property rights, privacy rights, confidentiality obligations, or other rights.</p>
+
+                    <h2>Limitation of liability</h2>
+                    <p>To the maximum extent permitted by applicable law, p(doom)'s total liability to you under this agreement is limited to the total amount p(doom) has paid you in the 12 months preceding the claim. p(doom) is not liable for indirect, incidental, or consequential damages.</p>
+
+                    <h2>Monthly statements</h2>
+                    <p>p(doom) may issue monthly Auszahlungsbelege (Data Purchase Statements) documenting each payment. These statements are not invoices under German VAT law (UStG). No VAT is shown and no input VAT (Vorsteuer) is claimed.</p>
+
+                    <h2>Tax responsibility</h2>
+                    <p>You are responsible for determining and fulfilling any tax obligations arising from payments you receive under this agreement, in your country of residence or tax jurisdiction. p(doom) does not withhold income tax, wage tax, social security contributions, or VAT for private individual participants unless required by applicable law.</p>
+
+                    <h2>Termination</h2>
+                    <p>Either party can end this agreement at any time, for any reason, with no penalty. Just let the other party know. Termination does not affect rights already granted in accepted and paid data.</p>
+
+                    <h2>Governing law</h2>
+                    <p>This agreement is governed by German law. If a dispute arises, both parties will try to resolve it informally first.</p>
+                </div>
+
+                <div style="margin-bottom: var(--s-4);">
+                    <a href="/docs/crowd-cast-data-purchase-agreement.pdf" target="_blank" class="btn-back" style="font-size:11px;padding:8px 14px;text-decoration:none;display:inline-block;">Download PDF</a>
+                </div>
+
+                <div class="check-row">
+                    <input type="checkbox" id="f-agree-purchase">
+                    <label for="f-agree-purchase">I have read and accept the Data Purchase and Participation Agreement. I confirm that I participate as a private individual.</label>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn-back" onclick="goStep(0)">Back</button>
+                    <button class="btn-next" onclick="goStep(2)">Continue</button>
+                </div>
+            </div>
+
+            <!-- STEP 3: Privacy & Recording Consent -->
+            <div class="step-panel" id="step-2">
+                <div class="step-label">Step 3 of 3 · Privacy and recording consent</div>
+
+                <div class="agreement-box" id="agreement-2">
+                    <p><strong>Data Controller:</strong> pdoom UG (haftungsbeschrankt), Volkartstr. 43, 80636 Munchen, Germany<br>
+                    <strong>Contact:</strong> mihir@pdoom.org</p>
+                    <p>This consent form is separate from the Data Purchase and Participation Agreement. It covers what data is collected, how it is used, and your rights under data protection law (GDPR).</p>
+
+                    <h2>What is recorded</h2>
+                    <ul>
+                        <li><strong>Screen video</strong> of the applications you have selected for recording</li>
+                        <li><strong>Keyboard and mouse events</strong> (keystrokes, clicks, scrolls, cursor movement)</li>
+                        <li><strong>App and window metadata</strong> (which application is active, window titles, timestamps)</li>
+                    </ul>
+
+                    <h2>What is NOT recorded</h2>
+                    <ul>
+                        <li>Audio or microphone input</li>
+                        <li>Camera or webcam</li>
+                        <li>Applications you have not selected for recording</li>
+                        <li>Anything during paused or stopped periods</li>
+                    </ul>
+
+                    <h2>You control what gets recorded</h2>
+                    <ul>
+                        <li>You choose which applications crowd-cast records. Unselected apps are not captured.</li>
+                        <li>You can pause or stop recording at any time.</li>
+                        <li>You can delete recent recordings you did not intend to capture, if the tool supports this.</li>
+                    </ul>
+
+                    <h2>What you must avoid recording</h2>
+                    <p>Even within selected apps, you are responsible for making sure you do not record:</p>
+                    <ul>
+                        <li>Passwords, credentials, or login screens</li>
+                        <li>Private messages or personal conversations</li>
+                        <li>Meetings, calls, or video chats</li>
+                        <li>Work covered by an NDA or confidentiality agreement</li>
+                        <li>Employer-confidential or client-confidential material</li>
+                        <li>Medical, legal, or financial records</li>
+                    </ul>
+                    <p>If you accidentally capture something sensitive, pause recording and delete the segment if possible.</p>
+
+                    <h2>How your data is used</h2>
+                    <ul>
+                        <li><strong>Reviewed by p(doom)</strong> for quality control and safety checks</li>
+                        <li><strong>Used for research</strong>, AI model training, and evaluation</li>
+                        <li><strong>Included in public dataset releases</strong>, meaning the recordings could be downloaded and used by other researchers, developers, and the general public</li>
+                    </ul>
+                    <p><strong>What "public release" means in practice:</strong> If your accepted data is included in a publicly released dataset, it will be available for anyone to download and use. This is core to the project's research mission. p(doom) takes steps to filter out sensitive content before release, but you are the first line of defense: do not record things you would not want made public.</p>
+
+                    <h2>Legal basis for processing</h2>
+                    <p>p(doom) processes your recording data based on your explicit, informed consent (GDPR Art. 6(1)(a)). Your personal information (name, email, payout details) is processed based on contractual necessity (GDPR Art. 6(1)(b)).</p>
+
+                    <h2>Withdrawing consent</h2>
+                    <p>You can withdraw your consent for future recordings at any time by stopping the recorder and notifying p(doom) at mihir@pdoom.org.</p>
+                    <ul>
+                        <li><strong>Future recordings:</strong> No further data will be collected from you.</li>
+                        <li><strong>Unpublished data:</strong> p(doom) will delete recordings that have not yet been accepted, paid for, or published.</li>
+                        <li><strong>Published data:</strong> Recordings that have already been accepted, paid for, and released as part of a public dataset cannot be practically retracted. Once data is in the hands of third parties who downloaded a public dataset, p(doom) cannot force them to delete it.</li>
+                    </ul>
+                    <p>This is why it is important to only record content you are comfortable sharing before you start.</p>
+
+                    <h2>International data transfers</h2>
+                    <p>Your recording data may be stored and processed on servers located outside the EU/EEA. When data is included in a public dataset release, it will be accessible worldwide. By consenting, you acknowledge these transfers.</p>
+
+                    <h2>Data retention</h2>
+                    <ul>
+                        <li>Recordings under review are stored on p(doom)'s secure infrastructure until accepted or rejected.</li>
+                        <li>Rejected recordings are deleted.</li>
+                        <li>Accepted recordings may be retained indefinitely as part of the research dataset.</li>
+                        <li>Your personal information is retained for as long as needed for participation and legal/accounting obligations, then deleted.</li>
+                    </ul>
+
+                    <h2>Your rights</h2>
+                    <p>Under GDPR, you have the right to: access your data, correct inaccurate data, request deletion (subject to limitations for published datasets), object to processing, data portability, and lodge a complaint with the Bayerisches Landesamt fur Datenschutzaufsicht (BayLDA) at <a href="https://www.lda.bayern.de" target="_blank">lda.bayern.de</a>.</p>
+                    <p>To exercise any of these rights, contact <a href="mailto:mihir@pdoom.org">mihir@pdoom.org</a>.</p>
+                </div>
+
+                <div style="margin-bottom: var(--s-4);">
+                    <a href="/docs/crowd-cast-privacy-consent.pdf" target="_blank" class="btn-back" style="font-size:11px;padding:8px 14px;text-decoration:none;display:inline-block;">Download PDF</a>
+                </div>
+
+                <div class="check-row">
+                    <input type="checkbox" id="f-agree-privacy">
+                    <label for="f-agree-privacy">I understand what data is collected, how it may be used (including public release), and the limitations on retracting data that has already been published. I give my consent.</label>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn-back" onclick="goStep(1)">Back</button>
+                    <button class="btn-next" onclick="submitOnboarding()">Complete onboarding</button>
+                </div>
+            </div>
+
+            <!-- SUCCESS -->
+            <div class="step-panel" id="step-done">
+                <div style="text-align: center; padding: var(--s-8) 0;">
+                    <div class="success-icon">&#10003;</div>
+                    <h2 class="onboard-title">You're in!</h2>
+                    <p class="onboard-lede">Your onboarding is complete. Download the app and start recording whenever you're ready.</p>
+                    <a class="btn btn-primary" href="/docs/crowd-cast/install/" style="text-decoration:none; margin-top: var(--s-5); display: inline-flex;">Download crowd-cast</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    const API_BASE = 'https://ob3iugfiy2.execute-api.us-east-1.amazonaws.com/v1';
+    let currentStep = 0;
+    let inviteToken = null;
+    let inviteEmail = null;
+
+    // Token validation on page load
+    async function initToken() {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('token');
+        if (!token) {
+            showTokenError('No invite token provided. You need an invitation link to sign up.');
+            return;
+        }
+        try {
+            const resp = await fetch(API_BASE + '/onboard/validate-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token }),
+            });
+            const data = await resp.json();
+            if (!data.valid) {
+                showTokenError(data.reason === 'Token already used'
+                    ? 'This invitation link has already been used.'
+                    : data.reason === 'Token expired'
+                    ? 'This invitation link has expired. Please request a new one.'
+                    : 'Invalid invitation link. Please contact mihir@pdoom.org.');
+                return;
+            }
+            inviteToken = token;
+            inviteEmail = data.email;
+            document.getElementById('f-email').value = inviteEmail;
+            document.getElementById('f-email').readOnly = true;
+            document.getElementById('f-email').style.color = 'var(--fg-dim)';
+            // Show form, hide loading
+            document.getElementById('token-loading').style.display = 'none';
+            document.getElementById('onboard-content').style.display = 'block';
+            document.getElementById('step-0').classList.add('active');
+        } catch (err) {
+            showTokenError('Could not validate your invitation. Please try again or contact mihir@pdoom.org.');
+        }
+    }
+
+    function showTokenError(message) {
+        document.getElementById('app').innerHTML = `
+            <div class="token-error">
+                <h2 class="onboard-title">Unable to proceed</h2>
+                <p class="onboard-lede">${message}</p>
+                <a class="btn" href="mailto:mihir@pdoom.org" style="text-decoration:none; margin-top: var(--s-5); display: inline-flex;">Contact us</a>
+            </div>`;
+    }
+
+    function goStep(n) {
+        if (n > currentStep && !validateStep(currentStep)) return;
+
+        currentStep = n;
+        document.querySelectorAll('.step-panel').forEach((p, i) => {
+            p.classList.toggle('active', i === n);
+        });
+        document.querySelectorAll('.step-pip').forEach((p, i) => {
+            p.classList.remove('active', 'done');
+            if (i < n) p.classList.add('done');
+            if (i === n) p.classList.add('active');
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // IBAN validation (ISO 13616)
+    function validateIBAN(iban) {
+        iban = iban.replace(/\s+/g, '').toUpperCase();
+        if (iban.length < 15 || iban.length > 34) return false;
+        if (!/^[A-Z]{2}[0-9]{2}[A-Z0-9]+$/.test(iban)) return false;
+
+        // Country-specific lengths
+        const lengths = {
+            AL:28, AD:24, AT:20, AZ:28, BH:22, BY:28, BE:16, BA:20, BR:29, BG:22,
+            CR:22, HR:21, CY:28, CZ:24, DK:18, DO:28, TL:23, EE:20, FO:18, FI:18,
+            FR:27, GE:22, DE:22, GI:23, GR:27, GL:18, GT:28, HU:28, IS:26, IQ:23,
+            IE:22, IL:23, IT:27, JO:30, KZ:20, XK:20, KW:30, LV:21, LB:28, LI:21,
+            LT:20, LU:20, MK:19, MT:31, MR:27, MU:30, MC:27, MD:24, ME:22, NL:18,
+            NO:15, PK:24, PS:29, PL:28, PT:25, QA:29, RO:24, LC:32, SM:27, SA:24,
+            RS:22, SC:31, SK:24, SI:19, ES:24, SE:24, CH:21, TN:24, TR:26, UA:29,
+            AE:23, GB:22, VA:22, VG:24,
+        };
+        const country = iban.substring(0, 2);
+        if (lengths[country] && iban.length !== lengths[country]) return false;
+
+        // MOD-97 checksum (ISO 7064)
+        const rearranged = iban.substring(4) + iban.substring(0, 4);
+        let numStr = '';
+        for (const ch of rearranged) {
+            if (ch >= '0' && ch <= '9') numStr += ch;
+            else numStr += (ch.charCodeAt(0) - 55).toString();
+        }
+        // BigInt-free mod97
+        let remainder = 0;
+        for (let i = 0; i < numStr.length; i++) {
+            remainder = (remainder * 10 + parseInt(numStr[i])) % 97;
+        }
+        return remainder === 1;
+    }
+
+    // Email validation
+    function validateEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function validateStep(step) {
+        if (step === 0) {
+            const required = ['f-name', 'f-email', 'f-address', 'f-country'];
+            let valid = true;
+            let errors = [];
+            required.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el.value.trim()) {
+                    el.classList.add('error');
+                    valid = false;
+                } else {
+                    el.classList.remove('error');
+                }
+            });
+
+            // Email format
+            const emailEl = document.getElementById('f-email');
+            if (emailEl.value.trim() && !validateEmail(emailEl.value.trim())) {
+                emailEl.classList.add('error');
+                errors.push('Please enter a valid email address.');
+                valid = false;
+            }
+
+            const checks = ['f-age', 'f-private', 'f-tax', 'f-sanctions'];
+            checks.forEach(id => {
+                if (!document.getElementById(id).checked) valid = false;
+            });
+
+            // Validate bank details
+            ['f-holder', 'f-iban'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el.value.trim()) { el.classList.add('error'); valid = false; }
+                else el.classList.remove('error');
+            });
+            // IBAN validation (only if it matches IBAN structure: 2 letters + 2 digits, min 15 chars)
+            const ibanVal = document.getElementById('f-iban').value.trim().replace(/\s+/g, '');
+            if (ibanVal && /^[A-Za-z]{2}[0-9]{2}/.test(ibanVal) && ibanVal.length >= 15 && !validateIBAN(ibanVal)) {
+                document.getElementById('f-iban').classList.add('error');
+                errors.push('IBAN appears invalid. Please double-check.');
+                valid = false;
+            }
+
+            if (!valid) {
+                alert(errors.length ? errors.join('\n') : 'Please fill in all required fields and check all boxes.');
+            }
+            return valid;
+        }
+        if (step === 1) {
+            if (!document.getElementById('f-agree-purchase').checked) {
+                alert('Please read and accept the Data Purchase Agreement to continue.');
+                return false;
+            }
+            return true;
+        }
+        if (step === 2) {
+            if (!document.getElementById('f-agree-privacy').checked) {
+                alert('Please read and accept the Privacy and Recording Consent to continue.');
+                return false;
+            }
+            return true;
+        }
+        return true;
+    }
+
+
+    async function submitOnboarding() {
+        if (!validateStep(2)) return;
+
+        const submitBtn = document.querySelector('#step-2 .btn-next');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+
+        const data = {
+            token: inviteToken,
+            name: document.getElementById('f-name').value.trim(),
+            email: document.getElementById('f-email').value.trim(),
+            address: document.getElementById('f-address').value.trim(),
+            country: document.getElementById('f-country').value.trim(),
+            payout_method: 'bank_transfer',
+            payout_details: {
+                holder: document.getElementById('f-holder').value.trim(),
+                iban: document.getElementById('f-iban').value.trim(),
+                bic: document.getElementById('f-bic').value.trim(),
+                bank: document.getElementById('f-bank').value.trim(),
+                currency: document.getElementById('f-currency').value,
+            },
+            agreements: {
+                data_purchase_accepted: true,
+                privacy_consent_accepted: true,
+                age_confirmed: true,
+                private_individual_confirmed: true,
+                tax_responsibility_confirmed: true,
+                sanctions_confirmed: true,
+            },
+            accepted_at: new Date().toISOString(),
+            user_agent: navigator.userAgent,
+        };
+
+        try {
+            const resp = await fetch(API_BASE + '/onboard/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+            const result = await resp.json();
+
+            if (!resp.ok) {
+                alert(result.error || 'Something went wrong. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Complete onboarding';
+                return;
+            }
+
+            // Show success
+            document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('step-done').classList.add('active');
+            document.querySelectorAll('.step-pip').forEach(p => {
+                p.classList.remove('active');
+                p.classList.add('done');
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (err) {
+            alert('Network error. Please check your connection and try again.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Complete onboarding';
+        }
+    }
+
+    // Initialize on page load
+    initToken();
+    </script>
+</body>
+</html>
