@@ -295,18 +295,27 @@
 
     <main>
         <div class="onboard-wrap" id="app">
-            <div class="onboard-eyebrow">crowd-cast</div>
-            <h1 class="onboard-title">Participant onboarding</h1>
-            <p class="onboard-lede">Set up your participation in three quick steps.</p>
+            <!-- Loading state while token validates -->
+            <div id="token-loading" style="text-align:center;padding:var(--s-10) 0;">
+                <div class="onboard-eyebrow">crowd-cast</div>
+                <h1 class="onboard-title" style="margin-top:var(--s-4);">Validating invitation...</h1>
+                <p class="onboard-lede">Please wait.</p>
+            </div>
 
-            <div class="steps">
-                <div class="step-pip active" id="pip-0"></div>
-                <div class="step-pip" id="pip-1"></div>
-                <div class="step-pip" id="pip-2"></div>
+            <div id="onboard-content" style="display:none;">
+                <div class="onboard-eyebrow">crowd-cast</div>
+                <h1 class="onboard-title">Participant onboarding</h1>
+                <p class="onboard-lede">Set up your participation in three quick steps.</p>
+
+                <div class="steps">
+                    <div class="step-pip active" id="pip-0"></div>
+                    <div class="step-pip" id="pip-1"></div>
+                    <div class="step-pip" id="pip-2"></div>
+                </div>
             </div>
 
             <!-- STEP 1: Personal info & payout -->
-            <div class="step-panel active" id="step-0">
+            <div class="step-panel" id="step-0">
                 <div class="step-label">Step 1 of 3 · Your details</div>
 
                 <div class="field">
@@ -629,6 +638,10 @@
             document.getElementById('f-email').value = inviteEmail;
             document.getElementById('f-email').readOnly = true;
             document.getElementById('f-email').style.color = 'var(--fg-dim)';
+            // Show form, hide loading
+            document.getElementById('token-loading').style.display = 'none';
+            document.getElementById('onboard-content').style.display = 'block';
+            document.getElementById('step-0').classList.add('active');
         } catch (err) {
             showTokenError('Could not validate your invitation. Please try again or contact mihir@pdoom.org.');
         }
@@ -732,9 +745,9 @@
                 if (!el.value.trim()) { el.classList.add('error'); valid = false; }
                 else el.classList.remove('error');
             });
-            // IBAN validation (only if it looks like an IBAN, i.e. starts with 2 letters)
+            // IBAN validation (only if it matches IBAN structure: 2 letters + 2 digits, min 15 chars)
             const ibanVal = document.getElementById('f-iban').value.trim().replace(/\s+/g, '');
-            if (ibanVal && /^[A-Za-z]{2}/.test(ibanVal) && !validateIBAN(ibanVal)) {
+            if (ibanVal && /^[A-Za-z]{2}[0-9]{2}/.test(ibanVal) && ibanVal.length >= 15 && !validateIBAN(ibanVal)) {
                 document.getElementById('f-iban').classList.add('error');
                 errors.push('IBAN appears invalid. Please double-check.');
                 valid = false;
