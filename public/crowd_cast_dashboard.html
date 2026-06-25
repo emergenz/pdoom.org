@@ -19,6 +19,7 @@
             color: #000000;
             padding: 28px 24px 60px;
             line-height: 1.6;
+            overflow: hidden;
         }
 
         .container {
@@ -381,33 +382,6 @@
         @media (max-width: 900px) { .skel-cards { grid-template-columns: repeat(2, 1fr); } .skel-row { grid-template-columns: 1fr; } }
         @media (max-width: 560px) { .skel-cards { grid-template-columns: 1fr; } }
 
-        /* -- Loading / error states -- */
-        .loading-state {
-            text-align: center;
-            padding: 80px 40px;
-        }
-
-        .loading-state h2 {
-            font-size: 28px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-bottom: 0;
-        }
-
-        .loading-state p {
-            font-size: 14px;
-            color: #555555;
-        }
-
-        .loading-animation {
-            display: block;
-            width: min(480px, 86vw);
-            max-width: 100%;
-            height: auto;
-            margin: 28px auto 18px;
-        }
-
         .error-text {
             color: #cf222e;
         }
@@ -452,35 +426,158 @@
                 align-items: flex-start;
             }
         }
+
+        /* ---- Landing page ---- */
+        #landing-page {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #ffffff;
+            z-index: 500;
+            overflow: hidden;
+        }
+
+        #landing-page .center-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 100;
+            padding: 50px 80px;
+            background: radial-gradient(ellipse at center, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 20%, rgba(255,255,255,0.6) 45%, rgba(255,255,255,0.3) 65%, rgba(255,255,255,0.1) 80%, rgba(255,255,255,0) 100%);
+        }
+
+        #landing-page .center-content h1 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        #landing-page .center-content .subtitle {
+            font-size: 11px;
+            color: #999;
+            font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 28px;
+        }
+
+        /* ---- Smiski characters ---- */
+        .smiski {
+            position: absolute;
+            cursor: default;
+            user-select: none;
+            z-index: 1;
+            will-change: opacity;
+        }
+
+        .smiski-inner {
+            will-change: transform;
+        }
+
+        .smiski img {
+            width: 70px;
+            height: 90px;
+            object-fit: contain;
+        }
+
+        .smiski-bubble {
+            position: absolute;
+            bottom: calc(100% + 4px);
+            left: 50%;
+            transform: translateX(-50%) scale(0.9);
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 5px 9px;
+            font-size: 9.5px;
+            font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+            color: #555;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            pointer-events: none;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        .smiski.bubble-below .smiski-bubble {
+            bottom: auto;
+            top: calc(100% + 4px);
+        }
+
+        .smiski.bubble-below .smiski-bubble::after {
+            top: auto;
+            bottom: 100%;
+            border-top-color: transparent;
+            border-bottom-color: #e0e0e0;
+        }
+
+        .smiski-bubble::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 4px solid transparent;
+            border-top-color: #e0e0e0;
+        }
+
+        .smiski-bubble.visible,
+        .smiski:hover .smiski-bubble {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+        @keyframes drift {
+            0%, 100% { transform: translate(var(--dx1), var(--dy1)); }
+            50% { transform: translate(var(--dx2), var(--dy2)); }
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .smiski {
+            animation: fade-in 0.8s ease both;
+        }
+
+        .landing-footer {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 11px;
+            color: #bbb;
+            font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+            z-index: 100;
+        }
+
+        .landing-footer a {
+            color: #999;
+            text-decoration: none;
+            border-bottom: 1px solid #ddd;
+        }
     </style>
 </head>
 <body>
     <div class="container">
 
-        <!-- Loading state -->
-        <div class="loading-state outline-box" id="loading-state">
-            <h2>crowd-cast</h2>
-            <!-- Loading animation attribution: Juergen Schmidhuber, 1987. -->
-            <img class="loading-animation" src="robby_30frames_v3_once.gif" width="800" height="592" alt="" data-attribution="Juergen Schmidhuber, 1987">
-            <p id="loading-dots" style="font-size:11px;color:#999;font-family:'SF Mono',monospace;letter-spacing:1px;text-transform:uppercase;text-align:left;display:inline-block;width:10ch;">Loading</p>
+        <!-- Landing page (shown until sign-in) -->
+        <div id="landing-page">
+            <div class="center-content">
+                <h1>crowd-cast</h1>
+                <div class="subtitle">Capturing Long-Horizon Human Work</div>
+                <button id="landing-signin" onclick="google.accounts.id.prompt()" style="display:inline-block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:12px 36px;border:2px solid #000;background:#000;color:#fff;cursor:pointer;font-family:'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;margin-top:20px;transition:background 0.15s,color 0.15s;" onmouseover="this.style.background='#fff';this.style.color='#000'" onmouseout="this.style.background='#000';this.style.color='#fff'">Sign In</button>
+            </div>
+            <div id="smiskis-container"></div>
+            <div class="landing-footer">
+                <a href="https://pdoom.org/docs/crowd-cast/" target="_blank">docs</a>
+            </div>
         </div>
-        <script>
-        (function() {
-            var el = document.getElementById('loading-dots');
-            var dots = 0;
-            setInterval(function() {
-                dots = (dots + 1) % 4;
-                el.textContent = 'Loading' + '.'.repeat(dots);
-            }, 500);
-            /* Replay the gif every 4s (3s animation + 1s pause) */
-            var img = document.querySelector('.loading-animation');
-            var src = img.src;
-            setInterval(function() {
-                img.src = '';
-                img.src = src;
-            }, 4000);
-        })();
-        </script>
 
         <!-- Dashboard (hidden until data loads) -->
         <div id="dashboard" style="display:none;">
@@ -523,9 +620,9 @@
                         <div class="card-sub" id="my-visible-sub"></div>
                     </div>
                     <div class="card outline-box">
-                        <div class="card-label">Segments</div>
-                        <div class="card-value" id="my-segments">--</div>
-                        <div class="card-sub" id="my-segments-sub"></div>
+                        <div class="card-label">Days Active</div>
+                        <div class="card-value" id="my-days-active">--</div>
+                        <div class="card-sub" id="my-days-active-sub"></div>
                     </div>
                     <div class="card outline-box">
                         <div class="card-label">Your Rank</div>
@@ -756,9 +853,6 @@
     let sortAsc = false;
 
     function render(meta) {
-        document.getElementById('loading-state').style.display = 'none';
-        document.getElementById('dashboard').style.display = 'block';
-
         const t = meta.totals || {};
         const j = meta.job || {};
         const hist = meta.action_histogram || {};
@@ -1732,8 +1826,9 @@
         document.getElementById('my-hours-sub').textContent = fmt(totalSessions) + ' sessions';
         document.getElementById('my-visible').textContent = visPct + '%';
         document.getElementById('my-visible-sub').textContent = fmtDec(totalHours * visPct / 100, 1) + 'h visible';
-        document.getElementById('my-segments').textContent = fmt(totalSegments);
-        document.getElementById('my-segments-sub').textContent = fmt(totalSteps) + ' actions';
+        var daysActive = Object.keys(mergedDaily).filter(function(d) { return mergedDaily[d].estimated_minutes > 0; }).length;
+        document.getElementById('my-days-active').textContent = fmt(daysActive);
+        document.getElementById('my-days-active-sub').textContent = fmt(totalSteps) + ' actions';
         document.getElementById('my-rank').textContent = '#' + rank;
         document.getElementById('my-rank-sub').textContent = 'of ' + fmt(usersData.length) + ' users';
 
@@ -2566,6 +2661,7 @@
             document.getElementById('auth-signin'),
             { theme: 'outline', size: 'small', text: 'signin', shape: 'rectangular' }
         );
+        /* Landing page uses a custom black button that calls google.accounts.id.prompt() */
     }
 
     function handleCredentialResponse(response) {
@@ -2594,12 +2690,20 @@
         document.getElementById('all-users-view').style.visibility = 'visible';
         document.getElementById('all-users-view').style.position = 'static';
         document.getElementById('all-users-view').style.height = 'auto';
-        /* Re-render with anonymous view */
-        boot();
+        /* Show landing page, hide dashboard */
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('landing-page').style.display = '';
+        document.body.style.overflow = 'hidden';
+        initSmiskis();
     }
 
     async function fetchAuthData() {
         if (!_authToken) return;
+        /* Transition from landing page to dashboard */
+        document.getElementById('landing-page').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        document.body.style.overflow = 'auto';
+        if (_smiskiBubbleInterval) { clearInterval(_smiskiBubbleInterval); _smiskiBubbleInterval = null; }
         /* Show skeleton loading state */
         document.getElementById('auth-signin').style.display = 'none';
         document.getElementById('auth-user').style.display = '';
@@ -2686,17 +2790,14 @@
             if (!metaResp.ok) throw new Error('HTTP ' + metaResp.status);
             const meta = await metaResp.json();
             window._lastMeta = meta;
-            render(meta);
 
-            /* If we have a stored token, fetch auth data */
+            /* If we have a stored token, fetch auth data (which will transition to dashboard) */
             if (_authToken) {
                 fetchAuthData();
             }
+            /* Otherwise, landing page stays visible until user signs in */
         } catch (err) {
-            document.getElementById('loading-state').innerHTML =
-                '<h2>crowd-cast</h2>' +
-                '<p class="error-text">Failed to load metadata.json</p>' +
-                '<p style="margin-top:8px;font-size:13px;color:#777;">' + escapeHtml(String(err)) + '</p>';
+            console.warn('Failed to load metadata:', err);
         }
     }
 
@@ -2706,6 +2807,169 @@
         if (_donutMode !== 'family') showFamilyView();
         if (document.getElementById('user-detail-view').style.display !== 'none') showUsersTableView();
     });
+
+    /* =================================================================
+       Smiski landing page
+       ================================================================= */
+    var SMISKI_COUNT = 20;
+
+    var SMISKI_USERS = [
+        "building action models from video",
+        "wrangling GPU clusters",
+        "researching LLM self-distillation methods",
+        "debugging vision-language model training",
+        "engineering reinforcement learning systems",
+        "studying JAX-based pretraining pipelines",
+        "investigating AI agent collusion detection",
+        "building theorem-proving AI agents",
+        "developing a gym discovery platform",
+        "building AlphaZero in JAX",
+        "writing a general relativity thesis",
+        "preparing a structural biology defense",
+        "developing AI companion prototypes",
+        "reviewing a thesis on spectral graph methods",
+    ];
+
+    var _smiskiEls = [];
+    var _smiskiBubbleInterval = null;
+    var _smiskiActiveBubbles = [];
+
+    function _smiskiRand(min, max) { return Math.random() * (max - min) + min; }
+    function _smiskiRandInt(min, max) { return Math.floor(_smiskiRand(min, max)); }
+
+    function initSmiskis() {
+        var container = document.getElementById('smiskis-container');
+        container.innerHTML = '';
+        _smiskiEls = [];
+
+        var vw = window.innerWidth;
+        var vh = window.innerHeight;
+        var n = SMISKI_USERS.length;
+
+        var pad = 120;
+        var padTop = 50;
+        var padBottom = 50;
+        var smiskiW = 70, smiskiH = 90;
+        var centerX = vw / 2, centerY = vh / 2;
+        var safeW = 160, safeH = 90;
+        var minSpacing = Math.sqrt((vw * vh) / (n * 3));
+
+        var positions = [];
+        for (var i = 0; i < n; i++) {
+            var candidates = [];
+            for (var attempt = 0; attempt < 150; attempt++) {
+                var cx = _smiskiRand(pad, vw - pad - smiskiW);
+                var cy = _smiskiRand(padTop, vh - padBottom - smiskiH);
+                if (Math.abs(cx + smiskiW/2 - centerX) < safeW && Math.abs(cy + smiskiH/2 - centerY) < safeH) continue;
+                var minD = Infinity;
+                for (var j = 0; j < positions.length; j++) {
+                    var dx = cx - positions[j][0];
+                    var dy = cy - positions[j][1];
+                    var d = Math.sqrt(dx*dx + dy*dy);
+                    if (d < minD) minD = d;
+                }
+                if (minD >= minSpacing) candidates.push({ x: cx, y: cy, d: minD });
+            }
+            if (candidates.length > 0) {
+                candidates.sort(function(a, b) { return b.d - a.d; });
+                var pick = candidates[_smiskiRandInt(0, Math.min(candidates.length, Math.ceil(candidates.length * 0.5)))];
+                positions.push([pick.x, pick.y]);
+            } else {
+                var best = null, bestD = -1;
+                for (var f = 0; f < 100; f++) {
+                    var fx = _smiskiRand(pad, vw - pad - smiskiW);
+                    var fy = _smiskiRand(padTop, vh - padBottom - smiskiH);
+                    if (Math.abs(fx + smiskiW/2 - centerX) < safeW && Math.abs(fy + smiskiH/2 - centerY) < safeH) continue;
+                    var md = Infinity;
+                    for (var j2 = 0; j2 < positions.length; j2++) {
+                        var dd = Math.sqrt(Math.pow(fx-positions[j2][0],2) + Math.pow(fy-positions[j2][1],2));
+                        if (dd < md) md = dd;
+                    }
+                    if (md > bestD) { bestD = md; best = [fx, fy]; }
+                }
+                if (best) positions.push(best);
+            }
+        }
+
+        for (var i2 = 0; i2 < SMISKI_USERS.length; i2++) {
+            var x = positions[i2][0];
+            var y = positions[i2][1];
+
+            var imgIdx = (i2 % SMISKI_COUNT) + 1;
+            var imgSrc = 'smiskis/smiski_' + String(imgIdx).padStart(2, '0') + '.png';
+
+            var dx1 = _smiskiRandInt(-8, 8) + 'px', dy1 = _smiskiRandInt(-6, 6) + 'px';
+            var dx2 = _smiskiRandInt(-8, 8) + 'px', dy2 = _smiskiRandInt(-6, 6) + 'px';
+            var dur = _smiskiRand(10, 20).toFixed(0) + 's';
+            var delay = _smiskiRand(0, 8).toFixed(1) + 's';
+
+            var el = document.createElement('div');
+            el.className = 'smiski' + (y < 40 ? ' bubble-below' : '');
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            el.style.animationDelay = (i2 * 0.08).toFixed(2) + 's';
+
+            var inner = document.createElement('div');
+            inner.className = 'smiski-inner';
+            inner.style.cssText = '--dx1:' + dx1 + ';--dy1:' + dy1 +
+                ';--dx2:' + dx2 + ';--dy2:' + dy2 +
+                ';animation:drift ' + dur + ' ease-in-out ' + delay + ' infinite;';
+
+            var bubble = document.createElement('div');
+            bubble.className = 'smiski-bubble';
+            bubble.textContent = SMISKI_USERS[i2];
+
+            var imgEl = document.createElement('img');
+            imgEl.src = imgSrc;
+            imgEl.alt = '';
+            imgEl.draggable = false;
+
+            inner.appendChild(bubble);
+            inner.appendChild(imgEl);
+            el.appendChild(inner);
+            container.appendChild(el);
+
+            _smiskiEls.push({ el: el, bubble: bubble, index: i2 });
+        }
+
+        /* Start bubble cycling */
+        _showRandomSmiskiBubbles();
+        if (_smiskiBubbleInterval) clearInterval(_smiskiBubbleInterval);
+        _smiskiBubbleInterval = setInterval(_showRandomSmiskiBubbles, 3000);
+    }
+
+    function _showRandomSmiskiBubbles() {
+        for (var i = 0; i < _smiskiActiveBubbles.length; i++) {
+            _smiskiActiveBubbles[i].classList.remove('visible');
+        }
+        _smiskiActiveBubbles = [];
+
+        var count = _smiskiRandInt(1, 4);
+        var indices = [];
+        while (indices.length < count && indices.length < _smiskiEls.length) {
+            var idx = _smiskiRandInt(0, _smiskiEls.length);
+            if (indices.indexOf(idx) === -1) indices.push(idx);
+        }
+
+        for (var j = 0; j < indices.length; j++) {
+            var bubble = _smiskiEls[indices[j]].bubble;
+            bubble.classList.add('visible');
+            _smiskiActiveBubbles.push(bubble);
+        }
+    }
+
+    /* Re-place smiskis on resize */
+    var _smiskiResizeTimer;
+    window.addEventListener('resize', function() {
+        if (document.getElementById('landing-page').style.display === 'none') return;
+        clearTimeout(_smiskiResizeTimer);
+        _smiskiResizeTimer = setTimeout(function() {
+            initSmiskis();
+        }, 250);
+    });
+
+    /* Init smiskis on page load */
+    initSmiskis();
 
     boot();
     initGoogleSignIn();
