@@ -506,6 +506,7 @@
                 <span class="tab-btn active" id="tab-my" onclick="switchTab('my')" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;border-bottom:2px solid #000;">My Overview</span>
                 <span class="tab-btn" id="tab-all" onclick="switchTab('all')" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">All Users</span>
                 <span class="tab-btn" id="tab-participants" onclick="switchTab('participants')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Participants</span>
+                <span class="tab-btn" id="tab-payouts" onclick="switchTab('payouts')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Payouts</span>
             </div>
 
             <!-- My Overview (only visible when logged in) -->
@@ -643,6 +644,7 @@
 
             <!-- Participants view (admin only) -->
             <div id="participants-view" style="display:none;"></div>
+            <div id="payouts-view" style="display:none;"></div>
 
             <!-- Footer -->
             <div class="site-footer">
@@ -736,7 +738,7 @@
     function escapeHtml(s) {
         const d = document.createElement('div');
         d.textContent = s;
-        return d.innerHTML;
+        return d.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
     function pct(num, den) {
         if (!den) return '0.0%';
@@ -1622,8 +1624,10 @@
         var myEl = document.getElementById('my-overview');
         var allEl = document.getElementById('all-users-view');
         var partEl = document.getElementById('participants-view');
+        var payEl = document.getElementById('payouts-view');
         myEl.style.display = tab === 'my' ? 'block' : 'none';
         partEl.style.display = tab === 'participants' ? 'block' : 'none';
+        payEl.style.display = tab === 'payouts' ? 'block' : 'none';
         /* Use position:absolute + visibility:hidden for all-users to preserve chart layout */
         if (tab === 'all') {
             allEl.style.display = 'block';
@@ -1642,8 +1646,11 @@
         document.getElementById('tab-all').style.color = tab === 'all' ? '#000' : '#999';
         document.getElementById('tab-participants').style.borderBottomColor = tab === 'participants' ? '#000' : 'transparent';
         document.getElementById('tab-participants').style.color = tab === 'participants' ? '#000' : '#999';
+        document.getElementById('tab-payouts').style.borderBottomColor = tab === 'payouts' ? '#000' : 'transparent';
+        document.getElementById('tab-payouts').style.color = tab === 'payouts' ? '#000' : '#999';
         if (tab === 'my') renderMyOverview();
         if (tab === 'participants') renderParticipantsView();
+        if (tab === 'payouts') renderPayoutsView();
     }
 
     function renderMyOverview() {
@@ -1849,9 +1856,16 @@
         }
 
         var html = '';
+
+        /* Pending review section */
+        html += '<div id="pending-review" style="margin-bottom:28px;"></div>';
+
         html += _buildParticipantSection('PARTICIPANTS', participants, 'participant');
         html += _buildParticipantSection('ADMINS', admins, 'admin');
         container.innerHTML = html;
+
+        /* Fetch pending onboarded participants */
+        fetchPendingReview();
 
         /* Wire up remove buttons */
         container.querySelectorAll('.participant-remove-btn').forEach(function(btn) {
@@ -2083,6 +2097,380 @@
         return html;
     }
 
+    var ONBOARD_API = DASHBOARD_API.replace('/dashboard', '/onboard');
+    var _payoutsData = null;
+    var _payoutsParticipants = null;
+
+    function renderPayoutsView() {
+        if (!_isAdmin) return;
+        var container = document.getElementById('payouts-view');
+        var now = new Date();
+        var year = now.getFullYear();
+        var month = now.getMonth() + 1;
+
+        container.innerHTML = '<div class="outline-box" style="padding:24px;">' +
+            '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">' +
+                '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#000;">Payouts</div>' +
+                '<select id="payout-month" style="font-size:12px;font-family:\'SF Mono\',monospace;padding:4px 8px;border:1px solid #ccc;background:#fff;">' +
+                    buildMonthOptions(year, month) +
+                '</select>' +
+            '</div>' +
+            '<div id="payouts-loading" style="padding:12px;font-size:13px;color:#999;font-family:\'SF Mono\',monospace;">Loading payouts...</div>' +
+            '<div id="payouts-table"></div>' +
+            '<div id="payouts-summary" style="margin-top:16px;"></div>' +
+        '</div>';
+
+        document.getElementById('payout-month').addEventListener('change', function() {
+            var sel = this.value.split('-');
+            loadPayouts(parseInt(sel[0]), parseInt(sel[1]));
+        });
+
+        // Auto-load current month
+        loadPayouts(year, month);
+    }
+
+    function buildMonthOptions(year, month) {
+        var opts = '';
+        for (var m = month; m >= Math.max(1, month - 5); m--) {
+            var y = year;
+            var mm = m;
+            if (mm <= 0) { mm += 12; y--; }
+            var label = y + '-' + String(mm).padStart(2, '0');
+            opts += '<option value="' + label + '">' + label + '</option>';
+        }
+        return opts;
+    }
+
+    function loadPayouts(year, month) {
+        var loadingEl = document.getElementById('payouts-loading');
+        var tableEl = document.getElementById('payouts-table');
+        var summaryEl = document.getElementById('payouts-summary');
+        if (loadingEl) loadingEl.style.display = 'block';
+        if (tableEl) tableEl.innerHTML = '';
+        if (summaryEl) summaryEl.innerHTML = '';
+
+        fetch(ONBOARD_API + '/payouts/generate', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ year: year, month: month })
+        })
+        .then(function(resp) { return resp.json(); })
+        .then(function(data) {
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (data.error) { if (tableEl) tableEl.innerHTML = '<div style="padding:12px;font-size:13px;color:#cf222e;font-family:\'SF Mono\',monospace;">' + escapeHtml(data.error) + '</div>'; return; }
+            _payoutsData = data.payouts || [];
+            _payoutsParticipants = data.participants || {};
+            renderPayoutsTable();
+            updateTabBadges();
+        })
+        .catch(function(err) {
+            console.error('Load payouts failed:', err);
+            if (loadingEl) loadingEl.style.display = 'none';
+        });
+    }
+
+    function renderPayoutsTable() {
+        var tableDiv = document.getElementById('payouts-table');
+        var summaryDiv = document.getElementById('payouts-summary');
+        if (!_payoutsData || _payoutsData.length === 0) {
+            tableDiv.innerHTML = '<div style="padding:12px;font-size:13px;color:#999;font-family:\'SF Mono\',monospace;">No payouts for this period.</div>';
+            summaryDiv.innerHTML = '';
+            return;
+        }
+
+        var html = '<table style="width:100%;border-collapse:collapse;">';
+        html += '<thead><tr>';
+        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;"><input type="checkbox" id="select-all-payouts"></th>';
+        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Participant</th>';
+        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Period</th>';
+        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Type</th>';
+        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:right;padding:8px 12px;border-bottom:2px solid #000;">Days</th>';
+        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:right;padding:8px 12px;border-bottom:2px solid #000;">Amount</th>';
+        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Status</th>';
+        html += '</tr></thead><tbody>';
+
+        var pendingCount = 0;
+        var pendingTotal = 0;
+
+        for (var i = 0; i < _payoutsData.length; i++) {
+            var p = _payoutsData[i];
+            var part = _payoutsParticipants[p.participant_id] || {};
+            var isPending = p.status === 'pending';
+            if (isPending) { pendingCount++; pendingTotal += p.amount_usd; }
+
+            var statusColor = p.status === 'approved' ? '#2ea043' : p.status === 'paid' ? '#0066cc' : p.status === 'rejected' ? '#cf222e' : '#b08800';
+            var typeLabel = p.payout_type === 'trial' ? 'Trial' : p.payout_type === 'partial' ? 'Partial' : 'Full';
+
+            html += '<tr>';
+            html += '<td style="padding:7px 12px;border-bottom:1px solid #eee;">';
+            if (isPending) html += '<input type="checkbox" class="payout-checkbox" data-id="' + escapeHtml(p.payout_id) + '">';
+            html += '</td>';
+            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">' + escapeHtml(part.name || p.participant_id) + '</td>';
+            html += '<td style="padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;color:#777;border-bottom:1px solid #eee;">' + escapeHtml(p.period_start) + ' to ' + escapeHtml(p.period_end) + '</td>';
+            html += '<td style="padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">' + typeLabel + '</td>';
+            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;text-align:right;border-bottom:1px solid #eee;">' + p.days + '</td>';
+            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;text-align:right;border-bottom:1px solid #eee;font-weight:700;">$' + p.amount_usd.toFixed(2) + '</td>';
+            html += '<td style="padding:7px 12px;font-size:11px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;"><span style="color:' + statusColor + ';font-weight:700;text-transform:uppercase;">' + escapeHtml(p.status) + '</span>';
+            if (p.approved_by) html += '<br><span style="color:#999;font-size:10px;">by ' + escapeHtml(p.approved_by) + '</span>';
+            html += '</td>';
+            html += '</tr>';
+        }
+
+        html += '</tbody></table>';
+        tableDiv.innerHTML = html;
+
+        // Select all checkbox
+        document.getElementById('select-all-payouts').addEventListener('change', function() {
+            var checked = this.checked;
+            document.querySelectorAll('.payout-checkbox').forEach(function(cb) { cb.checked = checked; });
+            updatePayoutsSummary();
+        });
+        document.querySelectorAll('.payout-checkbox').forEach(function(cb) {
+            cb.addEventListener('change', updatePayoutsSummary);
+        });
+
+        // Summary
+        if (pendingCount > 0) {
+            summaryDiv.innerHTML = '<div style="display:flex;gap:12px;align-items:center;padding:12px 0;">' +
+                '<div id="payout-summary-text" style="font-size:13px;font-family:\'SF Mono\',monospace;color:#777;">Select payouts to approve</div>' +
+                '<span id="confirm-payouts-btn" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #2ea043;background:#2ea043;color:#fff;cursor:pointer;font-family:\'SF Mono\',monospace;">Confirm and Send</span>' +
+            '</div>';
+
+            document.getElementById('confirm-payouts-btn').addEventListener('click', function() {
+                var selected = [];
+                document.querySelectorAll('.payout-checkbox:checked').forEach(function(cb) { selected.push(cb.dataset.id); });
+                if (selected.length === 0) return;
+
+                var total = 0;
+                for (var j = 0; j < _payoutsData.length; j++) {
+                    if (selected.indexOf(_payoutsData[j].payout_id) >= 0) total += _payoutsData[j].amount_usd;
+                }
+
+                showPayoutConfirmModal(selected, total);
+            });
+        } else {
+            summaryDiv.innerHTML = '';
+        }
+    }
+
+    function showPayoutConfirmModal(payoutIds, total) {
+        var overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+
+        var modal = document.createElement('div');
+        modal.style.cssText = 'background:#fff;border:1px solid #000;padding:32px;max-width:480px;width:90%;font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;';
+
+        modal.innerHTML = '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;">Confirm Payouts</div>' +
+            '<div style="font-size:14px;margin-bottom:8px;"><strong>' + payoutIds.length + ' payouts</strong> totaling <strong>$' + total.toFixed(2) + '</strong></div>' +
+            '<div style="font-size:12px;color:#666;margin-bottom:20px;">This will generate Auszahlungsbelege and email them to participants.</div>' +
+            '<div style="font-size:12px;margin-bottom:16px;">Type <strong>CONFIRM</strong> to proceed:</div>' +
+            '<input type="text" id="confirm-input" style="width:100%;font-size:14px;font-family:\'SF Mono\',monospace;padding:8px 12px;border:1px solid #ccc;margin-bottom:20px;outline:none;" placeholder="CONFIRM">' +
+            '<div style="display:flex;gap:8px;justify-content:flex-end;">' +
+                '<span id="modal-cancel" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #000;cursor:pointer;">Cancel</span>' +
+                '<span id="modal-approve" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #ccc;background:#ccc;color:#999;cursor:not-allowed;">Approve</span>' +
+            '</div>';
+
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        var input = document.getElementById('confirm-input');
+        var approveBtn = document.getElementById('modal-approve');
+        input.focus();
+
+        input.addEventListener('input', function() {
+            if (input.value.trim() === 'CONFIRM') {
+                approveBtn.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #2ea043;background:#2ea043;color:#fff;cursor:pointer;';
+            } else {
+                approveBtn.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #ccc;background:#ccc;color:#999;cursor:not-allowed;';
+            }
+        });
+
+        document.getElementById('modal-cancel').addEventListener('click', function() {
+            document.body.removeChild(overlay);
+        });
+
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) document.body.removeChild(overlay);
+        });
+
+        approveBtn.addEventListener('click', function() {
+            if (input.value.trim() !== 'CONFIRM') return;
+            approveBtn.textContent = 'Processing...';
+            approveBtn.style.pointerEvents = 'none';
+
+            fetch(ONBOARD_API + '/payouts/approve', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ payout_ids: payoutIds })
+            })
+            .then(function(resp) { return resp.json(); })
+            .then(function(data) {
+                document.body.removeChild(overlay);
+                if (data.error) { alert(data.error); return; }
+                var sel = document.getElementById('payout-month').value.split('-');
+                generatePayouts(parseInt(sel[0]), parseInt(sel[1]));
+            })
+            .catch(function(err) {
+                console.error('Approve failed:', err);
+                document.body.removeChild(overlay);
+            });
+        });
+
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && input.value.trim() === 'CONFIRM') approveBtn.click();
+            if (e.key === 'Escape') document.body.removeChild(overlay);
+        });
+    }
+
+    function fetchBadgeCounts() {
+        // Fetch pending payouts count
+        var now = new Date();
+        fetch(ONBOARD_API + '/payouts/generate', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ year: now.getFullYear(), month: now.getMonth() + 1 })
+        })
+        .then(function(resp) { return resp.json(); })
+        .then(function(data) {
+            if (data.payouts) {
+                _payoutsData = data.payouts;
+                _payoutsParticipants = data.participants || {};
+            }
+            var pending = (data.payouts || []).filter(function(p) { return p.status === 'pending'; }).length;
+            var tab = document.getElementById('tab-payouts');
+            if (tab) tab.textContent = pending > 0 ? 'Payouts (' + pending + ')' : 'Payouts';
+        })
+        .catch(function() {});
+
+        // Fetch pending reviews count
+        fetchPendingCount();
+    }
+
+    function updateTabBadges() {
+        // Payouts badge
+        var pendingPayouts = (_payoutsData || []).filter(function(p) { return p.status === 'pending'; }).length;
+        var payoutsTab = document.getElementById('tab-payouts');
+        if (payoutsTab) {
+            payoutsTab.textContent = pendingPayouts > 0 ? 'Payouts (' + pendingPayouts + ')' : 'Payouts';
+            if (pendingPayouts > 0) payoutsTab.style.color = payoutsTab.style.borderBottomColor === 'transparent' ? '#b08800' : payoutsTab.style.color;
+        }
+
+        // Participants badge (pending reviews)
+        fetchPendingCount();
+    }
+
+    function fetchPendingCount() {
+        fetch(ONBOARD_API + '/participants', {
+            headers: { 'Authorization': 'Bearer ' + _authToken }
+        })
+        .then(function(resp) { return resp.json(); })
+        .then(function(data) {
+            var pending = (data.participants || []).filter(function(p) { return p.status === 'onboarded'; }).length;
+            var partTab = document.getElementById('tab-participants');
+            if (partTab) {
+                partTab.textContent = pending > 0 ? 'Participants (' + pending + ')' : 'Participants';
+                if (pending > 0) partTab.style.color = partTab.style.borderBottomColor === 'transparent' ? '#b08800' : partTab.style.color;
+            }
+        })
+        .catch(function() {});
+    }
+
+    function updatePayoutsSummary() {
+        var selected = [];
+        var total = 0;
+        document.querySelectorAll('.payout-checkbox:checked').forEach(function(cb) {
+            selected.push(cb.dataset.id);
+        });
+        for (var j = 0; j < _payoutsData.length; j++) {
+            if (selected.indexOf(_payoutsData[j].payout_id) >= 0) total += _payoutsData[j].amount_usd;
+        }
+        var textEl = document.getElementById('payout-summary-text');
+        var btnEl = document.getElementById('confirm-payouts-btn');
+        if (selected.length > 0) {
+            textEl.textContent = selected.length + ' payouts selected, total: $' + total.toFixed(2);
+            textEl.style.color = '#000';
+            textEl.style.fontWeight = '700';
+            btnEl.style.display = 'inline-block';
+        } else {
+            textEl.textContent = 'Select payouts to approve';
+            textEl.style.color = '#777';
+            textEl.style.fontWeight = '400';
+            btnEl.style.display = 'none';
+        }
+    }
+
+    function fetchPendingReview() {
+        fetch(ONBOARD_API + '/participants', {
+            headers: { 'Authorization': 'Bearer ' + _authToken }
+        })
+        .then(function(resp) { return resp.json(); })
+        .then(function(data) {
+            var pending = (data.participants || []).filter(function(p) { return p.status === 'onboarded'; });
+            var reviewDiv = document.getElementById('pending-review');
+            if (!reviewDiv) return;
+            if (pending.length === 0) { reviewDiv.innerHTML = ''; return; }
+
+            var html = '<div class="outline-box" style="padding:24px;">';
+            html += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#000;margin-bottom:14px;">Pending Review (' + pending.length + ')</div>';
+            html += '<table style="width:100%;border-collapse:collapse;">';
+            html += '<thead><tr>';
+            html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">ID</th>';
+            html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Name</th>';
+            html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Email</th>';
+            html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Country</th>';
+            html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Bank</th>';
+            html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Actions</th>';
+            html += '</tr></thead><tbody>';
+
+            for (var i = 0; i < pending.length; i++) {
+                var p = pending[i];
+                var bank = p.payout_details ? (p.payout_details.iban || p.payout_details.account || '') : '';
+                var holder = p.payout_details ? (p.payout_details.holder || '') : '';
+                html += '<tr>';
+                html += '<td style="padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">' + escapeHtml(p.participant_id || '') + '</td>';
+                html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">' + escapeHtml(p.name || '') + '</td>';
+                html += '<td style="padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;color:#777;border-bottom:1px solid #eee;">' + escapeHtml(p.email || '') + '</td>';
+                html += '<td style="padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">' + escapeHtml(p.country || '') + '</td>';
+                html += '<td style="padding:7px 12px;font-size:11px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">' + escapeHtml(holder) + '<br><span style="color:#777;">' + escapeHtml(bank) + '</span></td>';
+                html += '<td style="padding:7px 12px;border-bottom:1px solid #eee;">';
+                html += '<span class="review-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-action="approve" style="display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 12px;border:1px solid #2ea043;color:#2ea043;cursor:pointer;font-family:\'SF Mono\',monospace;margin-right:6px;">Approve</span>';
+                html += '<span class="review-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-action="reject" style="display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 12px;border:1px solid #cf222e;color:#cf222e;cursor:pointer;font-family:\'SF Mono\',monospace;">Reject</span>';
+                html += '</td></tr>';
+            }
+
+            html += '</tbody></table></div>';
+            reviewDiv.innerHTML = html;
+
+            /* Wire up review buttons */
+            reviewDiv.querySelectorAll('.review-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var pid = btn.dataset.id;
+                    var action = btn.dataset.action;
+                    if (!confirm(action.charAt(0).toUpperCase() + action.slice(1) + ' ' + pid + '?')) return;
+                    btn.textContent = '...';
+                    btn.style.pointerEvents = 'none';
+
+                    fetch(ONBOARD_API + '/review', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ participant_id: pid, action: action })
+                    })
+                    .then(function(resp) { return resp.json(); })
+                    .then(function(data) {
+                        if (data.error) { alert(data.error); btn.textContent = action; btn.style.pointerEvents = ''; return; }
+                        fetchPendingReview();
+                    })
+                    .catch(function(err) {
+                        console.error('Review failed:', err);
+                        btn.textContent = action;
+                        btn.style.pointerEvents = '';
+                    });
+                });
+            });
+        })
+        .catch(function(err) { console.error('Fetch pending failed:', err); });
+    }
+
     function initGoogleSignIn() {
         if (typeof google === 'undefined') {
             setTimeout(initGoogleSignIn, 200);
@@ -2118,6 +2506,8 @@
         document.getElementById('my-overview').style.display = 'none';
         document.getElementById('participants-view').style.display = 'none';
         document.getElementById('tab-participants').style.display = 'none';
+        document.getElementById('tab-payouts').style.display = 'none';
+        document.getElementById('payouts-view').style.display = 'none';
         document.getElementById('all-users-view').style.display = 'block';
         document.getElementById('all-users-view').style.visibility = 'visible';
         document.getElementById('all-users-view').style.position = 'static';
@@ -2184,8 +2574,14 @@
             document.getElementById('auth-user').style.display = '';
             document.getElementById('auth-user-name').textContent = data.user.name || data.user.email;
 
-            /* Show participants tab for admins */
+            /* Show participants and payouts tabs for admins */
             document.getElementById('tab-participants').style.display = _isAdmin ? 'inline' : 'none';
+            document.getElementById('tab-payouts').style.display = _isAdmin ? 'inline' : 'none';
+
+            /* Load badge counts in background */
+            if (_isAdmin) {
+                fetchBadgeCounts();
+            }
 
             /* Restore My Overview HTML from skeleton and render */
             document.getElementById('my-overview').innerHTML = _myOverviewOrigHTML;
