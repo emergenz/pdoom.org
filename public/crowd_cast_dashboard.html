@@ -2510,17 +2510,21 @@
         html += '<th style="' + thStyle + '">Name</th>';
         html += '<th style="' + thStyle + '">Email</th>';
         html += '<th style="' + thStyle + '">Country</th>';
+        html += '<th style="' + thStyle + '">Bank</th>';
         if (mode === 'status') html += '<th style="' + thStyle + '">Status</th>';
         html += '<th style="' + thStyle + '">Actions</th>';
         html += '</tr></thead><tbody>';
 
         for (var i = 0; i < participants.length; i++) {
             var p = participants[i];
+            var bank = p.payout_details ? (p.payout_details.iban || p.payout_details.account || '') : '';
+            var holder = p.payout_details ? (p.payout_details.holder || '') : '';
             html += '<tr>';
             html += '<td style="' + tdStyle + '">' + escapeHtml(p.participant_id || '') + '</td>';
             html += '<td style="' + tdStyle + 'font-size:13px;">' + escapeHtml(p.name || '') + '</td>';
             html += '<td style="' + tdStyle + 'color:#777;">' + escapeHtml(p.email || '') + '</td>';
             html += '<td style="' + tdStyle + '">' + escapeHtml(p.country || '') + '</td>';
+            html += '<td style="' + tdStyle + 'font-size:11px;">' + escapeHtml(holder) + '<br><span style="color:#777;">' + escapeHtml(bank) + '</span></td>';
 
             if (mode === 'status') {
                 var statusColor = p.status === 'active' ? '#2ea043' : p.status === 'paused' ? '#b08800' : '#cf222e';
