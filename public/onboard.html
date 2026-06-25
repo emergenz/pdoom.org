@@ -319,20 +319,58 @@
                 <div class="step-label">Step 1 of 3 · Your details</div>
 
                 <div class="field">
-                    <label class="field-label">Full legal name</label>
+                    <label class="field-label">Full legal name *</label>
                     <input class="field-input" type="text" id="f-name" placeholder="Jane Doe" required>
                 </div>
                 <div class="field">
-                    <label class="field-label">Email address</label>
+                    <label class="field-label">Email address *</label>
                     <input class="field-input" type="email" id="f-email" placeholder="jane@university.edu" required>
                 </div>
                 <div class="field">
-                    <label class="field-label">Mailing address</label>
-                    <input class="field-input" type="text" id="f-address" placeholder="Street, City, Postal Code" required>
+                    <label class="field-label">Mailing address *</label>
+                    <input class="field-input" type="text" id="f-address" placeholder="Street 123, 80636 Munich, Germany" required>
+                    <div class="field-hint">Street, postal code, city</div>
                 </div>
                 <div class="field">
-                    <label class="field-label">Country of residence</label>
-                    <input class="field-input" type="text" id="f-country" placeholder="Germany" required>
+                    <label class="field-label">Country of residence *</label>
+                    <select class="field-select" id="f-country">
+                        <option value="">Select country...</option>
+                        <option value="Germany">Germany</option>
+                        <option value="United Kingdom">United Kingdom</option>
+                        <option value="Switzerland">Switzerland</option>
+                        <option value="Austria">Austria</option>
+                        <option value="Netherlands">Netherlands</option>
+                        <option value="France">France</option>
+                        <option value="Sweden">Sweden</option>
+                        <option value="Denmark">Denmark</option>
+                        <option value="Norway">Norway</option>
+                        <option value="Finland">Finland</option>
+                        <option value="Belgium">Belgium</option>
+                        <option value="Italy">Italy</option>
+                        <option value="Spain">Spain</option>
+                        <option value="Portugal">Portugal</option>
+                        <option value="Poland">Poland</option>
+                        <option value="Czech Republic">Czech Republic</option>
+                        <option value="Hungary">Hungary</option>
+                        <option value="Romania">Romania</option>
+                        <option value="Ireland">Ireland</option>
+                        <option value="Greece">Greece</option>
+                        <option value="India">India</option>
+                        <option value="China">China</option>
+                        <option value="Japan">Japan</option>
+                        <option value="United States">United States</option>
+                        <option value="Canada">Canada</option>
+                        <option value="Australia">Australia</option>
+                        <option value="Israel">Israel</option>
+                        <option value="Turkey">Turkey</option>
+                        <option value="Singapore">Singapore</option>
+                        <option value="Hong Kong">Hong Kong</option>
+                        <option value="South Korea">South Korea</option>
+                        <option value="Taiwan">Taiwan</option>
+                        <option value="Brazil">Brazil</option>
+                        <option value="Mexico">Mexico</option>
+                        <option value="South Africa">South Africa</option>
+                    </select>
                 </div>
 
                 <div class="check-row">
@@ -359,19 +397,19 @@
                 </div>
 
                 <div class="field">
-                    <label class="field-label">Account holder name</label>
+                    <label class="field-label">Account holder name *</label>
                     <input class="field-input" type="text" id="f-holder" placeholder="As shown on your bank account">
                 </div>
                 <div class="field">
-                    <label class="field-label">IBAN or account number</label>
+                    <label class="field-label">IBAN or account number *</label>
                     <input class="field-input" type="text" id="f-iban" placeholder="DE89 3704 0044 0532 0130 00">
                 </div>
                 <div class="field">
-                    <label class="field-label">BIC/SWIFT (if applicable)</label>
+                    <label class="field-label">BIC/SWIFT</label>
                     <input class="field-input" type="text" id="f-bic" placeholder="COBADEFFXXX">
                 </div>
                 <div class="field">
-                    <label class="field-label">Bank name and country</label>
+                    <label class="field-label">Bank name and country *</label>
                     <input class="field-input" type="text" id="f-bank" placeholder="Commerzbank, Germany">
                 </div>
                 <div class="field">
@@ -597,7 +635,8 @@
                 <div style="text-align: center; padding: var(--s-8) 0;">
                     <div class="success-icon">&#10003;</div>
                     <h2 class="onboard-title">You're in!</h2>
-                    <p class="onboard-lede">Your onboarding is complete. Download the app and start recording whenever you're ready.</p>
+                    <p class="onboard-lede">Your onboarding is complete. We'll review your details and confirm your participation as soon as possible.</p>
+                    <p style="font-family: var(--font-sans); font-size: 14px; color: var(--fg3); margin-top: var(--s-4);">In the meantime, you can already download the app and get set up.</p>
                     <a class="btn btn-primary" href="/docs/crowd-cast/install/" style="text-decoration:none; margin-top: var(--s-5); display: inline-flex;">Download crowd-cast</a>
                 </div>
             </div>
@@ -713,45 +752,79 @@
 
     function validateStep(step) {
         if (step === 0) {
-            const required = ['f-name', 'f-email', 'f-address', 'f-country'];
             let valid = true;
             let errors = [];
-            required.forEach(id => {
+
+            function checkField(id, test, msg) {
                 const el = document.getElementById(id);
-                if (!el.value.trim()) {
+                const val = el.value ? el.value.trim() : '';
+                if (!test(val)) {
                     el.classList.add('error');
+                    if (msg) errors.push(msg);
                     valid = false;
                 } else {
                     el.classList.remove('error');
                 }
-            });
-
-            // Email format
-            const emailEl = document.getElementById('f-email');
-            if (emailEl.value.trim() && !validateEmail(emailEl.value.trim())) {
-                emailEl.classList.add('error');
-                errors.push('Please enter a valid email address.');
-                valid = false;
             }
 
+            // Name: at least first and last name
+            checkField('f-name',
+                v => v && v.includes(' ') && v.split(/\s+/).length >= 2 && v.length >= 3,
+                'Please enter your full legal name (first and last name).');
+
+            // Email
+            checkField('f-email',
+                v => v && validateEmail(v),
+                'Please enter a valid email address.');
+
+            // Address: reasonable length and structure
+            checkField('f-address',
+                v => v && v.length >= 10,
+                'Please enter your full mailing address (street, postal code, city).');
+
+            // Country: must be selected
+            checkField('f-country',
+                v => v && v.length > 0,
+                'Please select your country of residence.');
+
+            // Checkboxes
             const checks = ['f-age', 'f-private', 'f-tax', 'f-sanctions'];
             checks.forEach(id => {
                 if (!document.getElementById(id).checked) valid = false;
             });
 
-            // Validate bank details
-            ['f-holder', 'f-iban'].forEach(id => {
-                const el = document.getElementById(id);
-                if (!el.value.trim()) { el.classList.add('error'); valid = false; }
-                else el.classList.remove('error');
-            });
-            // IBAN validation (only if it matches IBAN structure: 2 letters + 2 digits, min 15 chars)
+            // Account holder: required, at least 2 words
+            checkField('f-holder',
+                v => v && v.includes(' ') && v.length >= 3,
+                'Please enter the account holder name as shown on your bank account.');
+
+            // IBAN/account number: required, reasonable length
+            checkField('f-iban',
+                v => v && v.replace(/\s+/g, '').length >= 8,
+                'Please enter your IBAN or account number.');
+
+            // IBAN checksum validation (only if it matches IBAN structure)
             const ibanVal = document.getElementById('f-iban').value.trim().replace(/\s+/g, '');
             if (ibanVal && /^[A-Za-z]{2}[0-9]{2}/.test(ibanVal) && ibanVal.length >= 15 && !validateIBAN(ibanVal)) {
                 document.getElementById('f-iban').classList.add('error');
-                errors.push('IBAN appears invalid. Please double-check.');
+                errors.push('IBAN checksum is invalid. Please double-check.');
                 valid = false;
             }
+
+            // BIC/SWIFT: optional but if provided, must be 8 or 11 alphanumeric chars
+            const bicVal = document.getElementById('f-bic').value.trim();
+            if (bicVal && !/^[A-Za-z0-9]{8}([A-Za-z0-9]{3})?$/.test(bicVal)) {
+                document.getElementById('f-bic').classList.add('error');
+                errors.push('BIC/SWIFT must be 8 or 11 characters.');
+                valid = false;
+            } else {
+                document.getElementById('f-bic').classList.remove('error');
+            }
+
+            // Bank name: required
+            checkField('f-bank',
+                v => v && v.length >= 3,
+                'Please enter your bank name and country.');
 
             if (!valid) {
                 alert(errors.length ? errors.join('\n') : 'Please fill in all required fields and check all boxes.');

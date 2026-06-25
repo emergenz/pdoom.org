@@ -1849,9 +1849,16 @@
         }
 
         var html = '';
+
+        /* Pending review section */
+        html += '<div id="pending-review" style="margin-bottom:28px;"></div>';
+
         html += _buildParticipantSection('PARTICIPANTS', participants, 'participant');
         html += _buildParticipantSection('ADMINS', admins, 'admin');
         container.innerHTML = html;
+
+        /* Fetch pending onboarded participants */
+        fetchPendingReview();
 
         /* Wire up remove buttons */
         container.querySelectorAll('.participant-remove-btn').forEach(function(btn) {
@@ -2081,6 +2088,80 @@
 
         html += '</div>';
         return html;
+    }
+
+    var ONBOARD_API = DASHBOARD_API.replace('/dashboard', '/onboard');
+
+    function fetchPendingReview() {
+        fetch(ONBOARD_API + '/participants', {
+            headers: { 'Authorization': 'Bearer ' + _authToken }
+        })
+        .then(function(resp) { return resp.json(); })
+        .then(function(data) {
+            var pending = (data.participants || []).filter(function(p) { return p.status === 'onboarded'; });
+            var reviewDiv = document.getElementById('pending-review');
+            if (!reviewDiv) return;
+            if (pending.length === 0) { reviewDiv.innerHTML = ''; return; }
+
+            var html = '<div class="outline-box" style="padding:24px;">';
+            html += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#000;margin-bottom:14px;">Pending Review (' + pending.length + ')</div>';
+            html += '<table style="width:100%;border-collapse:collapse;">';
+            html += '<thead><tr>';
+            html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">ID</th>';
+            html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Name</th>';
+            html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Email</th>';
+            html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Country</th>';
+            html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Bank</th>';
+            html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Actions</th>';
+            html += '</tr></thead><tbody>';
+
+            for (var i = 0; i < pending.length; i++) {
+                var p = pending[i];
+                var bank = p.payout_details ? (p.payout_details.iban || p.payout_details.account || '') : '';
+                var holder = p.payout_details ? (p.payout_details.holder || '') : '';
+                html += '<tr>';
+                html += '<td style="padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">' + escapeHtml(p.participant_id || '') + '</td>';
+                html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">' + escapeHtml(p.name || '') + '</td>';
+                html += '<td style="padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;color:#777;border-bottom:1px solid #eee;">' + escapeHtml(p.email || '') + '</td>';
+                html += '<td style="padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">' + escapeHtml(p.country || '') + '</td>';
+                html += '<td style="padding:7px 12px;font-size:11px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">' + escapeHtml(holder) + '<br><span style="color:#777;">' + escapeHtml(bank) + '</span></td>';
+                html += '<td style="padding:7px 12px;border-bottom:1px solid #eee;">';
+                html += '<span class="review-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-action="approve" style="display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 12px;border:1px solid #2ea043;color:#2ea043;cursor:pointer;font-family:\'SF Mono\',monospace;margin-right:6px;">Approve</span>';
+                html += '<span class="review-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-action="reject" style="display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 12px;border:1px solid #cf222e;color:#cf222e;cursor:pointer;font-family:\'SF Mono\',monospace;">Reject</span>';
+                html += '</td></tr>';
+            }
+
+            html += '</tbody></table></div>';
+            reviewDiv.innerHTML = html;
+
+            /* Wire up review buttons */
+            reviewDiv.querySelectorAll('.review-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var pid = btn.dataset.id;
+                    var action = btn.dataset.action;
+                    if (!confirm(action.charAt(0).toUpperCase() + action.slice(1) + ' ' + pid + '?')) return;
+                    btn.textContent = '...';
+                    btn.style.pointerEvents = 'none';
+
+                    fetch(ONBOARD_API + '/review', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ participant_id: pid, action: action })
+                    })
+                    .then(function(resp) { return resp.json(); })
+                    .then(function(data) {
+                        if (data.error) { alert(data.error); btn.textContent = action; btn.style.pointerEvents = ''; return; }
+                        fetchPendingReview();
+                    })
+                    .catch(function(err) {
+                        console.error('Review failed:', err);
+                        btn.textContent = action;
+                        btn.style.pointerEvents = '';
+                    });
+                });
+            });
+        })
+        .catch(function(err) { console.error('Fetch pending failed:', err); });
     }
 
     function initGoogleSignIn() {
