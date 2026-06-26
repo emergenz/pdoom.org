@@ -571,7 +571,9 @@
             <div class="center-content">
                 <h1>crowd-cast</h1>
                 <div class="subtitle">Capturing Long-Horizon Human Work</div>
-                <button id="landing-signin" onclick="google.accounts.id.prompt()" style="display:inline-block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:12px 36px;border:2px solid #000;background:#000;color:#fff;cursor:pointer;font-family:'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;margin-top:20px;transition:background 0.15s,color 0.15s;" onmouseover="this.style.background='#fff';this.style.color='#000'" onmouseout="this.style.background='#000';this.style.color='#fff'">Sign In</button>
+                <button id="landing-signin" onclick="triggerSignIn()" style="display:inline-block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:12px 36px;border:2px solid #000;background:#000;color:#fff;cursor:pointer;font-family:'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;margin-top:20px;transition:background 0.15s,color 0.15s;" onmouseover="this.style.background='#fff';this.style.color='#000'" onmouseout="this.style.background='#000';this.style.color='#fff'">Sign In</button>
+                <div id="landing-signin-fallback" style="position:absolute;opacity:0;pointer-events:none;"></div>
+                <div style="margin-top:16px;"><a href="#" onclick="enterGuestView();return false;" style="font-size:12px;font-family:'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;color:#777;text-decoration:none;border-bottom:1px solid #aaa;letter-spacing:0.5px;">View as Guest</a></div>
             </div>
             <div id="smiskis-container"></div>
             <div class="landing-footer">
@@ -696,7 +698,7 @@
             <!-- Top users table -->
             <div class="table-box outline-box" id="users-section">
                 <div id="users-table-view">
-                    <span class="section-title">Users by Estimated Hours</span>
+                    <span class="section-title" id="users-table-title">Users by Estimated Hours</span>
                     <div style="overflow-x: auto;">
                         <table id="users-table">
                             <thead>
@@ -886,7 +888,8 @@
             const key = (info && info.email) ? info.email : hash;
             if (!_seenEmails.has(key)) { _seenEmails.add(key); uniqueUsers++; }
         }
-        document.getElementById('card-users').textContent = fmt(uniqueUsers);
+        document.getElementById('card-users').textContent = fmt(_isAdmin ? uniqueUsers : Object.keys(perUser).length);
+        document.querySelector('#card-users').closest('.card').querySelector('.card-label').textContent = _isAdmin ? 'Users' : 'Devices';
         const todayEntry = daily.length ? daily[daily.length - 1] : null;
         document.getElementById('card-users-sub').textContent =
             todayEntry ? '+' + fmt(todayEntry.new_segments) + ' seg today' : '';
@@ -897,8 +900,12 @@
         /* -- Daily trend chart -- */
         renderTrend(daily);
 
-        /* -- Action donut -- */
-        renderActionDonut(hist, detail);
+        /* -- Action / App donut -- */
+        if (meta.app_histogram && Object.keys(meta.app_histogram).length > 0) {
+            renderAppDonut(meta.app_histogram);
+        } else {
+            renderActionDonut(hist, detail);
+        }
 
         /* -- Users table -- */
         _cachedPerUser = perUser;
@@ -914,7 +921,7 @@
     /* ---- Trend chart ---- */
     function renderTrend(daily) {
         const labels = daily.map(d => d.date);
-        const minutes = daily.map(d => d.new_estimated_minutes || 0);
+        const hours = daily.map(d => Math.round(((d.new_estimated_minutes || 0) / 60) * 10) / 10);
         const steps = daily.map(d => d.new_action_steps || 0);
 
         const ctx = document.getElementById('trend-chart').getContext('2d');
@@ -927,8 +934,8 @@
                 labels: labels,
                 datasets: [
                     {
-                        label: 'New minutes',
-                        data: minutes,
+                        label: 'New hours',
+                        data: hours,
                         backgroundColor: '#000000',
                         borderColor: '#000000',
                         borderWidth: 1,
@@ -936,7 +943,7 @@
                         order: 2,
                     },
                     {
-                        label: 'New action steps',
+                        label: _isGuest ? 'New interactions' : 'New action steps',
                         data: steps,
                         type: 'line',
                         borderColor: '#999999',
@@ -971,13 +978,13 @@
                     },
                     y: {
                         position: 'left',
-                        title: { display: true, text: 'Minutes', font: { size: 11, weight: 'bold' } },
+                        title: { display: true, text: 'Hours', font: { size: 11, weight: 'bold' } },
                         grid: { color: '#eeeeee' },
                         beginAtZero: true,
                     },
                     y1: {
                         position: 'right',
-                        title: { display: true, text: 'Steps', font: { size: 11, weight: 'bold' } },
+                        title: { display: true, text: _isGuest ? 'Interactions' : 'Steps', font: { size: 11, weight: 'bold' } },
                         grid: { drawOnChartArea: false },
                         beginAtZero: true,
                     },
@@ -1021,7 +1028,7 @@
             }
         }
 
-        document.getElementById('action-chart-title').textContent = 'Action Families';
+        document.getElementById('action-chart-title').textContent = _isGuest ? 'Interaction Types' : 'Action Families';
         document.getElementById('action-back-btn').style.display = 'none';
         document.getElementById('action-detail-table').style.display = 'none';
 
@@ -1065,6 +1072,171 @@
                             }
                         }
                     },
+                },
+            },
+        });
+    }
+
+    /* App usage donut for guest view — category → app drill-down */
+    /* Map app bundle IDs / names → category. Uses substring matching. */
+    var APP_CATEGORY_RULES = [
+        /* Coding */
+        ['vscode', 'Coding'], ['cursor', 'Coding'], ['com.todesktop.230313mzl4w4u92', 'Coding'],
+        ['antigravity', 'Coding'], ['codex', 'Coding'], ['zed', 'Coding'],
+        ['intellij', 'Coding'], ['pycharm', 'Coding'], ['webstorm', 'Coding'],
+        ['rstudio', 'Coding'], ['neovim', 'Coding'], ['vim', 'Coding'],
+        ['code', 'Coding'],
+        /* Terminal */
+        ['ghostty', 'Terminal'], ['alacritty', 'Terminal'], ['windowsterminal', 'Terminal'],
+        ['iterm2', 'Terminal'], ['com.apple.terminal', 'Terminal'], ['wezterm', 'Terminal'],
+        ['cmuxterm', 'Terminal'],
+        /* Browser */
+        ['firefox', 'Browser'], ['chrome', 'Browser'], ['safari', 'Browser'],
+        ['thebrowser', 'Browser'], ['arc', 'Browser'], ['edge', 'Browser'],
+        /* Research */
+        ['preview', 'Research'], ['evince', 'Research'], ['zotero', 'Research'],
+        ['quicktime', 'Research'], ['obsidian', 'Research'],
+        /* Science */
+        ['archicad', 'Design'], ['chimerax', 'Science'], ['overleaf', 'Science'],
+        ['vitis', 'Science'], ['xsim', 'Science'],
+        /* Design */
+        ['illustrator', 'Design'], ['canva', 'Design'], ['powerpoint', 'Design'],
+        ['powerpnt', 'Design'], ['figma', 'Design'], ['keynote', 'Design'],
+        ['inkscape', 'Design'], ['freeform', 'Design'],
+        /* Communication */
+        ['slack', 'Communication'], ['discord', 'Communication'], ['zoom', 'Communication'],
+        ['whatsapp', 'Communication'], ['notion', 'Communication'], ['linear', 'Communication'],
+        ['mobilesms', 'Communication'],
+        /* AI Assistants */
+        ['claude', 'AI Assistants'], ['openai.chat', 'AI Assistants'], ['gemini', 'AI Assistants'],
+        /* Skip / Other */
+        ['finder', 'Other'], ['explorer', 'Other'], ['spotify', 'Other'],
+        ['loginwindow', 'Other'], ['systempreferences', 'Other'], ['activitymonitor', 'Other'],
+        ['calculator', 'Other'], ['stickies', 'Other'], ['appstore', 'Other'],
+        ['textedit', 'Other'], ['securityagent', 'Other'], ['archiveutility', 'Other'],
+        ['crowd-cast', 'Other'], ['docker', 'Other'], ['handbrake', 'Other'],
+        ['eduvpn', 'Other'], ['cisco', 'Other'], ['cron.electron', 'Other'],
+        ['excel', 'Other'], ['word', 'Other'], ['notepad', 'Other'],
+        ['fl64', 'Other'], ['ical', 'Other'], ['realvnc', 'Other'], ['oracle.java', 'Other'],
+    ];
+    function appCategory(appId) {
+        var lower = appId.toLowerCase();
+        for (var i = 0; i < APP_CATEGORY_RULES.length; i++) {
+            if (lower.indexOf(APP_CATEGORY_RULES[i][0]) !== -1) return APP_CATEGORY_RULES[i][1];
+        }
+        return 'Other';
+    }
+    var APP_DISPLAY_RULES = [
+        ['com.microsoft.vscode', 'VS Code'], ['vscodeinsiders', 'VS Code Insiders'],
+        ['com.todesktop.230313mzl4w4u92', 'Cursor'], ['cursor', 'Cursor'],
+        ['ghostty', 'Ghostty'], ['alacritty', 'Alacritty'], ['windowsterminal', 'Windows Terminal'],
+        ['iterm2', 'iTerm2'], ['com.apple.terminal', 'Terminal'], ['cmuxterm', 'Cmux Terminal'],
+        ['firefox', 'Firefox'], ['chrome', 'Chrome'], ['safari', 'Safari'],
+        ['thebrowser', 'Arc'], ['antigravity', 'Antigravity'],
+        ['codex', 'Codex'], ['zed', 'Zed'],
+        ['preview', 'Preview'], ['evince', 'Evince'], ['zotero', 'Zotero'],
+        ['chimerax', 'ChimeraX'], ['vitis', 'Vitis IDE'], ['archicad', 'Archicad'],
+        ['illustrator', 'Illustrator'], ['inkscape', 'Inkscape'], ['canva', 'Canva'],
+        ['powerpoint', 'PowerPoint'], ['powerpnt', 'PowerPoint'],
+        ['slack', 'Slack'], ['discord', 'Discord'], ['zoom', 'Zoom'],
+        ['whatsapp', 'WhatsApp'], ['notion.mail', 'Notion Mail'], ['notion', 'Notion'],
+        ['linear', 'Linear'], ['claude', 'Claude'], ['openai.chat', 'ChatGPT'],
+        ['gemini', 'Gemini'], ['spotify', 'Spotify'], ['quicktime', 'QuickTime'],
+        ['obsidian', 'Obsidian'], ['rstudio', 'RStudio'], ['code', 'VS Code'],
+    ];
+    function appDisplayName(appId) {
+        var lower = appId.toLowerCase();
+        for (var i = 0; i < APP_DISPLAY_RULES.length; i++) {
+            if (lower.indexOf(APP_DISPLAY_RULES[i][0]) !== -1) return APP_DISPLAY_RULES[i][1];
+        }
+        return appId;
+    }
+    var CATEGORY_COLORS = {
+        'Coding': '#2f7fbf', 'Terminal': '#7a5195', 'Browser': '#3fa35d',
+        'Research': '#f0a030', 'Science': '#9060c0', 'Design': '#e06070',
+        'Communication': '#40b0a0', 'AI Assistants': '#c08030', 'Other': '#999999',
+    };
+    var _appHist = {};
+    var _appDonutMode = 'category';
+
+    function renderAppDonut(appHist) {
+        _appHist = appHist;
+        _appDonutMode = 'category';
+        _drawCategoryDonut();
+    }
+
+    function _drawCategoryDonut() {
+        /* Group apps into categories */
+        var cats = {};
+        var catApps = {};  /* category → {app: secs} for drill-down */
+        for (var app in _appHist) {
+            var cat = appCategory(app);
+            cats[cat] = (cats[cat] || 0) + _appHist[app];
+            if (!catApps[cat]) catApps[cat] = {};
+            var display = appDisplayName(app);
+            catApps[cat][display] = (catApps[cat][display] || 0) + _appHist[app];
+        }
+        _cachedCatApps = catApps;
+
+        var sorted = Object.entries(cats).sort(function(a, b) { return b[1] - a[1]; });
+        var total = sorted.reduce(function(s, e) { return s + e[1]; }, 0);
+        var catKeys = sorted.map(function(e) { return e[0]; });
+        var labels = sorted.map(function(e) { return e[0] + ' (' + Math.round(e[1] / total * 100) + '%)'; });
+        var data = sorted.map(function(e) { return e[1]; });
+        var colors = sorted.map(function(e) { return CATEGORY_COLORS[e[0]] || '#999'; });
+
+        document.getElementById('action-chart-title').textContent = 'How We Work';
+        document.getElementById('action-back-btn').style.display = 'none';
+        document.getElementById('action-detail-table').style.display = 'none';
+
+        var ctx = document.getElementById('action-chart').getContext('2d');
+        if (actionChart) actionChart.destroy();
+
+        actionChart = new Chart(ctx, {
+            type: 'doughnut',
+            animation: false,
+            data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderColor: '#fff', borderWidth: 2 }] },
+            options: {
+                responsive: true, maintainAspectRatio: false, cutout: '55%',
+                onClick: function(evt, elems) {
+                    if (elems.length > 0) _drillIntoCategory(catKeys[elems[0].index]);
+                },
+                plugins: {
+                    legend: { position: 'right', labels: { font: { size: 11, family: "'SF Mono', SFMono-Regular, Menlo, Consolas, monospace" } } },
+                    tooltip: { callbacks: { label: function(c) { return c.label.split(' (')[0] + ': ' + (c.raw / 3600).toFixed(1) + 'h'; } } },
+                },
+            },
+        });
+    }
+
+    var _cachedCatApps = {};
+
+    function _drillIntoCategory(category) {
+        _appDonutMode = category;
+        var apps = _cachedCatApps[category] || {};
+        var sorted = Object.entries(apps).sort(function(a, b) { return b[1] - a[1]; });
+        var total = sorted.reduce(function(s, e) { return s + e[1]; }, 0);
+        var labels = sorted.map(function(e) { return e[0] + ' (' + Math.round(e[1] / total * 100) + '%)'; });
+        var data = sorted.map(function(e) { return e[1]; });
+        var baseColor = CATEGORY_COLORS[category] || '#999';
+        var colors = sorted.map(function(_, i) { return shadeColor(baseColor, i, sorted.length); });
+
+        document.getElementById('action-chart-title').textContent = category;
+        document.getElementById('action-back-btn').style.display = '';
+        document.getElementById('action-back-btn').onclick = function(e) { e.preventDefault(); _drawCategoryDonut(); };
+
+        var ctx = document.getElementById('action-chart').getContext('2d');
+        if (actionChart) actionChart.destroy();
+
+        actionChart = new Chart(ctx, {
+            type: 'doughnut',
+            animation: false,
+            data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderColor: '#fff', borderWidth: 2 }] },
+            options: {
+                responsive: true, maintainAspectRatio: false, cutout: '55%',
+                plugins: {
+                    legend: { position: 'right', labels: { font: { size: 11, family: "'SF Mono', SFMono-Regular, Menlo, Consolas, monospace" } } },
+                    tooltip: { callbacks: { label: function(c) { return c.label.split(' (')[0] + ': ' + (c.raw / 3600).toFixed(1) + 'h'; } } },
                 },
             },
         });
@@ -2661,7 +2833,53 @@
             document.getElementById('auth-signin'),
             { theme: 'outline', size: 'small', text: 'signin', shape: 'rectangular' }
         );
-        /* Landing page uses a custom black button that calls google.accounts.id.prompt() */
+        /* Hidden Google button on landing page as fallback when prompt() is suppressed */
+        google.accounts.id.renderButton(
+            document.getElementById('landing-signin-fallback'),
+            { theme: 'outline', size: 'large', text: 'signin_with', shape: 'rectangular' }
+        );
+    }
+
+    var _isGuest = false;
+    function enterGuestView() {
+        _isGuest = true;
+        document.getElementById('landing-page').style.display = 'none';
+        document.getElementById('smiskis-container').innerHTML = '';
+        document.getElementById('dashboard').style.display = 'block';
+        document.body.style.overflow = 'auto';
+        if (_smiskiBubbleInterval) { clearInterval(_smiskiBubbleInterval); _smiskiBubbleInterval = null; }
+        /* Hide tabs — guest only sees All Users */
+        document.getElementById('dashboard-tabs').style.display = 'none';
+        document.getElementById('my-overview').style.display = 'none';
+        document.getElementById('all-users-view').style.display = 'block';
+        document.getElementById('all-users-view').style.visibility = 'visible';
+        document.getElementById('all-users-view').style.position = 'static';
+        document.getElementById('all-users-view').style.height = 'auto';
+        /* Simplify labels for external visitors */
+        var sessionsLabel = document.querySelector('#card-sessions')?.closest('.card')?.querySelector('.card-label');
+        if (sessionsLabel) sessionsLabel.textContent = 'Recording Sessions';
+        var actionsLabel = document.querySelector('#card-actions')?.closest('.card')?.querySelector('.card-label');
+        if (actionsLabel) actionsLabel.textContent = 'Interactions Captured';
+        /* Rename table title for guests */
+        document.getElementById('users-table-title').textContent = 'Contributors';
+        /* Hide internal-facing panels */
+        document.querySelector('.health-box')?.style && (document.querySelector('.health-box').style.display = 'none');
+        if (window._lastMeta) render(window._lastMeta);
+    }
+
+    var _promptDismissed = false;
+    function triggerSignIn() {
+        if (_promptDismissed) {
+            /* Prompt was previously dismissed — go straight to fallback */
+            var fallbackBtn = document.querySelector('#landing-signin-fallback div[role="button"]');
+            if (fallbackBtn) fallbackBtn.click();
+            return;
+        }
+        google.accounts.id.prompt(function(notification) {
+            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                _promptDismissed = true;
+            }
+        });
     }
 
     function handleCredentialResponse(response) {
@@ -2690,6 +2908,14 @@
         document.getElementById('all-users-view').style.visibility = 'visible';
         document.getElementById('all-users-view').style.position = 'static';
         document.getElementById('all-users-view').style.height = 'auto';
+        _isGuest = false;
+        /* Restore internal labels */
+        var sessionsLabel = document.querySelector('#card-sessions')?.closest('.card')?.querySelector('.card-label');
+        if (sessionsLabel) sessionsLabel.textContent = 'Sessions';
+        var actionsLabel = document.querySelector('#card-actions')?.closest('.card')?.querySelector('.card-label');
+        if (actionsLabel) actionsLabel.textContent = 'Action Steps';
+        if (document.querySelector('.health-box')) document.querySelector('.health-box').style.display = '';
+        document.getElementById('users-table-title').textContent = 'Users by Estimated Hours';
         /* Show landing page, hide dashboard */
         document.getElementById('dashboard').style.display = 'none';
         document.getElementById('landing-page').style.display = '';
@@ -2701,6 +2927,7 @@
         if (!_authToken) return;
         /* Transition from landing page to dashboard */
         document.getElementById('landing-page').style.display = 'none';
+        document.getElementById('smiskis-container').innerHTML = '';
         document.getElementById('dashboard').style.display = 'block';
         document.body.style.overflow = 'auto';
         if (_smiskiBubbleInterval) { clearInterval(_smiskiBubbleInterval); _smiskiBubbleInterval = null; }
