@@ -2726,32 +2726,52 @@
         .then(function(resp) { return resp.json(); })
         .then(function(data) {
             var all = data.participants || [];
-            var pending = all.filter(function(p) { return p.status === 'onboarded'; });
-            var managed = all.filter(function(p) { return p.status === 'active' || p.status === 'paused' || p.status === 'terminated'; });
             var reviewDiv = document.getElementById('pending-review');
             if (!reviewDiv) return;
 
-            var html = '';
-
-            // Pending review section
-            if (pending.length > 0) {
-                html += '<div class="outline-box" style="padding:24px;margin-bottom:20px;">';
-                html += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#000;margin-bottom:14px;">Pending Review (' + pending.length + ')</div>';
-                html += _buildOnboardTable(pending, 'review');
-                html += '</div>';
+            if (all.length === 0) {
+                reviewDiv.innerHTML = '';
+                return;
             }
 
-            // Managed participants section
-            if (managed.length > 0) {
-                html += '<div class="outline-box" style="padding:24px;">';
-                html += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#000;margin-bottom:14px;">Onboarded Participants (' + managed.length + ')</div>';
-                html += _buildOnboardTable(managed, 'status');
-                html += '</div>';
-            }
+            /* Sort: onboarded (pending) first, then active, paused, terminated */
+            var statusOrder = { onboarded: 0, active: 1, paused: 2, terminated: 3 };
+            all.sort(function(a, b) {
+                var oa = statusOrder[a.status] !== undefined ? statusOrder[a.status] : 9;
+                var ob = statusOrder[b.status] !== undefined ? statusOrder[b.status] : 9;
+                if (oa !== ob) return oa - ob;
+                return (a.name || '').localeCompare(b.name || '');
+            });
+
+            var pendingCount = all.filter(function(p) { return p.status === 'onboarded'; }).length;
+
+            var html = '<div class="outline-box" style="padding:24px;">';
+            html += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#000;margin-bottom:14px;">';
+            html += 'Onboarded Participants (' + all.length + ')';
+            if (pendingCount > 0) html += ' &middot; <span style="color:#b08800;">' + pendingCount + ' pending review</span>';
+            html += '</div>';
+            html += _buildUnifiedOnboardTable(all);
+            html += '</div>';
 
             reviewDiv.innerHTML = html;
 
-            // Wire up review buttons
+            // Wire up expand buttons
+            reviewDiv.querySelectorAll('.onboard-expand-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var detailRow = document.getElementById('onboard-detail-' + btn.dataset.idx);
+                    if (!detailRow) return;
+                    if (detailRow.style.display === 'none') {
+                        detailRow.style.display = 'table-row';
+                        btn.textContent = '−';
+                    } else {
+                        detailRow.style.display = 'none';
+                        btn.textContent = '+';
+                    }
+                });
+            });
+
+            // Wire up review buttons (approve/reject for onboarded)
             reviewDiv.querySelectorAll('.review-btn').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     var pid = btn.dataset.id;
@@ -2775,7 +2795,7 @@
                 });
             });
 
-            // Wire up status buttons
+            // Wire up status buttons (pause/resume/terminate for active/paused)
             reviewDiv.querySelectorAll('.status-btn').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     var pid = btn.dataset.id;
@@ -2802,56 +2822,95 @@
         .catch(function(err) { console.error('Fetch pending failed:', err); });
     }
 
-    function _buildOnboardTable(participants, mode) {
-        var thStyle = 'font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;';
-        var tdStyle = 'padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;';
+    function _buildUnifiedOnboardTable(participants) {
+        var thStyle = 'font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;white-space:nowrap;';
+        var tdStyle = 'padding:7px 12px;font-size:12px;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;border-bottom:1px solid #eee;';
         var btnBase = 'display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:3px 10px;cursor:pointer;font-family:\'SF Mono\',monospace;margin-right:4px;';
 
-        var html = '<table style="width:100%;border-collapse:collapse;"><thead><tr>';
-        html += '<th style="' + thStyle + '">ID</th>';
+        var html = '<div style="overflow-x:auto;">';
+        html += '<table style="width:100%;border-collapse:collapse;"><thead><tr>';
+        html += '<th style="' + thStyle + 'width:30px;"></th>';
+        html += '<th style="' + thStyle + '">Status</th>';
         html += '<th style="' + thStyle + '">Name</th>';
         html += '<th style="' + thStyle + '">Email</th>';
-        html += '<th style="' + thStyle + '">Country</th>';
-        html += '<th style="' + thStyle + '">Bank</th>';
-        if (mode === 'status') html += '<th style="' + thStyle + '">Status</th>';
+        html += '<th style="' + thStyle + 'text-align:right;">Last 7d</th>';
+        html += '<th style="' + thStyle + 'text-align:right;">Prior 7d</th>';
+        html += '<th style="' + thStyle + '">Last Active</th>';
+        html += '<th style="' + thStyle + '">Agreement</th>';
         html += '<th style="' + thStyle + '">Actions</th>';
         html += '</tr></thead><tbody>';
 
         for (var i = 0; i < participants.length; i++) {
             var p = participants[i];
+            var stats = computeParticipantStats(p.email || '');
+            var hasRecordingData = stats.lastActive !== 'never';
+
+            /* Status dot color: grey for onboarded/terminated with no data, otherwise use stats */
+            var dotColor;
+            if ((p.status === 'onboarded' || p.status === 'terminated') && !hasRecordingData) {
+                dotColor = '#ccc';
+            } else {
+                dotColor = statusDotColor(stats.status);
+            }
+
+            /* Agreement status label */
+            var agreementLabel, agreementColor;
+            if (p.status === 'onboarded') {
+                agreementLabel = 'PENDING';
+                agreementColor = '#b08800';
+            } else if (p.status === 'active' || p.status === 'paused') {
+                agreementLabel = 'SIGNED';
+                agreementColor = '#2ea043';
+            } else {
+                agreementLabel = 'ENDED';
+                agreementColor = '#999';
+            }
+
             var bank = p.payout_details ? (p.payout_details.iban || p.payout_details.account || '') : '';
             var holder = p.payout_details ? (p.payout_details.holder || '') : '';
+            var currency = p.payout_details ? (p.payout_details.currency || '') : '';
+            var acceptedAt = p.accepted_at || '';
+
+            /* Main row */
             html += '<tr>';
-            html += '<td style="' + tdStyle + '">' + escapeHtml(p.participant_id || '') + '</td>';
+            html += '<td style="' + tdStyle + 'text-align:center;cursor:pointer;"><span class="onboard-expand-btn" data-idx="' + i + '" style="font-size:14px;font-weight:700;color:#000;user-select:none;">+</span></td>';
+            html += '<td style="' + tdStyle + '"><span class="status-dot" style="background:' + dotColor + ';"></span><span style="font-size:11px;font-weight:700;text-transform:uppercase;color:' + dotColor + ';">' + escapeHtml(p.status) + '</span></td>';
             html += '<td style="' + tdStyle + 'font-size:13px;">' + escapeHtml(p.name || '') + '</td>';
             html += '<td style="' + tdStyle + 'color:#777;">' + escapeHtml(p.email || '') + '</td>';
-            html += '<td style="' + tdStyle + '">' + escapeHtml(p.country || '') + '</td>';
-            html += '<td style="' + tdStyle + 'font-size:11px;">' + escapeHtml(holder) + '<br><span style="color:#777;">' + escapeHtml(bank) + '</span></td>';
+            html += '<td style="' + tdStyle + 'text-align:right;">' + fmtDec(stats.last7dHours, 1) + 'h</td>';
+            html += '<td style="' + tdStyle + 'text-align:right;">' + fmtDec(stats.prior7dHours, 1) + 'h</td>';
+            html += '<td style="' + tdStyle + '">' + escapeHtml(stats.lastActive) + '</td>';
+            html += '<td style="' + tdStyle + '"><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:' + agreementColor + ';">' + agreementLabel + '</span></td>';
 
-            if (mode === 'status') {
-                var statusColor = p.status === 'active' ? '#2ea043' : p.status === 'paused' ? '#b08800' : '#cf222e';
-                html += '<td style="' + tdStyle + '"><span style="color:' + statusColor + ';font-weight:700;text-transform:uppercase;">' + escapeHtml(p.status) + '</span></td>';
-            }
-
+            /* Actions */
             html += '<td style="' + tdStyle + '">';
-            if (mode === 'review') {
+            if (p.status === 'onboarded') {
                 html += '<span class="review-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-action="approve" style="' + btnBase + 'border:1px solid #2ea043;color:#2ea043;">Approve</span>';
                 html += '<span class="review-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-action="reject" style="' + btnBase + 'border:1px solid #cf222e;color:#cf222e;">Reject</span>';
+            } else if (p.status === 'active') {
+                html += '<span class="status-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-status="paused" style="' + btnBase + 'border:1px solid #b08800;color:#b08800;">Pause</span>';
+                html += '<span class="status-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-status="terminated" style="' + btnBase + 'border:1px solid #cf222e;color:#cf222e;">Terminate</span>';
+            } else if (p.status === 'paused') {
+                html += '<span class="status-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-status="active" style="' + btnBase + 'border:1px solid #2ea043;color:#2ea043;">Resume</span>';
+                html += '<span class="status-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-status="terminated" style="' + btnBase + 'border:1px solid #cf222e;color:#cf222e;">Terminate</span>';
             } else {
-                if (p.status === 'active') {
-                    html += '<span class="status-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-status="paused" style="' + btnBase + 'border:1px solid #b08800;color:#b08800;">Pause</span>';
-                    html += '<span class="status-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-status="terminated" style="' + btnBase + 'border:1px solid #cf222e;color:#cf222e;">Terminate</span>';
-                } else if (p.status === 'paused') {
-                    html += '<span class="status-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-status="active" style="' + btnBase + 'border:1px solid #2ea043;color:#2ea043;">Resume</span>';
-                    html += '<span class="status-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-status="terminated" style="' + btnBase + 'border:1px solid #cf222e;color:#cf222e;">Terminate</span>';
-                } else {
-                    html += '<span style="font-size:11px;color:#999;font-family:\'SF Mono\',monospace;">terminated</span>';
-                }
+                html += '<span style="font-size:11px;color:#999;font-family:\'SF Mono\',monospace;">terminated</span>';
             }
             html += '</td></tr>';
+
+            /* Expandable detail row (hidden by default) */
+            html += '<tr id="onboard-detail-' + i + '" style="display:none;"><td colspan="9" style="padding:0;border-bottom:1px solid #eee;">';
+            html += '<div style="background:#fafaf7;padding:14px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px 24px;">';
+            html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Country</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(p.country || '--') + '</span></div>';
+            html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Holder</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(holder || '--') + '</span></div>';
+            html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">IBAN / Account</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(bank || '--') + '</span></div>';
+            html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Currency</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(currency || '--') + '</span></div>';
+            html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Accepted At</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(acceptedAt || '--') + '</span></div>';
+            html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Participant ID</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(p.participant_id || '--') + '</span></div>';
+            html += '</div></td></tr>';
         }
 
-        html += '</tbody></table>';
+        html += '</tbody></table></div>';
         return html;
     }
 
