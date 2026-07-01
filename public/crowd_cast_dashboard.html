@@ -2445,6 +2445,19 @@
             return;
         }
 
+        var now = new Date();
+        var sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+
+        _payoutsData.sort(function(a, b) {
+            var adue = a.period_end || '9999-12-31';
+            var bdue = b.period_end || '9999-12-31';
+            if (a.status === 'pending' && b.status !== 'pending') return -1;
+            if (a.status !== 'pending' && b.status === 'pending') return 1;
+            if (adue < bdue) return -1;
+            if (adue > bdue) return 1;
+            return 0;
+        });
+
         var html = '<table style="width:100%;border-collapse:collapse;">';
         html += '<thead><tr>';
         html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;"><input type="checkbox" id="select-all-payouts"></th>';
@@ -2465,10 +2478,15 @@
             var isPending = p.status === 'pending';
             if (isPending) { pendingCount++; pendingTotal += p.amount_usd; }
 
+            var dueDate = p.period_end ? new Date(p.period_end + 'T23:59:59') : null;
+            var isDueSoon = isPending && dueDate && (dueDate.getTime() - now.getTime()) <= sevenDaysMs;
+            var isOverdue = isPending && dueDate && dueDate < now;
+
             var statusColor = p.status === 'approved' ? '#2ea043' : p.status === 'paid' ? '#0066cc' : p.status === 'rejected' ? '#cf222e' : '#b08800';
             var typeLabel = p.payout_type === 'trial' ? 'Trial' : p.payout_type === 'partial' ? 'Partial' : 'Full';
+            var rowBg = isOverdue ? '#fff0f0' : isDueSoon ? '#fffbe6' : '';
 
-            html += '<tr>';
+            html += '<tr style="background:' + rowBg + ';">';
             html += '<td style="padding:7px 12px;border-bottom:1px solid #eee;">';
             if (isPending) html += '<input type="checkbox" class="payout-checkbox" data-id="' + escapeHtml(p.payout_id) + '">';
             html += '</td>';
@@ -2477,7 +2495,10 @@
             html += '<td style="padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">' + typeLabel + '</td>';
             html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;text-align:right;border-bottom:1px solid #eee;">' + p.days + '</td>';
             html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;text-align:right;border-bottom:1px solid #eee;font-weight:700;">$' + p.amount_usd.toFixed(2) + '</td>';
-            html += '<td style="padding:7px 12px;font-size:11px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;"><span style="color:' + statusColor + ';font-weight:700;text-transform:uppercase;">' + escapeHtml(p.status) + '</span>';
+            html += '<td style="padding:7px 12px;font-size:11px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">';
+            html += '<span style="color:' + statusColor + ';font-weight:700;text-transform:uppercase;">' + escapeHtml(p.status) + '</span>';
+            if (isOverdue) html += ' <span style="background:#cf222e;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;letter-spacing:0.5px;">OVERDUE</span>';
+            else if (isDueSoon) html += ' <span style="background:#b08800;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;letter-spacing:0.5px;">DUE SOON</span>';
             if (p.approved_by) html += '<br><span style="color:#999;font-size:10px;">by ' + escapeHtml(p.approved_by) + '</span>';
             html += '</td>';
             html += '</tr>';
@@ -2497,8 +2518,22 @@
         });
 
         // Summary
+        var dueSoonCount = 0;
+        var overdueCount = 0;
+        for (var k = 0; k < _payoutsData.length; k++) {
+            var pk = _payoutsData[k];
+            if (pk.status !== 'pending') continue;
+            var dueK = pk.period_end ? new Date(pk.period_end + 'T23:59:59') : null;
+            if (dueK && dueK < now) overdueCount++;
+            else if (dueK && (dueK.getTime() - now.getTime()) <= sevenDaysMs) dueSoonCount++;
+        }
+        var summaryHint = '';
+        if (overdueCount > 0) summaryHint = overdueCount + ' overdue, ' + dueSoonCount + ' due within 7 days';
+        else if (dueSoonCount > 0) summaryHint = dueSoonCount + ' due within 7 days';
+
         if (pendingCount > 0) {
-            summaryDiv.innerHTML = '<div style="display:flex;gap:12px;align-items:center;padding:12px 0;">' +
+            summaryDiv.innerHTML = (summaryHint ? '<div style="font-size:12px;font-family:\'SF Mono\',monospace;padding:8px 0;color:#b08800;">' + (overdueCount > 0 ? '<span style="color:#cf222e;">' + summaryHint + '</span>' : summaryHint) + '</div>' : '') +
+            '<div style="display:flex;gap:12px;align-items:center;padding:12px 0;">' +
                 '<div id="payout-summary-text" style="font-size:13px;font-family:\'SF Mono\',monospace;color:#777;">Select payouts to approve</div>' +
                 '<span id="confirm-payouts-btn" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #2ea043;background:#2ea043;color:#fff;cursor:pointer;font-family:\'SF Mono\',monospace;">Confirm and Send</span>' +
             '</div>';
