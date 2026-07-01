@@ -2131,13 +2131,11 @@
 
         var html = '';
 
-        /* Onboarding controls (invite + grant dashboard access) */
-        var addBtnStyle = 'display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:6px 16px;border:1px solid #000;background:#fff;color:#000;cursor:pointer;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;';
+        /* Onboarding controls (invite by email) */
         var inviteBtnStyle = 'display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:6px 16px;border:1px solid #000;background:#000;color:#fff;cursor:pointer;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;';
         html += '<div class="outline-box" style="padding:20px 24px;margin-bottom:20px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">';
         html += '<span style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#000;margin-right:8px;">Onboarding</span>';
         html += '<span class="invite-btn" style="' + inviteBtnStyle + '">Invite by Email</span>';
-        html += '<span class="participant-add-btn" data-role="participant" style="' + addBtnStyle + '">Grant Dashboard Access</span>';
         html += '</div>';
 
         /* Unified onboarded participants (rendered async by fetchPendingReview) */
