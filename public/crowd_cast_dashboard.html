@@ -2020,12 +2020,19 @@
     const ROLES_API = DASHBOARD_API.replace('/dashboard', '/roles');
 
     /** Compute participant status and stats from per_user_daily data. */
-    function computeParticipantStats(email) {
+    function computeParticipantStats(emailOrEmails) {
         var perUserDaily = (window._lastMeta && window._lastMeta.per_user_daily) || {};
-        /* Find all UUIDs for this email */
+        /* Accept a single email or a list (onboarding email + linked recorder emails) */
+        var emailList = Array.isArray(emailOrEmails) ? emailOrEmails : [emailOrEmails];
+        var emailSet = {};
+        for (var e = 0; e < emailList.length; e++) {
+            if (emailList[e]) emailSet[String(emailList[e]).toLowerCase()] = true;
+        }
+        /* Find all UUIDs whose recorder email matches any of these (case-insensitive) */
         var uuids = [];
         for (var uid in _cachedUserNames) {
-            if (_cachedUserNames[uid].email === email) uuids.push(uid);
+            var ue = (_cachedUserNames[uid].email || '').toLowerCase();
+            if (emailSet[ue]) uuids.push(uid);
         }
 
         /* Merge daily data across all UUIDs */
@@ -2124,10 +2131,18 @@
 
         var html = '';
 
-        /* Pending review section */
+        /* Onboarding controls (invite + grant dashboard access) */
+        var addBtnStyle = 'display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:6px 16px;border:1px solid #000;background:#fff;color:#000;cursor:pointer;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;';
+        var inviteBtnStyle = 'display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:6px 16px;border:1px solid #000;background:#000;color:#fff;cursor:pointer;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;';
+        html += '<div class="outline-box" style="padding:20px 24px;margin-bottom:20px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">';
+        html += '<span style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#000;margin-right:8px;">Onboarding</span>';
+        html += '<span class="invite-btn" style="' + inviteBtnStyle + '">Invite by Email</span>';
+        html += '<span class="participant-add-btn" data-role="participant" style="' + addBtnStyle + '">Grant Dashboard Access</span>';
+        html += '</div>';
+
+        /* Unified onboarded participants (rendered async by fetchPendingReview) */
         html += '<div id="pending-review" style="margin-bottom:28px;"></div>';
 
-        html += _buildParticipantSection('PARTICIPANTS', participants, 'participant');
         html += _buildParticipantSection('ADMINS', admins, 'admin');
         container.innerHTML = html;
 
@@ -2367,6 +2382,16 @@
     var ONBOARD_API = DASHBOARD_API.replace('/dashboard', '/onboard');
     var _payoutsData = null;
     var _payoutsParticipants = null;
+    var _lastOnboardParticipants = [];
+
+    /* Persist a participant's linked recorder emails, then refresh the table */
+    function saveRecorderLinks(pid, emails) {
+        return fetch(ONBOARD_API + '/link-recorder', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ participant_id: pid, recorder_emails: emails })
+        }).then(function(resp) { return resp.json(); });
+    }
 
     function renderPayoutsView() {
         if (!_isAdmin) return;
@@ -2743,6 +2768,8 @@
                 return (a.name || '').localeCompare(b.name || '');
             });
 
+            _lastOnboardParticipants = all;
+
             var pendingCount = all.filter(function(p) { return p.status === 'onboarded'; }).length;
 
             var html = '<div class="outline-box" style="padding:24px;">';
@@ -2768,6 +2795,39 @@
                         detailRow.style.display = 'none';
                         btn.textContent = '+';
                     }
+                });
+            });
+
+            // Wire up recorder link picker (link a recorder email to this participant)
+            reviewDiv.querySelectorAll('.recorder-link-select').forEach(function(sel) {
+                sel.addEventListener('change', function() {
+                    var pid = sel.dataset.id;
+                    var email = sel.value;
+                    if (!email) return;
+                    var p = _lastOnboardParticipants.find(function(x) { return x.participant_id === pid; });
+                    var current = (p && p.recorder_emails) ? p.recorder_emails.slice() : [];
+                    if (current.indexOf(email) === -1) current.push(email);
+                    sel.disabled = true;
+                    saveRecorderLinks(pid, current).then(function(data) {
+                        if (data.error) { alert(data.error); sel.disabled = false; return; }
+                        fetchPendingReview();
+                    }).catch(function(err) { console.error('Link recorder failed:', err); sel.disabled = false; });
+                });
+            });
+
+            // Wire up recorder unlink buttons
+            reviewDiv.querySelectorAll('.recorder-unlink-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var pid = btn.dataset.id;
+                    var email = btn.dataset.email;
+                    var p = _lastOnboardParticipants.find(function(x) { return x.participant_id === pid; });
+                    var current = (p && p.recorder_emails) ? p.recorder_emails.slice() : [];
+                    current = current.filter(function(x) { return x !== email; });
+                    saveRecorderLinks(pid, current).then(function(data) {
+                        if (data.error) { alert(data.error); return; }
+                        fetchPendingReview();
+                    }).catch(function(err) { console.error('Unlink recorder failed:', err); });
                 });
             });
 
@@ -2827,6 +2887,27 @@
         var tdStyle = 'padding:7px 12px;font-size:12px;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;border-bottom:1px solid #eee;';
         var btnBase = 'display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:3px 10px;cursor:pointer;font-family:\'SF Mono\',monospace;margin-right:4px;';
 
+        /* Emails already claimed by an onboarded participant (primary or linked) */
+        var claimed = {};
+        for (var ci = 0; ci < participants.length; ci++) {
+            if (participants[ci].email) claimed[participants[ci].email.toLowerCase()] = true;
+            var ra = participants[ci].recorder_emails || [];
+            for (var cj = 0; cj < ra.length; cj++) claimed[String(ra[cj]).toLowerCase()] = true;
+        }
+        /* Distinct recorder emails (from recording data) not yet claimed -> pick list */
+        var recorderMap = {};
+        for (var ruid in _cachedUserNames) {
+            var rinfo = _cachedUserNames[ruid];
+            var rem = rinfo.email;
+            if (!rem || claimed[rem.toLowerCase()]) continue;
+            if (!recorderMap[rem]) recorderMap[rem] = rinfo.name || rem;
+        }
+        var recorderOptionEmails = Object.keys(recorderMap).sort();
+        var recorderOptionsHtml = '<option value="">+ link recorder email…</option>';
+        for (var ro = 0; ro < recorderOptionEmails.length; ro++) {
+            recorderOptionsHtml += '<option value="' + escapeHtml(recorderOptionEmails[ro]) + '">' + escapeHtml(recorderMap[recorderOptionEmails[ro]]) + ' (' + escapeHtml(recorderOptionEmails[ro]) + ')</option>';
+        }
+
         var html = '<div style="overflow-x:auto;">';
         html += '<table style="width:100%;border-collapse:collapse;"><thead><tr>';
         html += '<th style="' + thStyle + 'width:30px;"></th>';
@@ -2842,7 +2923,8 @@
 
         for (var i = 0; i < participants.length; i++) {
             var p = participants[i];
-            var stats = computeParticipantStats(p.email || '');
+            var linkedEmails = p.recorder_emails || [];
+            var stats = computeParticipantStats([p.email || ''].concat(linkedEmails));
             var hasRecordingData = stats.lastActive !== 'never';
 
             /* Status dot color: grey for onboarded/terminated with no data, otherwise use stats */
@@ -2907,7 +2989,28 @@
             html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Currency</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(currency || '--') + '</span></div>';
             html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Accepted At</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(acceptedAt || '--') + '</span></div>';
             html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Participant ID</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(p.participant_id || '--') + '</span></div>';
-            html += '</div></td></tr>';
+            html += '</div>';
+
+            /* Recorder email linking (drives activity stats) */
+            html += '<div style="background:#fafaf7;padding:0 20px 14px;">';
+            html += '<div style="border-top:1px dashed #ddd;padding-top:12px;">';
+            html += '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Linked recorder emails</span>';
+            html += '<span style="font-size:11px;color:#aaa;font-family:\'SF Mono\',monospace;"> — activity stats match onboarding email' + (linkedEmails.length ? ' + these' : '') + '</span><br>';
+            html += '<div style="margin-top:6px;">';
+            if (linkedEmails.length === 0) {
+                html += '<span style="font-size:12px;color:#999;font-family:\'SF Mono\',monospace;">None linked</span>';
+            } else {
+                for (var li = 0; li < linkedEmails.length; li++) {
+                    html += '<span style="display:inline-block;font-size:11px;font-family:\'SF Mono\',monospace;background:#eef;border:1px solid #ccd;border-radius:3px;padding:2px 8px;margin:0 6px 6px 0;">' + escapeHtml(linkedEmails[li]) + ' <a href="#" class="recorder-unlink-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-email="' + escapeHtml(linkedEmails[li]) + '" style="color:#cf222e;text-decoration:none;margin-left:4px;font-weight:700;">✕</a></span>';
+                }
+            }
+            html += '</div>';
+            if (recorderOptionEmails.length > 0) {
+                html += '<div style="margin-top:6px;"><select class="recorder-link-select" data-id="' + escapeHtml(p.participant_id || '') + '" style="font-size:12px;font-family:\'SF Mono\',monospace;padding:4px 8px;border:1px solid #000;background:#fff;cursor:pointer;max-width:100%;">' + recorderOptionsHtml + '</select></div>';
+            }
+            html += '</div></div>';
+
+            html += '</td></tr>';
         }
 
         html += '</tbody></table></div>';
