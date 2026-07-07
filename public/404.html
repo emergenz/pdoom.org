@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Page not found · p(doom)</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+               background: #F7F4EA; color: #161514; display: grid; place-items: center;
+               min-height: 100vh; margin: 0; text-align: center; padding: 24px; }
+        a { color: #B7361E; }
+        h1 { font-size: 1.4rem; margin: 0 0 0.5rem; }
+        p { margin: 0.25rem 0; }
+        code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Page not found</h1>
+        <p>The page you were looking for does not exist.</p>
+        <p><a href="/">Go to pdoom.org</a></p>
+    </main>
+    <script>
+      // Typo-catcher: if the requested single-segment path is a near-miss of a
+      // known shortlink (e.g. a misspelled "participate" off a flyer), send the
+      // visitor to the intended page instead of showing the 404.
+      (function () {
+        var TARGETS = {
+          'participate': '/open_calls/04_crowd_cast.html'
+        };
+
+        // Only consider top-level, single-segment paths: "/particpate", not
+        // "/foo/bar". Strip leading/trailing slashes and any file extension.
+        var path = location.pathname.replace(/^\/+|\/+$/g, '');
+        if (path.indexOf('/') !== -1) return;
+        var slug = path.replace(/\.html?$/i, '').toLowerCase();
+        if (!slug) return;
+
+        function levenshtein(a, b) {
+          var m = a.length, n = b.length;
+          var prev = new Array(n + 1), cur = new Array(n + 1), i, j;
+          for (j = 0; j <= n; j++) prev[j] = j;
+          for (i = 1; i <= m; i++) {
+            cur[0] = i;
+            for (j = 1; j <= n; j++) {
+              var cost = a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1;
+              cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+            }
+            var tmp = prev; prev = cur; cur = tmp;
+          }
+          return prev[n];
+        }
+
+        for (var key in TARGETS) {
+          if (!Object.prototype.hasOwnProperty.call(TARGETS, key)) continue;
+          // Require the first two letters to match so unrelated real words that
+          // happen to be close (e.g. "anticipate") are not swept up.
+          if (slug.slice(0, 2) !== key.slice(0, 2)) continue;
+          // Allow up to ~30% of the word to be wrong (min 3 edits), so short
+          // unrelated slugs never match but real fat-finger typos do.
+          var tolerance = Math.max(3, Math.floor(key.length * 0.3));
+          if (levenshtein(slug, key) <= tolerance) {
+            location.replace(TARGETS[key]);
+            return;
+          }
+        }
+      })();
+    </script>
+</body>
+</html>
