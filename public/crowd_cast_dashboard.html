@@ -2653,13 +2653,15 @@
             .then(function(resp) { return resp.json(); })
             .then(function(data) {
                 document.body.removeChild(overlay);
-                if (data.error) { alert(data.error); return; }
-                var sel = document.getElementById('payout-month').value.split('-');
-                generatePayouts(parseInt(sel[0]), parseInt(sel[1]));
+                if (data.error) alert(data.error);
+                refreshPayoutsAfterApprove();
             })
             .catch(function(err) {
-                console.error('Approve failed:', err);
+                // The gateway cuts responses at 29s but the lambda keeps working,
+                // so a "failed" request may still complete - re-poll instead of alerting.
+                console.error('Approve request failed (payment may still be processing):', err);
                 document.body.removeChild(overlay);
+                refreshPayoutsAfterApprove();
             });
         });
 
@@ -2667,6 +2669,18 @@
             if (e.key === 'Enter' && input.value.trim() === 'CONFIRM') approveBtn.click();
             if (e.key === 'Escape') document.body.removeChild(overlay);
         });
+    }
+
+    function refreshPayoutsAfterApprove() {
+        var sel = document.getElementById('payout-month');
+        if (!sel) return;
+        var parts = sel.value.split('-');
+        var y = parseInt(parts[0]), m = parseInt(parts[1]);
+        loadPayouts(y, m);
+        // Payment + statement + email can finish after the HTTP response
+        // (or after the 29s gateway timeout), so poll a couple more times.
+        setTimeout(function() { loadPayouts(y, m); }, 8000);
+        setTimeout(function() { loadPayouts(y, m); }, 25000);
     }
 
     function fetchBadgeCounts() {
