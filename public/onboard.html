@@ -445,37 +445,7 @@
                     <input class="field-input" type="text" id="f-bank" placeholder="Commerzbank, Germany">
                 </div>
                 <div class="field">
-                    <label class="field-label">Currency preference</label>
-                    <select class="field-select" id="f-currency">
-                        <option value="EUR">EUR (Euro)</option>
-                        <option value="GBP">GBP (British Pound)</option>
-                        <option value="CHF">CHF (Swiss Franc)</option>
-                        <option value="USD">USD (US Dollar)</option>
-                        <option value="SEK">SEK (Swedish Krona)</option>
-                        <option value="DKK">DKK (Danish Krone)</option>
-                        <option value="NOK">NOK (Norwegian Krone)</option>
-                        <option value="CZK">CZK (Czech Koruna)</option>
-                        <option value="HUF">HUF (Hungarian Forint)</option>
-                        <option value="RON">RON (Romanian Leu)</option>
-                        <option value="INR">INR (Indian Rupee)</option>
-                        <option value="CAD">CAD (Canadian Dollar)</option>
-                        <option value="AUD">AUD (Australian Dollar)</option>
-                        <option value="JPY">JPY (Japanese Yen)</option>
-                        <option value="CNY">CNY (Chinese Yuan)</option>
-                        <option value="HKD">HKD (Hong Kong Dollar)</option>
-                        <option value="SGD">SGD (Singapore Dollar)</option>
-                        <option value="ILS">ILS (Israeli Shekel)</option>
-                        <option value="TRY">TRY (Turkish Lira)</option>
-                        <option value="THB">THB (Thai Baht)</option>
-                        <option value="AED">AED (UAE Dirham)</option>
-                        <option value="ZAR">ZAR (South African Rand)</option>
-                        <option value="MXN">MXN (Mexican Peso)</option>
-                        <option value="MAD">MAD (Moroccan Dirham)</option>
-                        <option value="VND">VND (Vietnamese Dong)</option>
-                        <option value="CLP">CLP (Chilean Peso)</option>
-                        <option value="CRC">CRC (Costa Rican Colon)</option>
-                        <option value="UYU">UYU (Uruguayan Peso)</option>
-                    </select>
+                    <div class="field-hint">Payouts are denominated in USD and paid to your account in its local currency (EUR for European accounts) at the official ECB exchange rate. Each payment statement shows the exact conversion.</div>
                 </div>
 
                 <div class="btn-row">
@@ -951,7 +921,6 @@
             holder: document.getElementById('f-holder').value.trim(),
             iban: clean('f-iban').toUpperCase(),
             bank: document.getElementById('f-bank').value.trim(),
-            currency: document.getElementById('f-currency').value,
         };
         if (mode === 'us') {
             pd.routing_number = clean('f-routing');
