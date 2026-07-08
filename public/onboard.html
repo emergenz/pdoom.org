@@ -941,6 +941,39 @@
     }
     document.getElementById('f-country').addEventListener('change', updateBankFields);
 
+    // Build the payout_details payload: sanitized (no spaces/dashes, uppercased
+    // where applicable) and containing ONLY the fields relevant to the selected
+    // country, so hidden-field leftovers never reach the backend.
+    function buildPayoutDetails() {
+        const clean = id => document.getElementById(id).value.trim().replace(/[\s-]+/g, '');
+        const mode = bankMode();
+        const pd = {
+            holder: document.getElementById('f-holder').value.trim(),
+            iban: clean('f-iban').toUpperCase(),
+            bank: document.getElementById('f-bank').value.trim(),
+            currency: document.getElementById('f-currency').value,
+        };
+        if (mode === 'us') {
+            pd.routing_number = clean('f-routing');
+            pd.account_type = document.getElementById('f-account-type').value;
+        } else if (mode === 'ca') {
+            pd.institution_number = clean('f-institution');
+            pd.transit_number = clean('f-transit');
+        } else if (mode === 'au') {
+            pd.bsb_code = clean('f-bsb');
+        } else if (mode === 'jp') {
+            pd.bank_code = clean('f-bankcode');
+            pd.branch_code = clean('f-branchcode');
+            pd.account_type = document.getElementById('f-account-type').value;
+        } else if (mode === 'sg' || mode === 'hk') {
+            pd.bank_code = clean('f-bankcode');
+        } else {
+            // IBAN countries + India (IFSC lives in the BIC field)
+            pd.bic = clean('f-bic').toUpperCase();
+        }
+        return pd;
+    }
+
     function validateStep(step) {
         if (step === 0) {
             let valid = true;
@@ -1088,20 +1121,7 @@
             address: document.getElementById('f-address').value.trim(),
             country: document.getElementById('f-country').value.trim(),
             payout_method: 'bank_transfer',
-            payout_details: {
-                holder: document.getElementById('f-holder').value.trim(),
-                iban: document.getElementById('f-iban').value.trim(),
-                bic: document.getElementById('f-bic').value.trim(),
-                bank: document.getElementById('f-bank').value.trim(),
-                currency: document.getElementById('f-currency').value,
-                routing_number: document.getElementById('f-routing').value.trim(),
-                account_type: document.getElementById('f-account-type').value,
-                institution_number: document.getElementById('f-institution').value.trim(),
-                transit_number: document.getElementById('f-transit').value.trim(),
-                bsb_code: document.getElementById('f-bsb').value.trim().replace(/-/g, ''),
-                bank_code: document.getElementById('f-bankcode').value.trim(),
-                branch_code: document.getElementById('f-branchcode').value.trim(),
-            },
+            payout_details: buildPayoutDetails(),
             agreements: {
                 data_purchase_accepted: true,
                 privacy_consent_accepted: true,
