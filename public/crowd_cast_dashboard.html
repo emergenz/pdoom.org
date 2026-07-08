@@ -2563,6 +2563,7 @@
             '<div style="display:flex;gap:12px;align-items:center;padding:12px 0;">' +
                 '<div id="payout-summary-text" style="font-size:13px;font-family:\'SF Mono\',monospace;color:#777;">Select payouts to approve</div>' +
                 '<span id="confirm-payouts-btn" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #2ea043;background:#2ea043;color:#fff;cursor:pointer;font-family:\'SF Mono\',monospace;">Confirm and Send</span>' +
+                '<span id="reject-payouts-btn" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #cf222e;background:#fff;color:#cf222e;cursor:pointer;font-family:\'SF Mono\',monospace;">Reject</span>' +
             '</div>';
 
             document.getElementById('confirm-payouts-btn').addEventListener('click', function() {
@@ -2576,6 +2577,30 @@
                 }
 
                 showPayoutConfirmModal(selected, total);
+            });
+
+            document.getElementById('reject-payouts-btn').addEventListener('click', function() {
+                var selected = [];
+                document.querySelectorAll('.payout-checkbox:checked').forEach(function(cb) { selected.push(cb.dataset.id); });
+                if (selected.length === 0) return;
+
+                var reason = prompt('Reject ' + selected.length + ' payout(s)? They will be marked as rejected and never paid.\n\nOptional reason (e.g. "participant paused"):');
+                if (reason === null) return;
+
+                fetch(ONBOARD_API + '/payouts/reject', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ payout_ids: selected, reason: reason })
+                })
+                .then(function(resp) { return resp.json(); })
+                .then(function(data) {
+                    if (data.error) alert(data.error);
+                    refreshPayoutsAfterApprove();
+                })
+                .catch(function(err) {
+                    console.error('Reject failed:', err);
+                    refreshPayoutsAfterApprove();
+                });
             });
         } else {
             summaryDiv.innerHTML = '';
@@ -2747,16 +2772,19 @@
         }
         var textEl = document.getElementById('payout-summary-text');
         var btnEl = document.getElementById('confirm-payouts-btn');
+        var rejectEl = document.getElementById('reject-payouts-btn');
         if (selected.length > 0) {
             textEl.textContent = selected.length + ' payouts selected, total: $' + total.toFixed(2);
             textEl.style.color = '#000';
             textEl.style.fontWeight = '700';
             btnEl.style.display = 'inline-block';
+            if (rejectEl) rejectEl.style.display = 'inline-block';
         } else {
             textEl.textContent = 'Select payouts to approve';
             textEl.style.color = '#777';
             textEl.style.fontWeight = '400';
             btnEl.style.display = 'none';
+            if (rejectEl) rejectEl.style.display = 'none';
         }
     }
 
