@@ -356,7 +356,6 @@
                         <option value="Ireland">Ireland</option>
                         <option value="Greece">Greece</option>
                         <option value="India">India</option>
-                        <option value="China">China</option>
                         <option value="Japan">Japan</option>
                         <option value="United States">United States</option>
                         <option value="Canada">Canada</option>
@@ -365,11 +364,8 @@
                         <option value="Turkey">Turkey</option>
                         <option value="Singapore">Singapore</option>
                         <option value="Hong Kong">Hong Kong</option>
-                        <option value="South Korea">South Korea</option>
-                        <option value="Taiwan">Taiwan</option>
                         <option value="Brazil">Brazil</option>
                         <option value="Mexico">Mexico</option>
-                        <option value="South Africa">South Africa</option>
                     </select>
                 </div>
 
@@ -411,6 +407,26 @@
                 <div class="field" id="w-routing" style="display:none;">
                     <label class="field-label">ACH routing number *</label>
                     <input class="field-input" type="text" id="f-routing" placeholder="9 digits, e.g. 026009593" inputmode="numeric">
+                </div>
+                <div class="field" id="w-institution" style="display:none;">
+                    <label class="field-label">Institution number *</label>
+                    <input class="field-input" type="text" id="f-institution" placeholder="3 digits, e.g. 004" inputmode="numeric">
+                </div>
+                <div class="field" id="w-transit" style="display:none;">
+                    <label class="field-label">Transit number *</label>
+                    <input class="field-input" type="text" id="f-transit" placeholder="5 digits" inputmode="numeric">
+                </div>
+                <div class="field" id="w-bsb" style="display:none;">
+                    <label class="field-label">BSB code *</label>
+                    <input class="field-input" type="text" id="f-bsb" placeholder="6 digits, e.g. 062000" inputmode="numeric">
+                </div>
+                <div class="field" id="w-bankcode" style="display:none;">
+                    <label class="field-label" id="l-bankcode">Bank code *</label>
+                    <input class="field-input" type="text" id="f-bankcode" placeholder="e.g. 7171" inputmode="numeric">
+                </div>
+                <div class="field" id="w-branchcode" style="display:none;">
+                    <label class="field-label">Branch code *</label>
+                    <input class="field-input" type="text" id="f-branchcode" placeholder="3 digits" inputmode="numeric">
                 </div>
                 <div class="field" id="w-account-type" style="display:none;">
                     <label class="field-label">Account type *</label>
@@ -848,10 +864,18 @@
         const country = document.getElementById('f-country').value;
         if (!country) return 'default';
         const iso = COUNTRY_ISO[country] || '';
-        if (iso === 'US') return 'us';
-        if (iso === 'IN') return 'in';
+        const modes = { US:'us', IN:'in', CA:'ca', AU:'au', JP:'jp', SG:'sg', HK:'hk', MX:'mx' };
+        if (modes[iso]) return modes[iso];
         if (IBAN_COUNTRIES.indexOf(iso) >= 0) return 'iban';
-        return 'swift';
+        return 'iban'; // every remaining country in the dropdown uses IBAN
+    }
+
+    function setAccountTypeOptions(opts) {
+        const sel = document.getElementById('f-account-type');
+        const current = sel.value;
+        sel.innerHTML = '<option value="">Select...</option>' +
+            opts.map(o => '<option value="' + o[0] + '">' + o[1] + '</option>').join('');
+        if (opts.some(o => o[0] === current)) sel.value = current;
     }
 
     function updateBankFields() {
@@ -860,27 +884,54 @@
         const fIban = document.getElementById('f-iban');
         const lBic = document.getElementById('l-bic');
         const fBic = document.getElementById('f-bic');
-        document.getElementById('w-routing').style.display = mode === 'us' ? '' : 'none';
-        document.getElementById('w-account-type').style.display = mode === 'us' ? '' : 'none';
-        document.getElementById('w-bic').style.display = mode === 'us' ? 'none' : '';
+        const show = (id, on) => { document.getElementById(id).style.display = on ? '' : 'none'; };
+        show('w-routing', mode === 'us');
+        show('w-institution', mode === 'ca');
+        show('w-transit', mode === 'ca');
+        show('w-bsb', mode === 'au');
+        show('w-bankcode', mode === 'jp' || mode === 'sg' || mode === 'hk');
+        show('w-branchcode', mode === 'jp');
+        show('w-account-type', mode === 'us' || mode === 'jp');
+        show('w-bic', mode === 'in' || mode === 'iban' || mode === 'default');
         if (mode === 'us') {
             lIban.textContent = 'Account number *';
             fIban.placeholder = 'e.g. 12345678 (4-17 digits)';
+            setAccountTypeOptions([['checking','Checking'],['savings','Savings']]);
         } else if (mode === 'in') {
             lIban.textContent = 'Account number *';
             fIban.placeholder = 'e.g. 1234567890';
             lBic.textContent = 'IFSC code *';
             fBic.placeholder = 'e.g. HDFC0001234';
+        } else if (mode === 'ca') {
+            lIban.textContent = 'Account number *';
+            fIban.placeholder = '5-12 digits';
+        } else if (mode === 'au') {
+            lIban.textContent = 'Account number *';
+            fIban.placeholder = '4-10 digits';
+        } else if (mode === 'jp') {
+            lIban.textContent = 'Account number *';
+            fIban.placeholder = '7 digits';
+            document.getElementById('l-bankcode').textContent = 'Bank code (銀行コード) *';
+            document.getElementById('f-bankcode').placeholder = '4 digits, e.g. 0001';
+            setAccountTypeOptions([['savings','Futsu 普通 (ordinary)'],['current','Toza 当座 (current)']]);
+        } else if (mode === 'sg') {
+            lIban.textContent = 'Account number *';
+            fIban.placeholder = 'e.g. 0052312891';
+            document.getElementById('l-bankcode').textContent = 'Bank code *';
+            document.getElementById('f-bankcode').placeholder = 'e.g. 7171 (DBS)';
+        } else if (mode === 'hk') {
+            lIban.textContent = 'Account number *';
+            fIban.placeholder = 'e.g. 740123456';
+            document.getElementById('l-bankcode').textContent = 'Bank code *';
+            document.getElementById('f-bankcode').placeholder = 'e.g. 004 (HSBC)';
+        } else if (mode === 'mx') {
+            lIban.textContent = 'CLABE *';
+            fIban.placeholder = '18 digits';
         } else if (mode === 'iban') {
             lIban.textContent = 'IBAN *';
             fIban.placeholder = 'DE89 3704 0044 0532 0130 00';
             lBic.textContent = 'BIC/SWIFT (optional)';
             fBic.placeholder = 'COBADEFFXXX';
-        } else if (mode === 'swift') {
-            lIban.textContent = 'Account number *';
-            fIban.placeholder = 'Your bank account number';
-            lBic.textContent = 'SWIFT/BIC *';
-            fBic.placeholder = 'e.g. HSBCHKHHHKH';
         } else {
             lIban.textContent = 'IBAN or account number *';
             fIban.placeholder = 'DE89 3704 0044 0532 0130 00';
@@ -947,14 +998,13 @@
                 errors.push(msg);
                 valid = false;
             };
-            document.getElementById('f-iban').classList.remove('error');
-            document.getElementById('f-bic').classList.remove('error');
-            document.getElementById('f-routing').classList.remove('error');
-            document.getElementById('f-account-type').classList.remove('error');
+            ['f-iban','f-bic','f-routing','f-account-type','f-institution','f-transit','f-bsb','f-bankcode','f-branchcode']
+                .forEach(id => document.getElementById(id).classList.remove('error'));
+            const fieldVal = id => document.getElementById(id).value.trim().replace(/\s+/g, '');
 
             if (mode === 'us') {
                 if (!/^[0-9]{4,17}$/.test(ibanVal)) markBank('f-iban', 'US account numbers are 4-17 digits.');
-                const routing = document.getElementById('f-routing').value.trim().replace(/\s+/g, '');
+                const routing = fieldVal('f-routing');
                 let abaOk = /^[0-9]{9}$/.test(routing);
                 if (abaOk) {
                     const d = routing.split('').map(Number);
@@ -965,12 +1015,33 @@
             } else if (mode === 'in') {
                 if (!/^[0-9]{6,20}$/.test(ibanVal)) markBank('f-iban', 'Indian account numbers are 6-20 digits.');
                 if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(bicVal)) markBank('f-bic', 'IFSC code must be 11 characters (e.g. HDFC0001234).');
+            } else if (mode === 'ca') {
+                if (!/^[0-9]{3}$/.test(fieldVal('f-institution'))) markBank('f-institution', 'Institution number must be 3 digits.');
+                if (!/^[0-9]{5}$/.test(fieldVal('f-transit'))) markBank('f-transit', 'Transit number must be 5 digits.');
+                if (!/^[0-9]{5,12}$/.test(ibanVal)) markBank('f-iban', 'Canadian account numbers are 5-12 digits.');
+            } else if (mode === 'au') {
+                if (!/^[0-9]{6}$/.test(fieldVal('f-bsb').replace(/-/g, ''))) markBank('f-bsb', 'BSB code must be 6 digits.');
+                if (!/^[0-9]{4,10}$/.test(ibanVal)) markBank('f-iban', 'Australian account numbers are 4-10 digits.');
+            } else if (mode === 'jp') {
+                if (!/^[0-9]{4}$/.test(fieldVal('f-bankcode'))) markBank('f-bankcode', 'Japanese bank code must be 4 digits.');
+                if (!/^[0-9]{3}$/.test(fieldVal('f-branchcode'))) markBank('f-branchcode', 'Branch code must be 3 digits.');
+                if (!/^[0-9]{6,8}$/.test(ibanVal)) markBank('f-iban', 'Japanese account numbers are 6-8 digits.');
+                if (!document.getElementById('f-account-type').value) markBank('f-account-type', 'Please select the account type.');
+            } else if (mode === 'sg' || mode === 'hk') {
+                if (!/^[0-9]{3,7}$/.test(fieldVal('f-bankcode'))) markBank('f-bankcode', 'Bank code must be 3-7 digits.');
+                if (!/^[0-9]{5,15}$/.test(ibanVal)) markBank('f-iban', 'Account number should be 5-15 digits.');
+            } else if (mode === 'mx') {
+                let clabeOk = /^[0-9]{18}$/.test(ibanVal);
+                if (clabeOk) {
+                    const w = [3,7,1];
+                    let sum = 0;
+                    for (let i = 0; i < 17; i++) sum += (parseInt(ibanVal[i]) * w[i % 3]) % 10;
+                    clabeOk = (10 - (sum % 10)) % 10 === parseInt(ibanVal[17]);
+                }
+                if (!clabeOk) markBank('f-iban', 'CLABE must be a valid 18-digit number (check with your bank).');
             } else if (mode === 'iban') {
                 if (!validateIBAN(ibanVal)) markBank('f-iban', 'Please enter a valid IBAN (your country uses IBAN for bank transfers).');
                 if (bicVal && !/^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(bicVal)) markBank('f-bic', 'BIC/SWIFT must be 8 or 11 characters.');
-            } else if (mode === 'swift') {
-                if (ibanVal.length < 4) markBank('f-iban', 'Please enter your account number.');
-                if (!/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/.test(bicVal)) markBank('f-bic', 'Please enter your bank\'s SWIFT/BIC code (8 or 11 characters).');
             } else {
                 if (ibanVal.length < 8) markBank('f-iban', 'Please enter your IBAN or account number.');
             }
@@ -1025,6 +1096,11 @@
                 currency: document.getElementById('f-currency').value,
                 routing_number: document.getElementById('f-routing').value.trim(),
                 account_type: document.getElementById('f-account-type').value,
+                institution_number: document.getElementById('f-institution').value.trim(),
+                transit_number: document.getElementById('f-transit').value.trim(),
+                bsb_code: document.getElementById('f-bsb').value.trim().replace(/-/g, ''),
+                bank_code: document.getElementById('f-bankcode').value.trim(),
+                branch_code: document.getElementById('f-branchcode').value.trim(),
             },
             agreements: {
                 data_purchase_accepted: true,
