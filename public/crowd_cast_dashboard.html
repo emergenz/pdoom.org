@@ -530,6 +530,35 @@
             transform: translateX(-50%) scale(1);
         }
 
+        /* Edge-aware bubbles: a smiski near a viewport edge aligns its bubble to that
+           edge instead of centering, so the bubble can't clip off-screen. */
+        .smiski.bubble-left .smiski-bubble {
+            left: 0;
+            transform: translateX(0) scale(0.9);
+        }
+        .smiski.bubble-left .smiski-bubble::after {
+            left: 20px;
+            transform: none;
+        }
+        .smiski.bubble-left .smiski-bubble.visible,
+        .smiski.bubble-left:hover .smiski-bubble {
+            transform: translateX(0) scale(1);
+        }
+        .smiski.bubble-right .smiski-bubble {
+            left: auto;
+            right: 0;
+            transform: translateX(0) scale(0.9);
+        }
+        .smiski.bubble-right .smiski-bubble::after {
+            left: auto;
+            right: 20px;
+            transform: none;
+        }
+        .smiski.bubble-right .smiski-bubble.visible,
+        .smiski.bubble-right:hover .smiski-bubble {
+            transform: translateX(0) scale(1);
+        }
+
         @keyframes drift {
             0%, 100% { transform: translate(var(--dx1), var(--dy1)); }
             50% { transform: translate(var(--dx2), var(--dy2)); }
@@ -560,6 +589,32 @@
             color: #999;
             text-decoration: none;
             border-bottom: 1px solid #ddd;
+        }
+
+        /* ---- Landing page: compact (phones in EITHER orientation — key on the
+           smaller dimension, so a landscape phone (e.g. 844x390) is compact too) ---- */
+        @media (max-width: 600px), (max-height: 600px) {
+            #landing-page .center-content {
+                /* Abs-pos shrink-to-fit caps width at 50% of the viewport, which crushed
+                   the title; give it an explicit content-sized width instead. */
+                width: max-content;
+                max-width: 92vw;
+                padding: 36px 20px;
+            }
+            #landing-page .center-content h1 {
+                font-size: 20px;
+                letter-spacing: 2px;
+            }
+            .smiski img {
+                width: 46px;
+                height: 59px;
+            }
+            .smiski-bubble {
+                white-space: normal;
+                width: max-content;
+                max-width: 150px;
+                text-align: center;
+            }
         }
     </style>
 </head>
@@ -3312,14 +3367,30 @@
 
         var vw = window.innerWidth;
         var vh = window.innerHeight;
-        var n = SMISKI_USERS.length;
+        /* Compact mode: fewer, smaller smiskis with narrow edge padding — the desktop
+           constants (pad 120, 70x90, 14 characters) collapse the placement area to a
+           sliver on a phone. Keyed on the SMALLER viewport dimension so a landscape
+           phone (wide but short) is compact too. Must match the CSS media query. */
+        var mobile = Math.min(vw, vh) < 600;
+        var users = mobile ? SMISKI_USERS.slice(0, 8) : SMISKI_USERS;
+        var n = users.length;
 
-        var pad = 120;
-        var padTop = 50;
+        var pad = mobile ? 16 : 120;
+        var padTop = mobile ? 64 : 50; /* room for a wrapped bubble above the top row */
         var padBottom = 50;
-        var smiskiW = 70, smiskiH = 90;
+        var smiskiW = mobile ? 46 : 70, smiskiH = mobile ? 59 : 90;
         var centerX = vw / 2, centerY = vh / 2;
+        /* Keep placements clear of the actual center content (title + sign-in),
+           measured live, rather than a guessed fixed box. */
         var safeW = 160, safeH = 90;
+        var cc = document.querySelector('#landing-page .center-content');
+        if (cc) {
+            var ccRect = cc.getBoundingClientRect();
+            if (ccRect.width > 0) {
+                safeW = ccRect.width / 2 + 24;
+                safeH = ccRect.height / 2 + 24;
+            }
+        }
         var minSpacing = Math.sqrt((vw * vh) / (n * 3));
 
         var positions = [];
@@ -3359,7 +3430,7 @@
             }
         }
 
-        for (var i2 = 0; i2 < SMISKI_USERS.length; i2++) {
+        for (var i2 = 0; i2 < users.length; i2++) {
             var x = positions[i2][0];
             var y = positions[i2][1];
 
@@ -3372,7 +3443,12 @@
             var delay = _smiskiRand(0, 8).toFixed(1) + 's';
 
             var el = document.createElement('div');
-            el.className = 'smiski' + (y < 40 ? ' bubble-below' : '');
+            var cls = 'smiski' + (y < 40 ? ' bubble-below' : '');
+            /* Near a viewport edge, pin the bubble to that edge so it can't clip. */
+            var smiskiMidX = x + smiskiW / 2;
+            if (smiskiMidX < 100) cls += ' bubble-left';
+            else if (smiskiMidX > vw - 100) cls += ' bubble-right';
+            el.className = cls;
             el.style.left = x + 'px';
             el.style.top = y + 'px';
             el.style.animationDelay = (i2 * 0.08).toFixed(2) + 's';
@@ -3385,7 +3461,7 @@
 
             var bubble = document.createElement('div');
             bubble.className = 'smiski-bubble';
-            bubble.textContent = SMISKI_USERS[i2];
+            bubble.textContent = users[i2];
 
             var imgEl = document.createElement('img');
             imgEl.src = imgSrc;
