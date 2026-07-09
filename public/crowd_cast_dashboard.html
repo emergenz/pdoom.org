@@ -591,8 +591,9 @@
             border-bottom: 1px solid #ddd;
         }
 
-        /* ---- Landing page: mobile ---- */
-        @media (max-width: 600px) {
+        /* ---- Landing page: compact (phones in EITHER orientation — key on the
+           smaller dimension, so a landscape phone (e.g. 844x390) is compact too) ---- */
+        @media (max-width: 600px), (max-height: 600px) {
             #landing-page .center-content {
                 /* Abs-pos shrink-to-fit caps width at 50% of the viewport, which crushed
                    the title; give it an explicit content-sized width instead. */
@@ -3338,10 +3339,11 @@
 
         var vw = window.innerWidth;
         var vh = window.innerHeight;
-        /* Mobile: fewer, smaller smiskis with narrow edge padding — the desktop
-           constants (pad 120, 70x90, 14 characters) collapse the placement area
-           to a sliver on a phone. Sizes must match the .smiski img media query. */
-        var mobile = vw < 600;
+        /* Compact mode: fewer, smaller smiskis with narrow edge padding — the desktop
+           constants (pad 120, 70x90, 14 characters) collapse the placement area to a
+           sliver on a phone. Keyed on the SMALLER viewport dimension so a landscape
+           phone (wide but short) is compact too. Must match the CSS media query. */
+        var mobile = Math.min(vw, vh) < 600;
         var users = mobile ? SMISKI_USERS.slice(0, 8) : SMISKI_USERS;
         var n = users.length;
 
