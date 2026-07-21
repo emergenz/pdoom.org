@@ -776,6 +776,27 @@ h1.hero-manifesto.display {
 }
 .btn-apply:hover { background: var(--ember); border-color: var(--ember); color: var(--paper); }
 
+/* Hero-sized apply button: the first thing visitors should see. */
+.btn-apply--hero {
+  font-size: 18px;
+  letter-spacing: .12em;
+  padding: 22px 48px;
+  margin: 8px 0 4px;
+}
+.apply-hero {
+  margin: 28px 0 12px;
+}
+.apply-hero .apply-note {
+  display: block;
+  margin-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-60, #666);
+}
+@media (max-width: 640px) {
+  .btn-apply--hero { display: flex; justify-content: center; width: 100%; }
+}
+
 /* ===== Inline form (crowd-cast signup) ======================== */
 .signup-form {
   margin-top: var(--s-7);
