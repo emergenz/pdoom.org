@@ -793,8 +793,14 @@ h1.hero-manifesto.display {
   font-size: 12px;
   color: var(--ink-60, #666);
 }
+.apply-note .seg { white-space: nowrap; }
+.apply-note .sep { margin: 0 8px; color: var(--ash-500, #999); }
 @media (max-width: 640px) {
   .btn-apply--hero { display: flex; justify-content: center; width: 100%; }
+  /* Stack the microcopy as tidy centered lines instead of mid-phrase wraps. */
+  .apply-hero { text-align: center; }
+  .apply-note .sep { display: none; }
+  .apply-note .seg { display: block; line-height: 1.9; }
 }
 
 /* ===== Inline form (crowd-cast signup) ======================== */
