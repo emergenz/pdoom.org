@@ -776,11 +776,12 @@ h1.hero-manifesto.display {
 }
 .btn-apply:hover { background: var(--ember); border-color: var(--ember); color: var(--paper); }
 
-/* Hero-sized apply button: the first thing visitors should see. */
+/* Hero apply button: prominent but restrained. It reads as the primary
+   action because it's the only filled dark button up top, not because it's huge. */
 .btn-apply--hero {
-  font-size: 18px;
+  font-size: 14px;
   letter-spacing: .12em;
-  padding: 22px 48px;
+  padding: 15px 34px;
   margin: 8px 0 4px;
 }
 .apply-hero {
@@ -796,9 +797,10 @@ h1.hero-manifesto.display {
 .apply-note .seg { white-space: nowrap; }
 .apply-note .sep { margin: 0 8px; color: var(--ash-500, #999); }
 @media (max-width: 640px) {
-  .btn-apply--hero { display: flex; justify-content: center; width: 100%; }
-  /* Stack the microcopy as tidy centered lines instead of mid-phrase wraps. */
-  .apply-hero { text-align: center; }
+  /* Size to content and center it, rather than spanning the whole screen. */
+  .btn-apply--hero { display: inline-flex; width: auto; }
+  /* Keep the button and microcopy on the same left edge as the headline and body. */
+  .apply-hero { text-align: left; }
   .apply-note .sep { display: none; }
   .apply-note .seg { display: block; line-height: 1.9; }
 }
