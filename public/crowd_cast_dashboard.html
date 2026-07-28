@@ -386,6 +386,114 @@
             color: #cf222e;
         }
 
+        /* -- Applicant review ("Tinder") -- */
+        .review-wrap { max-width: 720px; margin: 0 auto; }
+        .review-progress {
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 12px; font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+            color: #555; margin-bottom: 14px;
+        }
+        .review-progress .rp-count { font-weight: 800; color: #000; letter-spacing: 1px; }
+        .review-progress-bar { height: 4px; background: #eee; margin-bottom: 18px; }
+        .review-progress-bar > div { height: 100%; background: #000; transition: width 0.25s ease; }
+        .review-card { padding: 24px 26px; }
+        .review-card-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+        .review-card-head h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+        .tier-badge {
+            font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px;
+            padding: 3px 9px; border: 1px solid #000; font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+        }
+        .tier-badge.tier-invite { background: #000; color: #fff; }
+        .tier-badge.tier-ask { background: #fff; color: #000; }
+        .tier-badge.tier-decline { background: #fff; color: #999; border-color: #bbb; }
+        .conf-badge {
+            font-size: 10px; font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+            color: #777; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .review-email-line {
+            font-size: 12px; font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+            color: #555; margin-bottom: 14px; word-break: break-all;
+        }
+        .review-blocked {
+            font-size: 11px; font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+            color: #b08800; margin-left: 8px;
+        }
+        .review-links { margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px 14px; }
+        .review-links a {
+            font-size: 12px; font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+            color: #000; border-bottom: 1px solid #ccc; text-decoration: none; word-break: break-all;
+        }
+        .review-links a:hover { border-color: #000; }
+        .review-field { margin-bottom: 16px; }
+        .review-field .rf-label {
+            font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px;
+            color: #555; margin-bottom: 5px;
+        }
+        .review-field .rf-body { font-size: 14px; line-height: 1.6; color: #222; white-space: pre-wrap; }
+        .fraud-banner {
+            border: 1px solid #cf222e; background: #fff5f5; padding: 12px 14px; margin-bottom: 16px;
+        }
+        .fraud-banner .fb-title {
+            font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px;
+            color: #cf222e; margin-bottom: 6px;
+        }
+        .fraud-banner ul { margin: 0; padding-left: 18px; }
+        .fraud-banner li { font-size: 13px; color: #cf222e; line-height: 1.5; }
+        .review-email-box { border: 1px solid #eee; margin-bottom: 18px; }
+        .review-email-toggle {
+            padding: 10px 14px; cursor: pointer; user-select: none;
+            font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: #000;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .review-email-toggle:hover { background: #fafafa; }
+        .review-email-body { padding: 0 14px 14px; }
+        .review-email-subject {
+            width: 100%; font-size: 13px; font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+            padding: 8px 10px; border: 1px solid #ddd; margin-bottom: 8px; color: #000;
+        }
+        .review-email-textarea {
+            width: 100%; min-height: 190px; font-size: 13px; line-height: 1.6;
+            font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+            padding: 10px 12px; border: 1px solid #ddd; resize: vertical; color: #000;
+        }
+        .review-email-hint { font-size: 11px; color: #999; margin-top: 6px; font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace; }
+        .review-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 4px; }
+        .review-btn {
+            padding: 14px 0; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
+            border: 2px solid #000; background: #fff; color: #000; cursor: pointer; text-align: center;
+            font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace; transition: background 0.12s, color 0.12s;
+        }
+        .review-btn small { display: block; font-size: 9px; letter-spacing: 1px; color: #999; margin-top: 3px; font-weight: 600; }
+        .review-btn.rb-reject:hover { background: #cf222e; border-color: #cf222e; color: #fff; }
+        .review-btn.rb-reject:hover small { color: #fff; }
+        .review-btn.rb-ask:hover { background: #b08800; border-color: #b08800; color: #fff; }
+        .review-btn.rb-ask:hover small { color: #fff; }
+        .review-btn.rb-accept:hover { background: #2ea043; border-color: #2ea043; color: #fff; }
+        .review-btn.rb-accept:hover small { color: #fff; }
+        .review-btn:disabled { opacity: 0.4; cursor: default; }
+        .undo-bar {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            padding: 12px 16px; border: 1px solid #000; background: #000; color: #fff; margin-bottom: 18px;
+        }
+        .undo-bar .ub-text { font-size: 12px; font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace; }
+        .undo-bar .ub-text b { text-transform: uppercase; letter-spacing: 1px; }
+        .undo-btn {
+            font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
+            padding: 7px 18px; border: 1px solid #fff; background: #fff; color: #000; cursor: pointer;
+            font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace; white-space: nowrap;
+        }
+        .undo-btn:hover { background: #000; color: #fff; }
+        .review-empty { padding: 60px 24px; text-align: center; }
+        .review-empty .re-big { font-size: 20px; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px; }
+        .review-empty .re-sub { font-size: 13px; color: #777; font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace; }
+        .kbd {
+            font-size: 10px; font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+            border: 1px solid #ccc; border-radius: 3px; padding: 1px 5px; color: #777; background: #fafafa;
+        }
+        @media (max-width: 560px) {
+            .review-actions { grid-template-columns: 1fr; }
+        }
+
         /* -- Footer -- */
         .site-footer {
             text-align: center;
@@ -659,6 +767,7 @@
             <div id="dashboard-tabs" style="display:none;margin-bottom:20px;">
                 <span class="tab-btn active" id="tab-my" onclick="switchTab('my')" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;border-bottom:2px solid #000;">My Overview</span>
                 <span class="tab-btn" id="tab-all" onclick="switchTab('all')" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">All Users</span>
+                <span class="tab-btn" id="tab-review" onclick="switchTab('review')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Review</span>
                 <span class="tab-btn" id="tab-participants" onclick="switchTab('participants')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Participants</span>
                 <span class="tab-btn" id="tab-payouts" onclick="switchTab('payouts')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Payouts</span>
             </div>
@@ -799,6 +908,8 @@
             <!-- Participants view (admin only) -->
             <div id="participants-view" style="display:none;"></div>
             <div id="payouts-view" style="display:none;"></div>
+            <!-- Applicant review "Tinder" queue (admin only) -->
+            <div id="review-view" style="display:none;"></div>
 
             <!-- Footer -->
             <div class="site-footer">
@@ -821,6 +932,14 @@
     let _authToken = localStorage.getItem('cc_auth_token') || null;
     let _authUser = null;
     let _isAdmin = false;
+    let _activeTab = 'my';
+
+    /* Applicant review ("Tinder") queue state */
+    let _reviewQueue = [];     /* ranked needs_review applicants */
+    let _reviewPos = 0;        /* index of the card currently shown */
+    let _reviewLoading = false;
+    let _lastDecision = null;  /* { email, choice, pos, name } for one-level Undo */
+    let _reviewBusy = false;   /* guards against double-swipes / key repeat */
 
     /* Chart.js global defaults */
     Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
@@ -1942,13 +2061,16 @@
        Tab switching
        ================================================================= */
     function switchTab(tab) {
+        _activeTab = tab;
         var myEl = document.getElementById('my-overview');
         var allEl = document.getElementById('all-users-view');
         var partEl = document.getElementById('participants-view');
         var payEl = document.getElementById('payouts-view');
+        var revEl = document.getElementById('review-view');
         myEl.style.display = tab === 'my' ? 'block' : 'none';
         partEl.style.display = tab === 'participants' ? 'block' : 'none';
         payEl.style.display = tab === 'payouts' ? 'block' : 'none';
+        revEl.style.display = tab === 'review' ? 'block' : 'none';
         /* Use position:absolute + visibility:hidden for all-users to preserve chart layout */
         if (tab === 'all') {
             allEl.style.display = 'block';
@@ -1969,9 +2091,13 @@
         document.getElementById('tab-participants').style.color = tab === 'participants' ? '#000' : '#999';
         document.getElementById('tab-payouts').style.borderBottomColor = tab === 'payouts' ? '#000' : 'transparent';
         document.getElementById('tab-payouts').style.color = tab === 'payouts' ? '#000' : '#999';
+        var revTab = document.getElementById('tab-review');
+        revTab.style.borderBottomColor = tab === 'review' ? '#000' : 'transparent';
+        revTab.style.color = tab === 'review' ? '#000' : '#999';
         if (tab === 'my') renderMyOverview();
         if (tab === 'participants') renderParticipantsView();
         if (tab === 'payouts') renderPayoutsView();
+        if (tab === 'review') renderReviewTab();
     }
 
     function renderMyOverview() {
@@ -2785,6 +2911,9 @@
 
         // Fetch pending reviews count
         fetchPendingCount();
+
+        // Fetch applicant-review queue count (also nudges the finalizer)
+        fetchReviewBadge();
     }
 
     function updateTabBadges() {
@@ -3200,6 +3329,8 @@
         document.getElementById('tab-participants').style.display = 'none';
         document.getElementById('tab-payouts').style.display = 'none';
         document.getElementById('payouts-view').style.display = 'none';
+        document.getElementById('tab-review').style.display = 'none';
+        document.getElementById('review-view').style.display = 'none';
         document.getElementById('all-users-view').style.display = 'block';
         document.getElementById('all-users-view').style.visibility = 'visible';
         document.getElementById('all-users-view').style.position = 'static';
@@ -3283,7 +3414,8 @@
             document.getElementById('auth-user').style.display = '';
             document.getElementById('auth-user-name').textContent = data.user.name || data.user.email;
 
-            /* Show participants and payouts tabs for admins */
+            /* Show review, participants and payouts tabs for admins */
+            document.getElementById('tab-review').style.display = _isAdmin ? 'inline' : 'none';
             document.getElementById('tab-participants').style.display = _isAdmin ? 'inline' : 'none';
             document.getElementById('tab-payouts').style.display = _isAdmin ? 'inline' : 'none';
 
@@ -3301,6 +3433,214 @@
             console.warn('Auth fetch failed:', err);
         }
     }
+
+    /* =================================================================
+       Applicant review ("Tinder") queue
+       ================================================================= */
+    function updateReviewBadge(n) {
+        var tab = document.getElementById('tab-review');
+        if (!tab) return;
+        tab.textContent = n > 0 ? 'Review (' + n + ')' : 'Review';
+        if (n > 0 && tab.style.borderBottomColor === 'transparent') tab.style.color = '#b08800';
+    }
+
+    /* Lightweight badge fetch (also nudges the server-side finalizer to send any
+       past-grace decisions, even if Mihir never opens the tab). */
+    function fetchReviewBadge() {
+        fetch(ONBOARD_API + '/applicants/queue', { headers: { 'Authorization': 'Bearer ' + _authToken } })
+            .then(function(resp){ return resp.json(); })
+            .then(function(data){ updateReviewBadge((data.applicants || []).length); })
+            .catch(function(){});
+    }
+
+    function renderReviewTab() {
+        if (!_isAdmin) return;
+        var container = document.getElementById('review-view');
+        if (_reviewLoading) return;
+        _reviewLoading = true;
+        container.innerHTML = '<div class="review-wrap"><div class="outline-box review-card">' +
+            '<div class="skel-line short"></div><div class="skel-block" style="height:240px;background:#f8f8f8;margin-top:14px;"></div></div></div>';
+        fetch(ONBOARD_API + '/applicants/queue', { headers: { 'Authorization': 'Bearer ' + _authToken } })
+            .then(function(resp){ if (!resp.ok) throw new Error('HTTP ' + resp.status); return resp.json(); })
+            .then(function(data){
+                _reviewLoading = false;
+                _reviewQueue = data.applicants || [];
+                _reviewPos = 0;
+                _lastDecision = null;
+                renderReviewCard();
+                updateReviewBadge(_reviewQueue.length);
+            })
+            .catch(function(err){
+                _reviewLoading = false;
+                container.innerHTML = '<div class="review-wrap"><div class="outline-box review-card"><p class="error-text">Failed to load review queue: ' + escapeHtml(String(err.message || err)) + '</p></div></div>';
+            });
+    }
+
+    function renderReviewCard() {
+        var container = document.getElementById('review-view');
+        var total = _reviewQueue.length;
+
+        var undoHtml = '';
+        if (_lastDecision) {
+            var lbl = _lastDecision.choice === 'accept' ? 'Accepted' : _lastDecision.choice === 'ask' ? 'Asked' : 'Rejected';
+            undoHtml =
+                '<div class="undo-bar">' +
+                    '<div class="ub-text"><b>' + lbl + '</b> ' + escapeHtml(_lastDecision.name || _lastDecision.email) +
+                        ' &mdash; sends in ~10 min. Undo cancels it.</div>' +
+                    '<button class="undo-btn" onclick="undoReview()">Undo</button>' +
+                '</div>';
+        }
+
+        if (_reviewPos >= total) {
+            container.innerHTML =
+                '<div class="review-wrap">' + undoHtml +
+                    '<div class="outline-box review-empty">' +
+                        '<div class="re-big">All caught up</div>' +
+                        '<div class="re-sub">' + (total ? total + ' reviewed this session. ' : '') + 'No applicants waiting.</div>' +
+                        '<div style="margin-top:20px;"><span class="review-btn rb-accept" style="display:inline-block;padding:10px 28px;cursor:pointer;" onclick="renderReviewTab()">Refresh</span></div>' +
+                    '</div>' +
+                '</div>';
+            return;
+        }
+
+        var a = _reviewQueue[_reviewPos];
+        var pctDone = total ? Math.round((_reviewPos / total) * 100) : 0;
+
+        var links = (a.links || []).map(function(l){
+            var url = /^https?:\/\//i.test(l) ? l : 'https://' + l;
+            return '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' + escapeHtml(l) + '</a>';
+        }).join('');
+
+        var fraudHtml = '';
+        if (a.fraud_flags && a.fraud_flags.length) {
+            fraudHtml = '<div class="fraud-banner"><div class="fb-title">&#9888; Fraud flags</div><ul>' +
+                a.fraud_flags.map(function(f){ return '<li>' + escapeHtml(f) + '</li>'; }).join('') + '</ul></div>';
+        }
+
+        var enrichHtml = '';
+        if (a.enrichment && a.enrichment.length) {
+            enrichHtml = '<div class="review-field"><div class="rf-label">Enrichment</div><div class="rf-body" style="font-size:12px;color:#666;">' +
+                a.enrichment.map(function(e){ return escapeHtml(e); }).join('\n') + '</div></div>';
+        }
+
+        var blockedHtml = a.blocked_domain ? '<span class="review-blocked">&#9888; blocked domain &mdash; email will be skipped</span>' : '';
+        var tierClass = a.tier === 'invite' ? 'tier-invite' : a.tier === 'ask' ? 'tier-ask' : 'tier-decline';
+
+        container.innerHTML =
+            '<div class="review-wrap">' +
+                undoHtml +
+                '<div class="review-progress">' +
+                    '<span class="rp-count">' + (_reviewPos + 1) + ' / ' + total + '</span>' +
+                    '<span>reject <span class="kbd">&larr;</span>&nbsp; ask <span class="kbd">&uarr;</span>&nbsp; accept <span class="kbd">&rarr;</span>&nbsp; undo <span class="kbd">U</span></span>' +
+                '</div>' +
+                '<div class="review-progress-bar"><div style="width:' + pctDone + '%;"></div></div>' +
+                '<div class="outline-box review-card">' +
+                    '<div class="review-card-head">' +
+                        '<h2>' + escapeHtml(a.name || '(no name)') + '</h2>' +
+                        '<span class="tier-badge ' + tierClass + '">' + escapeHtml(a.tier || '?') + '</span>' +
+                        '<span class="conf-badge">id: ' + escapeHtml(a.identity_confidence || '?') + '</span>' +
+                    '</div>' +
+                    '<div class="review-email-line">' + escapeHtml(a.email) + blockedHtml + '</div>' +
+                    (links ? '<div class="review-links">' + links + '</div>' : '') +
+                    fraudHtml +
+                    (a.work_summary ? '<div class="review-field"><div class="rf-label">What they do</div><div class="rf-body">' + escapeHtml(a.work_summary) + '</div></div>' : '') +
+                    (a.blurb ? '<div class="review-field"><div class="rf-label">Application blurb</div><div class="rf-body" style="color:#555;">' + escapeHtml(a.blurb) + '</div></div>' : '') +
+                    (a.reasoning ? '<div class="review-field"><div class="rf-label">Gate reasoning</div><div class="rf-body" style="color:#444;">' + escapeHtml(a.reasoning) + '</div></div>' : '') +
+                    enrichHtml +
+                    '<div class="review-email-box">' +
+                        '<div class="review-email-toggle" onclick="toggleReviewEmail(this)"><span>Drafted email <span style="color:#999;font-weight:400;text-transform:none;letter-spacing:0;">(click to expand / edit)</span></span><span class="rem-caret">+</span></div>' +
+                        '<div class="review-email-body" style="display:none;">' +
+                            '<input class="review-email-subject" id="review-subject" value="' + escapeHtml(a.email_subject || '') + '" readonly>' +
+                            '<textarea class="review-email-textarea" id="review-body">' + escapeHtml(a.email_body || '') + '</textarea>' +
+                            '<div class="review-email-hint">Edits override the drafted body when you Accept / Ask / Reject. Nothing sends until the 10-minute window passes.</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="review-actions">' +
+                        '<button class="review-btn rb-reject" onclick="decideReview(\'reject\')">Reject<small>&larr;</small></button>' +
+                        '<button class="review-btn rb-ask" onclick="decideReview(\'ask\')">Ask<small>&uarr;</small></button>' +
+                        '<button class="review-btn rb-accept" onclick="decideReview(\'accept\')">Accept<small>&rarr;</small></button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+    }
+
+    function toggleReviewEmail(el) {
+        var body = el.nextElementSibling;
+        var caret = el.querySelector('.rem-caret');
+        if (body.style.display === 'none') { body.style.display = 'block'; if (caret) caret.textContent = '−'; }
+        else { body.style.display = 'none'; if (caret) caret.textContent = '+'; }
+    }
+
+    function decideReview(choice) {
+        if (_reviewBusy) return;
+        if (_reviewPos >= _reviewQueue.length) return;
+        var a = _reviewQueue[_reviewPos];
+        _reviewBusy = true;
+
+        var payload = { email: a.email, choice: choice };
+        var bodyEl = document.getElementById('review-body');
+        if (bodyEl && typeof a.email_body === 'string' && bodyEl.value !== a.email_body) {
+            payload.edited_email = bodyEl.value;
+        }
+        document.querySelectorAll('.review-btn').forEach(function(b){ b.disabled = true; });
+
+        fetch(ONBOARD_API + '/applicants/decision', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(function(resp){ return resp.json().then(function(j){ return { ok: resp.ok, j: j }; }); })
+        .then(function(r){
+            _reviewBusy = false;
+            if (!r.ok) {
+                alert('Decision failed: ' + (r.j.error || 'unknown'));
+                document.querySelectorAll('.review-btn').forEach(function(b){ b.disabled = false; });
+                return;
+            }
+            _lastDecision = { email: a.email, choice: choice, pos: _reviewPos, name: a.name };
+            _reviewPos++;
+            renderReviewCard();
+            updateReviewBadge(Math.max(0, _reviewQueue.length - _reviewPos));
+        })
+        .catch(function(err){
+            _reviewBusy = false;
+            alert('Decision failed: ' + (err.message || err));
+            document.querySelectorAll('.review-btn').forEach(function(b){ b.disabled = false; });
+        });
+    }
+
+    function undoReview() {
+        if (_reviewBusy || !_lastDecision) return;
+        var d = _lastDecision;
+        _reviewBusy = true;
+        fetch(ONBOARD_API + '/applicants/undo', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: d.email })
+        })
+        .then(function(resp){ return resp.json().then(function(j){ return { ok: resp.ok, j: j }; }); })
+        .then(function(r){
+            _reviewBusy = false;
+            if (!r.ok) { alert('Undo failed: ' + (r.j.error || 'unknown') + '\n(The 10-minute window may have passed.)'); return; }
+            _reviewPos = d.pos;
+            _lastDecision = null;
+            renderReviewCard();
+            updateReviewBadge(Math.max(0, _reviewQueue.length - _reviewPos));
+        })
+        .catch(function(err){ _reviewBusy = false; alert('Undo failed: ' + (err.message || err)); });
+    }
+
+    /* Keyboard shortcuts — only on the Review tab, and never while editing the email. */
+    document.addEventListener('keydown', function(e){
+        if (_activeTab !== 'review') return;
+        var t = (document.activeElement && document.activeElement.tagName) || '';
+        if (t === 'TEXTAREA' || t === 'INPUT') return;
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        if (e.key === 'ArrowLeft') { e.preventDefault(); decideReview('reject'); }
+        else if (e.key === 'ArrowRight') { e.preventDefault(); decideReview('accept'); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); decideReview('ask'); }
+        else if (e.key === 'u' || e.key === 'U') { e.preventDefault(); undoReview(); }
+    });
 
     /* =================================================================
        Boot
