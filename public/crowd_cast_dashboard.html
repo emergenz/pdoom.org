@@ -768,6 +768,7 @@
                 <span class="tab-btn active" id="tab-my" onclick="switchTab('my')" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;border-bottom:2px solid #000;">My Overview</span>
                 <span class="tab-btn" id="tab-all" onclick="switchTab('all')" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">All Users</span>
                 <span class="tab-btn" id="tab-review" onclick="switchTab('review')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Review</span>
+                <span class="tab-btn" id="tab-nudges" onclick="switchTab('nudges')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Nudges</span>
                 <span class="tab-btn" id="tab-participants" onclick="switchTab('participants')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Participants</span>
                 <span class="tab-btn" id="tab-payouts" onclick="switchTab('payouts')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Payouts</span>
             </div>
@@ -910,6 +911,8 @@
             <div id="payouts-view" style="display:none;"></div>
             <!-- Applicant review "Tinder" queue (admin only) -->
             <div id="review-view" style="display:none;"></div>
+            <!-- Participant recording-health nudges "Tinder" queue (admin only) -->
+            <div id="nudges-view" style="display:none;"></div>
 
             <!-- Footer -->
             <div class="site-footer">
@@ -940,6 +943,12 @@
     let _reviewLoading = false;
     let _lastDecision = null;  /* { email, choice, pos, name } for one-level Undo */
     let _reviewBusy = false;   /* guards against double-swipes / key repeat */
+
+    /* Participant recording-health nudge ("Tinder") queue state */
+    let _nudgeQueue = [];      /* participants flagged for a weekly health nudge */
+    let _nudgePos = 0;         /* index of the card currently shown */
+    let _nudgeLoading = false;
+    let _nudgeBusy = false;    /* guards against double-clicks */
 
     /* Chart.js global defaults */
     Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
@@ -2067,10 +2076,12 @@
         var partEl = document.getElementById('participants-view');
         var payEl = document.getElementById('payouts-view');
         var revEl = document.getElementById('review-view');
+        var nudgeEl = document.getElementById('nudges-view');
         myEl.style.display = tab === 'my' ? 'block' : 'none';
         partEl.style.display = tab === 'participants' ? 'block' : 'none';
         payEl.style.display = tab === 'payouts' ? 'block' : 'none';
         revEl.style.display = tab === 'review' ? 'block' : 'none';
+        nudgeEl.style.display = tab === 'nudges' ? 'block' : 'none';
         /* Use position:absolute + visibility:hidden for all-users to preserve chart layout */
         if (tab === 'all') {
             allEl.style.display = 'block';
@@ -2094,10 +2105,14 @@
         var revTab = document.getElementById('tab-review');
         revTab.style.borderBottomColor = tab === 'review' ? '#000' : 'transparent';
         revTab.style.color = tab === 'review' ? '#000' : '#999';
+        var nudgeTab = document.getElementById('tab-nudges');
+        nudgeTab.style.borderBottomColor = tab === 'nudges' ? '#000' : 'transparent';
+        nudgeTab.style.color = tab === 'nudges' ? '#000' : '#999';
         if (tab === 'my') renderMyOverview();
         if (tab === 'participants') renderParticipantsView();
         if (tab === 'payouts') renderPayoutsView();
         if (tab === 'review') renderReviewTab();
+        if (tab === 'nudges') renderNudgesTab();
     }
 
     function renderMyOverview() {
@@ -2914,6 +2929,9 @@
 
         // Fetch applicant-review queue count (also nudges the finalizer)
         fetchReviewBadge();
+
+        // Fetch participant recording-health nudge queue count
+        fetchNudgeBadge();
     }
 
     function updateTabBadges() {
@@ -3331,6 +3349,8 @@
         document.getElementById('payouts-view').style.display = 'none';
         document.getElementById('tab-review').style.display = 'none';
         document.getElementById('review-view').style.display = 'none';
+        document.getElementById('tab-nudges').style.display = 'none';
+        document.getElementById('nudges-view').style.display = 'none';
         document.getElementById('all-users-view').style.display = 'block';
         document.getElementById('all-users-view').style.visibility = 'visible';
         document.getElementById('all-users-view').style.position = 'static';
@@ -3414,8 +3434,9 @@
             document.getElementById('auth-user').style.display = '';
             document.getElementById('auth-user-name').textContent = data.user.name || data.user.email;
 
-            /* Show review, participants and payouts tabs for admins */
+            /* Show review, nudges, participants and payouts tabs for admins */
             document.getElementById('tab-review').style.display = _isAdmin ? 'inline' : 'none';
+            document.getElementById('tab-nudges').style.display = _isAdmin ? 'inline' : 'none';
             document.getElementById('tab-participants').style.display = _isAdmin ? 'inline' : 'none';
             document.getElementById('tab-payouts').style.display = _isAdmin ? 'inline' : 'none';
 
@@ -3716,6 +3737,169 @@
         else if (e.key === 'ArrowUp') { e.preventDefault(); decideReview('ask'); }
         else if (e.key === 'u' || e.key === 'U') { e.preventDefault(); undoReview(); }
     });
+
+    /* =================================================================
+       Participant recording-health nudge ("Tinder") queue
+       ================================================================= */
+    function updateNudgeBadge(n) {
+        var tab = document.getElementById('tab-nudges');
+        if (!tab) return;
+        tab.textContent = n > 0 ? 'Nudges (' + n + ')' : 'Nudges';
+        if (n > 0 && tab.style.borderBottomColor === 'transparent') tab.style.color = '#b08800';
+    }
+
+    /* Lightweight badge fetch so the count shows on load without opening the tab. */
+    function fetchNudgeBadge() {
+        fetch(ONBOARD_API + '/participants/nudges', { headers: { 'Authorization': 'Bearer ' + _authToken } })
+            .then(function(resp){ return resp.json(); })
+            .then(function(data){ updateNudgeBadge((data.nudges || []).length); })
+            .catch(function(){});
+    }
+
+    function renderNudgesTab() {
+        if (!_isAdmin) return;
+        var container = document.getElementById('nudges-view');
+        if (_nudgeLoading) return;
+        _nudgeLoading = true;
+        container.innerHTML = '<div class="review-wrap"><div class="outline-box review-card">' +
+            '<div class="skel-line short"></div><div class="skel-block" style="height:240px;background:#f8f8f8;margin-top:14px;"></div></div></div>';
+        fetch(ONBOARD_API + '/participants/nudges', { headers: { 'Authorization': 'Bearer ' + _authToken } })
+            .then(function(resp){ if (!resp.ok) throw new Error('HTTP ' + resp.status); return resp.json(); })
+            .then(function(data){
+                _nudgeLoading = false;
+                _nudgeQueue = data.nudges || [];
+                _nudgePos = 0;
+                renderNudgeCard();
+                updateNudgeBadge(_nudgeQueue.length);
+            })
+            .catch(function(err){
+                _nudgeLoading = false;
+                container.innerHTML = '<div class="review-wrap"><div class="outline-box review-card"><p class="error-text">Failed to load nudge queue: ' + escapeHtml(String(err.message || err)) + '</p></div></div>';
+            });
+    }
+
+    function renderNudgeCard() {
+        var container = document.getElementById('nudges-view');
+        var total = _nudgeQueue.length;
+
+        if (_nudgePos >= total) {
+            container.innerHTML =
+                '<div class="review-wrap">' +
+                    '<div class="outline-box review-empty">' +
+                        '<div class="re-big">All caught up</div>' +
+                        '<div class="re-sub">' + (total ? total + ' handled this session. ' : '') + 'No participants to nudge right now.</div>' +
+                        '<div style="margin-top:20px;"><span class="review-btn rb-accept" style="display:inline-block;padding:10px 28px;cursor:pointer;" onclick="renderNudgesTab()">Refresh</span></div>' +
+                    '</div>' +
+                '</div>';
+            return;
+        }
+
+        var n = _nudgeQueue[_nudgePos];
+        var pctDone = total ? Math.round((_nudgePos / total) * 100) : 0;
+
+        var isGhost = n.bucket === 'ghosting';
+        var badgeClass = isGhost ? 'tier-decline' : 'tier-ask';
+        var badgeLabel = isGhost ? 'not recording' : 'low volume';
+
+        var blockedHtml = n.blocked_domain ? '<span class="review-blocked">&#9888; their domain blocks pdoom.org mail &mdash; sending will be skipped</span>' : '';
+
+        var metrics;
+        if (isGhost) {
+            metrics = 'No recordings in the last 7 days';
+            if (n.days_since != null) metrics += ', last recording ' + n.days_since + 'd ago';
+        } else {
+            var hrs = (typeof n.hours === 'number') ? n.hours : 0;
+            if (hrs < 1) metrics = 'under an hour recorded this week (target ~20)';
+            else metrics = hrs + 'h recorded this week (target ~20)';
+            if (n.days_since != null) metrics += ', last recording ' + n.days_since + 'd ago';
+        }
+
+        container.innerHTML =
+            '<div class="review-wrap">' +
+                '<div class="review-progress">' +
+                    '<span class="rp-count">' + (_nudgePos + 1) + ' / ' + total + '</span>' +
+                    '<span>skip or send each drafted nudge</span>' +
+                '</div>' +
+                '<div class="review-progress-bar"><div style="width:' + pctDone + '%;"></div></div>' +
+                '<div class="outline-box review-card">' +
+                    '<div class="review-card-head">' +
+                        '<h2>' + escapeHtml(n.name || '(no name)') + '</h2>' +
+                        '<span class="tier-badge ' + badgeClass + '">' + badgeLabel + '</span>' +
+                    '</div>' +
+                    '<div class="review-email-line">' + escapeHtml(n.email) + blockedHtml + '</div>' +
+                    '<div class="review-field"><div class="rf-body">' + escapeHtml(metrics) + '</div></div>' +
+                    buildNudgeEmailBox(n) +
+                    '<div class="review-actions" style="grid-template-columns:1fr 1fr;">' +
+                        '<button class="review-btn rb-reject" onclick="decideNudge(\'skip\')">Skip</button>' +
+                        '<button class="review-btn rb-accept" onclick="decideNudge(\'send\')">Send</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+    }
+
+    // The "drafted nudge" box, mirroring buildReviewEmailBox: a read-only subject
+    // and an editable body. Reuses toggleReviewEmail for expand/collapse.
+    function buildNudgeEmailBox(n) {
+        var subj = n.email_subject || '';
+        var bodyText = n.email_body || '';
+        var label = '(click to expand / edit)';
+        return '<div class="review-email-box">' +
+                '<div class="review-email-toggle" onclick="toggleReviewEmail(this)"><span>Drafted nudge <span style="color:#999;font-weight:400;text-transform:none;letter-spacing:0;">' + label + '</span></span><span class="rem-caret">+</span></div>' +
+                '<div class="review-email-body" style="display:none;">' +
+                    '<input class="review-email-subject" value="' + escapeHtml(subj) + '" readonly>' +
+                    '<textarea class="review-email-textarea" id="nudge-body">' + escapeHtml(bodyText) + '</textarea>' +
+                    '<div class="review-email-hint">Edit if you like. <b>Send</b> emails this to the participant now; <b>Skip</b> drops them for this week. Blocked domains are never emailed.</div>' +
+                '</div>' +
+            '</div>';
+    }
+
+    function decideNudge(choice) {
+        if (_nudgeBusy) return;
+        if (_nudgePos >= _nudgeQueue.length) return;
+        var n = _nudgeQueue[_nudgePos];
+        var name = n.name || n.email;
+        var bodyEl = document.getElementById('nudge-body');
+        var body = (bodyEl ? bodyEl.value : '') || '';
+
+        if (choice === 'send' && n.blocked_domain) {
+            if (!window.confirm('⚠ ' + name + "'s domain blocks pdoom.org mail, so this can't be delivered. Mark them skipped for this week?")) return;
+        } else if (choice === 'send') {
+            if (!window.confirm('This will email ' + name + ' now:\n\n----------\n' + body + '\n----------\n\nSend it?')) return;
+        } else {
+            if (!window.confirm('Skip nudging ' + name + ' this week? (no email is sent)')) return;
+        }
+
+        var payload = { email: n.email, choice: choice };
+        if (bodyEl && typeof n.email_body === 'string' && bodyEl.value !== n.email_body) {
+            payload.edited_email = bodyEl.value;
+        }
+
+        _nudgeBusy = true;
+        document.querySelectorAll('.review-btn').forEach(function(b){ b.disabled = true; });
+
+        fetch(ONBOARD_API + '/participants/nudge-decision', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(function(resp){ return resp.json().then(function(j){ return { ok: resp.ok, j: j }; }); })
+        .then(function(r){
+            _nudgeBusy = false;
+            if (!r.ok) {
+                alert('Nudge failed: ' + (r.j.error || 'unknown'));
+                document.querySelectorAll('.review-btn').forEach(function(b){ b.disabled = false; });
+                return;
+            }
+            _nudgePos++;
+            renderNudgeCard();
+            updateNudgeBadge(Math.max(0, _nudgeQueue.length - _nudgePos));
+        })
+        .catch(function(err){
+            _nudgeBusy = false;
+            alert('Nudge failed: ' + (err.message || err));
+            document.querySelectorAll('.review-btn').forEach(function(b){ b.disabled = false; });
+        });
+    }
 
     /* =================================================================
        Boot
