@@ -776,35 +776,6 @@ h1.hero-manifesto.display {
 }
 .btn-apply:hover { background: var(--ember); border-color: var(--ember); color: var(--paper); }
 
-/* Hero apply button: prominent but restrained. It reads as the primary
-   action because it's the only filled dark button up top, not because it's huge. */
-.btn-apply--hero {
-  font-size: 14px;
-  letter-spacing: .12em;
-  padding: 15px 34px;
-  margin: 8px 0 4px;
-}
-.apply-hero {
-  margin: 28px 0 12px;
-}
-.apply-hero .apply-note {
-  display: block;
-  margin-top: 12px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--ink-60, #666);
-}
-.apply-note .seg { white-space: nowrap; }
-.apply-note .sep { margin: 0 8px; color: var(--ash-500, #999); }
-@media (max-width: 640px) {
-  /* Size to content and center it, rather than spanning the whole screen. */
-  .btn-apply--hero { display: inline-flex; width: auto; }
-  /* Keep the button and microcopy on the same left edge as the headline and body. */
-  .apply-hero { text-align: left; }
-  .apply-note .sep { display: none; }
-  .apply-note .seg { display: block; line-height: 1.9; }
-}
-
 /* ===== Position detail layout (two column) ===================== */
 /* Role pages (MTS + residency) pair the long-form copy with a sticky
  * "at a glance" rail that carries the facts and the primary Apply
