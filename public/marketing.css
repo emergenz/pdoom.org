@@ -805,6 +805,115 @@ h1.hero-manifesto.display {
   .apply-note .seg { display: block; line-height: 1.9; }
 }
 
+/* ===== Position detail layout (two column) ===================== */
+/* Role pages (MTS + residency) pair the long-form copy with a sticky
+ * "at a glance" rail that carries the facts and the primary Apply
+ * (mailto) action. The rail fills the right side so the page reads as
+ * composed rather than a lone column of text, and keeps Apply in view. */
+.detail-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 72px;
+  align-items: start;
+  margin-top: var(--s-6);
+}
+.detail-main > .page-prose:first-child p:first-child { color: var(--ink); }
+.detail-main .detail-section:first-child { margin-top: 0; }
+
+.detail-rail {
+  position: sticky;
+  top: 88px;               /* clears the 64px sticky header */
+  align-self: start;
+}
+.rail-card {
+  border: 1px solid var(--ash-400);
+  padding: 26px 26px 28px;
+  background: transparent;
+}
+.rail-eyebrow { display: block; color: var(--ash-600); }
+.rail-facts { margin: 18px 0 22px; }
+.rail-fact {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--ash-300);
+}
+.rail-fact:last-child { border-bottom: 1px solid var(--ash-300); }
+.rail-fact dt {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ash-600);
+}
+.rail-fact dd {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--ink);
+  text-align: right;
+}
+.rail-apply {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+.rail-note {
+  margin: 14px 0 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.6;
+  letter-spacing: .01em;
+  color: var(--ash-600);
+}
+.rail-note strong { color: var(--ink); font-weight: 600; }
+
+/* Bulleted variant of .detail-list: an ember tick instead of a number. */
+.detail-list--bullets li .mark {
+  color: var(--ember);
+  padding-top: 3px;
+  font-size: 13px;
+}
+
+/* Bottom pager: a full-width card back to the index, closing the page
+ * the way the docs pages close with a next/prev card. */
+.detail-pager { margin-top: var(--s-9); }
+.pager-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid var(--ash-400);
+  padding: 22px 26px;
+  text-decoration: none;
+  color: var(--ink);
+  transition: border-color var(--dur-fast) var(--ease-ink),
+              color var(--dur-fast) var(--ease-ink);
+}
+.pager-card:hover { border-color: var(--ink); color: var(--ember); }
+.pager-dir {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ash-600);
+  transition: color var(--dur-fast) var(--ease-ink);
+}
+.pager-card:hover .pager-dir { color: var(--ember); }
+.pager-title {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+@media (max-width: 960px) {
+  .detail-shell { grid-template-columns: 1fr; gap: 40px; margin-top: var(--s-5); }
+  .detail-rail { position: static; order: -1; }
+  .rail-card { max-width: 440px; }
+}
+
 /* ===== Inline form (crowd-cast signup) ======================== */
 .signup-form {
   margin-top: var(--s-7);
