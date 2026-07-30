@@ -3798,13 +3798,17 @@
         var pctDone = total ? Math.round((_nudgePos / total) * 100) : 0;
 
         var isGhost = n.bucket === 'ghosting';
-        var badgeClass = isGhost ? 'tier-decline' : 'tier-ask';
-        var badgeLabel = isGhost ? 'not recording' : 'low volume';
+        var isCapture = n.bucket === 'capture_broken';
+        var badgeClass = (isGhost || isCapture) ? 'tier-decline' : 'tier-ask';
+        var badgeLabel = isCapture ? 'black frames' : isGhost ? 'not recording' : 'low volume';
 
         var blockedHtml = n.blocked_domain ? '<span class="review-blocked">&#9888; their domain blocks pdoom.org mail &mdash; sending will be skipped</span>' : '';
 
         var metrics;
-        if (isGhost) {
+        if (isCapture) {
+            metrics = 'Recording, but frames are coming through blank/black (hours look fine, data is unusable)';
+            if (typeof n.visible_fraction === 'number') metrics += ' &mdash; ' + Math.round(n.visible_fraction * 100) + '% visible';
+        } else if (isGhost) {
             metrics = 'No recordings in the last 7 days';
             if (n.days_since != null) metrics += ', last recording ' + n.days_since + 'd ago';
         } else {
