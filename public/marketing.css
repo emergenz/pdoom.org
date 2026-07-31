@@ -793,7 +793,11 @@ h1.hero-manifesto.display {
 
 .detail-rail {
   position: sticky;
-  top: 88px;               /* clears the 64px sticky header */
+  /* Pin the card at the vertical center of the viewport once it sticks,
+   * rather than at the top. 180px ~= half the card's height, so its own
+   * centre lands on 50vh. Before it sticks it stays in normal flow (no
+   * transform), so short pages are unaffected. */
+  top: calc(50vh - 180px);
   align-self: start;
 }
 .rail-card {
