@@ -3553,8 +3553,12 @@
             '<div class="review-wrap">' +
                 undoHtml +
                 '<div class="review-progress">' +
-                    '<span class="rp-count">' + (_reviewPos + 1) + ' / ' + total + '</span>' +
-                    '<span>reject <span class="kbd">&larr;</span>&nbsp; ask <span class="kbd">&uarr;</span>&nbsp; accept <span class="kbd">&rarr;</span>&nbsp; undo <span class="kbd">U</span></span>' +
+                    '<span class="rp-count">' +
+                        '<button onclick="navReview(-1)"' + (_reviewPos <= 0 ? ' disabled' : '') + ' title="Previous (Shift+Left)" style="font:inherit;font-size:11px;font-weight:600;padding:3px 10px;border:1px solid #d0d7de;border-radius:6px;background:#fff;color:#333;cursor:pointer;' + (_reviewPos <= 0 ? 'opacity:.35;cursor:default;' : '') + '">&lsaquo; Prev</button>' +
+                        '<span style="margin:0 10px;">' + (_reviewPos + 1) + ' / ' + total + '</span>' +
+                        '<button onclick="navReview(1)"' + (_reviewPos >= total - 1 ? ' disabled' : '') + ' title="Next (Shift+Right)" style="font:inherit;font-size:11px;font-weight:600;padding:3px 10px;border:1px solid #d0d7de;border-radius:6px;background:#fff;color:#333;cursor:pointer;' + (_reviewPos >= total - 1 ? 'opacity:.35;cursor:default;' : '') + '">Next &rsaquo;</button>' +
+                    '</span>' +
+                    '<span>browse <span class="kbd">&#8679;&larr;</span> <span class="kbd">&#8679;&rarr;</span> &nbsp;&middot;&nbsp; reject <span class="kbd">&larr;</span> ask <span class="kbd">&uarr;</span> accept <span class="kbd">&rarr;</span> undo <span class="kbd">U</span></span>' +
                 '</div>' +
                 '<div class="review-progress-bar"><div style="width:' + pctDone + '%;"></div></div>' +
                 '<div class="outline-box review-card">' +
@@ -3728,14 +3732,28 @@
         .catch(function(err){ _reviewBusy = false; alert('Undo failed: ' + (err.message || err)); });
     }
 
+    /* Browse the queue freely without deciding (buttons + Shift+Arrows). Clamped
+       to [0, last]; disabled while a decision is mid-flight. */
+    function navReview(delta) {
+        if (_reviewBusy) return;
+        var total = _reviewQueue.length;
+        if (!total) return;
+        var np = _reviewPos + delta;
+        if (np < 0) np = 0;
+        if (np > total - 1) np = total - 1;
+        if (np === _reviewPos) return;
+        _reviewPos = np;
+        renderReviewCard();
+    }
+
     /* Keyboard shortcuts — only on the Review tab, and never while editing the email. */
     document.addEventListener('keydown', function(e){
         if (_activeTab !== 'review') return;
         var t = (document.activeElement && document.activeElement.tagName) || '';
         if (t === 'TEXTAREA' || t === 'INPUT') return;
         if (e.metaKey || e.ctrlKey || e.altKey) return;
-        if (e.key === 'ArrowLeft') { e.preventDefault(); decideReview('reject'); }
-        else if (e.key === 'ArrowRight') { e.preventDefault(); decideReview('accept'); }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); if (e.shiftKey) navReview(-1); else decideReview('reject'); }
+        else if (e.key === 'ArrowRight') { e.preventDefault(); if (e.shiftKey) navReview(1); else decideReview('accept'); }
         else if (e.key === 'ArrowUp') { e.preventDefault(); decideReview('ask'); }
         else if (e.key === 'u' || e.key === 'U') { e.preventDefault(); undoReview(); }
     });
