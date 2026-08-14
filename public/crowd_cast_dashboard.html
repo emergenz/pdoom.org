@@ -943,6 +943,8 @@
     let _reviewLoading = false;
     let _lastDecision = null;  /* { email, choice, pos, name } for one-level Undo */
     let _reviewBusy = false;   /* guards against double-swipes / key repeat */
+    let _reviewEmailFor = '';       /* which decision's email is loaded in the editor */
+    let _reviewEmailBaseline = '';  /* the loaded template text, to detect edits */
 
     /* Participant recording-health nudge ("Tinder") queue state */
     let _nudgeQueue = [];      /* participants flagged for a weekly health nudge */
@@ -3619,40 +3621,77 @@
             "Best,\nMihir";
     }
 
-    // The "drafted email" box, tier-aware. Accept and Reject send fixed standard
-    // templates (shown read-only, so what you see is what ships). Only Ask is
-    // editable, since its clarifying question is applicant-specific.
+    // Editable accept template. {{link}} is replaced with the applicant's unique
+    // onboarding URL server-side (see the finalizer in the onboard lambda).
+    function acceptTemplate(name) {
+        var f = reviewFirstName(name);
+        return "Hey " + f + ",\n\n" +
+            "Thanks for applying to crowd-cast (pdoom.org/participate), we'd love to have you on board! Here's everything to get you started.\n\n" +
+            "Onboarding link (~5 min, covers the agreement and where we send your payouts): {{link}}\n\n" +
+            "Once that's done, our docs walk you through installing and setting up the recorder: pdoom.org/docs/crowd-cast/install. After it's installed, just sign in with Google from the tray menu so your recordings upload under your account.\n\n" +
+            "A tip from us: we record on one browser (e.g. Firefox) and keep a second one (e.g. Chrome) for private tasks like email, contracts, and chats, which we don't record. It keeps recording comfortable, and it's what we recommend to our participants. You'll set this up when the app asks you to whitelist your applications.\n\n" +
+            "Let me know once you have onboarded and started recording. I am also open for any questions from your side.\n\n" +
+            "Best,\nMihir\np(doom)";
+    }
+    function reviewEmailTemplate(choice, a) {
+        if (choice === 'accept') return acceptTemplate(a.name);
+        if (choice === 'reject') return rejectionPreview(a.name);
+        return (a.email_body || '');   // ask
+    }
+    function reviewEmailSubject(choice, a) {
+        if (choice === 'accept') return 'Your crowd-cast onboarding link';
+        if (choice === 'reject') return 'Your crowd-cast application';
+        return (a.email_subject || 'crowd-cast');   // ask
+    }
+    function reviewEmailHint(choice) {
+        if (choice === 'accept') return 'Sends on <b>Accept</b>. Edit freely, but keep <code>{{link}}</code> where their unique onboarding link should go (inserted automatically; if you delete it, the link is appended at the end).';
+        if (choice === 'reject') return 'Sends on <b>Reject</b>. Edit freely.';
+        return 'Sends as the clarifying question on <b>Ask</b>. Edit freely.';
+    }
+
+    // The "drafted email" box. Pick which decision's email you want with the
+    // Reject/Ask/Accept selector (defaults to the recommendation), then edit it.
+    // Editing THIS decision's email and then choosing it sends your custom copy;
+    // otherwise the standard template ships. Nothing sends until the 10-min window.
     function buildReviewEmailBox(a) {
         var tier = a.tier || '';
-        var subj, bodyText, editable, hint;
-        if (tier === 'ask') {
-            subj = a.email_subject || '';
-            bodyText = a.email_body || '';
-            editable = true;
-            hint = 'This is the clarifying question sent if you <b>Ask</b>. Edit it here if you like. <b>Accept</b> sends the onboarding email; <b>Reject</b> sends the standard decline. Nothing sends until the 10-minute window passes.';
-        } else if (tier === 'invite') {
-            subj = 'Your crowd-cast onboarding link';
-            bodyText = onboardingPreview(a.name);
-            editable = false;
-            hint = 'This is the onboarding email sent if you <b>Accept</b> (their unique link is filled in automatically). <b>Reject</b> sends the standard decline; <b>Ask</b> sends a clarifying question. Nothing sends until the 10-minute window passes.';
-        } else {
-            subj = 'Your crowd-cast application';
-            bodyText = rejectionPreview(a.name);
-            editable = false;
-            hint = 'This is the standard decline sent if you <b>Reject</b>. <b>Accept</b> sends the onboarding email; <b>Ask</b> sends a clarifying question. Nothing sends until the 10-minute window passes.';
+        var def = tier === 'invite' ? 'accept' : tier === 'ask' ? 'ask' : 'reject';
+        _reviewEmailFor = def;
+        var bodyText = reviewEmailTemplate(def, a);
+        _reviewEmailBaseline = bodyText;
+        function seg(c, lbl) {
+            var on = c === def;
+            return '<button type="button" id="rem-seg-' + c + '" onclick="loadReviewEmail(\'' + c + '\')" ' +
+                'style="font:inherit;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:5px 12px;border:1px solid #d0d7de;cursor:pointer;background:' + (on ? '#111' : '#fff') + ';color:' + (on ? '#fff' : '#333') + ';">' + lbl + '</button>';
         }
-        var label = editable ? '(click to expand / edit)' : '(click to expand)';
-        var textarea = editable
-            ? '<textarea class="review-email-textarea" id="review-body">' + escapeHtml(bodyText) + '</textarea>'
-            : '<textarea class="review-email-textarea" readonly>' + escapeHtml(bodyText) + '</textarea>';
         return '<div class="review-email-box">' +
-                '<div class="review-email-toggle" onclick="toggleReviewEmail(this)"><span>Drafted email <span style="color:#999;font-weight:400;text-transform:none;letter-spacing:0;">' + label + '</span></span><span class="rem-caret">+</span></div>' +
+                '<div class="review-email-toggle" onclick="toggleReviewEmail(this)"><span>Drafted email <span style="color:#999;font-weight:400;text-transform:none;letter-spacing:0;">(click to expand / edit)</span></span><span class="rem-caret">+</span></div>' +
                 '<div class="review-email-body" style="display:none;">' +
-                    '<input class="review-email-subject" value="' + escapeHtml(subj) + '" readonly>' +
-                    textarea +
-                    '<div class="review-email-hint">' + hint + '</div>' +
+                    '<div style="display:flex;align-items:center;gap:0;margin-bottom:8px;">' + seg('reject','Reject') + seg('ask','Ask') + seg('accept','Accept') +
+                        '<span style="margin-left:auto;font-size:11px;color:#999;">editing this decision&#8217;s email</span></div>' +
+                    '<input class="review-email-subject" id="review-subject" value="' + escapeHtml(reviewEmailSubject(def, a)) + '" readonly>' +
+                    '<textarea class="review-email-textarea" id="review-body">' + escapeHtml(bodyText) + '</textarea>' +
+                    '<div class="review-email-hint" id="review-email-hint">' + reviewEmailHint(def) + '</div>' +
                 '</div>' +
             '</div>';
+    }
+
+    // Switch the editor to a different decision's email (loads its template).
+    function loadReviewEmail(choice) {
+        var a = _reviewQueue[_reviewPos];
+        if (!a) return;
+        _reviewEmailFor = choice;
+        var tpl = reviewEmailTemplate(choice, a);
+        _reviewEmailBaseline = tpl;
+        var ta = document.getElementById('review-body'); if (ta) ta.value = tpl;
+        var sj = document.getElementById('review-subject'); if (sj) sj.value = reviewEmailSubject(choice, a);
+        var hint = document.getElementById('review-email-hint'); if (hint) hint.innerHTML = reviewEmailHint(choice);
+        ['reject','ask','accept'].forEach(function(c){
+            var b = document.getElementById('rem-seg-' + c);
+            if (b) { b.style.background = c === choice ? '#111' : '#fff'; b.style.color = c === choice ? '#fff' : '#333'; }
+        });
+        var body = document.querySelector('.review-email-box .review-email-body');
+        if (body && body.style.display === 'none') { body.style.display = 'block'; var car = document.querySelector('.review-email-box .rem-caret'); if (car) car.textContent = '−'; }
     }
 
     function decideReview(choice) {
@@ -3662,25 +3701,25 @@
         var name = a.name || a.email;
         var payload = { email: a.email, choice: choice };
 
+        // Custom copy only if the editor currently holds THIS decision's email and it was changed.
+        var ta = document.getElementById('review-body');
+        var custom = (ta && _reviewEmailFor === choice) ? ta.value : '';
+        var isCustom = !!(custom && custom.trim() && custom !== _reviewEmailBaseline);
+
         if (choice === 'ask') {
-            var bodyEl = document.getElementById('review-body');
-            var question = (bodyEl ? bodyEl.value : '') || '';
-            var untouched = !!(bodyEl && typeof a.email_body === 'string' && bodyEl.value === a.email_body);
+            var question = (custom && custom.trim()) ? custom : (a.email_body || '');
             if (!question.trim()) {
-                // No question drafted (applicant wasn't recommended for Ask). Collect one.
                 question = window.prompt('No question is drafted for ' + name + '. Type the clarifying question to send:', '') || '';
                 if (!question.trim()) return; // cancelled / empty
-                untouched = false;
             }
-            var warn = untouched
-                ? '⚠️ You have NOT edited the auto-drafted question — it will be sent as written below.\n\n'
-                : '';
-            if (!window.confirm(warn + 'Send this question to ' + name + '?\n\n----------\n' + question + '\n----------\n\nIt goes out after the 10-minute undo window.')) return;
+            if (!window.confirm('Send this question to ' + name + '?\n\n----------\n' + question + '\n----------\n\nIt goes out after the 10-minute undo window.')) return;
             payload.edited_email = question;
         } else if (choice === 'accept') {
-            if (!window.confirm('Accept ' + name + '?\n\nThe onboarding email (with their unique link) will be sent after the 10-minute undo window.')) return;
+            if (!window.confirm('Accept ' + name + '?' + (isCustom ? ' (your edited email)' : '') + '\n\nThe onboarding email' + (isCustom ? ' you edited' : '') + ' (with their unique link) will be sent after the 10-minute undo window.')) return;
+            if (isCustom) payload.edited_email = custom;
         } else {
-            if (!window.confirm('Reject ' + name + '?\n\nThe standard decline email will be sent after the 10-minute undo window.')) return;
+            if (!window.confirm('Reject ' + name + '?' + (isCustom ? ' (your edited email)' : '') + '\n\nThe' + (isCustom ? ' edited' : ' standard') + ' decline email will be sent after the 10-minute undo window.')) return;
+            if (isCustom) payload.edited_email = custom;
         }
 
         _reviewBusy = true;
