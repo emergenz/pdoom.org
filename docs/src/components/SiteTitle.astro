@@ -1,80 +1,98 @@
 ---
-// Custom site title: a breadcrumb lockup that doubles as the way back to the
-// main site. The sigil + "p(doom)" wordmark link to the site root / homepage
-// (mirroring the main site's own logo behaviour); "crowd-cast docs" links to
-// the docs home.
-//
-// Logos are served from public/ and referenced with the base path, rather than
-// imported through astro:assets — the optimizer chokes on these source PNGs,
-// and these marks need no optimization.
-const orgHome = '/'; // site root: the main p(doom) homepage — resolves to localhost in dev, pdoom.org in production
-const base = import.meta.env.BASE_URL.replace(/\/$/, ''); // '/docs/crowd-cast' (BASE_URL may lack a trailing slash)
+const orgHome = '/';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const docsHome = base + '/';
-const lightThemeLogo = base + '/logo-on-light.png'; // dark sigil, shown in light theme
-const darkThemeLogo = base + '/logo-on-dark.png'; // light sigil, shown in dark theme
+const mark = base + '/assets/pdoom-mark.png';
 ---
 
-<div class="site-title sl-flex">
+<div class="site-title">
   <a href={orgHome} class="cc-org" aria-label="p(doom) home">
-    <img src={darkThemeLogo} alt="" class="cc-logo light:sl-hidden" width="1024" height="1024" />
-    <img src={lightThemeLogo} alt="" class="cc-logo dark:sl-hidden" width="1024" height="1024" />
+    <img src={mark} alt="" class="cc-logo" width="1024" height="1024" />
     <span class="cc-wordmark">p(doom)</span>
   </a>
-  <span class="cc-sep" aria-hidden="true">›</span>
-  <a href={docsHome} class="cc-docs">crowd-cast docs</a>
+  <span class="cc-sep" aria-hidden="true"></span>
+  <a href={docsHome} class="cc-docs">
+    <span>crowd-cast</span>
+    <small>documentation</small>
+  </a>
 </div>
 
 <style>
   .site-title {
+    display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     min-width: 0;
     white-space: nowrap;
   }
+
   .cc-org {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    text-decoration: none;
+    gap: 0.625rem;
     color: var(--sl-color-white);
+    text-decoration: none;
   }
+
   .cc-logo {
-    height: calc(var(--sl-nav-height) - 2 * var(--sl-nav-pad-y));
-    width: auto;
+    width: 2.25rem;
+    height: 2.25rem;
     object-fit: contain;
   }
-  /* The brand wordmark is the canonical serif italic; the docs label is the
-     upright heading style (italic is reserved for the wordmark/display). */
+
   .cc-wordmark {
-    font-family: 'Lora', 'Adobe Garamond Pro', Georgia, serif;
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1.25rem;
     font-style: italic;
-    font-weight: 400; /* match the homepage wordmark (.brand .wm), which is Lora italic 400 */
-    font-size: 1.25rem;
-    letter-spacing: -0.01em;
+    font-weight: 400;
+    letter-spacing: 0;
   }
+
   .cc-sep {
-    color: var(--sl-color-gray-4);
-    font-family: var(--sl-font-mono);
+    width: 1px;
+    height: 1.75rem;
+    background: var(--sl-color-hairline-shade);
   }
+
   .cc-docs {
-    font-family: 'Lora', 'Adobe Garamond Pro', Georgia, serif;
-    font-weight: 600;
-    font-size: 1.25rem;
-    letter-spacing: -0.01em;
-    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
     color: var(--sl-color-white);
+    font-family: var(--sl-font);
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0;
+    text-decoration: none;
   }
+
+  .cc-docs small {
+    color: var(--sl-color-gray-3);
+    font-family: var(--sl-font-mono);
+    font-size: 0.58rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
   .cc-org:hover .cc-wordmark,
   .cc-docs:hover {
     color: var(--sl-color-text-accent);
   }
 
-  /* On narrow screens collapse to sigil + "crowd-cast docs"; the sigil still
-     links back to pdoom.org, so the way back survives. */
   @media (max-width: 50rem) {
-    .cc-wordmark,
-    .cc-sep {
+    .cc-wordmark {
       display: none;
+    }
+
+    .site-title {
+      gap: 0.625rem;
+    }
+
+    .cc-logo {
+      width: 2rem;
+      height: 2rem;
     }
   }
 </style>

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>crowd-cast metadata</title>
+    <script src="/site-announcement.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
@@ -13,13 +14,73 @@
             padding: 0;
         }
 
+        :root { --announcement-height: 38px; }
+        :root.paid-announcement-dismissed { --announcement-height: 0px; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #ffffff;
             color: #000000;
-            padding: 28px 24px 60px;
+            padding: calc(28px + var(--announcement-height)) 24px 60px;
             line-height: 1.6;
             overflow: hidden;
+        }
+
+        .site-announcement {
+            position: fixed;
+            inset: 0 0 auto;
+            z-index: 10000;
+            height: var(--announcement-height);
+            color: #ffffff;
+            background: #b7361e;
+            overflow: hidden;
+        }
+
+        .site-announcement a {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 48px;
+            color: inherit;
+            font-size: 13px;
+            line-height: 1.25;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .site-announcement button {
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            border: 0;
+            border-radius: 3px;
+            color: rgba(255, 255, 255, 0.8);
+            background: transparent;
+            font: inherit;
+            font-size: 20px;
+            cursor: pointer;
+            transform: translateY(-50%);
+        }
+
+        .site-announcement a:hover,
+        .site-announcement a:focus-visible,
+        .site-announcement button:hover,
+        .site-announcement button:focus-visible {
+            background: rgba(0, 0, 0, 0.14);
+        }
+
+        .site-announcement :focus-visible {
+            outline: 2px solid #ffffff;
+            outline-offset: -3px;
+        }
+
+        @media (max-width: 500px) {
+            :root { --announcement-height: 48px; }
+            .site-announcement a { font-size: 12px; }
         }
 
         .container {
@@ -727,6 +788,10 @@
     </style>
 </head>
 <body>
+    <aside class="site-announcement" aria-label="Paid data collection">
+        <a href="/careers/paid-data-collection"><span>We pay <strong>$300/month</strong> to record your screen for AI research</span></a>
+        <button type="button" aria-label="Dismiss announcement" title="Dismiss announcement" data-dismiss-paid-announcement>×</button>
+    </aside>
     <div class="container">
 
         <!-- Landing page (shown until sign-in) -->

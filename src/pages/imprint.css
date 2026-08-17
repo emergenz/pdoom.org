@@ -1,0 +1,105 @@
+.imprint-page {
+  min-height: 100svh;
+  color: var(--ink);
+  background: var(--white);
+}
+
+.imprint-shell {
+  width: min(calc(100% - (2 * var(--gutter))), var(--container));
+  margin-inline: auto;
+}
+
+.imprint-intro {
+  padding-top: calc(var(--header-height) + clamp(52px, 7svh, 88px));
+  padding-bottom: clamp(52px, 7svh, 84px);
+}
+
+.imprint-intro h1 {
+  max-width: 900px;
+  font-size: clamp(64px, 7.4vw, 118px);
+  font-weight: 500;
+  line-height: 0.9;
+}
+
+.imprint-details {
+  padding-bottom: clamp(120px, 16svh, 210px);
+}
+
+.imprint-fields {
+  margin: 0;
+  border-top: 1px solid rgba(11, 16, 21, 0.2);
+  border-bottom: 1px solid rgba(11, 16, 21, 0.2);
+}
+
+.imprint-field {
+  display: grid;
+  grid-template-columns: minmax(220px, 5fr) minmax(0, 7fr);
+  gap: clamp(36px, 5vw, 84px);
+  align-items: start;
+  padding: clamp(24px, 3svh, 34px) 0;
+}
+
+.imprint-field + .imprint-field {
+  border-top: 1px solid rgba(11, 16, 21, 0.2);
+}
+
+.imprint-field dt {
+  color: var(--steel-dark);
+  font-family: "Instrument Sans", Arial, sans-serif;
+  font-size: clamp(15px, 1.1vw, 17px);
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.imprint-field dd {
+  min-width: 0;
+  margin: 0;
+  font-size: clamp(18px, 1.35vw, 22px);
+  line-height: 1.42;
+}
+
+.imprint-field a {
+  border-bottom: 1px solid currentColor;
+  transition: color 180ms ease;
+}
+
+.imprint-field a:hover,
+.imprint-field a:focus-visible {
+  color: var(--signal);
+}
+
+@media (max-width: 760px) {
+  .imprint-intro {
+    padding-top: calc(var(--header-height) + 48px);
+    padding-bottom: 52px;
+  }
+
+  .imprint-intro h1 {
+    font-size: clamp(52px, 15vw, 76px);
+    line-height: 0.94;
+  }
+
+  .imprint-details {
+    padding-bottom: 112px;
+  }
+
+  .imprint-field {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding-block: 24px 27px;
+  }
+
+  .imprint-field dt {
+    font-size: 14px;
+  }
+
+  .imprint-field dd {
+    font-size: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .imprint-field a {
+    transition: none;
+  }
+}

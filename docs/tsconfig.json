@@ -1,5 +1,5 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "../public/docs/crowd-cast"]
+  "exclude": ["dist", "../dist/docs/crowd-cast"]
 }
