@@ -3,10 +3,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <meta name="referrer" content="no-referrer">
     <title>crowd-cast · onboarding</title>
-    <link rel="icon" type="image/png" href="favicon.png">
-    <link rel="stylesheet" href="colors_and_type.css">
-    <link rel="stylesheet" href="marketing.css">
+    <link rel="icon" type="image/png" href="/assets/pdoom-mark.png">
+    <script src="/site-announcement.js"></script>
     <style>
         .onboard-wrap {
             max-width: 640px;
@@ -274,20 +275,23 @@
             color: var(--fg2);
         }
     </style>
+    <link rel="stylesheet" href="/onboard.css">
 </head>
 <body>
-    <header class="site-header" data-surface="void">
+    <aside class="site-announcement" aria-label="Paid data collection">
+        <a href="/careers/paid-data-collection"><span>We pay <strong>$300/month</strong> to record your screen for AI research</span></a>
+        <button type="button" aria-label="Dismiss announcement" title="Dismiss announcement" data-dismiss-paid-announcement>×</button>
+    </aside>
+    <header class="site-header">
         <div class="container">
             <nav class="nav">
                 <a class="brand" href="/">
-                    <img class="sigil-img" src="logo-mark-inverted.png" alt="">
+                    <img class="sigil-img" src="/assets/pdoom-mark.png" alt="">
                     <span class="wm">p(doom)</span>
                 </a>
                 <div class="nav-links">
-                    <a href="/blog.html">Research</a>
-                    <a href="/about.html">About</a>
-                    <a href="/supply.html">Supply</a>
-                    <a href="/open_calls.html">Open calls</a>
+                    <a href="/docs/crowd-cast/">Documentation</a>
+                    <a href="mailto:mihir@pdoom.org">Contact</a>
                 </div>
             </nav>
         </div>
@@ -690,20 +694,16 @@
         </div>
     </main>
 
-    <footer class="site-footer" data-surface="void">
+    <footer class="site-footer">
         <div class="container">
             <div class="footer-row">
                 <a class="brand" href="/">
-                    <img class="sigil-img" src="logo-mark-inverted.png" alt="">
+                    <img class="sigil-img" src="/assets/pdoom-mark.png" alt="">
                     <span class="wm">p(doom)</span>
                 </a>
                 <nav class="footer-links">
-                    <a href="https://github.com/p-doom/">GitHub</a>
-                    <a href="https://discord.gg/G4JNuPX2VR">Discord</a>
-                    <a href="https://x.com/@prob_doom">Twitter</a>
-                    <a href="https://www.linkedin.com/company/p-doom">LinkedIn</a>
-                    <a href="https://huggingface.co/p-doom">HuggingFace</a>
-                    <a href="/imprint.html">Imprint</a>
+                    <a href="/docs/crowd-cast/">Documentation</a>
+                    <a href="/imprint">Imprint</a>
                 </nav>
             </div>
         </div>

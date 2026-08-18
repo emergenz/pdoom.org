@@ -2,27 +2,22 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
-// crowd-cast documentation.
-// Builds into ../public/docs/crowd-cast so it ships with the existing pdoom.org
-// GitHub Pages deploy (which uploads ./public) and is served at
-// https://pdoom.org/docs/crowd-cast/ (one domain, no extra CI).
+// Keep the existing public URL while building beside the Vite landing site.
 export default defineConfig({
   site: 'https://pdoom.org',
   base: '/docs/crowd-cast',
-  outDir: '../public/docs/crowd-cast',
+  outDir: '../dist/docs/crowd-cast',
   integrations: [
     starlight({
-      title: 'crowd-cast docs',
+      title: 'crowd-cast documentation',
       description:
-        'Install, configure and run crowd-cast — the p(doom) screen + input recording agent.',
-      // The logo is rendered by the custom SiteTitle component (below), so no
-      // `logo:` config here — having both processes the same asset twice and
-      // the two image pipelines collide.
+        'Install, configure and run crowd-cast, the p(doom) screen and input recording agent.',
       favicon: '/favicon.png',
       customCss: ['./src/styles/pdoom.css'],
       components: {
-        // Breadcrumb lockup: p(doom) (→ pdoom.org) › crowd-cast docs (→ docs home).
+        Header: './src/components/Header.astro',
         SiteTitle: './src/components/SiteTitle.astro',
+        ThemeProvider: './src/components/ThemeProvider.astro',
       },
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/p-doom/crowd-cast' },

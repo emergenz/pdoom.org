@@ -1,69 +1,36 @@
 {
-  "name": "distill-template",
-  "version": "2.8.0",
-  "description": "Template for creating Distill articles.",
-  "main": "public/template.v2.js",
-  "bin": {
-    "distill-render": "./bin/render.js"
-  },
-  "author": "Shan Carter",
-  "homepage": "https://github.com/distillpub/distill-template#readme",
-  "bugs": {
-    "url": "https://github.com/distillpub/distill-template/issues"
-  },
+  "name": "pdoom-landing-prototype",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "rollup -c rollup.config.dev.js -w",
-    "serve": "http-server",
-    "test": "mocha",
-    "lint": "eslint",
-    "build": "rollup -c rollup.config.prod.js && npm --prefix docs run build",
+    "dev": "npm run build:docs && vite",
+    "dev:site": "vite",
+    "dev:docs": "npm --prefix docs run dev -- --host 127.0.0.1",
+    "build": "npm run build:site && npm run build:docs && npm run build:pages",
+    "build:site": "vite build",
     "build:docs": "npm --prefix docs run build",
-    "postinstall": "npm --prefix docs install",
-    "prepare": "npm run build"
-  },
-  "repository": {
-    "url": "git+https://github.com/distillpub/distill-template.git",
-    "type": "git"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.9.0",
-    "@rollup/plugin-babel": "^5.0.0",
-    "@rollup/plugin-image": "^3.0.3",
-    "bibtex-parse-js": "^0.0.23",
-    "chai": "^3.5.0",
-    "eslint": "^4.19.1",
-    "eslint-config-google": "^0.9.1",
-    "js-yaml": "^3.13.1",
-    "jsdom": "11.3.0",
-    "jsdom-global": "3.0.2",
-    "marked": "^0.8.2",
-    "mocha": "^5.2.0",
-    "prismjs": "^1.20.0",
-    "rollup": "^2.80.0",
-    "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-copy": "^0.2.3",
-    "rollup-plugin-grapher": "^0.2.0",
-    "rollup-plugin-gzip": "^1.4.0",
-    "rollup-plugin-node-resolve": "^2.0.0",
-    "rollup-plugin-serve": "^2.0.3",
-    "rollup-plugin-string": "^2.0.2",
-    "rollup-plugin-uglify": "^1.0.1",
-    "rollup-watch": "^4.3.1",
-    "should": "^13.2.3",
-    "source-map-support": "^0.5.19"
+    "build:pages": "node scripts/prepare-pages.mjs",
+    "verify:pages": "node scripts/verify-pages.mjs",
+    "lint": "eslint .",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@webcomponents/webcomponentsjs": "^1.3.3",
-    "assert": "^1.5.0",
-    "commander": "^2.20.3",
-    "d3-array": "^2.4.0",
-    "d3-drag": "^1.2.5",
-    "d3-scale": "^3.2.1",
-    "d3-selection": "^1.4.1",
-    "d3-time-format": "^2.2.3",
-    "escape-html": "^1.0.3",
-    "intersection-observer": "^0.4.3",
-    "jsdom-wc": "^11.0.0-alpha-1",
-    "katex": "^0.8.3"
+    "@orcid/bibtex-parse-js": "^0.0.25",
+    "@radix-ui/react-navigation-menu": "^1.2.22",
+    "@vitejs/plugin-react": "latest",
+    "katex": "^0.16.47",
+    "lucide-react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "vite": "latest"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "latest",
+    "eslint-plugin-react-refresh": "latest",
+    "globals": "latest"
   }
 }

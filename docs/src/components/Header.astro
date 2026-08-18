@@ -1,0 +1,198 @@
+---
+import config from 'virtual:starlight/user-config';
+import LanguageSelect from '@astrojs/starlight/components/LanguageSelect.astro';
+import Search from '@astrojs/starlight/components/Search.astro';
+import SocialIcons from '@astrojs/starlight/components/SocialIcons.astro';
+import ThemeSelect from '@astrojs/starlight/components/ThemeSelect.astro';
+import SiteTitle from './SiteTitle.astro';
+
+const shouldRenderSearch =
+  config.pagefind || config.components.Search !== '@astrojs/starlight/components/Search.astro';
+---
+
+<div class="docs-header">
+  <aside class="site-announcement" aria-label="Paid data collection">
+    <a href="/careers/paid-data-collection">
+      <span>We pay <strong>$300/month</strong> to record your screen for AI research</span>
+    </a>
+    <button type="button" aria-label="Dismiss announcement" title="Dismiss announcement" data-dismiss-paid-announcement>
+      <span aria-hidden="true">×</span>
+    </button>
+  </aside>
+  <div class="docs-nav">
+    <div class="title-wrapper sl-flex">
+      <SiteTitle />
+    </div>
+    <div class="sl-flex print:hidden">
+      {shouldRenderSearch && <Search />}
+    </div>
+    <div class="sl-hidden md:sl-flex print:hidden right-group">
+      <div class="sl-flex social-icons">
+        <SocialIcons />
+      </div>
+      <ThemeSelect />
+      <LanguageSelect />
+    </div>
+  </div>
+</div>
+
+<script>
+  const storageKey = 'pdoom-paid-data-announcement-dismissed';
+  const dismissButton = document.querySelector('[data-dismiss-paid-announcement]');
+
+  dismissButton?.addEventListener('click', () => {
+    try {
+      localStorage.setItem(storageKey, '1');
+    } catch {
+      // Dismissal still applies for the current page.
+    }
+    document.documentElement.classList.add('paid-announcement-dismissed');
+  });
+</script>
+
+<style>
+  @layer starlight.core {
+    .docs-header {
+      height: 100%;
+    }
+
+    .site-announcement {
+      position: relative;
+      height: var(--pd-announcement-height);
+      color: #fff;
+      background: var(--pd-signal);
+      border-bottom: 1px solid rgba(11, 16, 21, 0.28);
+    }
+
+    .site-announcement a {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-inline: 3rem;
+      color: inherit;
+      font-family: var(--sl-font);
+      font-size: 0.8125rem;
+      line-height: 1.25;
+      text-align: center;
+      text-decoration: none;
+      transition: background-color 160ms ease-out;
+    }
+
+    .site-announcement button {
+      position: absolute;
+      top: 50%;
+      right: 0.5rem;
+      width: 1.875rem;
+      height: 1.875rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: 0;
+      border-radius: 3px;
+      color: rgba(255, 255, 255, 0.78);
+      background: transparent;
+      font-size: 1.2rem;
+      line-height: 1;
+      cursor: pointer;
+      transform: translateY(-50%);
+      transition: color 150ms ease-out, background-color 150ms ease-out;
+    }
+
+    .site-announcement button:hover,
+    .site-announcement button:focus-visible {
+      color: #fff;
+      background: rgba(11, 16, 21, 0.15);
+    }
+
+    .site-announcement button:focus-visible {
+      outline-color: #fff;
+      outline-offset: -2px;
+    }
+
+    :global(html.paid-announcement-dismissed) .site-announcement {
+      display: none;
+    }
+
+    .site-announcement strong {
+      font-weight: 650;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .site-announcement a:hover,
+    .site-announcement a:focus-visible {
+      background: rgba(11, 16, 21, 0.1);
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .site-announcement a:focus-visible {
+      outline-color: #fff;
+      outline-offset: -3px;
+    }
+
+    .docs-nav {
+      height: var(--pd-docs-nav-height);
+      display: flex;
+      gap: var(--sl-nav-gap);
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--sl-nav-pad-y) var(--sl-nav-pad-x);
+      padding-inline-end: calc(
+        var(--sl-nav-gap) + var(--sl-nav-pad-x) + var(--sl-menu-button-size)
+      );
+    }
+
+    .title-wrapper {
+      min-width: 0;
+      margin: -0.25rem;
+      padding: 0.25rem;
+      overflow: clip;
+    }
+
+    .right-group,
+    .social-icons {
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .social-icons::after {
+      content: '';
+      height: 2rem;
+      border-inline-end: 1px solid var(--sl-color-gray-5);
+    }
+
+    @media (min-width: 50rem) {
+      :global(:root[data-has-sidebar]) {
+        --__sidebar-pad: calc(2 * var(--sl-nav-pad-x));
+      }
+
+      :global(:root:not([data-has-toc])) {
+        --__toc-width: 0rem;
+      }
+
+      .docs-nav {
+        --__sidebar-width: max(0rem, var(--sl-content-inline-start, 0rem) - var(--sl-nav-pad-x));
+        --__main-column-fr: calc(
+          (
+              100% + var(--__sidebar-pad, 0rem) - var(--__toc-width, var(--sl-sidebar-width)) -
+                (2 * var(--__toc-width, var(--sl-nav-pad-x))) - var(--sl-content-inline-start, 0rem) -
+                var(--sl-content-width)
+            ) / 2
+        );
+        display: grid;
+        grid-template-columns:
+          minmax(
+            calc(var(--__sidebar-width) + max(0rem, var(--__main-column-fr) - var(--sl-nav-gap))),
+            auto
+          )
+          1fr
+          auto;
+        align-content: center;
+        padding-inline-end: var(--sl-nav-pad-x);
+      }
+    }
+  }
+</style>
