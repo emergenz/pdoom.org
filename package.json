@@ -11,6 +11,7 @@
     "build:site": "vite build",
     "build:docs": "npm --prefix docs run build",
     "build:pages": "node scripts/prepare-pages.mjs",
+    "verify:pages": "node scripts/verify-pages.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

@@ -6,7 +6,7 @@ export const researchReleases = [
     title: 'Annotating Unlabeled Screencasts with an IDM',
     shortTitle: 'Annotating Unlabeled Screencasts with an IDM',
     description: "We train an inverse dynamics model on crowd-cast's action-labeled dataset, yielding a model that recovers key presses, mouse clicks, cursor movements, and scroll events from unlabeled videos. Trained exclusively on macOS, the model outperforms orders-of-magnitude larger off-the-shelf models and generalizes to Windows and Linux. Along with the model, we openly release 600 hours of IDM-annotated screencasts.",
-    summary: 'An inverse dynamics model for recovering raw input events from screen recordings, released alongside 600 hours of action-labeled screencasts.',
+    summary: 'An inverse dynamics model trained to recover raw input events from screen recordings, released alongside 600 hours of action-labeled screencasts.',
     date: 'June 16, 2026',
     dateShort: 'Jun 16, 2026',
     authors: ['p(doom) Team'],

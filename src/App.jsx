@@ -116,7 +116,7 @@ const readyCards = [
     title: 'Train',
     image: '/assets/human-work/train.webp',
     tags: ['Extending task horizons', 'Fixed-sized state', 'Billion-token trajectories'],
-    body: 'Train models on signals derived from human work.',
+    body: 'Train models on months-long human trajectories to extend their task horizons.',
     links: [
       { label: 'Research', href: '/research' },
       { label: 'omegalax', href: 'https://github.com/p-doom/omegalax' },
@@ -141,7 +141,7 @@ const readyCards = [
 const announcements = [
   {
     title: 'Annotating Unlabeled Screencasts with an IDM',
-    subtitle: 'Recovering raw input events from screen recordings, alongside 600 hours of action-labeled screencasts.',
+    subtitle: 'An inverse dynamics model trained to recover raw input events from screen recordings, released alongside 600 hours of action-labeled screencasts.',
     image: '/assets/releases/idm.webp',
     href: '/research/inverse-dynamics-model',
   },
@@ -481,11 +481,10 @@ function MediaConsole() {
 function FilmSection() {
   return (
     <section className="film-section" aria-labelledby="film-title" data-nav-theme="dark">
-      <h2 id="film-title" className="sr-only">Research media placeholder</h2>
+      <h2 id="film-title" className="sr-only">Learning from human work</h2>
       <div className="film-frame">
         <video
-          src="/media/learning-from-human-work-01-trimmed.mp4"
-          poster="/assets/learning-from-human-work-01-trimmed-poster.jpg"
+          poster="/assets/learning-from-human-work-film-poster.jpg"
           autoPlay
           muted
           loop
@@ -493,7 +492,10 @@ function FilmSection() {
           preload="auto"
           disablePictureInPicture
           aria-hidden="true"
-        />
+        >
+          <source src="/media/learning-from-human-work-film.webm" type="video/webm" />
+          <source src="/media/learning-from-human-work-film.mp4" type="video/mp4" />
+        </video>
         <div className="film-vignette" />
       </div>
     </section>

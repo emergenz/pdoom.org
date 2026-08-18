@@ -10,16 +10,15 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
 jobs:
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,6 +43,9 @@ jobs:
 
       - name: Build site and docs
         run: npm run build
+
+      - name: Verify Pages artifact
+        run: npm run verify:pages
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
