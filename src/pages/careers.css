@@ -320,7 +320,7 @@
 
 .career-facts-apply {
   min-height: 66px;
-  margin-top: 18px;
+  margin-top: 0;
   padding: 0 18px;
   color: var(--off-white, #e5e0d6);
   background: var(--ink, #0b1015);
