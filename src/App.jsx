@@ -645,7 +645,8 @@ function Footer() {
           <h3>Legal</h3>
           <div>
             <a href="/imprint/">IMPRINT</a>
-            <a href="/onboard.html">PARTICIPATION TERMS</a>
+            <a href="/docs/crowd-cast-data-purchase-agreement.pdf">DATA PURCHASE AGREEMENT</a>
+            <a href="/docs/crowd-cast-privacy-consent.pdf">PRIVACY CONSENT</a>
             <a href="/docs/crowd-cast/privacy/">PRIVACY AND DATA</a>
           </div>
         </div>

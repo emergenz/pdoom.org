@@ -3,7 +3,7 @@ import './careers.css'
 
 const signUpHref = 'https://docs.google.com/forms/d/e/1FAIpQLSd50ZarNRKoIWDmy5xAn8K8FVGM2Jbk1T52er4YLHiP2P28rQ/viewform'
 const emailApplicationLabel = 'franz@pdoom.org'
-const emailApplicationNote = 'Five bullet points demonstrating exceptional ability.'
+const emailApplicationNote = 'To apply, send five bullet points demonstrating exceptional ability.'
 
 const opportunities = [
   {
@@ -43,7 +43,7 @@ const opportunities = [
         ],
       },
     ],
-    applyLabel: 'Sign up',
+    applyLabel: 'Apply to participate',
     applyHref: signUpHref,
     externalApply: true,
     applyNote: 'The signup form asks about the work you would record and the applications involved.',
@@ -325,7 +325,7 @@ function CareerDetail({ opportunity }) {
 
       <article className="careers-shell career-detail-layout">
         <aside className="career-facts" aria-label="At a glance">
-          <span className="careers-kicker">At a glance</span>
+          <h2>At a glance</h2>
           <dl>
             {opportunity.facts.map(([label, value]) => (
               <div key={label}>
@@ -356,7 +356,7 @@ function CareerDetail({ opportunity }) {
           ))}
 
           {opportunity.id !== 'paid-data-collection' && (
-            <div className="career-inline-apply">
+            <div className="career-inline-apply" id="application">
               <p>{opportunity.applyNote}</p>
               <a
                 className="career-apply-link"
@@ -364,9 +364,7 @@ function CareerDetail({ opportunity }) {
                 {...(opportunity.externalApply ? { target: '_blank', rel: 'noreferrer' } : {})}
               >
                 {opportunity.applyLabel}
-                {opportunity.externalApply
-                  ? <ArrowUpRight size={22} strokeWidth={1.6} aria-hidden="true" />
-                  : <ArrowRight size={22} strokeWidth={1.6} aria-hidden="true" />}
+                <ArrowUpRight size={20} strokeWidth={1.6} aria-hidden="true" />
               </a>
             </div>
           )}
