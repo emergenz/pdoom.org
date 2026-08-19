@@ -466,10 +466,9 @@ function Hero() {
       <AmbientVideo
         className="hero-media"
         videoClassName="hero-video"
-        poster="/assets/hero-explorations/umbra-mountain.png"
+        poster="/assets/hero-explorations/copper-growth-v3.png"
         sources={[
-          { src: '/media/hero-umbra-mountain-fade-loop.webm', type: 'video/webm' },
-          { src: '/media/hero-umbra-mountain-fade-loop.mp4', type: 'video/mp4' },
+          { src: '/media/hero-electrolyte-loop.webm', type: 'video/webm' },
         ]}
       />
       <div className="hero-shade hero-shade--top" />
@@ -516,7 +515,6 @@ function FilmSection() {
           poster="/assets/learning-from-human-work-film-poster.jpg"
           sources={[
             { src: '/media/learning-from-human-work-film.webm', type: 'video/webm' },
-            { src: '/media/learning-from-human-work-film.mp4', type: 'video/mp4' },
           ]}
         />
         <div className="film-vignette" />
