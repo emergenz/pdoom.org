@@ -647,7 +647,6 @@ function Footer() {
             <a href="/imprint/">IMPRINT</a>
             <a href="/docs/crowd-cast-data-purchase-agreement.pdf">DATA PURCHASE AGREEMENT</a>
             <a href="/docs/crowd-cast-privacy-consent.pdf">PRIVACY CONSENT</a>
-            <a href="/docs/crowd-cast/privacy/">PRIVACY AND DATA</a>
           </div>
         </div>
       </div>
