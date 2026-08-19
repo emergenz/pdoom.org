@@ -175,9 +175,9 @@ export const allResearch = [...researchReleases, ...researchPosts]
 export const researchBySlug = Object.fromEntries(allResearch.map((item) => [item.slug, item]))
 
 export const legacyResearchRoutes = Object.fromEntries(
-  allResearch.map((item) => [`${item.source}.html`, `/research/${item.slug}`]),
+  allResearch.map((item) => [`${item.source}.html`, `/research/${item.slug}/`]),
 )
 
 export function researchHref(item) {
-  return `/research/${item.slug}`
+  return `/research/${item.slug}/`
 }
