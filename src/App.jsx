@@ -78,7 +78,7 @@ const modalities = [
     description: 'Learn, reason, and act across trajectories that last hours, days, and eventually lifetimes.',
   },
   {
-    label: 'Fixed-Sized State',
+    label: 'Fixed-Size State',
     description: 'Carry useful state indefinitely while keeping memory and computation bounded as experience accumulates.',
   },
   {
@@ -115,7 +115,7 @@ const readyCards = [
   {
     title: 'Train',
     image: '/assets/human-work/train.webp',
-    tags: ['Extending task horizons', 'Fixed-sized state', 'Billion-token trajectories'],
+    tags: ['Extending task horizons', 'Fixed-size state', 'Billion-token trajectories'],
     body: 'Train models on months-long human trajectories to extend their task horizons.',
     links: [
       { label: 'Research', href: '/research/' },
