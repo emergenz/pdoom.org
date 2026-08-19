@@ -426,24 +426,52 @@ function Header() {
   )
 }
 
-function Hero() {
+function AmbientVideo({ className = '', poster, sources, videoClassName = '' }) {
+  const [playing, setPlaying] = useState(false)
+
   return (
-    <section className="hero" id="top" data-nav-theme="dark">
-      <img className="hero-media hero-poster" src="/assets/hero-explorations/umbra-mountain.png" alt="" aria-hidden="true" />
+    <>
+      <img
+        className={`${className} ambient-video-poster ${playing ? 'is-hidden' : ''}`}
+        src={poster}
+        alt=""
+        aria-hidden="true"
+      />
       <video
-        className="hero-media hero-video"
-        poster="/assets/hero-explorations/umbra-mountain.png"
+        className={`${className} ${videoClassName} ambient-video-media ${playing ? 'is-playing' : ''}`}
         autoPlay
         muted
         loop
         playsInline
         preload="auto"
+        controls={false}
         disablePictureInPicture
+        disableRemotePlayback
+        tabIndex={-1}
         aria-hidden="true"
+        onPlaying={() => setPlaying(true)}
+        onError={() => setPlaying(false)}
       >
-        <source src="/media/hero-umbra-mountain-fade-loop.webm" type="video/webm" />
-        <source src="/media/hero-umbra-mountain-fade-loop.mp4" type="video/mp4" />
+        {sources.map((source) => (
+          <source key={source.src} src={source.src} type={source.type} />
+        ))}
       </video>
+    </>
+  )
+}
+
+function Hero() {
+  return (
+    <section className="hero" id="top" data-nav-theme="dark">
+      <AmbientVideo
+        className="hero-media"
+        videoClassName="hero-video"
+        poster="/assets/hero-explorations/umbra-mountain.png"
+        sources={[
+          { src: '/media/hero-umbra-mountain-fade-loop.webm', type: 'video/webm' },
+          { src: '/media/hero-umbra-mountain-fade-loop.mp4', type: 'video/mp4' },
+        ]}
+      />
       <div className="hero-shade hero-shade--top" />
       <div className="hero-shade hero-shade--bottom" />
       <div className="hero-content">
@@ -483,19 +511,14 @@ function FilmSection() {
     <section className="film-section" aria-labelledby="film-title" data-nav-theme="dark">
       <h2 id="film-title" className="sr-only">Learning from human work</h2>
       <div className="film-frame">
-        <video
+        <AmbientVideo
+          className="film-media"
           poster="/assets/learning-from-human-work-film-poster.jpg"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          disablePictureInPicture
-          aria-hidden="true"
-        >
-          <source src="/media/learning-from-human-work-film.webm" type="video/webm" />
-          <source src="/media/learning-from-human-work-film.mp4" type="video/mp4" />
-        </video>
+          sources={[
+            { src: '/media/learning-from-human-work-film.webm', type: 'video/webm' },
+            { src: '/media/learning-from-human-work-film.mp4', type: 'video/mp4' },
+          ]}
+        />
         <div className="film-vignette" />
       </div>
     </section>
