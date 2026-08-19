@@ -5,7 +5,7 @@ const siteOrigin = 'https://pdoom.org'
 const defaultDescription = 'p(doom) addresses the fundamental bottlenecks toward AGI that scaling compute cannot solve.'
 
 const defaultMetadata = {
-  title: 'p(doom) | AGI research',
+  title: 'p(doom)',
   description: defaultDescription,
   url: `${siteOrigin}/`,
   image: `${siteOrigin}/pdoom-preview.png`,

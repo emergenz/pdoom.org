@@ -336,13 +336,13 @@ function CareerDetail({ opportunity }) {
           </dl>
           {opportunity.id === 'paid-data-collection' && (
             <a
-              className="career-apply-link career-facts-apply"
+              className="button button--primary career-facts-apply"
               href={opportunity.applyHref}
               target="_blank"
               rel="noreferrer"
             >
               {opportunity.applyLabel}
-              <ArrowUpRight size={22} strokeWidth={1.6} aria-hidden="true" />
+              <ArrowRight size={16} strokeWidth={1.8} aria-hidden="true" />
             </a>
           )}
         </aside>

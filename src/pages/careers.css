@@ -294,9 +294,6 @@
   gap: clamp(28px, 5vw, 72px);
   align-items: center;
   margin-top: clamp(52px, 5.25vw, 80px);
-  padding-block: 22px;
-  border-top: 1px solid var(--careers-rule);
-  border-bottom: 1px solid var(--careers-rule);
 }
 
 .career-inline-apply p {
@@ -317,14 +314,12 @@
   transition: color 180ms ease, border-color 180ms ease;
 }
 
-.career-facts-apply {
-  min-height: 66px;
+.career-facts .career-facts-apply {
+  width: 100%;
   margin-top: 26px;
-  padding: 0 18px;
   color: var(--off-white, #e5e0d6);
   background: var(--ink, #0b1015);
-  border: 0;
-  font-size: 16px;
+  border-color: var(--ink, #0b1015);
 }
 
 .career-inline-apply .career-apply-link {
