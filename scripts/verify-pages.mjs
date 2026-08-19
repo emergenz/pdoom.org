@@ -4,6 +4,7 @@ import { stdout } from 'node:process'
 
 const requiredFiles = [
   'dist/index.html',
+  'dist/favicon.png',
   'dist/404.html',
   'dist/CNAME',
   'dist/about/index.html',
