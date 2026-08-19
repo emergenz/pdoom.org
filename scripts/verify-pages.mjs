@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { stdout } from 'node:process'
 
@@ -19,6 +20,7 @@ const requiredFiles = [
   'dist/about.html',
   'dist/blog.html',
   'dist/participate.html',
+  'dist/participate-preview.png',
   'dist/open_calls/04_crowd_cast.html',
   'dist/media/hero-umbra-mountain-fade-loop.webm',
   'dist/media/learning-from-human-work-film.webm',
@@ -40,6 +42,14 @@ const assertEqual = (actual, expected, message) => {
 
 if (contents.get('dist/CNAME').toString().trim() !== 'pdoom.org') {
   throw new Error('dist/CNAME must contain pdoom.org')
+}
+
+const participationPreviewHash = createHash('sha256')
+  .update(contents.get('dist/participate-preview.png'))
+  .digest('hex')
+
+if (participationPreviewHash !== 'e6fd4f648e284c59e48f1c149fca9ae18c8225765b5c5989d7fda5be6fad34a3') {
+  throw new Error('The recruitment social preview no longer matches d379038')
 }
 
 assertEqual(
@@ -64,6 +74,50 @@ const redirects = [
 for (const [file, target] of redirects) {
   if (!contents.get(file).toString().includes(`url=${target}`)) {
     throw new Error(`${file} does not redirect to ${target}`)
+  }
+}
+
+const socialPages = [
+  {
+    file: 'dist/index.html',
+    url: 'https://pdoom.org/',
+    image: 'https://pdoom.org/assets/hero-explorations/umbra-mountain.png',
+    card: 'summary_large_image',
+  },
+  {
+    file: 'dist/participate.html',
+    url: 'https://pdoom.org/participate',
+    image: 'https://pdoom.org/participate-preview.png',
+    card: 'summary_large_image',
+  },
+  {
+    file: 'dist/open_calls/04_crowd_cast.html',
+    url: 'https://pdoom.org/open_calls/04_crowd_cast.html',
+    image: 'https://pdoom.org/participate-preview.png',
+    card: 'summary_large_image',
+  },
+  {
+    file: 'dist/research/inverse-dynamics-model/index.html',
+    url: 'https://pdoom.org/research/inverse-dynamics-model/',
+    image: 'https://pdoom.org/assets/releases/idm.webp',
+    card: 'summary',
+  },
+]
+
+for (const { file, url, image, card } of socialPages) {
+  const html = contents.get(file).toString()
+  const expectedTags = [
+    `property="og:url" content="${url}"`,
+    `property="og:image" content="${image}"`,
+    `name="twitter:card" content="${card}"`,
+    'property="og:title"',
+    'property="og:description"',
+    'name="twitter:title"',
+    'name="twitter:description"',
+  ]
+
+  for (const tag of expectedTags) {
+    if (!html.includes(tag)) throw new Error(`${file} is missing social metadata: ${tag}`)
   }
 }
 
