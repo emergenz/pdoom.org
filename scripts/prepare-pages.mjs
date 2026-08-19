@@ -106,7 +106,7 @@ const appRoutes = [
     metadata: {
       ...defaultMetadata,
       title: 'About | p(doom)',
-      description: 'p(doom) works on new data, long-horizon learning, fixed-sized state, continual learning, and credit assignment.',
+      description: 'p(doom) works on new data, long-horizon learning, fixed-size state, continual learning, and credit assignment.',
       url: `${siteOrigin}/about/`,
     },
   },

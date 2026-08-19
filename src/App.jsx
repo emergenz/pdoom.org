@@ -78,7 +78,7 @@ const modalities = [
     description: 'Learn, reason, and act across trajectories that last hours, days, and eventually lifetimes.',
   },
   {
-    label: 'Fixed-Sized State',
+    label: 'Fixed-Size State',
     description: 'Carry useful state indefinitely while keeping memory and computation bounded as experience accumulates.',
   },
   {
@@ -115,7 +115,7 @@ const readyCards = [
   {
     title: 'Train',
     image: '/assets/human-work/train.webp',
-    tags: ['Extending task horizons', 'Fixed-sized state', 'Billion-token trajectories'],
+    tags: ['Extending task horizons', 'Fixed-size state', 'Billion-token trajectories'],
     body: 'Train models on months-long human trajectories to extend their task horizons.',
     links: [
       { label: 'Research', href: '/research/' },
@@ -290,7 +290,7 @@ function AnnouncementBar() {
   if (!visible) return null
 
   return (
-    <aside className="site-announcement" aria-label="Paid data collection">
+    <aside className="site-announcement" aria-label="Paid data collection" data-nosnippet="">
       <a href="/careers/paid-data-collection/">
         <span>We pay <strong>$300/month</strong> to record your screen for AI research</span>
       </a>
@@ -466,10 +466,9 @@ function Hero() {
       <AmbientVideo
         className="hero-media"
         videoClassName="hero-video"
-        poster="/assets/hero-explorations/umbra-mountain.png"
+        poster="/assets/hero-explorations/copper-growth-v3.png"
         sources={[
-          { src: '/media/hero-umbra-mountain-fade-loop.webm', type: 'video/webm' },
-          { src: '/media/hero-umbra-mountain-fade-loop.mp4', type: 'video/mp4' },
+          { src: '/media/hero-electrolyte-loop.webm', type: 'video/webm' },
         ]}
       />
       <div className="hero-shade hero-shade--top" />
@@ -516,7 +515,6 @@ function FilmSection() {
           poster="/assets/learning-from-human-work-film-poster.jpg"
           sources={[
             { src: '/media/learning-from-human-work-film.webm', type: 'video/webm' },
-            { src: '/media/learning-from-human-work-film.mp4', type: 'video/mp4' },
           ]}
         />
         <div className="film-vignette" />

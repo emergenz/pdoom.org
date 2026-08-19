@@ -257,7 +257,7 @@ function CareersOverview() {
       <header className="careers-intro">
         <div className="careers-shell careers-intro-grid">
           <h1>Work on what compute cannot solve.</h1>
-          <p>Join p(doom) to address the fundamental bottlenecks toward AGI: new data, long horizons, fixed-sized state, and continual learning.</p>
+          <p>Join p(doom) to address the fundamental bottlenecks toward AGI: new data, long horizons, fixed-size state, and continual learning.</p>
         </div>
       </header>
 

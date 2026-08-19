@@ -24,7 +24,7 @@ const requiredFiles = [
   'dist/participate-preview.png',
   'dist/pdoom-preview.png',
   'dist/open_calls/04_crowd_cast.html',
-  'dist/media/hero-umbra-mountain-fade-loop.webm',
+  'dist/media/hero-electrolyte-loop.webm',
   'dist/media/learning-from-human-work-film.webm',
 ]
 
