@@ -290,7 +290,7 @@ function AnnouncementBar() {
   if (!visible) return null
 
   return (
-    <aside className="site-announcement" aria-label="Paid data collection">
+    <aside className="site-announcement" aria-label="Paid data collection" data-nosnippet="">
       <a href="/careers/paid-data-collection/">
         <span>We pay <strong>$300/month</strong> to record your screen for AI research</span>
       </a>
