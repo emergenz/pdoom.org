@@ -28,7 +28,7 @@ function localArticleRoute(href) {
 
     const filename = url.pathname.split('/').filter(Boolean).at(-1)
     if (filename === 'blog.html' || url.pathname === '/') {
-      return filename === 'blog.html' ? '/research' : '/'
+      return filename === 'blog.html' ? '/research/' : '/'
     }
     if (filename && legacyResearchRoutes[filename]) return legacyResearchRoutes[filename]
     return null
@@ -297,7 +297,7 @@ function MissingResearchPost() {
     <main className="blog-page blog-missing-page" id="main" data-nav-theme="light">
       <p className="blog-eyebrow">404</p>
       <h1>Research document not found.</h1>
-      <a href="/research">
+      <a href="/research/">
         <ArrowLeft size={18} aria-hidden="true" /> Return to all research
       </a>
     </main>
@@ -327,7 +327,7 @@ export default function BlogPostPage({ slug: slugProp }) {
   return (
     <main className="blog-page blog-post-page" id="main" data-nav-theme="light">
       <header className="blog-post-hero" data-nav-theme="light">
-        <a className="blog-back-link" href="/research">
+        <a className="blog-back-link" href="/research/">
           <ArrowLeft size={17} strokeWidth={1.8} aria-hidden="true" />
           All research
         </a>

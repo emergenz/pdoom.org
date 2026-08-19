@@ -243,7 +243,7 @@ function currentOpportunityId() {
 
 function OpportunityRow({ opportunity }) {
   return (
-    <a className="career-row" href={`/careers/${opportunity.id}`}>
+    <a className="career-row" href={`/careers/${opportunity.id}/`}>
       <strong className="career-row-title">{opportunity.title}</strong>
       <span className="career-row-summary">{opportunity.summary}</span>
       <ArrowRight className="career-row-arrow" size={22} strokeWidth={1.6} aria-hidden="true" />
@@ -311,7 +311,7 @@ function CareerDetail({ opportunity }) {
     <main className="career-detail-page" id="main" data-nav-theme="light">
       <header className="career-detail-hero">
         <div className="careers-shell">
-          <a className="career-back-link" href="/careers">
+          <a className="career-back-link" href="/careers/">
             <ArrowLeft size={17} strokeWidth={1.7} aria-hidden="true" />
             All roles
           </a>

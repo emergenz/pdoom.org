@@ -17,7 +17,7 @@ import {
 const navItems = [
   {
     label: 'Research',
-    href: '/research',
+    href: '/research/',
   },
   {
     label: 'Releases',
@@ -25,18 +25,18 @@ const navItems = [
       {
         label: 'Latest releases',
         items: [
-          { label: 'Inverse Dynamics Model', description: 'Action-labeling unlabeled videos', href: '/research/inverse-dynamics-model' },
+          { label: 'Inverse Dynamics Model', description: 'Action-labeling unlabeled videos', href: '/research/inverse-dynamics-model/' },
           { label: 'omegalax', description: 'VLM training codebase', href: 'https://github.com/p-doom/omegalax' },
-          { label: 'crowd-cast', description: 'Screen capture infrastructure', href: '/research/crowd-cast' },
-          { label: 'AGI-CAST', description: 'Long-horizon research dataset', href: '/research/agi-cast' },
-          { label: 'crowd-code', description: 'Data for product-feedback loops', href: '/research/crowd-code' },
-          { label: 'Jasmine', description: 'JAX world-modeling codebase and dataset', href: '/research/jasmine' },
+          { label: 'crowd-cast', description: 'Screen capture infrastructure', href: '/research/crowd-cast/' },
+          { label: 'AGI-CAST', description: 'Long-horizon research dataset', href: '/research/agi-cast/' },
+          { label: 'crowd-code', description: 'Data for product-feedback loops', href: '/research/crowd-code/' },
+          { label: 'Jasmine', description: 'JAX world-modeling codebase and dataset', href: '/research/jasmine/' },
         ],
       },
       {
         label: 'Browse',
         items: [
-          { label: 'All research', description: 'Publications and release notes', href: '/research' },
+          { label: 'All research', description: 'Publications and release notes', href: '/research/' },
           { label: 'Models and datasets', description: 'Weights and open data', href: 'https://huggingface.co/p-doom' },
         ],
       },
@@ -49,7 +49,7 @@ const navItems = [
         label: 'Resources',
         items: [
           { label: 'Documentation', description: 'Guides and reference', href: '/docs/crowd-cast/' },
-          { label: 'Research', description: 'Publications and releases', href: '/research' },
+          { label: 'Research', description: 'Publications and releases', href: '/research/' },
           { label: 'GitHub', description: 'Open source code', href: 'https://github.com/p-doom' },
           { label: 'Hugging Face', description: 'Models and datasets', href: 'https://huggingface.co/p-doom' },
           { label: 'Discord', description: 'Community and discussion', href: 'https://discord.gg/G4JNuPX2VR' },
@@ -58,10 +58,10 @@ const navItems = [
       {
         label: 'Company',
         items: [
-          { label: 'About us', description: 'Methods that unblock scaling', href: '/about' },
-          { label: 'Careers', description: 'Work with us', href: '/careers' },
-          { label: 'Merch', description: 'Support the work', href: '/merch' },
-          { label: 'Imprint', description: 'Legal information', href: '/imprint' },
+          { label: 'About us', description: 'Methods that unblock scaling', href: '/about/' },
+          { label: 'Careers', description: 'Work with us', href: '/careers/' },
+          { label: 'Merch', description: 'Support the work', href: '/merch/' },
+          { label: 'Imprint', description: 'Legal information', href: '/imprint/' },
         ],
       },
     ],
@@ -94,11 +94,11 @@ const readyCards = [
     tags: ['Human work', 'Month-long horizons', 'Passive recordings'],
     body: 'Capture months-long human computer work as aligned streams of video and human inputs.',
     links: [
-      { label: 'crowd-cast', href: '/research/crowd-cast' },
-      { label: 'AGI-CAST', href: '/research/agi-cast' },
+      { label: 'crowd-cast', href: '/research/crowd-cast/' },
+      { label: 'AGI-CAST', href: '/research/agi-cast/' },
     ],
     cta: 'Read the project',
-    ctaHref: '/research/crowd-cast',
+    ctaHref: '/research/crowd-cast/',
   },
   {
     title: 'Recover',
@@ -106,11 +106,11 @@ const readyCards = [
     tags: ['Low-level actions', 'Goals', 'Thinking traces'],
     body: 'Turn passive recordings of human work into useful training signal.',
     links: [
-      { label: 'IDM', href: '/research/inverse-dynamics-model' },
+      { label: 'IDM', href: '/research/inverse-dynamics-model/' },
       { label: 'Hugging Face', href: 'https://huggingface.co/p-doom' },
     ],
     cta: 'Explore the IDM',
-    ctaHref: '/research/inverse-dynamics-model',
+    ctaHref: '/research/inverse-dynamics-model/',
   },
   {
     title: 'Train',
@@ -118,7 +118,7 @@ const readyCards = [
     tags: ['Extending task horizons', 'Fixed-sized state', 'Billion-token trajectories'],
     body: 'Train models on months-long human trajectories to extend their task horizons.',
     links: [
-      { label: 'Research', href: '/research' },
+      { label: 'Research', href: '/research/' },
       { label: 'omegalax', href: 'https://github.com/p-doom/omegalax' },
     ],
     cta: 'Explore the training codebase',
@@ -130,11 +130,11 @@ const readyCards = [
     tags: ['Careers', 'Collaborate', 'Contribute data'],
     body: 'Work with us on the broader set of bottlenecks that scaling compute alone cannot solve.',
     links: [
-      { label: 'Careers', href: '/careers' },
+      { label: 'Careers', href: '/careers/' },
       { label: 'Documentation', href: '/docs/crowd-cast/' },
     ],
     cta: 'Get paid to contribute data',
-    ctaHref: '/careers/paid-data-collection',
+    ctaHref: '/careers/paid-data-collection/',
   },
 ]
 
@@ -143,39 +143,39 @@ const announcements = [
     title: 'Annotating Unlabeled Screencasts with an IDM',
     subtitle: 'An inverse dynamics model trained to recover raw input events from screen recordings, released alongside 600 hours of action-labeled screencasts.',
     image: '/assets/releases/idm.webp',
-    href: '/research/inverse-dynamics-model',
+    href: '/research/inverse-dynamics-model/',
   },
   {
     title: 'Capturing Long-Horizon Human Work',
     subtitle: 'The largest long-horizon screencast dataset in the world, with open-source infrastructure for action-annotated crowd-sourcing.',
     image: '/assets/releases/crowd-cast.webp',
-    href: '/research/crowd-cast',
+    href: '/research/crowd-cast/',
   },
   {
     title: 'AGI-CAST: 600 Hours of AGI Research',
     subtitle: 'A continually growing, openly released dataset of long-horizon screen recordings of AGI research.',
     image: '/assets/releases/agi-cast.webp',
-    href: '/research/agi-cast',
+    href: '/research/agi-cast/',
   },
   {
     title: 'Jasmine: A JAX World-Modeling Codebase',
     subtitle: 'A production-ready JAX codebase and the largest open dataset of Minecraft Let\'s Plays for world modeling from unlabeled video.',
     image: '/assets/releases/jasmine.webp',
-    href: '/research/jasmine',
+    href: '/research/jasmine/',
   },
 ]
 
 const footerGroups = [
   ['Research', [
     { label: 'RESEARCH AGENDA', href: '/#console' },
-    { label: 'ALL RESEARCH', href: '/research' },
+    { label: 'ALL RESEARCH', href: '/research/' },
   ]],
   ['Releases', [
-    { label: 'CROWD-CAST', href: '/research/crowd-cast' },
-    { label: 'INVERSE DYNAMICS MODEL', href: '/research/inverse-dynamics-model' },
-    { label: 'AGI-CAST', href: '/research/agi-cast' },
-    { label: 'CROWD-CODE', href: '/research/crowd-code' },
-    { label: 'JASMINE', href: '/research/jasmine' },
+    { label: 'CROWD-CAST', href: '/research/crowd-cast/' },
+    { label: 'INVERSE DYNAMICS MODEL', href: '/research/inverse-dynamics-model/' },
+    { label: 'AGI-CAST', href: '/research/agi-cast/' },
+    { label: 'CROWD-CODE', href: '/research/crowd-code/' },
+    { label: 'JASMINE', href: '/research/jasmine/' },
   ]],
   ['Resources', [
     { label: 'DOCUMENTATION', href: '/docs/crowd-cast/' },
@@ -183,13 +183,13 @@ const footerGroups = [
     { label: 'HUGGING FACE', href: 'https://huggingface.co/p-doom' },
   ]],
   ['Opportunities', [
-    { label: 'CAREERS', href: '/careers' },
-    { label: 'PAID DATA COLLECTION', href: '/careers/paid-data-collection' },
-    { label: 'RESEARCH RESIDENCY', href: '/careers/residency' },
+    { label: 'CAREERS', href: '/careers/' },
+    { label: 'PAID DATA COLLECTION', href: '/careers/paid-data-collection/' },
+    { label: 'RESEARCH RESIDENCY', href: '/careers/residency/' },
   ]],
   ['Lab', [
-    { label: 'ABOUT', href: '/about' },
-    { label: 'MERCH', href: '/merch' },
+    { label: 'ABOUT', href: '/about/' },
+    { label: 'MERCH', href: '/merch/' },
   ]],
   ['Connect', [
     { label: 'DISCORD', href: 'https://discord.gg/G4JNuPX2VR' },
@@ -198,7 +198,7 @@ const footerGroups = [
   ]],
 ]
 
-const paidDataCollectionPath = '/careers/paid-data-collection'
+const paidDataCollectionPath = '/careers/paid-data-collection/'
 
 function editDistance(first, second) {
   const previous = Array.from({ length: second.length + 1 }, (_, index) => index)
@@ -291,7 +291,7 @@ function AnnouncementBar() {
 
   return (
     <aside className="site-announcement" aria-label="Paid data collection">
-      <a href="/careers/paid-data-collection">
+      <a href="/careers/paid-data-collection/">
         <span>We pay <strong>$300/month</strong> to record your screen for AI research</span>
       </a>
       <button type="button" aria-label="Dismiss announcement" title="Dismiss announcement" onClick={dismiss}>
@@ -426,24 +426,52 @@ function Header() {
   )
 }
 
-function Hero() {
+function AmbientVideo({ className = '', poster, sources, videoClassName = '' }) {
+  const [playing, setPlaying] = useState(false)
+
   return (
-    <section className="hero" id="top" data-nav-theme="dark">
-      <img className="hero-media hero-poster" src="/assets/hero-explorations/umbra-mountain.png" alt="" aria-hidden="true" />
+    <>
+      <img
+        className={`${className} ambient-video-poster ${playing ? 'is-hidden' : ''}`}
+        src={poster}
+        alt=""
+        aria-hidden="true"
+      />
       <video
-        className="hero-media hero-video"
-        poster="/assets/hero-explorations/umbra-mountain.png"
+        className={`${className} ${videoClassName} ambient-video-media ${playing ? 'is-playing' : ''}`}
         autoPlay
         muted
         loop
         playsInline
         preload="auto"
+        controls={false}
         disablePictureInPicture
+        disableRemotePlayback
+        tabIndex={-1}
         aria-hidden="true"
+        onPlaying={() => setPlaying(true)}
+        onError={() => setPlaying(false)}
       >
-        <source src="/media/hero-umbra-mountain-fade-loop.webm" type="video/webm" />
-        <source src="/media/hero-umbra-mountain-fade-loop.mp4" type="video/mp4" />
+        {sources.map((source) => (
+          <source key={source.src} src={source.src} type={source.type} />
+        ))}
       </video>
+    </>
+  )
+}
+
+function Hero() {
+  return (
+    <section className="hero" id="top" data-nav-theme="dark">
+      <AmbientVideo
+        className="hero-media"
+        videoClassName="hero-video"
+        poster="/assets/hero-explorations/umbra-mountain.png"
+        sources={[
+          { src: '/media/hero-umbra-mountain-fade-loop.webm', type: 'video/webm' },
+          { src: '/media/hero-umbra-mountain-fade-loop.mp4', type: 'video/mp4' },
+        ]}
+      />
       <div className="hero-shade hero-shade--top" />
       <div className="hero-shade hero-shade--bottom" />
       <div className="hero-content">
@@ -483,19 +511,14 @@ function FilmSection() {
     <section className="film-section" aria-labelledby="film-title" data-nav-theme="dark">
       <h2 id="film-title" className="sr-only">Learning from human work</h2>
       <div className="film-frame">
-        <video
+        <AmbientVideo
+          className="film-media"
           poster="/assets/learning-from-human-work-film-poster.jpg"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          disablePictureInPicture
-          aria-hidden="true"
-        >
-          <source src="/media/learning-from-human-work-film.webm" type="video/webm" />
-          <source src="/media/learning-from-human-work-film.mp4" type="video/mp4" />
-        </video>
+          sources={[
+            { src: '/media/learning-from-human-work-film.webm', type: 'video/webm' },
+            { src: '/media/learning-from-human-work-film.mp4', type: 'video/mp4' },
+          ]}
+        />
         <div className="film-vignette" />
       </div>
     </section>
@@ -561,7 +584,7 @@ function NewsSection() {
     <section className="news-section" id="news" data-nav-theme="light">
       <div className="section-heading-row">
         <h2>Research and releases</h2>
-        <ArrowLink href="/research">Explore all research</ArrowLink>
+        <ArrowLink href="/research/">Explore all research</ArrowLink>
       </div>
       <div className="news-grid">
         {announcements.map((item) => <NewsCard item={item} key={item.title} />)}
@@ -576,8 +599,8 @@ function ClosingCta() {
       <PdoomBrand className="closing-mark" markOnly />
       <h2>Work with us.</h2>
       <div>
-        <a className="button button--primary" href="/careers">Careers <ArrowRight size={17} /></a>
-        <a className="button button--outline" href="/research">Read research</a>
+        <a className="button button--primary" href="/careers/">Careers <ArrowRight size={17} /></a>
+        <a className="button button--outline" href="/research/">Read research</a>
       </div>
     </section>
   )
@@ -621,7 +644,7 @@ function Footer() {
         <div className="footer-legal">
           <h3>Legal</h3>
           <div>
-            <a href="/imprint">IMPRINT</a>
+            <a href="/imprint/">IMPRINT</a>
             <a href="/onboard.html">PARTICIPATION TERMS</a>
             <a href="/docs/crowd-cast/privacy/">PRIVACY AND DATA</a>
           </div>
@@ -656,12 +679,12 @@ function App() {
   }
 
   const legacyRoute = legacyResearchRoutes[legacyPath] || {
-    'about.html': '/about',
-    'blog.html': '/research',
-    'imprint.html': '/imprint',
-    'open_calls.html': '/careers',
-    'research.html': '/research',
-    'supply.html': '/merch',
+    'about.html': '/about/',
+    'blog.html': '/research/',
+    'imprint.html': '/imprint/',
+    'open_calls.html': '/careers/',
+    'research.html': '/research/',
+    'supply.html': '/merch/',
   }[legacyPath]
 
   if (legacyRoute) {

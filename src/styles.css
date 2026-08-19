@@ -682,14 +682,34 @@ ul {
 .hero-media {
   position: absolute;
   inset: 0;
+  z-index: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
 }
 
-.hero-video {
-  z-index: 0;
+.ambient-video-poster,
+.ambient-video-media {
+  transition: opacity 120ms linear;
+}
+
+.ambient-video-media {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ambient-video-media.is-playing {
+  opacity: 1;
+}
+
+.ambient-video-poster.is-hidden {
+  opacity: 0;
+}
+
+.ambient-video-media::-webkit-media-controls,
+.ambient-video-media::-webkit-media-controls-start-playback-button {
+  display: none !important;
 }
 
 .hero-shade {
@@ -822,7 +842,7 @@ ul {
   background: var(--black-soft);
 }
 
-.film-frame > video {
+.film-frame > .film-media {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -1574,7 +1594,7 @@ ul {
     aspect-ratio: 4 / 3;
   }
 
-  .film-frame > video {
+  .film-frame > .film-media {
     object-position: center;
   }
 
@@ -1735,8 +1755,13 @@ ul {
     transform: scale(1.08);
   }
 
-  .hero-video {
+  .ambient-video-media {
     display: none;
+  }
+
+  .ambient-video-poster,
+  .ambient-video-poster.is-hidden {
+    opacity: 1;
   }
 
   .news-card:hover,
