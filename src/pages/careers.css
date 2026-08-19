@@ -198,8 +198,9 @@
 }
 
 .career-facts dl {
-  margin: 18px 0 0;
-  border-bottom: 1px solid var(--careers-rule);
+  display: grid;
+  gap: 18px;
+  margin: 24px 0 0;
 }
 
 .career-facts dl > div {
@@ -207,8 +208,6 @@
   grid-template-columns: minmax(100px, 1fr) auto;
   align-items: baseline;
   gap: 20px;
-  padding: 17px 0;
-  border-top: 1px solid var(--careers-rule);
 }
 
 .career-facts dt {
@@ -320,7 +319,7 @@
 
 .career-facts-apply {
   min-height: 66px;
-  margin-top: 0;
+  margin-top: 26px;
   padding: 0 18px;
   color: var(--off-white, #e5e0d6);
   background: var(--ink, #0b1015);
