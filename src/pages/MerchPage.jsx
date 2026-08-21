@@ -54,7 +54,10 @@ function ProductEntry({ product, index }) {
         <img
           src={image.src}
           alt={`${product.name}, ${image.label.toLowerCase()} view`}
+          decoding="async"
+          height="1200"
           loading={index === 0 ? 'eager' : 'lazy'}
+          width="1200"
         />
       </figure>
 

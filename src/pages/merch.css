@@ -103,7 +103,7 @@
   padding: 0 0 3px;
   border: 0;
   border-bottom: 1px solid transparent;
-  color: rgba(11, 16, 21, 0.56);
+  color: var(--steel-dark);
   background: transparent;
   font: inherit;
   font-size: 15px;

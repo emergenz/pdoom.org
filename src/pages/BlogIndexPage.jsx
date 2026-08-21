@@ -20,11 +20,13 @@ function ResearchMedia({ media, title }) {
         muted
         playsInline
         preload="metadata"
+        width="960"
+        height="960"
       />
     )
   }
 
-  return <img src={media.src} alt="" loading="lazy" />
+  return <img src={media.src} alt="" decoding="async" height="960" loading="lazy" width="960" />
 }
 
 function ReleaseCard({ release }) {

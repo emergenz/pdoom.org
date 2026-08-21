@@ -24,7 +24,7 @@
   gap: clamp(20px, 2.5vw, 44px);
 }
 
-.about-thesis h2 {
+.about-thesis h1 {
   grid-column: 1 / span 9;
   max-width: 1160px;
   font-size: clamp(54px, 6.2vw, 98px);
@@ -42,7 +42,7 @@
 }
 
 @media (max-width: 1100px) {
-  .about-thesis h2 {
+  .about-thesis h1 {
     grid-column: 1 / span 10;
   }
 
@@ -57,7 +57,7 @@
     grid-template-columns: 1fr;
   }
 
-  .about-thesis h2,
+  .about-thesis h1,
   .about-thesis p {
     grid-column: auto;
   }
@@ -79,7 +79,7 @@
     padding-bottom: 84px;
   }
 
-  .about-thesis h2 {
+  .about-thesis h1 {
     font-size: 43px;
     line-height: 0.98;
   }

@@ -254,10 +254,26 @@ function RouteRedirect({ href }) {
   return null
 }
 
-function PdoomBrand({ className = '', large = false, markOnly = false }) {
+function PdoomBrand({ className = '', defer = false, large = false, markOnly = false }) {
+  const markSizes = large
+    ? '(max-width: 680px) 76px, 180px'
+    : markOnly
+      ? '(max-width: 760px) 88px, 104px'
+      : '38px'
+
   return (
     <span className={`pdoom-brand ${large ? 'pdoom-brand--large' : ''} ${className}`}>
-      <img src="/assets/pdoom-mark.png" alt="" aria-hidden="true" />
+      <img
+        src="/assets/pdoom-mark.webp"
+        srcSet="/assets/pdoom-mark-128.webp 128w, /assets/pdoom-mark-256.webp 256w, /assets/pdoom-mark.webp 512w"
+        sizes={markSizes}
+        alt=""
+        aria-hidden="true"
+        decoding="async"
+        height="512"
+        loading={defer ? 'lazy' : 'eager'}
+        width="512"
+      />
       {!markOnly && <span>p(doom)</span>}
     </span>
   )
@@ -302,6 +318,10 @@ function AnnouncementBar() {
 }
 
 function Header() {
+  const closeButtonRef = useRef(null)
+  const drawerRef = useRef(null)
+  const headerRef = useRef(null)
+  const menuButtonRef = useRef(null)
   const [theme, setTheme] = useState('dark')
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -333,12 +353,64 @@ function Header() {
 
   useEffect(() => {
     document.body.classList.toggle('menu-locked', menuOpen)
-    return () => document.body.classList.remove('menu-locked')
+    const closeButton = closeButtonRef.current
+    const drawer = drawerRef.current
+    const menuButton = menuButtonRef.current
+    const backgroundRegions = [
+      headerRef.current,
+      document.querySelector('.site-announcement'),
+      document.querySelector('#main'),
+      document.querySelector('.footer-canvas'),
+    ].filter(Boolean)
+    const previouslyFocused = document.activeElement
+
+    for (const region of backgroundRegions) region.inert = menuOpen
+
+    if (!menuOpen) return () => {
+      document.body.classList.remove('menu-locked')
+      for (const region of backgroundRegions) region.inert = false
+    }
+
+    const focusFrame = requestAnimationFrame(() => closeButton?.focus())
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setMenuOpen(false)
+        return
+      }
+      if (event.key !== 'Tab' || !drawer) return
+
+      const focusable = [...drawer.querySelectorAll(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      )]
+      if (focusable.length === 0) return
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      cancelAnimationFrame(focusFrame)
+      document.removeEventListener('keydown', handleKeyDown)
+      document.body.classList.remove('menu-locked')
+      for (const region of backgroundRegions) region.inert = false
+      if (previouslyFocused === menuButton || drawer?.contains(previouslyFocused)) {
+        menuButton?.focus()
+      }
+    }
   }, [menuOpen])
 
   return (
     <>
-      <header className={`site-header site-header--${theme} ${scrolled ? 'is-scrolled' : ''}`}>
+      <header ref={headerRef} className={`site-header site-header--${theme} ${scrolled ? 'is-scrolled' : ''}`}>
         <a className="header-brand" href="/" aria-label="p(doom) home">
           <PdoomBrand />
         </a>
@@ -385,16 +457,25 @@ function Header() {
         </NavigationMenu.Root>
 
         <div className="header-actions">
-          <button className="menu-toggle" type="button" aria-label="Open navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}>
+          <button ref={menuButtonRef} className="menu-toggle" type="button" aria-label="Open navigation" aria-controls="mobile-navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}>
             <Menu size={22} />
           </button>
         </div>
       </header>
 
-      <div className={`mobile-drawer ${menuOpen ? 'is-open' : ''}`} aria-hidden={!menuOpen}>
+      <div
+        ref={drawerRef}
+        className={`mobile-drawer ${menuOpen ? 'is-open' : ''}`}
+        id="mobile-navigation"
+        role="dialog"
+        aria-label="Mobile navigation"
+        aria-modal="true"
+        aria-hidden={!menuOpen}
+        inert={!menuOpen}
+      >
         <div className="drawer-top">
           <PdoomBrand />
-          <button type="button" className="icon-button light" aria-label="Close navigation" onClick={() => setMenuOpen(false)}><X /></button>
+          <button ref={closeButtonRef} type="button" className="icon-button light" aria-label="Close navigation" onClick={() => setMenuOpen(false)}><X /></button>
         </div>
         <nav aria-label="Mobile navigation">
           {navItems.map((item) => (
@@ -426,33 +507,127 @@ function Header() {
   )
 }
 
-function AmbientVideo({ className = '', poster, sources, videoClassName = '' }) {
+function shouldAvoidAutoplayMedia() {
+  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  const saveData = navigator.connection?.saveData
+  return Boolean(reducedMotion || saveData)
+}
+
+function bufferedToEnd(video) {
+  if (!Number.isFinite(video.duration) || video.duration <= 0 || video.buffered.length === 0) return false
+  return video.buffered.end(video.buffered.length - 1) >= video.duration - 0.25
+}
+
+function AmbientVideo({
+  className = '',
+  eager = false,
+  loadSignal = false,
+  mediaHeight,
+  mediaWidth,
+  onFullyBuffered,
+  poster,
+  posterSizes,
+  posterSrcSet,
+  sources,
+  videoClassName = '',
+}) {
+  const videoRef = useRef(null)
   const [playing, setPlaying] = useState(false)
+  const [nearViewport, setNearViewport] = useState(eager)
+  const [mediaAllowed, setMediaAllowed] = useState(() => !shouldAvoidAutoplayMedia())
+  const completionReported = useRef(false)
+  const attachSources = mediaAllowed && (eager || loadSignal || nearViewport)
+  const attachPoster = eager || loadSignal || nearViewport
+  const showVideo = playing && attachSources
+
+  useEffect(() => {
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const connection = navigator.connection
+    const update = () => setMediaAllowed(!shouldAvoidAutoplayMedia())
+
+    motionQuery.addEventListener?.('change', update)
+    connection?.addEventListener?.('change', update)
+    return () => {
+      motionQuery.removeEventListener?.('change', update)
+      connection?.removeEventListener?.('change', update)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (eager || loadSignal || nearViewport || !videoRef.current) return undefined
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+        setNearViewport(true)
+        observer.disconnect()
+      },
+      { rootMargin: '600px 0px' },
+    )
+    observer.observe(videoRef.current)
+    return () => observer.disconnect()
+  }, [eager, loadSignal, nearViewport])
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    if (!attachSources) {
+      video.pause()
+      video.load()
+      return
+    }
+
+    // Adding the source starts loading and autoplay; calling load() here would
+    // issue a duplicate range request in the near-viewport path.
+  }, [attachSources])
+
+  const reportCompletion = () => {
+    const video = videoRef.current
+    if (!video || completionReported.current || !bufferedToEnd(video)) return
+    completionReported.current = true
+    onFullyBuffered?.()
+  }
 
   return (
     <>
       <img
-        className={`${className} ambient-video-poster ${playing ? 'is-hidden' : ''}`}
-        src={poster}
+        className={`${className} ambient-video-poster ${showVideo ? 'is-hidden' : ''}`}
+        src={attachPoster ? poster : undefined}
+        srcSet={attachPoster ? posterSrcSet : undefined}
+        sizes={attachPoster ? posterSizes : undefined}
         alt=""
         aria-hidden="true"
+        decoding="async"
+        fetchPriority={eager ? 'high' : 'auto'}
+        height={mediaHeight}
+        loading={eager ? 'eager' : 'lazy'}
+        width={mediaWidth}
       />
       <video
-        className={`${className} ${videoClassName} ambient-video-media ${playing ? 'is-playing' : ''}`}
+        ref={videoRef}
+        className={`${className} ${videoClassName} ambient-video-media ${showVideo ? 'is-playing' : ''}`}
         autoPlay
         muted
+        height={mediaHeight}
         loop
         playsInline
-        preload="auto"
+        preload={attachSources ? 'auto' : 'none'}
         controls={false}
         disablePictureInPicture
         disableRemotePlayback
         tabIndex={-1}
+        width={mediaWidth}
         aria-hidden="true"
         onPlaying={() => setPlaying(true)}
+        onEmptied={() => setPlaying(false)}
         onError={() => setPlaying(false)}
+        onCanPlayThrough={reportCompletion}
+        onLoadedData={reportCompletion}
+        onProgress={reportCompletion}
+        onSuspend={reportCompletion}
       >
-        {sources.map((source) => (
+        {attachSources && sources.map((source) => (
           <source key={source.src} src={source.src} type={source.type} />
         ))}
       </video>
@@ -460,15 +635,21 @@ function AmbientVideo({ className = '', poster, sources, videoClassName = '' }) 
   )
 }
 
-function Hero() {
+function Hero({ onVideoBuffered }) {
   return (
     <section className="hero" id="top" data-nav-theme="dark">
       <AmbientVideo
         className="hero-media"
+        eager
+        mediaHeight={941}
+        mediaWidth={1672}
+        onFullyBuffered={onVideoBuffered}
         videoClassName="hero-video"
-        poster="/assets/hero-explorations/copper-growth-v3.png"
+        poster="/assets/hero-explorations/copper-growth-v3.webp"
+        posterSizes="100vw"
+        posterSrcSet="/assets/hero-explorations/copper-growth-v3-960.webp 960w, /assets/hero-explorations/copper-growth-v3.webp 1672w"
         sources={[
-          { src: '/media/hero-electrolyte-loop.webm', type: 'video/webm' },
+          { src: '/media/hero-electrolyte-loop-compressed.webm', type: 'video/webm' },
         ]}
       />
       <div className="hero-shade hero-shade--top" />
@@ -505,14 +686,17 @@ function MediaConsole() {
   )
 }
 
-function FilmSection() {
+function FilmSection({ heroVideoBuffered }) {
   return (
     <section className="film-section" aria-labelledby="film-title" data-nav-theme="dark">
       <h2 id="film-title" className="sr-only">Learning from human work</h2>
       <div className="film-frame">
         <AmbientVideo
           className="film-media"
-          poster="/assets/learning-from-human-work-film-poster.jpg"
+          loadSignal={heroVideoBuffered}
+          mediaHeight={720}
+          mediaWidth={1280}
+          poster="/assets/learning-from-human-work-film-poster.webp"
           sources={[
             { src: '/media/learning-from-human-work-film.webm', type: 'video/webm' },
           ]}
@@ -535,7 +719,7 @@ function ReadySection() {
           {readyCards.map((card, index) => (
             <article className="ready-stage" key={card.title} style={{ zIndex: index + 1 }}>
               <div className="ready-plate">
-                <img src={card.image} alt="" loading="lazy" />
+                <img src={card.image} alt="" decoding="async" height="1402" loading="lazy" width="1122" />
                 <div className="ready-card">
                   <h3>{card.title}</h3>
                   <div className="ready-card-body">
@@ -567,7 +751,7 @@ function NewsCard({ item }) {
       href={item.href}
       {...(external ? { target: '_blank', rel: 'noreferrer' } : {})}
     >
-      <span className="news-media"><img src={item.image} alt="" loading="lazy" /></span>
+      <span className="news-media"><img src={item.image} alt="" decoding="async" height="960" loading="lazy" width="960" /></span>
       <span className="news-content">
         <strong>{item.title}</strong>
         {item.subtitle && <span>{item.subtitle}</span>}
@@ -594,7 +778,7 @@ function NewsSection() {
 function ClosingCta() {
   return (
     <section className="closing-cta" data-nav-theme="light">
-      <PdoomBrand className="closing-mark" markOnly />
+      <PdoomBrand className="closing-mark" defer markOnly />
       <h2>Work with us.</h2>
       <div>
         <a className="button button--primary" href="/careers/">Careers <ArrowRight size={17} /></a>
@@ -630,9 +814,10 @@ function Footer() {
 
   return (
     <footer ref={footerRef} className="site-footer" data-nav-theme="light">
-      <img ref={backdropRef} className="footer-backdrop" src="/assets/footer-delta.webp" alt="" aria-hidden="true" />
-      <div className="footer-wordmark"><PdoomBrand large /></div>
-      <div className="footer-groups">
+      <img ref={backdropRef} className="footer-backdrop" src="/assets/footer-delta-compressed.webp" alt="" aria-hidden="true" decoding="async" height="941" loading="lazy" width="1672" />
+      <div className="footer-wordmark"><PdoomBrand defer large /></div>
+      <h2 className="sr-only" id="footer-navigation-title">Footer navigation</h2>
+      <nav className="footer-groups" aria-labelledby="footer-navigation-title">
         {footerGroups.map(([heading, links]) => (
           <div className="footer-group" key={heading}>
             <h3>{heading}</h3>
@@ -647,14 +832,14 @@ function Footer() {
             <a href="/docs/crowd-cast-privacy-consent.pdf">PRIVACY CONSENT</a>
           </div>
         </div>
-      </div>
+      </nav>
       <div className="footer-bottom">
         <span>©2026 P(DOOM).</span>
         <div className="social-links">
           <a href="https://x.com/prob_doom" aria-label="X"><span aria-hidden="true">X</span></a>
-          <a href="https://github.com/p-doom" aria-label="GitHub"><span aria-hidden="true">GH</span></a>
-          <a href="https://huggingface.co/p-doom" aria-label="Hugging Face"><span aria-hidden="true">HF</span></a>
-          <a href="https://www.linkedin.com/company/p-doom" aria-label="LinkedIn"><span aria-hidden="true">in</span></a>
+          <a href="https://github.com/p-doom" aria-label="GH: GitHub"><span aria-hidden="true">GH</span></a>
+          <a href="https://huggingface.co/p-doom" aria-label="HF: Hugging Face"><span aria-hidden="true">HF</span></a>
+          <a href="https://www.linkedin.com/company/p-doom" aria-label="in: LinkedIn"><span aria-hidden="true">in</span></a>
         </div>
         <span>ALL RIGHTS RESERVED.</span>
       </div>
@@ -663,6 +848,7 @@ function Footer() {
 }
 
 function App() {
+  const [heroVideoBuffered, setHeroVideoBuffered] = useState(false)
   const path = window.location.pathname.replace(/\/+$/, '') || '/'
   const legacyPath = path.slice(1)
   const researchPostMatch = path.match(/^\/(?:research|blog)\/([^/]+)$/)
@@ -719,9 +905,9 @@ function App() {
       <Header />
       <main id="main">
         <div className="dark-page">
-          <Hero />
+          <Hero onVideoBuffered={() => setHeroVideoBuffered(true)} />
           <MediaConsole />
-          <FilmSection />
+          <FilmSection heroVideoBuffered={heroVideoBuffered} />
           <ReadySection />
         </div>
         <NewsSection />

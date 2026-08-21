@@ -2,12 +2,12 @@
 const orgHome = '/';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const docsHome = base + '/';
-const mark = base + '/assets/pdoom-mark.png';
+const mark = base + '/assets/pdoom-mark-128.webp';
 ---
 
 <div class="site-title">
   <a href={orgHome} class="cc-org" aria-label="p(doom) home">
-    <img src={mark} alt="" class="cc-logo" width="1024" height="1024" />
+    <img src={mark} alt="" class="cc-logo" width="128" height="128" decoding="async" />
     <span class="cc-wordmark">p(doom)</span>
   </a>
   <span class="cc-sep" aria-hidden="true"></span>

@@ -5,6 +5,7 @@ import { stdout } from 'node:process'
 const requiredFiles = [
   'dist/index.html',
   'dist/favicon.png',
+  'dist/apple-touch-icon.png',
   'dist/404.html',
   'dist/CNAME',
   'dist/about/index.html',
@@ -23,8 +24,10 @@ const requiredFiles = [
   'dist/participate.html',
   'dist/participate-preview.png',
   'dist/pdoom-preview.png',
+  'dist/robots.txt',
+  'dist/sitemap.xml',
   'dist/open_calls/04_crowd_cast.html',
-  'dist/media/hero-electrolyte-loop.webm',
+  'dist/media/hero-electrolyte-loop-compressed.webm',
   'dist/media/learning-from-human-work-film.webm',
 ]
 

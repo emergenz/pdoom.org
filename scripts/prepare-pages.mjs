@@ -34,6 +34,8 @@ const escapeHtml = (value) => String(value)
   .replaceAll('<', '&lt;')
   .replaceAll('>', '&gt;')
 
+const escapeXml = (value) => escapeHtml(value).replaceAll("'", '&apos;')
+
 function renderSocialMetadata(metadata) {
   const tags = [
     '<meta property="og:site_name" content="p(doom)" />',
@@ -59,8 +61,18 @@ function renderSocialMetadata(metadata) {
   return tags.join('\n    ')
 }
 
-function renderPage(template, metadata) {
+const heroPreload = '<link rel="preload" href="/assets/hero-explorations/copper-growth-v3-960.webp" imagesrcset="/assets/hero-explorations/copper-growth-v3-960.webp 960w, /assets/hero-explorations/copper-growth-v3.webp 1672w" imagesizes="100vw" as="image" type="image/webp" fetchpriority="high" />'
+
+function renderPage(template, metadata, { preloadHero = false } = {}) {
   return template
+    .replace(
+      /\s*<!-- hero-preload:start -->([\s\S]*?)<!-- hero-preload:end -->/,
+      preloadHero ? `\n    ${heroPreload}` : '',
+    )
+    .replace(
+      /<!-- noscript-copy:start -->[\s\S]*?<!-- noscript-copy:end -->/,
+      `<!-- noscript-copy:start -->\n          <h1>${escapeHtml(metadata.title)}</h1>\n          <p>${escapeHtml(metadata.description)}</p>\n          <!-- noscript-copy:end -->`,
+    )
     .replace(/<title>.*?<\/title>/, `<title>${escapeHtml(metadata.title)}</title>`)
     .replace(
       /<meta name="description" content=".*?" \/>/,
@@ -178,13 +190,24 @@ const appRoutes = [
 await mkdir('dist', { recursive: true })
 
 const entryTemplate = await readFile('dist/index.html', 'utf8')
-await writeFile('dist/index.html', renderPage(entryTemplate, defaultMetadata))
+await writeFile('dist/index.html', renderPage(entryTemplate, defaultMetadata, { preloadHero: true }))
 
 for (const { route, metadata } of appRoutes) {
   const routeDirectory = `dist/${route}`
   await mkdir(routeDirectory, { recursive: true })
   await writeFile(`${routeDirectory}/index.html`, renderPage(entryTemplate, metadata))
 }
+
+const sitemapUrls = [...new Set([
+  defaultMetadata.url,
+  ...appRoutes.map(({ metadata }) => metadata.url),
+])].sort()
+
+await writeFile('dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${sitemapUrls.map((url) => `  <url><loc>${escapeXml(url)}</loc></url>`).join('\n')}
+</urlset>
+`)
 
 const careerLegacyRoutes = {
   '02_fixed_size_state': '/careers/fixed-size-state/',

@@ -333,13 +333,13 @@
 }
 
 .blog-equal-contribution {
-  color: rgba(11, 16, 21, 0.58);
+  color: var(--steel-dark);
   font-size: 13px;
   line-height: 1.35;
 }
 
 .blog-post-byline time {
-  color: rgba(11, 16, 21, 0.58);
+  color: var(--steel-dark);
   font-family: "Instrument Sans", Arial, sans-serif;
   font-size: 15px;
   line-height: 1.45;
@@ -581,6 +581,20 @@
   font-size: 13px;
   line-height: 1.45;
   text-align: left;
+}
+
+.blog-article-body figcaption[style],
+.blog-article-body .ood-example-grid p[style] {
+  color: var(--steel-dark) !important;
+}
+
+.blog-article-body #idm-demo .idm-compass-label,
+.blog-article-body #idm-demo .idm-scroll-placeholder {
+  color: #4b4943;
+}
+
+.blog-article-body #idm-demo .idm-carousel-group {
+  opacity: 1 !important;
 }
 
 .blog-article-body code,
