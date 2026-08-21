@@ -6,9 +6,11 @@
     <meta name="theme-color" content="#07130e" />
     <meta name="description" content="p(doom) addresses the fundamental bottlenecks toward AGI that scaling compute cannot solve." />
     <title>p(doom)</title>
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/favicon.png" />
+    <link rel="icon" type="image/png" sizes="128x128" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="canonical" href="https://pdoom.org/" />
+    <!-- hero-preload:start -->
+    <!-- hero-preload:end -->
     <!-- social-meta:start -->
     <meta property="og:site_name" content="p(doom)" />
     <meta property="og:type" content="website" />
@@ -34,7 +36,23 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <noscript>
+        <main class="noscript-page">
+          <a class="noscript-brand" href="/">p(doom)</a>
+          <!-- noscript-copy:start -->
+          <h1>p(doom)</h1>
+          <p>Addressing the fundamental bottlenecks toward AGI that scaling compute cannot solve.</p>
+          <!-- noscript-copy:end -->
+          <nav aria-label="Primary navigation">
+            <a href="/research/">Research</a>
+            <a href="/about/">About</a>
+            <a href="/careers/">Careers</a>
+            <a href="/docs/crowd-cast/">Documentation</a>
+          </nav>
+        </main>
+      </noscript>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

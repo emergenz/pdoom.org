@@ -46,8 +46,10 @@ function prepareLegacyArticle(source, bibtexSource, renderer) {
 
   const embeddedScripts = [...article.querySelectorAll('script')].map((script) => {
     let scriptSource = script.textContent
+    let rootId = null
 
     if (scriptSource.includes("var BASE_PATH = 'idm-demo/';")) {
+      rootId = 'idm-demo'
       scriptSource = scriptSource
         .replace("var BASE_PATH = 'idm-demo/';", "var BASE_PATH = '/blog-content/idm-demo/';")
         .replace(
@@ -57,6 +59,7 @@ function prepareLegacyArticle(source, bibtexSource, renderer) {
     }
 
     if (scriptSource.includes("var OOD_BASE_PATH = 'idm-ood-demo/agentnet_ubuntu/';")) {
+      rootId = 'ood-positive-demo'
       scriptSource = scriptSource
         .replace(
           "var OOD_BASE_PATH = 'idm-ood-demo/agentnet_ubuntu/';",
@@ -68,10 +71,40 @@ function prepareLegacyArticle(source, bibtexSource, renderer) {
         )
     }
 
-    return scriptSource
+    scriptSource = scriptSource
+      .replaceAll(
+        "playBtn.title = 'Play / Pause (Space)';",
+        "playBtn.title = 'Play / Pause (Space)'; playBtn.setAttribute('aria-label', 'Play or pause animation');",
+      )
+      .replace(
+        "prevBtn.title = 'Previous clip (Up)';",
+        "prevBtn.title = 'Previous clip (Up)'; prevBtn.setAttribute('aria-label', 'Previous clip');",
+      )
+      .replace(
+        "nextBtn.title = 'Next clip (Down)';",
+        "nextBtn.title = 'Next clip (Down)'; nextBtn.setAttribute('aria-label', 'Next clip');",
+      )
+      .replaceAll(
+        "scrubber.className = 'idm-scrubber';",
+        "scrubber.className = 'idm-scrubber'; scrubber.setAttribute('aria-label', 'Animation frame');",
+      )
+      .replaceAll(
+        "scrubber.className = 'ood-scrubber';",
+        "scrubber.className = 'ood-scrubber'; scrubber.setAttribute('aria-label', 'Animation frame');",
+      )
+      .replaceAll(
+        'ce.el.style.opacity = opacity;',
+        "ce.el.style.opacity = opacity; ce.el.setAttribute('aria-hidden', dist > 1 ? 'true' : 'false');",
+      )
+
+    return { rootId, source: scriptSource }
   })
 
   for (const script of article.querySelectorAll('script')) script.remove()
+  for (const marker of article.querySelectorAll('a.marker')) {
+    marker.removeAttribute('href')
+    marker.setAttribute('aria-hidden', 'true')
+  }
   for (const aside of article.querySelectorAll('aside')) {
     if (/^\*?\s*equal contribution$/i.test(aside.textContent.trim())) aside.remove()
   }
@@ -201,14 +234,38 @@ function ArticleContents({ post }) {
   useEffect(() => {
     if (status !== 'ready' || !articleRef.current) return undefined
 
-    const scripts = documentContent.embeddedScripts.map((source) => {
+    const scripts = []
+    const observers = []
+    const appendScript = (source) => {
       const script = document.createElement('script')
       script.textContent = source
       articleRef.current.appendChild(script)
-      return script
-    })
+      scripts.push(script)
+    }
 
-    return () => scripts.forEach((script) => script.remove())
+    for (const { rootId, source } of documentContent.embeddedScripts) {
+      const root = rootId ? document.getElementById(rootId) : null
+      if (!root || !('IntersectionObserver' in window)) {
+        appendScript(source)
+        continue
+      }
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry.isIntersecting) return
+          appendScript(source)
+          observer.disconnect()
+        },
+        { rootMargin: '800px 0px' },
+      )
+      observer.observe(root)
+      observers.push(observer)
+    }
+
+    return () => {
+      observers.forEach((observer) => observer.disconnect())
+      scripts.forEach((script) => script.remove())
+    }
   }, [documentContent.embeddedScripts, status])
 
   if (status === 'loading') {

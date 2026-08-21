@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pdoom.org/sitemap.xml
+Sitemap: https://pdoom.org/docs/crowd-cast/sitemap-index.xml

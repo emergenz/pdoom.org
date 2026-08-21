@@ -9,7 +9,7 @@ export const researchReleases = [
     summary: 'An inverse dynamics model trained to recover raw input events from screen recordings, released alongside 600 hours of action-labeled screencasts.',
     date: 'June 16, 2026',
     dateShort: 'Jun 16, 2026',
-    authors: ['p(doom) Team'],
+    authors: ['p(doom) Team', 'Stefan Bauer'],
     category: 'Models + data',
     kind: 'Release',
     media: { type: 'image', src: '/assets/releases/idm.webp' },

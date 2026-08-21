@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex,nofollow">
     <meta name="referrer" content="no-referrer">
+    <meta name="description" content="Complete your crowd-cast participant onboarding.">
     <title>crowd-cast · onboarding</title>
-    <link rel="icon" type="image/png" href="/assets/pdoom-mark.png">
+    <link rel="icon" type="image/png" href="/favicon.png">
     <script src="/site-announcement.js"></script>
     <style>
         .onboard-wrap {
@@ -286,7 +287,7 @@
         <div class="container">
             <nav class="nav">
                 <a class="brand" href="/">
-                    <img class="sigil-img" src="/assets/pdoom-mark.png" alt="">
+                    <img class="sigil-img" src="/assets/pdoom-mark.webp" alt="" width="512" height="512">
                     <span class="wm">p(doom)</span>
                 </a>
                 <div class="nav-links">
@@ -323,21 +324,21 @@
                 <div class="step-label">Step 1 of 3 · Your details</div>
 
                 <div class="field">
-                    <label class="field-label">Full legal name *</label>
-                    <input class="field-input" type="text" id="f-name" placeholder="Jane Doe" required>
+                    <label class="field-label" for="f-name">Full legal name *</label>
+                    <input class="field-input" type="text" id="f-name" name="full-name" autocomplete="name" placeholder="Jane Doe" required>
                 </div>
                 <div class="field">
-                    <label class="field-label">Email address *</label>
-                    <input class="field-input" type="email" id="f-email" placeholder="jane@university.edu" required>
+                    <label class="field-label" for="f-email">Email address *</label>
+                    <input class="field-input" type="email" id="f-email" name="email" autocomplete="email" placeholder="jane@university.edu" required>
                 </div>
                 <div class="field">
-                    <label class="field-label">Mailing address *</label>
-                    <input class="field-input" type="text" id="f-address" placeholder="Street 123, 80636 Munich, Germany" required>
-                    <div class="field-hint">Street, postal code, city</div>
+                    <label class="field-label" for="f-address">Mailing address *</label>
+                    <input class="field-input" type="text" id="f-address" name="address" autocomplete="street-address" aria-describedby="f-address-hint" placeholder="Street 123, 80636 Munich, Germany" required>
+                    <div class="field-hint" id="f-address-hint">Street, postal code, city</div>
                 </div>
                 <div class="field">
-                    <label class="field-label">Country of residence *</label>
-                    <select class="field-select" id="f-country">
+                    <label class="field-label" for="f-country">Country of residence *</label>
+                    <select class="field-select" id="f-country" name="country" autocomplete="country-name">
                         <option value="">Select country...</option>
                         <option value="Germany">Germany</option>
                         <option value="United Kingdom">United Kingdom</option>
@@ -397,56 +398,56 @@
                 <hr class="rule">
 
                 <div class="field">
-                    <label class="field-label">Bank details (for payouts via bank transfer)</label>
+                    <p class="field-label">Bank details (for payouts via bank transfer)</p>
                 </div>
 
                 <div class="field">
-                    <label class="field-label">Account holder name *</label>
-                    <input class="field-input" type="text" id="f-holder" placeholder="As shown on your bank account">
+                    <label class="field-label" for="f-holder">Account holder name *</label>
+                    <input class="field-input" type="text" id="f-holder" name="account-holder" autocomplete="name" placeholder="As shown on your bank account">
                 </div>
                 <div class="field">
-                    <label class="field-label" id="l-iban">IBAN or account number *</label>
-                    <input class="field-input" type="text" id="f-iban" placeholder="DE89 3704 0044 0532 0130 00">
+                    <label class="field-label" id="l-iban" for="f-iban">IBAN or account number *</label>
+                    <input class="field-input" type="text" id="f-iban" name="account-number" autocomplete="off" placeholder="DE89 3704 0044 0532 0130 00">
                 </div>
                 <div class="field" id="w-routing" style="display:none;">
-                    <label class="field-label">ACH routing number *</label>
-                    <input class="field-input" type="text" id="f-routing" placeholder="9 digits, e.g. 026009593" inputmode="numeric">
+                    <label class="field-label" for="f-routing">ACH routing number *</label>
+                    <input class="field-input" type="text" id="f-routing" name="routing-number" autocomplete="off" placeholder="9 digits, e.g. 026009593" inputmode="numeric">
                 </div>
                 <div class="field" id="w-institution" style="display:none;">
-                    <label class="field-label">Institution number *</label>
-                    <input class="field-input" type="text" id="f-institution" placeholder="3 digits, e.g. 004" inputmode="numeric">
+                    <label class="field-label" for="f-institution">Institution number *</label>
+                    <input class="field-input" type="text" id="f-institution" name="institution-number" autocomplete="off" placeholder="3 digits, e.g. 004" inputmode="numeric">
                 </div>
                 <div class="field" id="w-transit" style="display:none;">
-                    <label class="field-label">Transit number *</label>
-                    <input class="field-input" type="text" id="f-transit" placeholder="5 digits" inputmode="numeric">
+                    <label class="field-label" for="f-transit">Transit number *</label>
+                    <input class="field-input" type="text" id="f-transit" name="transit-number" autocomplete="off" placeholder="5 digits" inputmode="numeric">
                 </div>
                 <div class="field" id="w-bsb" style="display:none;">
-                    <label class="field-label">BSB code *</label>
-                    <input class="field-input" type="text" id="f-bsb" placeholder="6 digits, e.g. 062000" inputmode="numeric">
+                    <label class="field-label" for="f-bsb">BSB code *</label>
+                    <input class="field-input" type="text" id="f-bsb" name="bsb-code" autocomplete="off" placeholder="6 digits, e.g. 062000" inputmode="numeric">
                 </div>
                 <div class="field" id="w-bankcode" style="display:none;">
-                    <label class="field-label" id="l-bankcode">Bank code *</label>
-                    <input class="field-input" type="text" id="f-bankcode" placeholder="e.g. 7171" inputmode="numeric">
+                    <label class="field-label" id="l-bankcode" for="f-bankcode">Bank code *</label>
+                    <input class="field-input" type="text" id="f-bankcode" name="bank-code" autocomplete="off" placeholder="e.g. 7171" inputmode="numeric">
                 </div>
                 <div class="field" id="w-branchcode" style="display:none;">
-                    <label class="field-label">Branch code *</label>
-                    <input class="field-input" type="text" id="f-branchcode" placeholder="3 digits" inputmode="numeric">
+                    <label class="field-label" for="f-branchcode">Branch code *</label>
+                    <input class="field-input" type="text" id="f-branchcode" name="branch-code" autocomplete="off" placeholder="3 digits" inputmode="numeric">
                 </div>
                 <div class="field" id="w-account-type" style="display:none;">
-                    <label class="field-label">Account type *</label>
-                    <select class="field-select" id="f-account-type">
+                    <label class="field-label" for="f-account-type">Account type *</label>
+                    <select class="field-select" id="f-account-type" name="account-type" autocomplete="off">
                         <option value="">Select...</option>
                         <option value="checking">Checking</option>
                         <option value="savings">Savings</option>
                     </select>
                 </div>
                 <div class="field" id="w-bic">
-                    <label class="field-label" id="l-bic">BIC/SWIFT</label>
-                    <input class="field-input" type="text" id="f-bic" placeholder="COBADEFFXXX">
+                    <label class="field-label" id="l-bic" for="f-bic">BIC/SWIFT</label>
+                    <input class="field-input" type="text" id="f-bic" name="bic" autocomplete="off" placeholder="COBADEFFXXX">
                 </div>
                 <div class="field">
-                    <label class="field-label">Bank name and country *</label>
-                    <input class="field-input" type="text" id="f-bank" placeholder="Commerzbank, Germany">
+                    <label class="field-label" for="f-bank">Bank name and country *</label>
+                    <input class="field-input" type="text" id="f-bank" name="bank" autocomplete="off" placeholder="Commerzbank, Germany">
                 </div>
                 <div class="field">
                     <div class="field-hint">Payouts are denominated in USD and paid to your account in its local currency (EUR for European accounts) at the official ECB exchange rate. Each payment statement shows the exact conversion.</div>
@@ -698,7 +699,7 @@
         <div class="container">
             <div class="footer-row">
                 <a class="brand" href="/">
-                    <img class="sigil-img" src="/assets/pdoom-mark.png" alt="">
+                    <img class="sigil-img" src="/assets/pdoom-mark.webp" alt="" width="512" height="512">
                     <span class="wm">p(doom)</span>
                 </a>
                 <nav class="footer-links">
