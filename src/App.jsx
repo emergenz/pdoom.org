@@ -131,7 +131,7 @@ const readyCards = [
     body: 'Work with us on the broader set of bottlenecks that scaling compute alone cannot solve.',
     links: [
       { label: 'Careers', href: '/careers/' },
-      { label: 'Documentation', href: '/docs/crowd-cast/' },
+      { label: 'Discord', href: 'https://discord.gg/G4JNuPX2VR' },
     ],
     cta: 'Get paid to contribute data',
     ctaHref: '/careers/paid-data-collection/',
@@ -831,6 +831,11 @@ function Footer() {
             <a href="/docs/crowd-cast-data-purchase-agreement.pdf">DATA PURCHASE AGREEMENT</a>
             <a href="/docs/crowd-cast-privacy-consent.pdf">PRIVACY CONSENT</a>
           </div>
+        </div>
+        <div className="footer-backing">
+          <a className="footer-sprind" href="https://www.sprind.org/" target="_blank" rel="noreferrer" aria-label="Visit SPRIND">
+            <img src="/assets/sprind.svg" alt="SPRIND" height="19" loading="lazy" width="136" />
+          </a>
         </div>
       </nav>
       <div className="footer-bottom">
