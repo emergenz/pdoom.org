@@ -769,6 +769,7 @@
                 <span class="tab-btn" id="tab-all" onclick="switchTab('all')" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">All Users</span>
                 <span class="tab-btn" id="tab-review" onclick="switchTab('review')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Review</span>
                 <span class="tab-btn" id="tab-nudges" onclick="switchTab('nudges')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Nudges</span>
+                <span class="tab-btn" id="tab-followups" onclick="switchTab('followups')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Follow-ups</span>
                 <span class="tab-btn" id="tab-participants" onclick="switchTab('participants')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Participants</span>
                 <span class="tab-btn" id="tab-payouts" onclick="switchTab('payouts')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Payouts</span>
             </div>
@@ -913,6 +914,9 @@
             <div id="review-view" style="display:none;"></div>
             <!-- Participant recording-health nudges "Tinder" queue (admin only) -->
             <div id="nudges-view" style="display:none;"></div>
+
+            <!-- Applicant follow-up SLA surface (admin only): waiting-on-you / nudged / lapsing -->
+            <div id="followups-view" style="display:none;"></div>
 
             <!-- Footer -->
             <div class="site-footer">
@@ -2079,11 +2083,13 @@
         var payEl = document.getElementById('payouts-view');
         var revEl = document.getElementById('review-view');
         var nudgeEl = document.getElementById('nudges-view');
+        var followEl = document.getElementById('followups-view');
         myEl.style.display = tab === 'my' ? 'block' : 'none';
         partEl.style.display = tab === 'participants' ? 'block' : 'none';
         payEl.style.display = tab === 'payouts' ? 'block' : 'none';
         revEl.style.display = tab === 'review' ? 'block' : 'none';
         nudgeEl.style.display = tab === 'nudges' ? 'block' : 'none';
+        if (followEl) followEl.style.display = tab === 'followups' ? 'block' : 'none';
         /* Use position:absolute + visibility:hidden for all-users to preserve chart layout */
         if (tab === 'all') {
             allEl.style.display = 'block';
@@ -2110,11 +2116,17 @@
         var nudgeTab = document.getElementById('tab-nudges');
         nudgeTab.style.borderBottomColor = tab === 'nudges' ? '#000' : 'transparent';
         nudgeTab.style.color = tab === 'nudges' ? '#000' : '#999';
+        var followTab = document.getElementById('tab-followups');
+        if (followTab) {
+            followTab.style.borderBottomColor = tab === 'followups' ? '#000' : 'transparent';
+            followTab.style.color = tab === 'followups' ? '#000' : '#999';
+        }
         if (tab === 'my') renderMyOverview();
         if (tab === 'participants') renderParticipantsView();
         if (tab === 'payouts') renderPayoutsView();
         if (tab === 'review') renderReviewTab();
         if (tab === 'nudges') renderNudgesTab();
+        if (tab === 'followups') renderFollowupsTab();
     }
 
     function renderMyOverview() {
@@ -3355,6 +3367,8 @@
         document.getElementById('review-view').style.display = 'none';
         document.getElementById('tab-nudges').style.display = 'none';
         document.getElementById('nudges-view').style.display = 'none';
+        var tfu = document.getElementById('tab-followups'); if (tfu) tfu.style.display = 'none';
+        var vfu = document.getElementById('followups-view'); if (vfu) vfu.style.display = 'none';
         document.getElementById('all-users-view').style.display = 'block';
         document.getElementById('all-users-view').style.visibility = 'visible';
         document.getElementById('all-users-view').style.position = 'static';
@@ -3441,6 +3455,7 @@
             /* Show review, nudges, participants and payouts tabs for admins */
             document.getElementById('tab-review').style.display = _isAdmin ? 'inline' : 'none';
             document.getElementById('tab-nudges').style.display = _isAdmin ? 'inline' : 'none';
+            var tfuShow = document.getElementById('tab-followups'); if (tfuShow) tfuShow.style.display = _isAdmin ? 'inline' : 'none';
             document.getElementById('tab-participants').style.display = _isAdmin ? 'inline' : 'none';
             document.getElementById('tab-payouts').style.display = _isAdmin ? 'inline' : 'none';
 
@@ -3813,6 +3828,71 @@
             .then(function(resp){ return resp.json(); })
             .then(function(data){ updateNudgeBadge((data.nudges || []).length); })
             .catch(function(){});
+    }
+
+    function fuDays(iso) {
+        if (!iso) return '';
+        var d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+        return d <= 0 ? 'today' : d + 'd ago';
+    }
+
+    function renderFollowupsTab() {
+        if (!_isAdmin) return;
+        var container = document.getElementById('followups-view');
+        container.innerHTML = '<div class="review-wrap"><div class="outline-box review-card"><div class="skel-line short"></div><div class="skel-block" style="height:200px;background:#f8f8f8;margin-top:14px;"></div></div></div>';
+        fetch(ONBOARD_API + '/applicants/followups', { headers: { 'Authorization': 'Bearer ' + _authToken } })
+            .then(function(resp){ if (!resp.ok) throw new Error('HTTP ' + resp.status); return resp.json(); })
+            .then(function(data){ renderFollowupsView(data); })
+            .catch(function(err){ container.innerHTML = '<div class="review-wrap"><div class="outline-box review-card"><p class="error-text">Failed to load follow-ups: ' + escapeHtml(String(err.message || err)) + '</p></div></div>'; });
+    }
+
+    function renderFollowupsView(data) {
+        var c = document.getElementById('followups-view');
+        var wy = data.waiting_on_you || [], nu = data.nudged || [];
+        function esc(s){ return escapeHtml(String(s || '')); }
+        function mailto(r, subj){ return 'mailto:' + encodeURIComponent(r.email) + '?subject=' + encodeURIComponent(subj); }
+
+        var h = '<div style="max-width:860px;margin:0 auto;padding:8px 4px 40px;">';
+        h += '<h2 style="font-size:18px;margin:0 0 4px;">Applicant follow-ups</h2>';
+        h += '<p style="color:#666;font-size:13px;margin:0 0 22px;">People we asked or invited who haven\'t resolved. <b>Waiting on you</b> replied and need a human answer; <b>nudged</b> are on the auto-nudge track (2 nudges, then they lapse).</p>';
+
+        h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#c0392b;margin:0 0 10px;">Waiting on you (' + wy.length + ')</div>';
+        if (!wy.length) {
+            h += '<p style="color:#999;font-size:13px;margin:0 0 26px;">Nobody waiting. Nice.</p>';
+        } else {
+            h += '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:28px;">';
+            wy.forEach(function(r){
+                h += '<div class="outline-box" style="padding:12px 14px;display:flex;align-items:center;gap:12px;">'
+                  + '<div style="flex:1;min-width:0;">'
+                  + '<div style="font-weight:650;">' + esc(r.name || r.email) + ' <span style="color:#999;font-weight:400;font-size:12px;">' + esc(r.email) + '</span></div>'
+                  + '<div style="color:#666;font-size:12px;margin-top:2px;">' + esc(r.status) + (r.tier ? ' &middot; ' + esc(r.tier) : '') + ' &middot; replied ' + fuDays(r.last_inbound_at) + '</div>'
+                  + (r.blurb ? '<div style="color:#888;font-size:12px;margin-top:4px;">' + esc(r.blurb) + '</div>' : '')
+                  + '</div>'
+                  + '<a href="' + mailto(r, 'Re: your crowd-cast application') + '" class="review-btn rb-accept" style="text-decoration:none;padding:8px 16px;white-space:nowrap;">Reply</a>'
+                  + '</div>';
+            });
+            h += '</div>';
+        }
+
+        h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#e67e22;margin:0 0 10px;">Nudged, awaiting them (' + nu.length + ')</div>';
+        if (!nu.length) {
+            h += '<p style="color:#999;font-size:13px;margin:0 0 26px;">None on the nudge track yet.</p>';
+        } else {
+            h += '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:28px;">';
+            nu.forEach(function(r){
+                var lapsing = r.nudges_sent >= 2;
+                h += '<div class="outline-box" style="padding:10px 14px;display:flex;align-items:center;gap:12px;' + (lapsing ? 'border-color:#e0b0b0;' : '') + '">'
+                  + '<div style="flex:1;min-width:0;">'
+                  + '<div style="font-weight:600;font-size:14px;">' + esc(r.name || r.email) + ' <span style="color:#999;font-weight:400;font-size:12px;">' + esc(r.email) + '</span></div>'
+                  + '<div style="color:#666;font-size:12px;margin-top:2px;">' + esc(r.status) + ' &middot; nudge ' + r.nudges_sent + ' sent ' + fuDays(r.last_nudge_at) + (lapsing ? ' &middot; <span style="color:#c0392b;">lapsing soon</span>' : '') + '</div>'
+                  + '</div>'
+                  + '<a href="' + mailto(r, 'Re: your crowd-cast application') + '" style="text-decoration:none;color:#888;font-size:12px;white-space:nowrap;">email &rarr;</a>'
+                  + '</div>';
+            });
+            h += '</div>';
+        }
+        h += '</div>';
+        c.innerHTML = h;
     }
 
     function renderNudgesTab() {
