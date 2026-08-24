@@ -3846,9 +3846,25 @@
             .catch(function(err){ container.innerHTML = '<div class="review-wrap"><div class="outline-box review-card"><p class="error-text">Failed to load follow-ups: ' + escapeHtml(String(err.message || err)) + '</p></div></div>'; });
     }
 
+    function snoozeApplicant(email, days) {
+        fetch(ONBOARD_API + '/applicants/snooze', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email, days: days })
+        })
+            .then(function(resp){ if (!resp.ok) throw new Error('HTTP ' + resp.status); return resp.json(); })
+            .then(function(){ renderFollowupsTab(); })
+            .catch(function(err){ alert('Snooze failed: ' + (err.message || err)); });
+    }
+
+    function fuSnoozeBtns(email) {
+        var mk = function(d, lab){ return '<span onclick="snoozeApplicant(\'' + email + '\',' + d + ')" style="cursor:pointer;color:#888;font-size:11px;border:1px solid #ddd;border-radius:4px;padding:2px 7px;white-space:nowrap;" title="Pause nudges for ' + lab + ' (e.g. vacation)">zz ' + lab + '</span>'; };
+        return '<span style="display:inline-flex;gap:4px;">' + mk(7,'1w') + mk(14,'2w') + mk(30,'1m') + '</span>';
+    }
+
     function renderFollowupsView(data) {
         var c = document.getElementById('followups-view');
-        var wy = data.waiting_on_you || [], nu = data.nudged || [];
+        var wy = data.waiting_on_you || [], nu = data.nudged || [], sz = data.snoozed || [];
         function esc(s){ return escapeHtml(String(s || '')); }
         function mailto(r, subj){ return 'mailto:' + encodeURIComponent(r.email) + '?subject=' + encodeURIComponent(subj); }
 
@@ -3868,6 +3884,7 @@
                   + '<div style="color:#666;font-size:12px;margin-top:2px;">' + esc(r.status) + (r.tier ? ' &middot; ' + esc(r.tier) : '') + ' &middot; replied ' + fuDays(r.last_inbound_at) + '</div>'
                   + (r.blurb ? '<div style="color:#888;font-size:12px;margin-top:4px;">' + esc(r.blurb) + '</div>' : '')
                   + '</div>'
+                  + fuSnoozeBtns(r.email)
                   + '<a href="' + mailto(r, 'Re: your crowd-cast application') + '" class="review-btn rb-accept" style="text-decoration:none;padding:8px 16px;white-space:nowrap;">Reply</a>'
                   + '</div>';
             });
@@ -3886,7 +3903,26 @@
                   + '<div style="font-weight:600;font-size:14px;">' + esc(r.name || r.email) + ' <span style="color:#999;font-weight:400;font-size:12px;">' + esc(r.email) + '</span></div>'
                   + '<div style="color:#666;font-size:12px;margin-top:2px;">' + esc(r.status) + ' &middot; nudge ' + r.nudges_sent + ' sent ' + fuDays(r.last_nudge_at) + (lapsing ? ' &middot; <span style="color:#c0392b;">lapsing soon</span>' : '') + '</div>'
                   + '</div>'
+                  + fuSnoozeBtns(r.email)
                   + '<a href="' + mailto(r, 'Re: your crowd-cast application') + '" style="text-decoration:none;color:#888;font-size:12px;white-space:nowrap;">email &rarr;</a>'
+                  + '</div>';
+            });
+            h += '</div>';
+        }
+
+        h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin:0 0 10px;">Snoozed (' + sz.length + ')</div>';
+        if (!sz.length) {
+            h += '<p style="color:#999;font-size:13px;margin:0 0 26px;">Nobody snoozed. Use the zz buttons when someone says they\'re away (vacation etc.), no nudges until they wake.</p>';
+        } else {
+            h += '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:28px;">';
+            sz.forEach(function(r){
+                var until = r.snooze_until ? new Date(r.snooze_until).toLocaleDateString() : '?';
+                h += '<div class="outline-box" style="padding:10px 14px;display:flex;align-items:center;gap:12px;opacity:0.7;">'
+                  + '<div style="flex:1;min-width:0;">'
+                  + '<div style="font-weight:600;font-size:14px;">' + esc(r.name || r.email) + ' <span style="color:#999;font-weight:400;font-size:12px;">' + esc(r.email) + '</span></div>'
+                  + '<div style="color:#666;font-size:12px;margin-top:2px;">' + esc(r.status) + ' &middot; sleeping until ' + until + '</div>'
+                  + '</div>'
+                  + '<span onclick="snoozeApplicant(\'' + r.email + '\',0)" style="cursor:pointer;color:#888;font-size:12px;border:1px solid #ddd;border-radius:4px;padding:3px 10px;white-space:nowrap;">wake now</span>'
                   + '</div>';
             });
             h += '</div>';
