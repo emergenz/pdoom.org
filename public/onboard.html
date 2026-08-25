@@ -901,9 +901,9 @@
             lIban.textContent = 'CLABE *';
             fIban.placeholder = '18 digits';
         } else if (mode === 'am') {
-            // USD-via-SWIFT corridor: IBAN + mandatory SWIFT/BIC.
-            lIban.textContent = 'IBAN *';
-            fIban.placeholder = 'AM.. (28 characters)';
+            // USD-via-SWIFT corridor: IBAN or account number + mandatory SWIFT/BIC.
+            lIban.textContent = 'IBAN or account number *';
+            fIban.placeholder = 'AM.. IBAN or your account number';
             lBic.textContent = 'SWIFT/BIC code *';
             fBic.placeholder = 'e.g. ARMIAM22';
         } else if (mode === 'np') {
@@ -1057,7 +1057,8 @@
                 }
                 if (!clabeOk) markBank('f-iban', 'CLABE must be a valid 18-digit number (check with your bank).');
             } else if (mode === 'am') {
-                if (!validateIBAN(ibanVal) || ibanVal.indexOf('AM') !== 0 || ibanVal.length !== 28) markBank('f-iban', 'Armenian accounts use IBAN: starts with AM, 28 characters.');
+                if (!/^[A-Za-z0-9]{4,34}$/.test(ibanVal)) markBank('f-iban', 'Please enter your IBAN or bank account number.');
+                else if (ibanVal.indexOf('AM') === 0 && !validateIBAN(ibanVal)) markBank('f-iban', 'That IBAN does not look valid; please double-check it.');
                 if (!/^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(bicVal)) markBank('f-bic', 'SWIFT/BIC code is required for transfers to Armenia (8 or 11 characters, ask your bank).');
             } else if (mode === 'np') {
                 if (!/^[A-Za-z0-9]{4,34}$/.test(ibanVal)) markBank('f-iban', 'Please enter your bank account number.');
