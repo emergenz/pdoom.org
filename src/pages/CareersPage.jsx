@@ -12,11 +12,11 @@ const opportunities = [
     number: '01',
     category: 'Participation',
     title: 'Get paid to record your work',
-    summary: 'Join the crowd-cast data collection. Record approved long-horizon work and earn $300 per month while active.',
-    meta: ['Remote', '$300 / month'],
+    summary: 'Join the crowd-cast data collection. We pay $1,000 per month for the long-horizon work we need most.',
+    meta: ['Remote', '$1,000 / month'],
     facts: [
       ['Mode', 'Remote'],
-      ['Pay', '$300 / month'],
+      ['Pay', '$1,000 / month'],
     ],
     intro: [
       <>p(doom) is working towards enabling models to perform complex tasks over weeks and months. Training on work at that horizon requires data at that horizon.</>,

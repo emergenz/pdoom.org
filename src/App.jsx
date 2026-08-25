@@ -308,7 +308,7 @@ function AnnouncementBar() {
   return (
     <aside className="site-announcement" aria-label="Paid data collection" data-nosnippet="">
       <a href="/careers/paid-data-collection/">
-        <span>We pay <strong>$300/month</strong> to record your screen for AI research</span>
+        <span>We pay <strong>$1,000/month</strong> to record your screen for AI research</span>
       </a>
       <button type="button" aria-label="Dismiss announcement" title="Dismiss announcement" onClick={dismiss}>
         <X size={17} strokeWidth={1.8} aria-hidden="true" />

@@ -18,7 +18,7 @@ const defaultMetadata = {
 
 const participationMetadata = {
   title: 'Get paid to record your work · p(doom)',
-  description: 'We pay $300/month to record your screen for AI research.',
+  description: 'We pay $1,000/month to record your screen for AI research.',
   url: `${siteOrigin}/participate`,
   image: `${siteOrigin}/participate-preview.png`,
   imageWidth: 1200,
