@@ -20,7 +20,7 @@ const opportunities = [
     ],
     intro: [
       <>p(doom) is working towards enabling models to perform complex tasks over weeks and months. Training on work at that horizon requires data at that horizon.</>,
-      <>crowd-cast is a privacy-preserving desktop application built to capture the largest long-horizon dataset of digital work. Together, the p(doom) team and early participants have already recorded more than 5,000 hours of work.</>,
+      <>crowd-cast is a privacy-preserving desktop application built to capture the largest long-horizon dataset of digital work. Professors, PhD students, researchers, engineers, and founders across multiple continents have already recorded more than 5,000 hours: prototyping spacecraft, designing buildings, training models on GPU clusters, proving complex theorems, and much more.</>,
       <>The program is now open to the public. We pay top participants <strong>$1,000 per month</strong> to passively record their work. PhD-level research, novel systems, engineering, and other complex months-long projects all qualify.</>,
       <>Other qualifying long-horizon work (research, engineering, design, editing, academic projects) is compensated at <strong>$300 per month</strong>. Submit the form and the team will follow up within a few days.</>,
     ],
