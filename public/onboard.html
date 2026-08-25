@@ -371,6 +371,8 @@
                         <option value="Hong Kong">Hong Kong</option>
                         <option value="Brazil">Brazil</option>
                         <option value="Mexico">Mexico</option>
+                        <option value="Armenia">Armenia</option>
+                        <option value="Nepal">Nepal</option>
                     </select>
                 </div>
 
@@ -827,7 +829,7 @@
         'Romania':'RO','Ireland':'IE','Greece':'GR','India':'IN','China':'CN','Japan':'JP',
         'United States':'US','Canada':'CA','Australia':'AU','Israel':'IL','Turkey':'TR',
         'Singapore':'SG','Hong Kong':'HK','South Korea':'KR','Taiwan':'TW','Brazil':'BR',
-        'Mexico':'MX','South Africa':'ZA',
+        'Mexico':'MX','South Africa':'ZA','Armenia':'AM','Nepal':'NP',
     };
     const IBAN_COUNTRIES = ['DE','GB','CH','AT','NL','FR','SE','DK','NO','FI','BE','IT','ES','PT','PL','CZ','HU','RO','IE','GR','IL','TR','BR'];
 
@@ -835,7 +837,7 @@
         const country = document.getElementById('f-country').value;
         if (!country) return 'default';
         const iso = COUNTRY_ISO[country] || '';
-        const modes = { US:'us', IN:'in', CA:'ca', AU:'au', JP:'jp', SG:'sg', HK:'hk', MX:'mx' };
+        const modes = { US:'us', IN:'in', CA:'ca', AU:'au', JP:'jp', SG:'sg', HK:'hk', MX:'mx', AM:'am', NP:'np' };
         if (modes[iso]) return modes[iso];
         if (IBAN_COUNTRIES.indexOf(iso) >= 0) return 'iban';
         return 'iban'; // every remaining country in the dropdown uses IBAN
@@ -863,7 +865,7 @@
         show('w-bankcode', mode === 'jp' || mode === 'sg' || mode === 'hk');
         show('w-branchcode', mode === 'jp');
         show('w-account-type', mode === 'us' || mode === 'jp');
-        show('w-bic', mode === 'in' || mode === 'iban' || mode === 'default');
+        show('w-bic', mode === 'in' || mode === 'iban' || mode === 'default' || mode === 'am' || mode === 'np');
         if (mode === 'us') {
             lIban.textContent = 'Account number *';
             fIban.placeholder = 'e.g. 12345678 (4-17 digits)';
@@ -898,6 +900,18 @@
         } else if (mode === 'mx') {
             lIban.textContent = 'CLABE *';
             fIban.placeholder = '18 digits';
+        } else if (mode === 'am') {
+            // USD-via-SWIFT corridor: IBAN + mandatory SWIFT/BIC.
+            lIban.textContent = 'IBAN *';
+            fIban.placeholder = 'AM.. (28 characters)';
+            lBic.textContent = 'SWIFT/BIC code *';
+            fBic.placeholder = 'e.g. ARMIAM22';
+        } else if (mode === 'np') {
+            // USD-via-SWIFT corridor: account number + mandatory SWIFT/BIC.
+            lIban.textContent = 'Account number *';
+            fIban.placeholder = 'as shown in your banking app';
+            lBic.textContent = 'SWIFT/BIC code *';
+            fBic.placeholder = 'e.g. NARBNPKA';
         } else if (mode === 'iban') {
             lIban.textContent = 'IBAN *';
             fIban.placeholder = 'DE89 3704 0044 0532 0130 00';
@@ -1042,6 +1056,12 @@
                     clabeOk = (10 - (sum % 10)) % 10 === parseInt(ibanVal[17]);
                 }
                 if (!clabeOk) markBank('f-iban', 'CLABE must be a valid 18-digit number (check with your bank).');
+            } else if (mode === 'am') {
+                if (!validateIBAN(ibanVal) || ibanVal.indexOf('AM') !== 0 || ibanVal.length !== 28) markBank('f-iban', 'Armenian accounts use IBAN: starts with AM, 28 characters.');
+                if (!/^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(bicVal)) markBank('f-bic', 'SWIFT/BIC code is required for transfers to Armenia (8 or 11 characters, ask your bank).');
+            } else if (mode === 'np') {
+                if (!/^[A-Za-z0-9]{4,34}$/.test(ibanVal)) markBank('f-iban', 'Please enter your bank account number.');
+                if (!/^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(bicVal)) markBank('f-bic', 'SWIFT/BIC code is required for transfers to Nepal (8 or 11 characters, ask your bank).');
             } else if (mode === 'iban') {
                 if (!validateIBAN(ibanVal)) markBank('f-iban', 'Please enter a valid IBAN (your country uses IBAN for bank transfers).');
                 if (bicVal && !/^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(bicVal)) markBank('f-bic', 'BIC/SWIFT must be 8 or 11 characters.');
