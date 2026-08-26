@@ -3924,6 +3924,10 @@
             h += '</div>';
         }
 
+        h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin:28px 0 6px;">Mentioned something, not attributed</div>'
+          + '<p style="color:#666;font-size:12.5px;margin:0 0 10px;">People who answered "how did you hear about us" but carry no partner credit, e.g. they cleared the prefilled answer and typed the show\'s name. Credit the right partner here and the bounty follows automatically.</p>'
+          + '<div id="unattributed-list" style="color:#999;font-size:13px;">Loading…</div>';
+
         h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin:28px 0 10px;">Add or edit a partner</div>'
           + '<div class="outline-box" style="padding:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">'
           + '<label style="font-size:12px;color:#666;">Name<br><input id="pt-name" placeholder="Dwarkesh Podcast" style="padding:6px 8px;border:1px solid #ddd;font-size:13px;width:190px;"></label>'
@@ -3935,6 +3939,48 @@
           + '</div>';
         h += '</div>';
         c.innerHTML = h;
+        loadUnattributed(partners);
+    }
+
+    function loadUnattributed(partners) {
+        var box = document.getElementById('unattributed-list');
+        if (!box) return;
+        function esc(s){ return escapeHtml(String(s == null ? '' : s)); }
+        fetch(ONBOARD_API + '/partners/unattributed', { headers: { 'Authorization': 'Bearer ' + _authToken } })
+            .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then(function(d){
+                var rows = d.unattributed || [];
+                if (!rows.length) { box.innerHTML = '<span style="color:#999;">Nothing waiting. Everyone who mentioned a source is credited.</span>'; return; }
+                var opts = '<option value="">credit to…</option>' + partners.map(function(p){
+                    return '<option value="' + esc(p.slug) + '">' + esc(p.name) + '</option>';
+                }).join('');
+                box.innerHTML = '<div style="display:flex;flex-direction:column;gap:6px;">' + rows.map(function(r, i){
+                    return '<div class="outline-box" style="padding:9px 12px;display:flex;align-items:center;gap:10px;">'
+                      + '<div style="flex:1;min-width:0;">'
+                      + '<div style="font-size:13px;font-weight:600;">' + esc(r.name || r.email)
+                      + ' <span style="color:#999;font-weight:400;font-size:11.5px;">' + esc(r.status) + '</span></div>'
+                      + '<div style="color:#666;font-size:12px;margin-top:2px;">&ldquo;' + esc(r.heard_via) + '&rdquo;</div>'
+                      + '</div>'
+                      + '<select id="attr-sel-' + i + '" style="font-size:12px;padding:4px 6px;border:1px solid #ddd;">' + opts + '</select>'
+                      + '<span onclick="attributeApplicant(\'' + esc(r.email) + '\', \'attr-sel-' + i + '\')" style="cursor:pointer;color:#888;font-size:12px;border:1px solid #ddd;border-radius:4px;padding:4px 10px;white-space:nowrap;">credit</span>'
+                      + '</div>';
+                }).join('') + '</div>';
+            })
+            .catch(function(err){ box.innerHTML = '<span class="error-text">Could not load: ' + esc(err.message || err) + '</span>'; });
+    }
+
+    function attributeApplicant(email, selectId) {
+        var sel = document.getElementById(selectId);
+        var slug = sel ? sel.value : '';
+        if (!slug) { alert('Pick a partner first.'); return; }
+        fetch(ONBOARD_API + '/partners/attribute', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email, slug: slug })
+        })
+            .then(function(r){ return r.json().then(function(j){ if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status)); return j; }); })
+            .then(function(){ renderPartnersTab(); })
+            .catch(function(err){ alert('Could not credit: ' + (err.message || err)); });
     }
 
     function ccCopy(text, el) {

@@ -1105,8 +1105,24 @@
         submitBtn.disabled = true;
         submitBtn.textContent = 'Submitting...';
 
+        /* If a referral partner's link brought this person to the site, their
+           browser still remembers it even if they cleared the signup form's
+           prefilled answer. Pass it along as a second attribution net. */
+        var partnerSlug = '';
+        try {
+            var refRaw = window.localStorage.getItem('cc_ref');
+            if (refRaw) {
+                var refObj = JSON.parse(refRaw);
+                if (refObj && /^[a-z0-9][a-z0-9_-]{1,38}$/.test(String(refObj.slug || '')) &&
+                    refObj.ts && (Date.now() - refObj.ts) < 90 * 24 * 60 * 60 * 1000) {
+                    partnerSlug = String(refObj.slug);
+                }
+            }
+        } catch (e) { /* no storage: attribution just falls back to the form answer */ }
+
         const data = {
             token: inviteToken,
+            partner_slug: partnerSlug,
             name: document.getElementById('f-name').value.trim(),
             email: document.getElementById('f-email').value.trim(),
             address: document.getElementById('f-address').value.trim(),
