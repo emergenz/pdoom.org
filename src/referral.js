@@ -18,10 +18,10 @@ function readStored() {
   try {
     const raw = window.localStorage.getItem(REF_KEY)
     if (!raw) return null
-    const { slug, name, ts } = JSON.parse(raw)
+    const { slug, name, ts, counted } = JSON.parse(raw)
     if (!slug || !SLUG_RE.test(slug)) return null
     if (!ts || Date.now() - ts > REF_TTL_MS) return null
-    return { slug, name: name || slug }
+    return { slug, name: name || slug, counted: Boolean(counted) }
   } catch {
     return null // private mode, blocked storage: attribution degrades, page still works
   }
@@ -44,27 +44,44 @@ export function captureReferral() {
   if (!SLUG_RE.test(slug)) return readStored()
 
   const stored = readStored()
-  const isNew = !stored || stored.slug !== slug
+  const sameSlug = stored && stored.slug === slug
+  // Count a click once per slug. Resolve the display name whenever it is still
+  // missing: the first attempt is usually made on /participate, which redirects
+  // onward before the response lands.
+  const shouldCount = !sameSlug || !stored.counted
+  const needsName = !sameSlug || !stored.name || stored.name === slug
   try {
-    window.localStorage.setItem(REF_KEY, JSON.stringify({ slug, ts: Date.now() }))
+    window.localStorage.setItem(REF_KEY, JSON.stringify({
+      slug,
+      name: sameSlug ? stored.name : undefined,
+      counted: sameSlug ? stored.counted : false,
+      ts: Date.now(),
+    }))
   } catch {
     /* attribution falls back to the URL param for this visit */
   }
   // Count the click and learn the partner's display name, so the prefilled
   // answer reads the same as it would via the direct link. Fire-and-forget:
   // attribution already works from the slug alone if this never resolves.
-  if (isNew) {
+  if (shouldCount || needsName) {
+    const q = shouldCount ? '?count=1' : '?info=1&count=0'
     try {
-      fetch(`${COUNT_ENDPOINT}${encodeURIComponent(slug)}?count=1`, { cache: 'no-store' })
+      // keepalive: the request must survive the redirect off /participate, or
+      // the click is never counted.
+      fetch(`${COUNT_ENDPOINT}${encodeURIComponent(slug)}${q}`, { cache: 'no-store', keepalive: true })
         .then((r) => (r.ok ? r.json() : null))
         .then((data) => {
-          if (!data || !data.name) return
           try {
-            window.localStorage.setItem(REF_KEY, JSON.stringify({ slug, name: data.name, ts: Date.now() }))
+            window.localStorage.setItem(REF_KEY, JSON.stringify({
+              slug,
+              name: (data && data.name) || (stored && stored.name) || undefined,
+              counted: shouldCount || Boolean(stored && stored.counted),
+              ts: Date.now(),
+            }))
           } catch {
             /* ignore */
           }
-          decorateFormLinks() // restamp with the nicer name
+          if (data && data.name) decorateFormLinks() // restamp with the real name
         })
         .catch(() => {})
     } catch {
