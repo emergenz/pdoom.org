@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Referral stats · crowd-cast</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #f0ece3; color: #0b1015;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    line-height: 1.5; padding: 40px 20px 80px;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: #b7361e; margin: 0 0 8px; }
+  h1 { font-size: 27px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .sub { color: #55606a; font-size: 14px; margin: 0 0 28px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+  .tile { background: #fff; border: 1px solid rgba(11,16,21,0.12); border-radius: 10px; padding: 15px 16px; }
+  .k { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #8a939c; margin: 0 0 7px; }
+  .v { font-size: 27px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .tile.pay .v { color: #b7361e; }
+  .note { color: #55606a; font-size: 13px; margin-top: 26px; }
+  .link { background: #fff; border: 1px solid rgba(11,16,21,0.12); border-radius: 10px; padding: 13px 15px; margin-top: 22px; font-size: 13px; }
+  .link code { font-size: 12.5px; word-break: break-all; color: #0b1015; }
+  .err { background: #fff; border: 1px solid #e0b4ab; border-radius: 10px; padding: 18px; color: #8c2f1a; }
+  footer { margin-top: 34px; font-size: 12px; color: #8a939c; }
+  a { color: #b7361e; }
+</style>
+</head>
+<body>
+<div class="wrap" id="root">
+  <p class="eyebrow">crowd-cast</p>
+  <h1>Referral stats</h1>
+  <p class="sub" id="sub">Loading…</p>
+  <div id="body"></div>
+  <footer>Figures update continuously. Questions: <a href="mailto:mihir@pdoom.org">mihir@pdoom.org</a></footer>
+</div>
+<script>
+(function () {
+  var API = 'https://ob3iugfiy2.execute-api.us-east-1.amazonaws.com/v1/partner-stats';
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  var token = '';
+  try { token = new URLSearchParams(window.location.search).get('token') || ''; } catch (e) {}
+  var sub = document.getElementById('sub');
+  var body = document.getElementById('body');
+
+  if (!token) {
+    sub.textContent = '';
+    body.innerHTML = '<div class="err">This page needs your personal stats link. Ask us to resend it.</div>';
+    return;
+  }
+
+  fetch(API + '?token=' + encodeURIComponent(token))
+    .then(function (r) {
+      if (r.status === 404) throw new Error('That stats link is not valid any more. Ask us for a fresh one.');
+      if (!r.ok) throw new Error('Could not load stats (error ' + r.status + '). Please try again shortly.');
+      return r.json();
+    })
+    .then(function (d) {
+      sub.innerHTML = 'For <b>' + esc(d.name) + '</b>. Everyone who signs up through your link, and what you have earned.';
+      var bounty = d.bounty_usd || 300;
+      body.innerHTML =
+        '<div class="grid">' +
+          '<div class="tile"><p class="k">Link clicks</p><div class="v">' + (d.clicks || 0) + '</div></div>' +
+          '<div class="tile"><p class="k">Signups</p><div class="v">' + (d.signups || 0) + '</div></div>' +
+          '<div class="tile"><p class="k">Passed trial</p><div class="v">' + (d.passed_trial || 0) + '</div></div>' +
+          '<div class="tile pay"><p class="k">Earned, unpaid</p><div class="v">$' + (d.owed_usd || 0) + '</div></div>' +
+          '<div class="tile"><p class="k">Already paid</p><div class="v">$' + (d.paid_usd || 0) + '</div></div>' +
+        '</div>' +
+        '<div class="link"><b>Your link</b><br><code>' + esc(d.link) + '</code></div>' +
+        '<p class="note">You earn <b>$' + bounty + '</b> for every person who signs up through your link and completes their first week of recording. ' +
+        '"Signups" counts everyone who applied; not all of them are accepted, and some take a few weeks to finish their trial week, so the numbers move at different speeds. ' +
+        'We pay out on request, or monthly.</p>';
+    })
+    .catch(function (err) {
+      sub.textContent = '';
+      body.innerHTML = '<div class="err">' + esc(err.message || err) + '</div>';
+    });
+})();
+</script>
+</body>
+</html>
