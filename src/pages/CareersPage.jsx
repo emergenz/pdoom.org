@@ -1,4 +1,6 @@
+import { useEffect } from 'react'
 import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react'
+import { decorateFormLinks } from '../referral.js'
 import './careers.css'
 
 const signUpHref = 'https://docs.google.com/forms/d/e/1FAIpQLSd50ZarNRKoIWDmy5xAn8K8FVGM2Jbk1T52er4YLHiP2P28rQ/viewform'
@@ -377,6 +379,16 @@ function CareerDetail({ opportunity }) {
 export default function CareersPage({ opportunityId }) {
   const resolvedId = opportunityId || currentOpportunityId()
   const opportunity = opportunities.find((item) => item.id === resolvedId)
+
+  // If the visitor arrived from a partner, stamp their referral onto every
+  // signup-form link on the page, whichever CTA they end up clicking.
+  useEffect(() => {
+    try {
+      decorateFormLinks()
+    } catch {
+      /* attribution is best-effort; never break the page */
+    }
+  }, [resolvedId])
 
   return opportunity ? <CareerDetail opportunity={opportunity} /> : <CareersOverview />
 }

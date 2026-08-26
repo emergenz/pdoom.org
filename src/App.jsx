@@ -7,6 +7,7 @@ import CareersPage from './pages/CareersPage.jsx'
 import ImprintPage from './pages/ImprintPage.jsx'
 import MerchPage from './pages/MerchPage.jsx'
 import { legacyResearchRoutes } from './pages/blogData.js'
+import { captureReferral, decorateFormLinks, withReferral } from './referral.js'
 import {
   ArrowRight,
   ChevronDown,
@@ -232,7 +233,16 @@ function isParticipationShortlink(pathname) {
 
 function ParticipationRedirect() {
   useEffect(() => {
-    window.location.replace(paidDataCollectionPath)
+    // Carry a partner's ?ref= through to the landing page so the signup links
+    // there stay attributed. The redirect itself must never depend on that
+    // working, hence the fallback.
+    let target = paidDataCollectionPath
+    try {
+      target = withReferral(paidDataCollectionPath)
+    } catch {
+      /* keep the plain path */
+    }
+    window.location.replace(target)
   }, [])
 
   return null
@@ -852,7 +862,21 @@ function Footer() {
   )
 }
 
+// Remember a partner's ?ref= once per page load, before any early return below
+// sends the visitor onward. Never throws: attribution must not break the site.
+let referralCaptured = false
+function ensureReferralCaptured() {
+  if (referralCaptured) return
+  referralCaptured = true
+  try {
+    captureReferral()
+  } catch {
+    /* ignore */
+  }
+}
+
 function App() {
+  ensureReferralCaptured()
   const [heroVideoBuffered, setHeroVideoBuffered] = useState(false)
   const path = window.location.pathname.replace(/\/+$/, '') || '/'
   const legacyPath = path.slice(1)
