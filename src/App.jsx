@@ -7,7 +7,7 @@ import CareersPage from './pages/CareersPage.jsx'
 import ImprintPage from './pages/ImprintPage.jsx'
 import MerchPage from './pages/MerchPage.jsx'
 import { legacyResearchRoutes } from './pages/blogData.js'
-import { captureReferral, decorateFormLinks, withReferral } from './referral.js'
+import { captureReferral, withReferral } from './referral.js'
 import {
   ArrowRight,
   ChevronDown,
