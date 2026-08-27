@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#07130e">
-<title>Your referral stats · crowd-cast</title>
+<title>Refer someone to crowd-cast · p(doom)</title>
 <link rel="icon" type="image/png" sizes="128x128" href="/favicon.png">
-<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Earn $300 for every person you refer to crowd-cast.">
 <style>
   @font-face {
     font-family: "Instrument Sans";
@@ -123,89 +123,109 @@
 
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
-<style>
-  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin: clamp(30px, 4vw, 44px) 0 0; }
-  .tile { background: var(--white); padding: 18px 20px; }
-  .tile .k { font-size: 13px; color: var(--muted); margin: 0 0 8px; }
-  .tile .v { font-size: clamp(26px, 3vw, 34px); font-weight: 500; line-height: 1; letter-spacing: -0.01em; }
-  .tile.pay .v { color: var(--signal); }
-  table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 15px; }
-  th { text-align: left; font-size: 13px; font-weight: 500; color: var(--muted); padding: 10px 12px 10px 0; border-bottom: 1px solid var(--rule); }
-  td { padding: 13px 12px 13px 0; border-bottom: 1px solid var(--rule); }
-  td.num { text-align: right; font-variant-numeric: tabular-nums; }
-  .sect { margin-top: clamp(38px, 5vw, 60px); }
-  .sect h2 { font-size: clamp(22px, 2.2vw, 30px); font-weight: 500; margin: 0 0 6px; letter-spacing: -0.01em; }
-  .sect p.note { color: var(--muted); font-size: 14.5px; margin: 0; max-width: 62ch; }
-  .linkbox { margin-top: 26px; padding: 14px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
-  .linkbox code { font-family: "IBM Plex Mono", monospace; font-size: 14.5px; word-break: break-all; }
-</style>
 </head>
 <body>
 <header class="bar"><div class="shell"><a class="wordmark" href="/">p(doom)</a></div></header>
+
 <main class="shell">
   <div id="root">
-    <p class="kicker">crowd-cast</p>
-    <h1 id="title">Your referrals</h1>
-    <div class="prose"><p class="sub" id="sub">Loading&hellip;</p></div>
-    <div id="body"></div>
+    <div class="layout">
+      <div>
+        <p class="kicker">crowd-cast</p>
+        <h1>Refer someone, earn $300.</h1>
+      </div>
+      <div class="prose">
+        <p>We pay participants to record the long-horizon work they already do, and the best people almost always know other good people. So we pay for introductions.</p>
+        <p class="sub">Get your own link below. Anyone who signs up through it is credited to you automatically, so nobody has to remember to mention your name. There is no cap on how many people you can refer, and you do not need to be a participant yourself.</p>
+      </div>
+    </div>
+
+    <div class="err" id="err"></div>
+
+    <form id="form" novalidate>
+      <div class="field">
+        <label for="name">Your name</label>
+        <p class="hint">This is shown to the people you refer, so use the name they would recognise: your own, your podcast, or your newsletter.</p>
+        <input type="text" id="name" name="name" autocomplete="name" required placeholder="Ada Lovelace">
+      </div>
+      <div class="field">
+        <label for="email">Your email</label>
+        <p class="hint">We send your link here, and this is where we arrange payment.</p>
+        <input type="email" id="email" name="email" autocomplete="email" required placeholder="you@example.com">
+      </div>
+      <div class="hp" aria-hidden="true">
+        <label for="website">Leave this field empty</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+      </div>
+      <button type="submit" id="submit">
+        Get my referral link
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </form>
+
+    <p class="fine"><strong>How it pays.</strong> You earn <strong>$150</strong> once someone you referred passes their first week of recording, and another <strong>$150</strong> once they reach 100 recorded hours. Everyone goes through the same review as any other applicant, so we cannot promise that everyone you send will be accepted. You cannot refer yourself.</p>
   </div>
 </main>
+
 <script>
 (function () {
-  var API = 'https://ob3iugfiy2.execute-api.us-east-1.amazonaws.com/v1/partner-stats';
+  var API = 'https://ob3iugfiy2.execute-api.us-east-1.amazonaws.com/v1/referral-signup';
+  var started = Date.now();
+  var form = document.getElementById('form');
+  var errBox = document.getElementById('err');
+  var btn = document.getElementById('submit');
+
   function esc(s) {
     return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
-  var token = '';
-  try { token = new URLSearchParams(window.location.search).get('token') || ''; } catch (e) {}
-  var sub = document.getElementById('sub');
-  var body = document.getElementById('body');
-
-  if (!token) {
-    sub.textContent = '';
-    body.innerHTML = '<div class="err" style="display:block;">This page needs your personal stats link. Ask us to resend it.</div>';
-    return;
+  function showErr(msg) {
+    errBox.textContent = msg;
+    errBox.style.display = 'block';
+    errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
-  fetch(API + '?token=' + encodeURIComponent(token))
-    .then(function (r) {
-      if (r.status === 404) throw new Error('That stats link is not valid any more. Ask us for a fresh one.');
-      if (!r.ok) throw new Error('Could not load your stats (error ' + r.status + '). Please try again shortly.');
-      return r.json();
-    })
-    .then(function (d) {
-      var t = d.tranches || { trial: 150, hours: 150, hours_gate: 100 };
-      sub.innerHTML = 'For <b>' + esc(d.name) + '</b>. Everyone who signs up through your link, and what you have earned.';
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    errBox.style.display = 'none';
+    var name = document.getElementById('name').value.trim();
+    var email = document.getElementById('email').value.trim();
+    if (!name) { showErr('Please enter your name.'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('Please enter a valid email address.'); return; }
 
-      var rows = (d.referrals || []).map(function (r, i) {
-        return '<tr><td>' + (i + 1) + '</td><td>' + esc(r.applied || '&mdash;') + '</td><td>' + esc(r.stage) + '</td>' +
-               '<td class="num">' + (r.earned_usd ? '$' + r.earned_usd : '&mdash;') + '</td>' +
-               '<td class="num">' + (r.paid_usd ? '$' + r.paid_usd : '&mdash;') + '</td></tr>';
-      }).join('');
-
-      body.innerHTML =
-        '<div class="tiles">' +
-          '<div class="tile"><p class="k">Link clicks</p><div class="v">' + (d.clicks || 0) + '</div></div>' +
-          '<div class="tile"><p class="k">Signed up</p><div class="v">' + (d.signups || 0) + '</div></div>' +
-          '<div class="tile"><p class="k">Passed first week</p><div class="v">' + (d.passed_trial || 0) + '</div></div>' +
-          '<div class="tile pay"><p class="k">Earned, unpaid</p><div class="v">$' + (d.owed_usd || 0) + '</div></div>' +
-          '<div class="tile"><p class="k">Already paid</p><div class="v">$' + (d.paid_usd || 0) + '</div></div>' +
-        '</div>' +
-        '<div class="sect"><h2>Your link</h2>' +
-          '<div class="linkbox"><code>' + esc(d.link) + '</code></div></div>' +
-        '<div class="sect"><h2>Everyone you sent</h2>' +
-          '<p class="note">One row per person who signed up through your link. We do not show names or email addresses, so this stays anonymous for them.</p>' +
-          (rows
-            ? '<table><thead><tr><th>#</th><th>Signed up</th><th>Where they are</th><th class="num">Earned</th><th class="num">Paid</th></tr></thead><tbody>' + rows + '</tbody></table>'
-            : '<p class="note" style="margin-top:14px;">Nobody yet. Once someone signs up through your link they show up here.</p>') +
-        '</div>' +
-        '<p class="fine">You earn <strong>$' + t.trial + '</strong> when someone you referred passes their first week of recording, and <strong>$' + t.hours + '</strong> more once they reach ' + t.hours_gate + ' recorded hours. Everyone goes through the same review as any other applicant, so not everyone you send will be accepted. Reply to the email we sent you to arrange payment.</p>';
+    btn.disabled = true;
+    btn.textContent = 'Creating your link...';
+    fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name, email: email,
+        website: document.getElementById('website').value,
+        elapsed_ms: Date.now() - started
+      })
     })
-    .catch(function (err) {
-      sub.textContent = '';
-      body.innerHTML = '<div class="err" style="display:block;">' + esc(err.message || err) + '</div>';
-    });
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Something went wrong. Please try again.'); return j; }); })
+      .then(function (j) {
+        var link = j.link || ('https://pdoom.org/participate?ref=' + (j.slug || ''));
+        var sent = j.emailed
+          ? '<p>We have emailed your link and a private stats page to <b>' + esc(email) + '</b>.</p>'
+          : '<p>Save this link now: we could not send the email, so please copy it before you close this page.</p>';
+        document.getElementById('root').innerHTML =
+          '<div class="done">' +
+          '<p class="kicker">crowd-cast</p>' +
+          '<h2>Your referral link is ready.</h2>' +
+          '<p style="font-family:\'IBM Plex Mono\', monospace; font-size:15px; color:#0b1015; word-break:break-all; border-top:1px solid rgba(11,16,21,0.2); border-bottom:1px solid rgba(11,16,21,0.2); padding:14px 0;">' + esc(link) + '</p>' +
+          sent +
+          '<p>Share it wherever your people are. Anyone who signs up through it is credited to you automatically.</p>' +
+          '</div>';
+        window.scrollTo(0, 0);
+      })
+      .catch(function (err) {
+        btn.disabled = false;
+        btn.textContent = 'Get my referral link';
+        showErr(err.message || 'Something went wrong. Please try again.');
+      });
+  });
 })();
 </script>
 </body>

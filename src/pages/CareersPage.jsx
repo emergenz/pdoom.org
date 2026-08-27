@@ -1,7 +1,9 @@
+import { useEffect } from 'react'
 import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react'
+import { decorateFormLinks } from '../referral.js'
 import './careers.css'
 
-const signUpHref = 'https://docs.google.com/forms/d/e/1FAIpQLSd50ZarNRKoIWDmy5xAn8K8FVGM2Jbk1T52er4YLHiP2P28rQ/viewform'
+const signUpHref = '/apply.html'
 const emailApplicationLabel = 'franz@pdoom.org'
 const emailApplicationNote = 'To apply, send five bullet points demonstrating exceptional ability.'
 
@@ -16,20 +18,20 @@ const opportunities = [
     meta: ['Remote', '$1,000 / month'],
     facts: [
       ['Mode', 'Remote'],
-      ['Pay', '$1,000 / month'],
+      ['Pay', 'up to $1,000 / month'],
     ],
     intro: [
       <>p(doom) is working towards enabling models to perform complex tasks over weeks and months. Training on work at that horizon requires data at that horizon.</>,
       <>crowd-cast is a privacy-preserving desktop application built to capture the largest long-horizon dataset of digital work. Together with early participants around the world, we have already recorded more than 5,000 hours of complex theorem proving, spacecraft prototyping, model training across hundreds of GPUs, building design, and much more.</>,
-      <>The program is now open to the public. We pay top participants <strong>$1,000 per month</strong> to passively record their work. PhD-level research, novel systems, engineering, and other complex months-long projects all qualify.</>,
-      <>Other qualifying long-horizon work (research, engineering, design, editing, academic projects) is compensated at <strong>$300 per month</strong>. Submit the form and the team will follow up within a few days.</>,
+      <>The program is now open to the public. We pay top participants <strong>$1,000 per month</strong> to passively record their work. PhD-level research, professional engineering, and other complex months-long projects all qualify.</>,
+      <>Other qualifying long-horizon work (Bachelor's and Master's projects, design, editing, personal builds) is compensated at <strong>$300 per month</strong>. Submit the form and the team will follow up within a few days.</>,
     ],
     sections: [
       {
         title: 'How it works',
         ordered: true,
         items: [
-          <>Apply through the <a href={signUpHref} target="_blank" rel="noreferrer">signup form</a>.</>,
+          <>Apply through the <a href={signUpHref}>signup form</a>.</>,
           <>If accepted, install <a href="https://github.com/p-doom/crowd-cast/releases" target="_blank" rel="noreferrer">crowd-cast</a> on macOS, Windows, or Linux.</>,
           <>On first launch, choose which applications can be recorded. Everything outside that list is automatically excluded.</>,
           <>The recorder captures five-minute segments and uploads them to a private S3 bucket. At the end of each segment, its local copy is deleted.</>,
@@ -39,13 +41,12 @@ const opportunities = [
         title: 'Privacy and trust',
         paragraphs: [
           <>Choose exactly which applications can be captured. Private applications, pop-ups, and notifications are excluded (guaranteed at OS-level), and recording can be started or stopped at any time. Only record work that you have the right to share; confidential employer or client material does not qualify.</>,
-          <>The recorder is <a href="https://github.com/p-doom/crowd-cast" target="_blank" rel="noreferrer">open source</a>. You can review the <a href="/docs/crowd-cast-data-purchase-agreement.pdf">Data Purchase Agreement</a> and <a href="/docs/crowd-cast-privacy-consent.pdf">Privacy and Recording Consent</a> before applying. p(doom) is funded by <a href="https://www.sprind.org" target="_blank" rel="noreferrer">SPRIND</a>, the German Federal Agency for Breakthrough Innovation.</>,
+          <>The recorder is <a href="https://github.com/p-doom/crowd-cast" target="_blank" rel="noreferrer">open source</a>. You can review the <a href="/docs/crowd-cast-data-purchase-agreement.pdf">Data Purchase Agreement</a> and <a href="/docs/crowd-cast-privacy-consent.pdf">Privacy and Recording Consent</a> before applying. p(doom) is funded by <a href="https://www.sprind.org" target="_blank" rel="noreferrer">SPRIN-D</a>, the German Federal Agency for Breakthrough Innovation.</>,
         ],
       },
     ],
     applyLabel: 'Apply to participate',
     applyHref: signUpHref,
-    externalApply: true,
     applyNote: 'The signup form asks about the work you would record and the applications involved.',
   },
   {
@@ -377,6 +378,16 @@ function CareerDetail({ opportunity }) {
 export default function CareersPage({ opportunityId }) {
   const resolvedId = opportunityId || currentOpportunityId()
   const opportunity = opportunities.find((item) => item.id === resolvedId)
+
+  // If the visitor arrived from a partner, stamp their referral onto every
+  // signup-form link on the page, whichever CTA they end up clicking.
+  useEffect(() => {
+    try {
+      decorateFormLinks()
+    } catch {
+      /* attribution is best-effort; never break the page */
+    }
+  }, [resolvedId])
 
   return opportunity ? <CareerDetail opportunity={opportunity} /> : <CareersOverview />
 }
