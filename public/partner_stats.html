@@ -7,6 +7,7 @@
 <title>Your referral stats · crowd-cast</title>
 <link rel="icon" type="image/png" sizes="128x128" href="/favicon.png">
 <meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
 <style>
   @font-face {
     font-family: "Instrument Sans";
@@ -192,10 +193,17 @@
           '<div class="tile pay"><p class="k">Earned, unpaid</p><div class="v">$' + (d.owed_usd || 0) + '</div></div>' +
           '<div class="tile"><p class="k">Already paid</p><div class="v">$' + (d.paid_usd || 0) + '</div></div>' +
         '</div>' +
+        ((d.owed_usd || 0) > 0
+          ? '<div class="sect"><h2>You have $' + (d.owed_usd || 0) + ' to claim</h2>' +
+            '<p class="note">Confirm a few details once and we pay it out.</p>' +
+            '<p style="margin-top:14px;"><a href="/refer_claim.html?token=' + encodeURIComponent(token) + '" style="border-bottom:1px solid currentColor;font-weight:500;">Claim your premium &rarr;</a></p></div>'
+          : ((d.claimed_usd || 0) > 0
+            ? '<div class="sect"><h2>Claim submitted</h2><p class="note">$' + (d.claimed_usd || 0) + ' is confirmed and being paid out. We\'ll email you the payment record once it\'s sent.</p></div>'
+            : '')) +
         '<div class="sect"><h2>Your link</h2>' +
           '<div class="linkbox"><code>' + esc(d.link) + '</code></div></div>' +
         '<div class="sect"><h2>Everyone you sent</h2>' +
-          '<p class="note">One row per person who signed up through your link. We do not show names or email addresses, so this stays anonymous for them.</p>' +
+          '<p class="note">One row per person who signed up through your link. Rows show no names or emails, though as the person who sent them you may recognise who is who. We only ever share whether the payout milestones were reached, never their recordings, application outcome, or anything else.</p>' +
           (rows
             ? '<table><thead><tr><th>#</th><th>Signed up</th><th>Where they are</th><th class="num">Earned</th><th class="num">Paid</th></tr></thead><tbody>' + rows + '</tbody></table>'
             : '<p class="note" style="margin-top:14px;">Nobody yet. Once someone signs up through your link they show up here.</p>') +

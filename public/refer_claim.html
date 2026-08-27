@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07130e">
+<title>Claim your referral premium · crowd-cast</title>
+<link rel="icon" type="image/png" sizes="128x128" href="/favicon.png">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<style>
+  @font-face {
+    font-family: "Instrument Sans";
+    src: url("/fonts/instrument-sans.woff2") format("woff2");
+    font-style: normal; font-weight: 400 700; font-display: swap;
+  }
+  @font-face {
+    font-family: "IBM Plex Mono";
+    src: url("/fonts/ibm-plex-mono.woff2") format("woff2");
+    font-style: normal; font-weight: 400 500; font-display: swap;
+  }
+
+  :root {
+    color-scheme: light;
+    --ink: #0b1015;
+    --white: #f0ece3;
+    --off-white: #e5e0d6;
+    --signal: #b7361e;
+    --steel-dark: #506777;
+    --rule: rgba(11, 16, 21, 0.2);
+    --muted: rgba(11, 16, 21, 0.62);
+    --gutter: 40px;
+  }
+  @media (max-width: 900px) { :root { --gutter: 24px; } }
+  @media (max-width: 620px) { :root { --gutter: 20px; } }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    min-height: 100svh;
+    background: var(--white);
+    color: var(--ink);
+    font-family: "Instrument Sans", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  .prose a { border-bottom: 1px solid currentColor; }
+  .prose a:hover { color: var(--signal); }
+
+  .shell { width: min(calc(100% - (2 * var(--gutter))), 1600px); margin-inline: auto; }
+
+  header.bar { padding: 26px 0; border-bottom: 1px solid var(--rule); }
+  .wordmark { font-size: 17px; font-weight: 500; letter-spacing: -0.01em; }
+  .wordmark:hover { color: var(--signal); }
+
+  main { padding: clamp(44px, 5vw, 76px) 0 clamp(70px, 8vw, 120px); }
+  .layout { display: grid; grid-template-columns: 5fr 7fr; gap: clamp(28px, 5vw, 72px); align-items: start; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; gap: 30px; } }
+
+  .kicker { font-size: 14px; color: var(--steel-dark); margin: 0 0 18px; }
+  h1 {
+    margin: 0;
+    font-size: clamp(42px, 5.2vw, 76px);
+    font-weight: 500;
+    line-height: 0.96;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  .prose p { font-size: clamp(17px, 1.15vw, 19px); color: var(--ink); margin: 0 0 14px; max-width: 60ch; }
+  .prose p.sub { color: var(--muted); }
+
+  .via {
+    display: none; margin-top: 22px; padding: 12px 0;
+    border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+    font-size: 15px; color: var(--muted);
+  }
+  .via b { color: var(--ink); font-weight: 500; }
+
+  form { margin-top: clamp(34px, 4vw, 54px); display: flex; flex-direction: column; gap: 30px; max-width: 720px; }
+  .field label {
+    display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px;
+  }
+  .field .hint { font-size: 14px; color: var(--muted); margin: 0 0 12px; max-width: 58ch; }
+  input[type=text], input[type=email], textarea {
+    width: 100%; padding: 12px 0; font-family: inherit; font-size: 17px; color: var(--ink);
+    background: transparent; border: 0; border-bottom: 1px solid var(--rule); border-radius: 0;
+    transition: border-color 180ms ease;
+  }
+  input::placeholder, textarea::placeholder { color: rgba(11,16,21,0.34); }
+  input:focus, textarea:focus { outline: none; border-bottom-color: var(--signal); }
+  textarea { min-height: 140px; resize: vertical; line-height: 1.5; }
+  .count { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+  button {
+    justify-self: start; align-self: flex-start;
+    display: inline-flex; align-items: center; gap: 12px;
+    font: inherit; font-size: 17px; font-weight: 500;
+    color: var(--off-white); background: var(--ink);
+    border: 0; border-radius: 0; padding: 17px 30px; cursor: pointer;
+    transition: background 180ms ease;
+  }
+  button:hover:not(:disabled) { background: #23303b; }
+  button:disabled { opacity: 0.5; cursor: default; }
+  button svg { transition: transform 180ms ease; }
+  button:hover:not(:disabled) svg { transform: translateX(4px); }
+
+  .err {
+    display: none; margin-top: 26px; padding: 13px 0;
+    border-top: 1px solid var(--signal); border-bottom: 1px solid var(--signal);
+    color: var(--signal); font-size: 15px;
+  }
+  .fine { margin-top: clamp(40px, 5vw, 64px); font-size: 14px; color: var(--muted); max-width: 62ch; }
+  .fine a { border-bottom: 1px solid currentColor; }
+  .fine a:hover { color: var(--signal); }
+
+  .done { max-width: 640px; }
+  .done h2 { font-size: clamp(30px, 3.4vw, 46px); font-weight: 500; line-height: 1.02; margin: 0 0 18px; letter-spacing: -0.01em; }
+  .done p { font-size: clamp(17px, 1.15vw, 19px); color: var(--muted); margin: 0 0 12px; max-width: 56ch; }
+  .done a { border-bottom: 1px solid currentColor; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<style>
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin: clamp(30px, 4vw, 44px) 0 0; }
+  .tile { background: var(--white); padding: 18px 20px; }
+  .tile .k { font-size: 13px; color: var(--muted); margin: 0 0 8px; }
+  .tile .v { font-size: clamp(26px, 3vw, 34px); font-weight: 500; line-height: 1; letter-spacing: -0.01em; }
+  .tile.pay .v { color: var(--signal); }
+  table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 15px; }
+  th { text-align: left; font-size: 13px; font-weight: 500; color: var(--muted); padding: 10px 12px 10px 0; border-bottom: 1px solid var(--rule); }
+  td { padding: 13px 12px 13px 0; border-bottom: 1px solid var(--rule); }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .sect { margin-top: clamp(38px, 5vw, 60px); }
+  .sect h2 { font-size: clamp(22px, 2.2vw, 30px); font-weight: 500; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .sect p.note { color: var(--muted); font-size: 14.5px; margin: 0; max-width: 62ch; }
+  .linkbox { margin-top: 26px; padding: 14px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+  .linkbox code { font-family: "IBM Plex Mono", monospace; font-size: 14.5px; word-break: break-all; }
+</style>
+</head>
+<body>
+<header class="bar"><div class="shell"><a class="wordmark" href="/">p(doom)</a></div></header>
+<main class="shell">
+  <div id="root">
+    <p class="kicker">crowd-cast</p>
+    <h1 id="title">Claim your premium</h1>
+    <div class="prose"><p class="sub" id="sub">Loading&hellip;</p></div>
+
+    <div class="err" id="err"></div>
+
+    <form id="form" novalidate style="display:none;">
+      <div class="field" id="f-email">
+        <label for="claim_email">Your email</label>
+        <p class="hint">The address your referral link was sent to. We check it matches, so your link alone can't be used by anyone else.</p>
+        <input type="email" id="claim_email" autocomplete="email" placeholder="you@example.com">
+      </div>
+      <div class="field" id="f-legal">
+        <label for="legal_name">Your full legal name</label>
+        <p class="hint">As it appears on your bank account. This goes on the payment record.</p>
+        <input type="text" id="legal_name" autocomplete="name" placeholder="Ada Lovelace">
+      </div>
+      <div class="field" id="f-address">
+        <label for="address">Your address</label>
+        <p class="hint">Street and number, postal code, city.</p>
+        <input type="text" id="address" autocomplete="street-address" placeholder="Musterstr. 1, 80636 Munich">
+      </div>
+      <div class="field" id="f-country">
+        <label for="country">Country</label>
+        <input type="text" id="country" autocomplete="country-name" placeholder="Germany">
+      </div>
+      <div class="field" id="f-bank">
+        <label for="holder">Bank details</label>
+        <p class="hint">IBAN for European accounts. Outside the IBAN area, put your local account and routing details in the second field.</p>
+        <input type="text" id="holder" placeholder="Account holder" style="margin-bottom:10px;">
+        <input type="text" id="iban" placeholder="IBAN (or leave empty for non-IBAN accounts)" style="margin-bottom:10px;">
+        <input type="text" id="other_details" placeholder="Non-IBAN details: account number, routing/sort code, bank name">
+      </div>
+
+      <div class="field">
+        <label>A few confirmations</label>
+        <p class="hint">We need these once per payout, for German tax and bookkeeping rules.</p>
+        <div class="checks">
+          <label class="check"><input type="radio" name="vat" value="none" checked>
+            <span>I made this referral <strong>privately, not as a business</strong> (no trade, self-employment, or freelance activity) and I have no VAT ID.</span></label>
+          <label class="check"><input type="radio" name="vat" value="kleinunternehmer">
+            <span>I am a German small business under <strong>&sect; 19 UStG</strong> (Kleinunternehmer).</span></label>
+          <label class="check"><input type="radio" name="vat" value="regelbesteuert">
+            <span>I <strong>charge VAT on my invoices</strong> (a VAT-registered business / regelbesteuert). We'll then ask you to invoice us instead. <em>This choice can't be undone here, so pick it only if it's true.</em></span></label>
+        </div>
+        <div class="checks" style="margin-top:18px;">
+          <label class="check"><input type="checkbox" id="c-emp"><span>I am not an employee of p(doom).</span></label>
+          <label class="check"><input type="checkbox" id="c-self"><span>I did not refer myself or anyone living in my household.</span></label>
+          <label class="check"><input type="checkbox" id="c-off"><span>I made this referral <strong>privately, not in an official role</strong>, and I did not refer anyone I supervise (for example my own students or staff).</span></label>
+          <label class="check"><input type="checkbox" id="c-rules"><span>If I have an employer or institution, accepting this premium does not break their rules on accepting benefits.</span></label>
+        </div>
+      </div>
+
+      <button type="submit" id="submit">
+        Claim premium
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </form>
+
+    <div class="done" id="done" style="display:none;">
+      <h2 id="done-title">Claimed.</h2>
+      <p id="done-msg"></p>
+      <p><a id="back-stats" href="#">Back to your stats page</a></p>
+    </div>
+
+    <p class="fine" id="fine" style="display:none;">Your bank details are stored encrypted and only used to pay you. The payment record (Pr&auml;mienbeleg) we email you documents the payout for your and our bookkeeping; the premium may be taxable for you in your country of residence, and that part is your responsibility. We do not withhold anything.</p>
+  </div>
+</main>
+<style>
+  .checks { display: flex; flex-direction: column; gap: 12px; }
+  .check { display: flex; gap: 12px; align-items: flex-start; font-size: 15.5px; line-height: 1.45; cursor: pointer; max-width: 62ch; }
+  .check input { margin-top: 4px; flex: 0 0 auto; accent-color: var(--signal); }
+</style>
+<script>
+(function () {
+  var API = 'https://ob3iugfiy2.execute-api.us-east-1.amazonaws.com/v1/referral-claim';
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  var token = '';
+  try { token = new URLSearchParams(window.location.search).get('token') || ''; } catch (e) {}
+  var sub = document.getElementById('sub');
+  var err = document.getElementById('err');
+  var form = document.getElementById('form');
+  var needsDetails = true;
+
+  function fail(msg) { err.style.display = 'block'; err.textContent = msg; }
+
+  if (!token) { sub.textContent = ''; fail('This page needs your personal link. Open it from your stats page.'); return; }
+  document.getElementById('back-stats').href = '/partner_stats.html?token=' + encodeURIComponent(token);
+
+  function showDone(title, msg) {
+    form.style.display = 'none';
+    document.getElementById('fine').style.display = 'none';
+    document.getElementById('done').style.display = '';
+    document.getElementById('done-title').textContent = title;
+    document.getElementById('done-msg').textContent = msg;
+  }
+
+  fetch(API + '?token=' + encodeURIComponent(token))
+    .then(function (r) {
+      if (r.status === 404) throw new Error('That link is not valid any more. Ask us for a fresh one.');
+      if (!r.ok) throw new Error('Could not load your claim. Please try again shortly.');
+      return r.json();
+    })
+    .then(function (d) {
+      needsDetails = !!d.needs_details;
+      // Pre-select the VAT option they chose before, so a returning referrer
+      // stays consistent across their own claims.
+      if (d.vat_status) {
+        var pre = document.querySelector('input[name=vat][value="' + d.vat_status + '"]');
+        if (pre) pre.checked = true;
+      }
+      if (!d.claimable || !d.claimable.length) {
+        sub.textContent = 'Nothing to claim right now. Once a premium is earned it shows up here.';
+        return;
+      }
+      var total = d.claimable.reduce(function (n, c) { return n + (c.amount_usd || 0); }, 0);
+      sub.innerHTML = 'For <b>' + esc(d.name) + '</b>: <b>$' + total + '</b> earned across ' + d.claimable.length +
+        ' premium' + (d.claimable.length === 1 ? '' : 's') + '. Fill this in once and we pay it out.';
+      if (!needsDetails) {
+        ['f-legal', 'f-address', 'f-country', 'f-bank'].forEach(function (id) {
+          document.getElementById(id).style.display = 'none';
+        });
+      }
+      form.style.display = '';
+      document.getElementById('fine').style.display = '';
+    })
+    .catch(function (e) { sub.textContent = ''; fail(e.message || String(e)); });
+
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    err.style.display = 'none';
+    var email = document.getElementById('claim_email').value.trim();
+    if (!email) return fail('Please enter the email your referral link was sent to.');
+    var vat = (document.querySelector('input[name=vat]:checked') || {}).value || 'none';
+    if (!document.getElementById('c-emp').checked || !document.getElementById('c-self').checked ||
+        !document.getElementById('c-off').checked || !document.getElementById('c-rules').checked) {
+      return fail('Please confirm all four statements.');
+    }
+    var body = {
+      token: token, email: email, vat_status: vat,
+      confirm_not_employee: true, confirm_not_self_household: true, confirm_not_official: true
+    };
+    if (needsDetails && vat !== 'regelbesteuert') {
+      var legal = document.getElementById('legal_name').value.trim();
+      var addr = document.getElementById('address').value.trim();
+      var ctry = document.getElementById('country').value.trim();
+      var holder = document.getElementById('holder').value.trim();
+      var iban = document.getElementById('iban').value.trim();
+      var other = document.getElementById('other_details').value.trim();
+      if (!legal || !addr || !ctry) return fail('Please fill in your legal name, address and country.');
+      if (!holder || (!iban && !other)) return fail('Please fill in your bank details.');
+      body.legal_name = legal; body.address = addr; body.country = ctry;
+      body.payout_details = { holder: holder, iban: iban, other: other };
+    }
+    var btn = document.getElementById('submit');
+    btn.disabled = true;
+    fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        btn.disabled = false;
+        if (!res.ok) { return fail(res.d.error || 'Something went wrong.'); }
+        if (res.d.manual_route) {
+          // Payment can't go through the form (non-European account or a bad
+          // IBAN). Keep the form so they can correct it and try again.
+          return fail(res.d.message || 'We could not process that bank account. Please check it and try again, or reply to your referral email.');
+        }
+        if (res.d.invoice_route) {
+          return showDone('You invoice us for this one.', res.d.message || 'As a VAT-registered business, please reply to your referral email to arrange payment.');
+        }
+        if (res.d.created && res.d.created.length) {
+          return showDone('Claimed.', 'Your premium is queued. We will email you the payment record once it has been sent.');
+        }
+        // 200 with nothing created: already claimed / nothing left. Not a "done" state.
+        return fail(res.d.message || 'There is nothing to claim right now.');
+      })
+      .catch(function () { btn.disabled = false; fail('Network error. Please try again.'); });
+  });
+})();
+</script>
+</body>
+</html>

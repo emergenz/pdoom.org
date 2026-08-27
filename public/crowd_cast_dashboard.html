@@ -1032,6 +1032,18 @@
         d.textContent = s;
         return d.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
+
+    // Delegated handlers for buttons whose payload is untrusted server data
+    // (applicant email, referred_email). These use data-* attributes read via
+    // dataset (never executed) instead of inline onclick strings, which are
+    // unsafe: escapeHtml('...&#39;...') decodes back to a quote inside an
+    // attribute and would let a crafted email break out into script.
+    document.addEventListener('click', function (ev) {
+        var mp = ev.target.closest && ev.target.closest('[data-mark-paid]');
+        if (mp) { markBountyPaid(mp.getAttribute('data-mark-paid')); return; }
+        var cr = ev.target.closest && ev.target.closest('[data-credit]');
+        if (cr) { attributeApplicant(cr.getAttribute('data-credit'), cr.getAttribute('data-credit-sel')); return; }
+    });
     function pct(num, den) {
         if (!den) return '0.0%';
         return (100 * num / den).toFixed(1) + '%';
@@ -2731,17 +2743,19 @@
             var isOverdue = isPending && dueDate && dueDate < now;
 
             var statusColor = p.status === 'approved' ? '#2ea043' : p.status === 'paid' ? '#0066cc' : p.status === 'rejected' ? '#cf222e' : p.status === 'merged' ? '#777' : '#b08800';
-            var typeLabel = p.merged_from ? 'Merged' : p.payout_type === 'trial' ? 'Trial' : p.payout_type === 'partial' ? 'Partial' : 'Full';
+            var typeLabel = p.merged_from ? 'Merged' : p.payout_type === 'referral_premium' ? ('Premium T' + (p.tranche || '?')) : p.payout_type === 'trial' ? 'Trial' : p.payout_type === 'partial' ? 'Partial' : 'Full';
             var rowBg = isOverdue ? '#fff0f0' : isDueSoon ? '#fffbe6' : '';
 
             html += '<tr style="background:' + rowBg + ';">';
             html += '<td style="padding:7px 12px;border-bottom:1px solid #eee;">';
             if (canApprove) html += '<input type="checkbox" class="payout-checkbox" data-id="' + escapeHtml(p.payout_id) + '">';
             html += '</td>';
-            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">' + escapeHtml(part.name || p.participant_id) + '</td>';
+            var isPremium = p.payout_type === 'referral_premium';
+            var displayName = isPremium ? (p.recipient_name || p.partner_slug || p.participant_id) : (part.name || p.participant_id);
+            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">' + escapeHtml(displayName) + (isPremium ? ' <span style="background:#6f42c1;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;letter-spacing:0.5px;vertical-align:1px;">REFERRER</span>' : '') + '</td>';
             html += '<td style="padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;color:#777;border-bottom:1px solid #eee;">' + escapeHtml(p.period_start) + ' to ' + escapeHtml(p.period_end) + '</td>';
             html += '<td style="padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">' + typeLabel + '</td>';
-            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;text-align:right;border-bottom:1px solid #eee;">' + p.days + '</td>';
+            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;text-align:right;border-bottom:1px solid #eee;">' + (isPremium ? '\u2014' : p.days) + '</td>';
             html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;text-align:right;border-bottom:1px solid #eee;font-weight:700;">$' + p.amount_usd.toFixed(2) + '</td>';
             html += '<td style="padding:7px 12px;font-size:11px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">';
             html += '<span style="color:' + statusColor + ';font-weight:700;text-transform:uppercase;">' + escapeHtml(p.status) + '</span>';
@@ -2756,7 +2770,9 @@
             // Note to participant: editable while the statement email is still unsent,
             // read-only afterwards so a sent note stays visible but can't be rewritten.
             html += '<td style="padding:7px 12px;border-bottom:1px solid #eee;min-width:240px;">';
-            if (canApprove) {
+            if (isPremium) {
+                html += '<div style="font-size:11px;font-family:\'SF Mono\',monospace;color:#999;">referral #' + escapeHtml(String(p.referral_no || '?')) + ' \u00b7 ' + escapeHtml(p.partner_slug || '') + '</div>';
+            } else if (canApprove) {
                 html += '<input type="text" class="payout-note" data-id="' + escapeHtml(p.payout_id) + '" maxlength="1000" value="' + escapeHtml(p.participant_note || '') + '" placeholder="Optional, emailed with the statement" style="width:100%;box-sizing:border-box;font-size:12px;font-family:\'SF Mono\',monospace;padding:5px 8px;border:1px solid #ccc;background:#fff;outline:none;">';
                 html += '<div class="payout-note-status" data-id="' + escapeHtml(p.payout_id) + '" style="font-size:10px;font-family:\'SF Mono\',monospace;color:#999;margin-top:3px;min-height:12px;"></div>';
             } else if (p.participant_note) {
@@ -3967,7 +3983,7 @@
 
         if (owed.length) {
             h += '<div class="outline-box" style="padding:12px 14px;margin-bottom:20px;border-color:#c9a227;">'
-              + '<b>$' + owedTotal + ' owed</b> across ' + owed.length + ' bounty' + (owed.length === 1 ? '' : 's') + '. Pay from Qonto, then mark paid below.</div>';
+              + '<b>$' + owedTotal + ' owed</b> across ' + owed.length + ' bounty' + (owed.length === 1 ? '' : 's') + '. The referrer claims via their stats page; the premium then appears in the Payouts tab for one-click payment. "Mark paid" below is only the manual fallback.</div>';
         }
 
         h += '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">'
@@ -4010,7 +4026,7 @@
                   + '<div style="color:#666;font-size:12px;margin-top:2px;">' + esc(b.status)
                   + (b.trial_passed_at ? ' &middot; trial passed ' + esc(String(b.trial_passed_at).slice(0,10)) : '')
                   + (b.paid_at ? ' &middot; paid ' + esc(String(b.paid_at).slice(0,10)) : '') + '</div></div>'
-                  + (isOwed ? '<span onclick="markBountyPaid(\'' + esc(b.referred_email) + '\')" class="review-btn rb-accept" style="padding:6px 14px;cursor:pointer;white-space:nowrap;">Mark paid</span>' : '')
+                  + (isOwed ? '<span data-mark-paid="' + esc(b.referred_email) + '" class="review-btn rb-accept" style="padding:6px 14px;cursor:pointer;white-space:nowrap;">Mark paid</span>' : '')
                   + '</div>';
             });
             h += '</div>';
@@ -4054,7 +4070,7 @@
                       + '<div style="color:#666;font-size:12px;margin-top:2px;">&ldquo;' + esc(r.heard_via) + '&rdquo;</div>'
                       + '</div>'
                       + '<select id="attr-sel-' + i + '" style="font-size:12px;padding:4px 6px;border:1px solid #ddd;">' + opts + '</select>'
-                      + '<span onclick="attributeApplicant(\'' + esc(r.email) + '\', \'attr-sel-' + i + '\')" style="cursor:pointer;color:#888;font-size:12px;border:1px solid #ddd;border-radius:4px;padding:4px 10px;white-space:nowrap;">credit</span>'
+                      + '<span data-credit="' + esc(r.email) + '" data-credit-sel="attr-sel-' + i + '" style="cursor:pointer;color:#888;font-size:12px;border:1px solid #ddd;border-radius:4px;padding:4px 10px;white-space:nowrap;">credit</span>'
                       + '</div>';
                 }).join('') + '</div>';
             })
