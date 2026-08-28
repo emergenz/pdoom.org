@@ -2829,14 +2829,9 @@
                 document.querySelectorAll('.payout-checkbox:checked').forEach(function(cb) { selected.push(cb.dataset.id); });
                 if (selected.length === 0) return;
 
-                var total = 0;
-                for (var j = 0; j < _payoutsData.length; j++) {
-                    if (selected.indexOf(_payoutsData[j].payout_id) >= 0) total += _payoutsData[j].amount_usd;
-                }
-
                 // A note typed but not yet blurred must reach DynamoDB before the
                 // approve call reads it back for the email.
-                flushPayoutNotes().then(function() { showPayoutConfirmModal(selected, total); });
+                flushPayoutNotes().then(function() { showPayoutConfirmModal(selected); });
             });
 
             document.getElementById('reject-payouts-btn').addEventListener('click', function() {
@@ -2943,7 +2938,7 @@
         modal.querySelector('.modal-confirm').addEventListener('click', function() { document.body.removeChild(overlay); onConfirm(); });
     }
 
-    function showPayoutConfirmModal(payoutIds, total) {
+    function showPayoutConfirmModal(payoutIds) {
         var overlay = document.createElement('div');
         overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
 
@@ -2967,7 +2962,7 @@
             : '';
 
         modal.innerHTML = '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;">Confirm Payouts</div>' +
-            '<div style="font-size:14px;margin-bottom:8px;"><strong>' + payoutIds.length + ' payouts</strong> totaling <strong>$' + total.toFixed(2) + '</strong></div>' +
+            '<div style="font-size:14px;margin-bottom:8px;"><strong>' + payoutIds.length + ' payouts</strong> totaling <strong>' + _fmtCurTotals(_payoutCurTotals(payoutIds)) + '</strong></div>' +
             '<div style="font-size:12px;color:#666;margin-bottom:20px;">This will generate Auszahlungsbelege and email them to participants.</div>' +
             notesBlock +
             '<div style="font-size:12px;margin-bottom:16px;">Type <strong>CONFIRM</strong> to proceed:</div>' +
@@ -3102,20 +3097,41 @@
         .catch(function() {});
     }
 
+    // Payments now go out in native currency (EUR/USD/GBP), so a single "$" sum
+    // across mixed-currency rows is wrong. Total per currency instead, with a
+    // USD-equivalent (from amount_usd) only as a parenthetical when mixed.
+    function _payoutCurTotals(ids) {
+        var byCur = {}, usd = 0;
+        for (var j = 0; j < _payoutsData.length; j++) {
+            var pd = _payoutsData[j];
+            if (ids.indexOf(pd.payout_id) < 0) continue;
+            var cur = (pd.currency || 'USD').toUpperCase();
+            var amt = (pd.amount != null ? Number(pd.amount) : Number(pd.amount_usd)) || 0;
+            byCur[cur] = (byCur[cur] || 0) + amt;
+            usd += Number(pd.amount_usd) || 0;
+        }
+        return { byCur: byCur, usd: usd };
+    }
+    function _fmtCurTotals(t) {
+        var sym = { EUR: '€', GBP: '£', USD: '$' };
+        var curs = Object.keys(t.byCur).sort();
+        if (!curs.length) return '$0.00';
+        var parts = curs.map(function(c){ return (sym[c] || (c + ' ')) + t.byCur[c].toFixed(2); });
+        var s = parts.join(' + ');
+        if (curs.length > 1) s += ' (~$' + t.usd.toFixed(2) + ')';
+        return s;
+    }
+
     function updatePayoutsSummary() {
         var selected = [];
-        var total = 0;
         document.querySelectorAll('.payout-checkbox:checked').forEach(function(cb) {
             selected.push(cb.dataset.id);
         });
-        for (var j = 0; j < _payoutsData.length; j++) {
-            if (selected.indexOf(_payoutsData[j].payout_id) >= 0) total += _payoutsData[j].amount_usd;
-        }
         var textEl = document.getElementById('payout-summary-text');
         var btnEl = document.getElementById('confirm-payouts-btn');
         var rejectEl = document.getElementById('reject-payouts-btn');
         if (selected.length > 0) {
-            textEl.textContent = selected.length + ' payouts selected, total: $' + total.toFixed(2);
+            textEl.textContent = selected.length + ' payouts selected, total: ' + _fmtCurTotals(_payoutCurTotals(selected));
             textEl.style.color = '#000';
             textEl.style.fontWeight = '700';
             btnEl.style.display = 'inline-block';
@@ -3263,6 +3279,56 @@
                     });
                 });
             });
+
+            // Wire up comp-tier "Set tier"
+            reviewDiv.querySelectorAll('.comp-set-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var pid = btn.dataset.id;
+                    var sel = reviewDiv.querySelector('.comp-tier-select[data-id="' + pid + '"]');
+                    var tier = sel ? sel.value : '';
+                    if (!tier) return;
+                    var p = _lastOnboardParticipants.find(function(x){ return x.participant_id === pid; });
+                    var nm = (p && p.name) ? p.name : pid;
+                    showConfirmModal('Set compensation tier', 'Set ' + nm + ' to "' + tier + '" tier?\n\nThis only records the tier. Their pay does not change until you re-issue the DPA and they accept it.', function() {
+                        btn.textContent = '...'; btn.style.pointerEvents = 'none';
+                        fetch(ONBOARD_API + '/onboard/set-comp-tier', {
+                            method: 'POST',
+                            headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ participant_id: pid, email: (p && p.email) || undefined, comp_tier: tier })
+                        })
+                        .then(function(resp){ return resp.json(); })
+                        .then(function(data){ if (data.error) { alert(data.error); btn.textContent='Set tier'; btn.style.pointerEvents=''; return; } fetchPendingReview(); })
+                        .catch(function(err){ console.error('Set tier failed:', err); btn.textContent='Set tier'; btn.style.pointerEvents=''; });
+                    });
+                });
+            });
+
+            // Wire up comp-tier "Re-issue DPA"
+            reviewDiv.querySelectorAll('.comp-reissue-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var pid = btn.dataset.id;
+                    var nm = btn.dataset.name || pid;
+                    var p = _lastOnboardParticipants.find(function(x){ return x.participant_id === pid; });
+                    var storedTier = (p && p.comp_tier) ? p.comp_tier : 'standard (default)';
+                    showConfirmModal('Re-issue DPA', 'Re-issue ' + nm + '\'s Data Purchase Agreement at "' + storedTier + '" tier?\n\nThis generates a new region-priced agreement and RESETS their acceptance. They keep their current rate until they accept the new one.', function() {
+                        var doEmail = confirm('Email ' + nm + ' the new agreement and accept link now?\n\nOK = email them now\nCancel = do not email (you will get the accept link to send yourself)');
+                        btn.textContent = '...'; btn.style.pointerEvents = 'none';
+                        fetch(ONBOARD_API + '/onboard/reissue-dpa', {
+                            method: 'POST',
+                            headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ participant_id: pid, send: doEmail })
+                        })
+                        .then(function(resp){ return resp.json(); })
+                        .then(function(data){
+                            if (data.error) { alert(data.error); btn.textContent='Re-issue DPA'; btn.style.pointerEvents=''; return; }
+                            var cur = data.currency === 'EUR' ? '€' : '$';
+                            alert('DPA re-issued at ' + cur + data.amount + ' (' + data.comp_tier + ', ' + data.region + ').' + (data.emailed ? '\n\nEmailed to the participant.' : '\n\nNOT emailed. Accept link to send yourself:\n' + data.accept_url));
+                            fetchPendingReview();
+                        })
+                        .catch(function(err){ console.error('Re-issue DPA failed:', err); btn.textContent='Re-issue DPA'; btn.style.pointerEvents=''; });
+                    });
+                });
+            });
         })
         .catch(function(err) { console.error('Fetch pending failed:', err); });
     }
@@ -3393,6 +3459,28 @@
             if (recorderOptionEmails.length > 0) {
                 html += '<div style="margin-top:6px;"><select class="recorder-link-select" data-id="' + escapeHtml(p.participant_id || '') + '" style="font-size:12px;font-family:\'SF Mono\',monospace;padding:4px 8px;border:1px solid #000;background:#fff;cursor:pointer;max-width:100%;">' + recorderOptionsHtml + '</select></div>';
             }
+            html += '</div></div>';
+
+            /* Compensation tier + region-priced DPA re-issue */
+            var compTier = p.comp_tier || '';
+            var compStatus, compColor;
+            if (!compTier) { compStatus = 'Legacy ($300/mo USD)'; compColor = '#999'; }
+            else if (p.dpa_accepted_at) { compStatus = 'ACTIVE: ' + compTier + ' (region rate)'; compColor = '#2ea043'; }
+            else if (p.reconsent_pending) { compStatus = compTier + ' set, DPA re-issued, awaiting acceptance'; compColor = '#b08800'; }
+            else { compStatus = compTier + ' set, DPA not re-issued yet'; compColor = '#b08800'; }
+            html += '<div style="background:#fafaf7;padding:0 20px 16px;">';
+            html += '<div style="border-top:1px dashed #ddd;padding-top:12px;">';
+            html += '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Compensation tier</span> ';
+            html += '<span style="font-size:11px;font-weight:700;color:' + compColor + ';">' + escapeHtml(compStatus) + '</span>';
+            html += '<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">';
+            html += '<select class="comp-tier-select" data-id="' + escapeHtml(p.participant_id || '') + '" style="font-size:12px;padding:4px 8px;border:1px solid #000;background:#fff;cursor:pointer;">';
+            html += '<option value="standard"' + (compTier === 'standard' ? ' selected' : '') + '>standard ($300)</option>';
+            html += '<option value="top"' + (compTier === 'top' ? ' selected' : '') + '>top (NA $1k / EU €1k / RoW $500)</option>';
+            html += '</select>';
+            html += '<span class="comp-set-btn" data-id="' + escapeHtml(p.participant_id || '') + '" style="' + btnBase + 'border:1px solid #0969da;color:#0969da;">Set tier</span>';
+            html += '<span class="comp-reissue-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-name="' + escapeHtml(p.name || '') + '" style="' + btnBase + 'border:1px solid #8250df;color:#8250df;">Re-issue DPA</span>';
+            html += '</div>';
+            html += '<div style="font-size:11px;color:#aaa;margin-top:6px;">Set the tier, then re-issue the DPA. Re-issuing resets acceptance, so they keep their current rate until they accept the new agreement.</div>';
             html += '</div></div>';
 
             html += '</td></tr>';
