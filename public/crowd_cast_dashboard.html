@@ -1040,7 +1040,7 @@
     // attribute and would let a crafted email break out into script.
     document.addEventListener('click', function (ev) {
         var mp = ev.target.closest && ev.target.closest('[data-mark-paid]');
-        if (mp) { markBountyPaid(mp.getAttribute('data-mark-paid')); return; }
+        if (mp) { markBountyPaid(mp.getAttribute('data-mark-paid'), mp.getAttribute('data-tranche'), mp.getAttribute('data-amount')); return; }
         var cr = ev.target.closest && ev.target.closest('[data-credit]');
         if (cr) { attributeApplicant(cr.getAttribute('data-credit'), cr.getAttribute('data-credit-sel')); return; }
     });
@@ -2756,7 +2756,10 @@
             html += '<td style="padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;color:#777;border-bottom:1px solid #eee;">' + escapeHtml(p.period_start) + ' to ' + escapeHtml(p.period_end) + '</td>';
             html += '<td style="padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">' + typeLabel + '</td>';
             html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;text-align:right;border-bottom:1px solid #eee;">' + (isPremium ? '\u2014' : p.days) + '</td>';
-            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;text-align:right;border-bottom:1px solid #eee;font-weight:700;">$' + p.amount_usd.toFixed(2) + '</td>';
+            var _cur = (p.currency || 'USD').toUpperCase();
+            var _amt = (p.amount != null ? p.amount : p.amount_usd);
+            var _sym = _cur === 'EUR' ? '€' : _cur === 'GBP' ? '£' : '$';
+            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;text-align:right;border-bottom:1px solid #eee;font-weight:700;">' + _sym + Number(_amt).toFixed(2) + '</td>';
             html += '<td style="padding:7px 12px;font-size:11px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">';
             html += '<span style="color:' + statusColor + ';font-weight:700;text-transform:uppercase;">' + escapeHtml(p.status) + '</span>';
             if (isOverdue) html += ' <span style="background:#cf222e;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;letter-spacing:0.5px;">OVERDUE</span>';
@@ -3973,6 +3976,8 @@
     function renderPartnersView(data) {
         var c = document.getElementById('partners-view');
         var partners = data.partners || [], bounties = data.bounties || [];
+        var tr = data.tranches || {};
+        var trancheTrial = tr.trial || 150, trancheHours = tr.hours || 150, trancheGate = tr.hours_gate || 100;
         function esc(s){ return escapeHtml(String(s == null ? '' : s)); }
         var owed = bounties.filter(function(b){ return b.status === 'owed'; });
         var owedTotal = owed.reduce(function(s,b){ return s + (b.amount_usd || 0); }, 0);
@@ -4013,20 +4018,36 @@
         h += '</tbody></table></div>';
 
         h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin:28px 0 10px;">Bounties</div>';
+        h += '<p style="color:#666;font-size:12.5px;margin:0 0 10px;">Each referral pays in two tranches: $' + trancheTrial + ' at trial-week pass, $' + trancheHours + ' at ' + trancheGate + ' recorded hours. Self-serve referrers claim from their stats page and you pay from the Payouts tab; "Mark paid" here is the manual fallback for when the money already left Qonto another way.</p>';
         if (!bounties.length) {
             h += '<p style="color:#999;font-size:13px;">None yet. A bounty appears once a referred applicant passes their trial week.</p>';
         } else {
-            h += '<div style="display:flex;flex-direction:column;gap:6px;">';
+            function trancheRow(b, key, label) {
+                var t = b[key]; if (!t) return '';
+                var st = t.status || (key === 't1' ? 'owed' : 'pending');
+                var meta = esc(st);
+                if (key === 't2' && st === 'pending' && t.gate) meta += ' &middot; unlocks at ' + t.gate + 'h';
+                if (t.paid_at) meta += ' &middot; paid ' + esc(String(t.paid_at).slice(0, 10));
+                var right = '';
+                if (st === 'owed' && t.claimed) {
+                    right = '<span style="font-size:11.5px;color:#888;white-space:nowrap;">claimed &middot; pay in Payouts tab</span>';
+                } else if (st === 'owed') {
+                    right = '<span data-mark-paid="' + esc(b.referred_email) + '" data-tranche="' + key + '" data-amount="' + (t.amount || 0) + '" class="review-btn rb-accept" style="padding:5px 12px;cursor:pointer;white-space:nowrap;font-size:12px;">Mark paid</span>';
+                }
+                return '<div style="display:flex;align-items:center;gap:10px;margin-top:6px;padding-top:6px;border-top:1px solid #f2f2f2;">'
+                  + '<div style="flex:1;min-width:0;font-size:12.5px;">' + esc(label) + ' &middot; <b>$' + (t.amount || 0) + '</b> <span style="color:#777;">' + meta + '</span></div>'
+                  + right + '</div>';
+            }
+            h += '<div style="display:flex;flex-direction:column;gap:8px;">';
             bounties.forEach(function(b){
-                var isOwed = b.status === 'owed';
-                h += '<div class="outline-box" style="padding:10px 14px;display:flex;align-items:center;gap:12px;' + (isOwed ? '' : 'opacity:0.6;') + '">'
-                  + '<div style="flex:1;min-width:0;">'
-                  + '<div style="font-weight:600;font-size:13.5px;">$' + (b.amount_usd || 0) + ' &middot; ' + esc(b.partner_slug)
-                  + ' <span style="color:#999;font-weight:400;">' + esc(b.participant_id || b.referred_email) + '</span></div>'
-                  + '<div style="color:#666;font-size:12px;margin-top:2px;">' + esc(b.status)
-                  + (b.trial_passed_at ? ' &middot; trial passed ' + esc(String(b.trial_passed_at).slice(0,10)) : '')
-                  + (b.paid_at ? ' &middot; paid ' + esc(String(b.paid_at).slice(0,10)) : '') + '</div></div>'
-                  + (isOwed ? '<span data-mark-paid="' + esc(b.referred_email) + '" class="review-btn rb-accept" style="padding:6px 14px;cursor:pointer;white-space:nowrap;">Mark paid</span>' : '')
+                var anyOwed = (b.t1 && b.t1.status === 'owed') || (b.t2 && b.t2.status === 'owed');
+                h += '<div class="outline-box" style="padding:10px 14px;' + (anyOwed ? '' : 'opacity:0.7;') + '">'
+                  + '<div style="font-weight:600;font-size:13.5px;">' + esc(b.partner_slug)
+                  + ' <span style="color:#999;font-weight:400;">' + esc(b.participant_id || b.referred_email) + '</span>'
+                  + (b.trial_passed_at ? ' <span style="color:#999;font-weight:400;font-size:11.5px;">&middot; trial passed ' + esc(String(b.trial_passed_at).slice(0, 10)) + '</span>' : '')
+                  + '</div>'
+                  + trancheRow(b, 't1', 'Trial week')
+                  + trancheRow(b, 't2', '100 hours')
                   + '</div>';
             });
             h += '</div>';
@@ -4041,9 +4062,8 @@
           + '<label style="font-size:12px;color:#666;">Name<br><input id="pt-name" placeholder="Dwarkesh Podcast" style="padding:6px 8px;border:1px solid #ddd;font-size:13px;width:190px;"></label>'
           + '<label style="font-size:12px;color:#666;">Slug<br><input id="pt-slug" placeholder="dwarkesh" style="padding:6px 8px;border:1px solid #ddd;font-size:13px;width:150px;font-family:monospace;"></label>'
           + '<label style="font-size:12px;color:#666;">Payout contact<br><input id="pt-contact" placeholder="email / invoice ref" style="padding:6px 8px;border:1px solid #ddd;font-size:13px;width:190px;"></label>'
-          + '<label style="font-size:12px;color:#666;">Bounty $<br><input id="pt-bounty" value="300" style="padding:6px 8px;border:1px solid #ddd;font-size:13px;width:70px;"></label>'
           + '<span onclick="savePartner()" class="review-btn rb-accept" style="padding:8px 18px;cursor:pointer;">Save partner</span>'
-          + '<div style="width:100%;color:#999;font-size:11.5px;">Slug: 2-39 chars, a-z 0-9 _ - only. Editing an existing slug updates it and keeps its stats link.</div>'
+          + '<div style="width:100%;color:#999;font-size:11.5px;">Slug: 2-39 chars, a-z 0-9 _ - only. Editing an existing slug updates it and keeps its stats link. The referral premium is fixed at $' + trancheTrial + ' + $' + trancheHours + ' (trial + ' + trancheGate + 'h) for every partner.</div>'
           + '</div>';
         h += '</div>';
         c.innerHTML = h;
@@ -4103,24 +4123,26 @@
         var name = (document.getElementById('pt-name') || {}).value || '';
         var slug = (document.getElementById('pt-slug') || {}).value || '';
         var contact = (document.getElementById('pt-contact') || {}).value || '';
-        var bounty = parseFloat((document.getElementById('pt-bounty') || {}).value || '300');
         if (!name.trim() || !slug.trim()) { alert('Name and slug are both required.'); return; }
         fetch(ONBOARD_API + '/partners/upsert', {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: name, slug: slug, payout_contact: contact, bounty_usd: bounty })
+            body: JSON.stringify({ name: name, slug: slug, payout_contact: contact })
         })
             .then(function(r){ return r.json().then(function(j){ if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status)); return j; }); })
             .then(function(j){ alert('Saved.\n\nLink: https://pdoom.org/participate?ref=' + j.slug + '\nStats: ' + j.stats_url); renderPartnersTab(); })
             .catch(function(err){ alert('Could not save: ' + (err.message || err)); });
     }
 
-    function markBountyPaid(email) {
-        if (!confirm('Mark the $300 bounty for ' + email + ' as paid?\n\nDo this after the money has actually left Qonto.')) return;
+    function markBountyPaid(email, tranche, amount) {
+        tranche = (tranche === 't2') ? 't2' : 't1';
+        var label = tranche === 't2' ? '100-hours' : 'trial-week';
+        var amt = amount ? ('$' + amount) : 'this';
+        if (!confirm('Mark the ' + amt + ' ' + label + ' tranche for ' + email + ' as paid?\n\nOnly do this if the money already left Qonto another way. Self-serve referrers are normally paid from the Payouts tab after they claim.')) return;
         fetch(ONBOARD_API + '/partners/mark-paid', {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ referred_email: email })
+            body: JSON.stringify({ referred_email: email, tranche: tranche })
         })
             .then(function(r){ return r.json().then(function(j){ if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status)); return j; }); })
             .then(function(){ renderPartnersTab(); })
