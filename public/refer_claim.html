@@ -191,6 +191,7 @@
             <span>I <strong>charge VAT on my invoices</strong> (a VAT-registered business / regelbesteuert). We'll then ask you to invoice us instead. <em>This choice can't be undone here, so pick it only if it's true.</em></span></label>
         </div>
         <div class="checks" style="margin-top:18px;">
+          <label class="check"><input type="checkbox" id="c-age"><span>I am 18 or older.</span></label>
           <label class="check"><input type="checkbox" id="c-emp"><span>I am not an employee of p(doom).</span></label>
           <label class="check"><input type="checkbox" id="c-self"><span>I did not refer myself or anyone living in my household.</span></label>
           <label class="check"><input type="checkbox" id="c-off"><span>I made this referral <strong>privately, not in an official role</strong>, and I did not refer anyone I supervise (for example my own students or staff).</span></label>
@@ -282,13 +283,15 @@
     var email = document.getElementById('claim_email').value.trim();
     if (!email) return fail('Please enter the email your referral link was sent to.');
     var vat = (document.querySelector('input[name=vat]:checked') || {}).value || 'none';
-    if (!document.getElementById('c-emp').checked || !document.getElementById('c-self').checked ||
-        !document.getElementById('c-off').checked || !document.getElementById('c-rules').checked) {
-      return fail('Please confirm all four statements.');
+    if (!document.getElementById('c-age').checked || !document.getElementById('c-emp').checked ||
+        !document.getElementById('c-self').checked || !document.getElementById('c-off').checked ||
+        !document.getElementById('c-rules').checked) {
+      return fail('Please confirm all five statements.');
     }
     var body = {
       token: token, email: email, vat_status: vat,
-      confirm_not_employee: true, confirm_not_self_household: true, confirm_not_official: true
+      confirm_over_18: true, confirm_not_employee: true, confirm_not_self_household: true,
+      confirm_not_official: true, confirm_rules: true
     };
     if (needsDetails && vat !== 'regelbesteuert') {
       var legal = document.getElementById('legal_name').value.trim();
