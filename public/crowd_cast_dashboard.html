@@ -3806,10 +3806,11 @@
                     (a.reasoning ? '<div class="review-field"><div class="rf-label">Gate reasoning</div><div class="rf-body" style="color:#444;">' + escapeHtml(a.reasoning) + '</div></div>' : '') +
                     enrichHtml +
                     buildReviewEmailBox(a) +
+                    tierControlHtml() +
                     '<div class="review-actions">' +
                         '<button class="review-btn rb-reject" onclick="decideReview(\'reject\')">Reject<small>&larr;</small></button>' +
                         '<button class="review-btn rb-ask" onclick="decideReview(\'ask\')">Ask<small>&uarr;</small></button>' +
-                        '<button class="review-btn rb-accept" onclick="decideReview(\'accept\')">Accept<small>&rarr;</small></button>' +
+                        '<button class="review-btn rb-accept" id="rb-accept-btn" onclick="decideReview(\'accept\')">Accept' + (_reviewTier === 'top' ? ' as Expert' : '') + '<small>&rarr;</small></button>' +
                     '</div>' +
                 '</div>' +
             '</div>';
@@ -3923,6 +3924,38 @@
         if (body && body.style.display === 'none') { body.style.display = 'block'; var car = document.querySelector('.review-email-box .rem-caret'); if (car) car.textContent = '−'; }
     }
 
+    // Compensation tier for the NEXT accept. Sticky across cards within a session
+    // so a run of expert-tier recruits doesn't need re-setting each time. Default
+    // is 'standard' deliberately: onboarding someone at the wrong high tier means
+    // a signed DPA at the wrong figure, while under-tiering is fixable by re-issue.
+    var _reviewTier = 'standard';
+
+    function setReviewTier(t) {
+        _reviewTier = (t === 'top') ? 'top' : 'standard';
+        var expertOn = _reviewTier === 'top';
+        var be = document.getElementById('tier-seg-top');
+        var bs = document.getElementById('tier-seg-standard');
+        if (be) { be.style.background = expertOn ? '#111' : '#fff'; be.style.color = expertOn ? '#fff' : '#333'; }
+        if (bs) { bs.style.background = expertOn ? '#fff' : '#111'; bs.style.color = expertOn ? '#333' : '#fff'; }
+        var ab = document.getElementById('rb-accept-btn');
+        if (ab) ab.innerHTML = 'Accept' + (expertOn ? ' as Expert' : '') + '<small>&rarr;</small>';
+    }
+
+    function tierControlHtml() {
+        function seg(val, lbl) {
+            var on = (val === _reviewTier);
+            return '<button type="button" id="tier-seg-' + val + '" onclick="setReviewTier(\'' + val + '\')" ' +
+                'style="font:inherit;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;' +
+                'padding:5px 12px;border:1px solid #d0d7de;cursor:pointer;background:' + (on ? '#111' : '#fff') +
+                ';color:' + (on ? '#fff' : '#333') + ';">' + lbl + '</button>';
+        }
+        return '<div style="display:flex;align-items:center;gap:0;margin:10px 0 2px 0;">' +
+                '<span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#666;margin-right:10px;">Onboard on tier</span>' +
+                seg('standard', 'Standard 300') + seg('top', 'Expert 1000') +
+                '<span style="margin-left:auto;font-size:11px;color:#999;">sets the DPA figure at onboarding</span>' +
+            '</div>';
+    }
+
     function decideReview(choice) {
         if (_reviewBusy) return;
         if (_reviewPos >= _reviewQueue.length) return;
@@ -3944,7 +3977,9 @@
             if (!window.confirm('Send this question to ' + name + '?\n\n----------\n' + question + '\n----------\n\nIt goes out after the 10-minute undo window.')) return;
             payload.edited_email = question;
         } else if (choice === 'accept') {
-            if (!window.confirm('Accept ' + name + '?' + (isCustom ? ' (your edited email)' : '') + '\n\nThe onboarding email' + (isCustom ? ' you edited' : '') + ' (with their unique link) will be sent after the 10-minute undo window.')) return;
+            var tierLbl = _reviewTier === 'top' ? 'EXPERT tier (1000/mo)' : 'STANDARD tier (300/mo)';
+            if (!window.confirm('Accept ' + name + ' on ' + tierLbl + '?' + (isCustom ? ' (your edited email)' : '') + '\n\nThis figure is written into the agreement they sign at onboarding, so changing it later means re-issuing the DPA.\n\nThe onboarding email' + (isCustom ? ' you edited' : '') + ' (with their unique link) will be sent after the 10-minute undo window.')) return;
+            payload.comp_tier = _reviewTier;
             if (isCustom) payload.edited_email = custom;
         } else {
             if (!window.confirm('Reject ' + name + '?' + (isCustom ? ' (your edited email)' : '') + '\n\nThe' + (isCustom ? ' edited' : ' standard') + ' decline email will be sent after the 10-minute undo window.')) return;
