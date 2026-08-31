@@ -3806,11 +3806,10 @@
                     (a.reasoning ? '<div class="review-field"><div class="rf-label">Gate reasoning</div><div class="rf-body" style="color:#444;">' + escapeHtml(a.reasoning) + '</div></div>' : '') +
                     enrichHtml +
                     buildReviewEmailBox(a) +
-                    tierControlHtml() +
                     '<div class="review-actions">' +
                         '<button class="review-btn rb-reject" onclick="decideReview(\'reject\')">Reject<small>&larr;</small></button>' +
                         '<button class="review-btn rb-ask" onclick="decideReview(\'ask\')">Ask<small>&uarr;</small></button>' +
-                        '<button class="review-btn rb-accept" id="rb-accept-btn" onclick="decideReview(\'accept\')">Accept' + (_reviewTier === 'top' ? ' as Expert' : '') + '<small>&rarr;</small></button>' +
+                        '<button class="review-btn rb-accept" onclick="decideReview(\'accept\')">Accept<small>&rarr;</small></button>' +
                     '</div>' +
                 '</div>' +
             '</div>';
@@ -3924,36 +3923,46 @@
         if (body && body.style.display === 'none') { body.style.display = 'block'; var car = document.querySelector('.review-email-box .rem-caret'); if (car) car.textContent = '−'; }
     }
 
-    // Compensation tier for the NEXT accept. Sticky across cards within a session
-    // so a run of expert-tier recruits doesn't need re-setting each time. Default
-    // is 'standard' deliberately: onboarding someone at the wrong high tier means
-    // a signed DPA at the wrong figure, while under-tiering is fixable by re-issue.
-    var _reviewTier = 'standard';
+    // Accepting requires picking a tier explicitly. The two tier buttons ARE the
+    // commit action, so there is no pre-selected default to click past: the figure
+    // shown here is written into the DPA the participant signs at onboarding, and
+    // changing it afterwards means re-issuing that agreement.
+    function showTierChoiceModal(name, isCustom, onChoose) {
+        var overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+        var modal = document.createElement('div');
+        modal.style.cssText = 'background:#fff;border:1px solid #000;padding:32px;max-width:520px;width:92%;font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;';
 
-    function setReviewTier(t) {
-        _reviewTier = (t === 'top') ? 'top' : 'standard';
-        var expertOn = _reviewTier === 'top';
-        var be = document.getElementById('tier-seg-top');
-        var bs = document.getElementById('tier-seg-standard');
-        if (be) { be.style.background = expertOn ? '#111' : '#fff'; be.style.color = expertOn ? '#fff' : '#333'; }
-        if (bs) { bs.style.background = expertOn ? '#fff' : '#111'; bs.style.color = expertOn ? '#333' : '#fff'; }
-        var ab = document.getElementById('rb-accept-btn');
-        if (ab) ab.innerHTML = 'Accept' + (expertOn ? ' as Expert' : '') + '<small>&rarr;</small>';
-    }
-
-    function tierControlHtml() {
-        function seg(val, lbl) {
-            var on = (val === _reviewTier);
-            return '<button type="button" id="tier-seg-' + val + '" onclick="setReviewTier(\'' + val + '\')" ' +
-                'style="font:inherit;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;' +
-                'padding:5px 12px;border:1px solid #d0d7de;cursor:pointer;background:' + (on ? '#111' : '#fff') +
-                ';color:' + (on ? '#fff' : '#333') + ';">' + lbl + '</button>';
+        function tierBtn(val, head, sub) {
+            return '<button type="button" class="tier-choice" data-tier="' + val + '" ' +
+                'style="display:block;width:100%;text-align:left;font:inherit;padding:14px 16px;margin-bottom:10px;' +
+                'border:1px solid #000;background:#fff;cursor:pointer;">' +
+                '<div style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">' + head + '</div>' +
+                '<div style="font-size:11px;color:#666;margin-top:4px;">' + sub + '</div>' +
+                '</button>';
         }
-        return '<div style="display:flex;align-items:center;gap:0;margin:10px 0 2px 0;">' +
-                '<span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#666;margin-right:10px;">Onboard on tier</span>' +
-                seg('standard', 'Standard 300') + seg('top', 'Expert 1000') +
-                '<span style="margin-left:auto;font-size:11px;color:#999;">sets the DPA figure at onboarding</span>' +
+
+        modal.innerHTML =
+            '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;">Accept ' + escapeHtml(name) + '</div>' +
+            '<div style="font-size:12px;color:#555;margin-bottom:18px;line-height:1.5;">Pick the tier they onboard on. This figure is printed in the agreement they sign, so changing it later means re-issuing the DPA.' +
+                (isCustom ? '<br><b>Your edited email will be sent.</b>' : '') + '</div>' +
+            tierBtn('top', 'Expert &mdash; $1,000 / &euro;1,000 per month', 'PhD-level research, professional engineering. $500 outside NA/Europe.') +
+            tierBtn('standard', 'Standard &mdash; $300 / &euro;300 per month', 'Other qualifying long-horizon work. Same in every region.') +
+            '<div style="font-size:11px;color:#999;margin:14px 0 16px 0;line-height:1.5;">The onboarding email goes out after the 10-minute undo window.</div>' +
+            '<div style="display:flex;justify-content:flex-end;">' +
+                '<span class="modal-cancel" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #000;cursor:pointer;">Cancel</span>' +
             '</div>';
+
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+        function close() { if (overlay.parentNode) document.body.removeChild(overlay); }
+        modal.querySelector('.modal-cancel').addEventListener('click', close);
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
+        modal.querySelectorAll('.tier-choice').forEach(function(b) {
+            b.addEventListener('mouseenter', function() { b.style.background = '#111'; b.style.color = '#fff'; b.querySelectorAll('div')[1].style.color = '#bbb'; });
+            b.addEventListener('mouseleave', function() { b.style.background = '#fff'; b.style.color = '#000'; b.querySelectorAll('div')[1].style.color = '#666'; });
+            b.addEventListener('click', function() { close(); onChoose(b.dataset.tier); });
+        });
     }
 
     function decideReview(choice) {
@@ -3977,15 +3986,23 @@
             if (!window.confirm('Send this question to ' + name + '?\n\n----------\n' + question + '\n----------\n\nIt goes out after the 10-minute undo window.')) return;
             payload.edited_email = question;
         } else if (choice === 'accept') {
-            var tierLbl = _reviewTier === 'top' ? 'EXPERT tier (1000/mo)' : 'STANDARD tier (300/mo)';
-            if (!window.confirm('Accept ' + name + ' on ' + tierLbl + '?' + (isCustom ? ' (your edited email)' : '') + '\n\nThis figure is written into the agreement they sign at onboarding, so changing it later means re-issuing the DPA.\n\nThe onboarding email' + (isCustom ? ' you edited' : '') + ' (with their unique link) will be sent after the 10-minute undo window.')) return;
-            payload.comp_tier = _reviewTier;
             if (isCustom) payload.edited_email = custom;
+            // The tier buttons in this modal are the commit: nothing is sent until
+            // one is clicked, so there is no default tier to click past.
+            showTierChoiceModal(name, isCustom, function(tier) {
+                payload.comp_tier = tier;
+                submitReviewDecision(a, choice, payload);
+            });
+            return;
         } else {
             if (!window.confirm('Reject ' + name + '?' + (isCustom ? ' (your edited email)' : '') + '\n\nThe' + (isCustom ? ' edited' : ' standard') + ' decline email will be sent after the 10-minute undo window.')) return;
             if (isCustom) payload.edited_email = custom;
         }
 
+        submitReviewDecision(a, choice, payload);
+    }
+
+    function submitReviewDecision(a, choice, payload) {
         _reviewBusy = true;
         document.querySelectorAll('.review-btn').forEach(function(b){ b.disabled = true; });
 
