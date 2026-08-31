@@ -862,6 +862,16 @@
                 </div>
             </div>
 
+            <!-- Growth over time -->
+            <div class="chart-box outline-box" style="margin-bottom:20px;">
+                <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:4px;flex-wrap:wrap;">
+                    <span class="section-title" style="margin-bottom:0;">Growth</span>
+                    <span style="font-size:11px;color:#777;font-family:'SF Mono',monospace;">recorded hours per week, with the number of people who actually recorded</span>
+                </div>
+                <canvas id="growth-chart"></canvas>
+                <div id="growth-note" style="font-size:11px;color:#777;font-family:'SF Mono',monospace;margin-top:10px;"></div>
+            </div>
+
             <!-- Top users table -->
             <div class="table-box outline-box" id="users-section">
                 <div id="users-table-view">
@@ -1095,15 +1105,20 @@
         }
         document.getElementById('card-users').textContent = fmt(_isAdmin ? uniqueUsers : Object.keys(perUser).length);
         document.querySelector('#card-users').closest('.card').querySelector('.card-label').textContent = _isAdmin ? 'Users' : 'Devices';
-        const todayEntry = daily.length ? daily[daily.length - 1] : null;
-        document.getElementById('card-users-sub').textContent =
-            todayEntry ? '+' + fmt(todayEntry.new_segments) + ' seg today' : '';
+        // "Active" means actually recorded in the last 7 days, not a status flag —
+        // a participant whose capture is broken still has status 'active' while
+        // delivering nothing, so headcount by status flatters the number.
+        var activeRecent = countActiveUsers(perUserDaily, 7);
+        var subEl = document.getElementById('card-users-sub');
+        subEl.textContent = activeRecent.n + ' active in last 7d';
+        subEl.title = activeRecent.n + ' of ' + activeRecent.total + ' recorded at least once in the last 7 days';
 
         document.getElementById('card-actions').textContent = fmt(t.action_steps_total);
         document.getElementById('card-actions-sub').textContent = fmt(t.events_total) + ' raw events';
 
         /* -- Daily trend chart -- */
         renderTrend(daily);
+        renderGrowth(perUserDaily);
 
         /* -- Action / App donut -- */
         if (meta.app_histogram && Object.keys(meta.app_histogram).length > 0) {
@@ -1121,6 +1136,105 @@
 
         /* -- Health panel -- */
         renderHealth(meta);
+    }
+
+
+    /* ---- Growth: headcount vs hours over time ----
+       Both series come from per_user_daily, so "active" means a person who
+       actually recorded in the bucket rather than one whose status says active.
+       That pairing is the point: headcount climbing while hours per person fall
+       is the signature of recruiting people who never really record. */
+    var growthChart = null;
+
+    function countActiveUsers(perUserDaily, days) {
+        var cutoff = new Date(Date.now() - days * 864e5).toISOString().slice(0, 10);
+        var n = 0, total = 0;
+        Object.keys(perUserDaily || {}).forEach(function(uuid) {
+            total++;
+            var dates = Object.keys(perUserDaily[uuid] || {});
+            for (var i = 0; i < dates.length; i++) {
+                if (dates[i] >= cutoff && (perUserDaily[uuid][dates[i]].estimated_minutes || 0) > 0) { n++; break; }
+            }
+        });
+        return { n: n, total: total };
+    }
+
+    /* ISO-ish week key (Monday-anchored) so buckets are stable across months. */
+    function weekKey(dateStr) {
+        var d = new Date(dateStr + 'T00:00:00Z');
+        var dow = (d.getUTCDay() + 6) % 7;
+        d.setUTCDate(d.getUTCDate() - dow);
+        return d.toISOString().slice(0, 10);
+    }
+
+    function renderGrowth(perUserDaily) {
+        var el = document.getElementById('growth-chart');
+        if (!el) return;
+        var weeks = {};
+        Object.keys(perUserDaily || {}).forEach(function(uuid) {
+            var byDate = perUserDaily[uuid] || {};
+            Object.keys(byDate).forEach(function(date) {
+                var mins = byDate[date].estimated_minutes || 0;
+                if (mins <= 0) return;
+                var wk = weekKey(date);
+                if (!weeks[wk]) weeks[wk] = { mins: 0, users: {} };
+                weeks[wk].mins += mins;
+                weeks[wk].users[uuid] = true;
+            });
+        });
+        var keys = Object.keys(weeks).sort();
+        if (!keys.length) { document.getElementById('growth-note').textContent = 'No recording data yet.'; return; }
+        /* Drop the current partial week so the last bar isn't misread as a decline. */
+        var thisWeek = weekKey(new Date().toISOString().slice(0, 10));
+        var partial = keys[keys.length - 1] === thisWeek ? keys.pop() : null;
+
+        var hours = keys.map(function(k) { return Math.round(weeks[k].mins / 60 * 10) / 10; });
+        var people = keys.map(function(k) { return Object.keys(weeks[k].users).length; });
+
+        var ctx = el.getContext('2d');
+        if (growthChart) growthChart.destroy();
+        growthChart = new Chart(ctx, {
+            type: 'bar',
+            animation: false,
+            data: {
+                labels: keys,
+                datasets: [
+                    { label: 'Recorded hours', data: hours, backgroundColor: '#000000',
+                      borderColor: '#000000', borderWidth: 1, yAxisID: 'y', order: 2 },
+                    { label: 'People recording', data: people, type: 'line', borderColor: '#2ea043',
+                      backgroundColor: 'rgba(0,0,0,0)', borderWidth: 2, pointRadius: 3,
+                      pointBackgroundColor: '#2ea043', tension: 0.25, yAxisID: 'y1', order: 1 },
+                ],
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: { callbacks: { label: function(c) {
+                        if (c.dataset.yAxisID === 'y1') {
+                            var h = hours[c.dataIndex] || 0, p = c.raw || 1;
+                            return c.dataset.label + ': ' + c.raw + '  (' + (Math.round(h / p * 10) / 10) + ' h each)';
+                        }
+                        return c.dataset.label + ': ' + fmt(c.raw);
+                    } } },
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 10 } } },
+                    y: { position: 'left', title: { display: true, text: 'Hours', font: { size: 11, weight: 'bold' } },
+                         grid: { color: '#eeeeee' }, beginAtZero: true },
+                    y1: { position: 'right', title: { display: true, text: 'People', font: { size: 11, weight: 'bold' } },
+                          grid: { drawOnChartArea: false }, beginAtZero: true,
+                          ticks: { precision: 0 } },
+                },
+            },
+        });
+
+        var lastH = hours[hours.length - 1] || 0, lastP = people[people.length - 1] || 0;
+        var perPerson = lastP ? Math.round(lastH / lastP * 10) / 10 : 0;
+        document.getElementById('growth-note').textContent =
+            'Week of ' + keys[keys.length - 1] + ': ' + lastP + ' people recorded ' + lastH + ' h (' + perPerson + ' h each).' +
+            (partial ? '  The current week is still in progress and is not shown.' : '');
     }
 
     /* ---- Trend chart ---- */
