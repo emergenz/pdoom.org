@@ -1236,10 +1236,6 @@
                 plugins: {
                     legend: { position: 'bottom' },
                     tooltip: { callbacks: { label: function(c){
-                        if (c.dataset.yAxisID === 'y1') {
-                            var h = hours[c.dataIndex] || 0, pp = c.raw || 1;
-                            return c.dataset.label + ': ' + c.raw + '  (' + (Math.round(h / pp * 10) / 10) + ' h each)';
-                        }
                         return c.dataset.label + ': ' + fmt(c.raw);
                     } } },
                 },
