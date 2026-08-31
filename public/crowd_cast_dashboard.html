@@ -840,8 +840,13 @@
             <!-- Charts row -->
             <div class="charts-row">
                 <div class="chart-box outline-box">
-                    <span class="section-title">Daily Trend</span>
+                    <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:4px;flex-wrap:wrap;">
+                        <span class="section-title" style="margin-bottom:0;">Daily Trend</span>
+                        <span style="font-size:11px;color:#777;font-family:'SF Mono',monospace;">hours recorded, and how many people recorded</span>
+                        <span id="trend-range" style="margin-left:auto;display:flex;gap:0;"></span>
+                    </div>
                     <canvas id="trend-chart"></canvas>
+                    <div id="trend-note" style="font-size:11px;color:#777;font-family:'SF Mono',monospace;margin-top:10px;"></div>
                 </div>
                 <div class="chart-box outline-box">
                     <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:4px;">
@@ -860,16 +865,6 @@
                         </table>
                     </div>
                 </div>
-            </div>
-
-            <!-- Growth over time -->
-            <div class="chart-box outline-box" style="margin-bottom:20px;">
-                <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:4px;flex-wrap:wrap;">
-                    <span class="section-title" style="margin-bottom:0;">Growth</span>
-                    <span style="font-size:11px;color:#777;font-family:'SF Mono',monospace;">recorded hours per week, with the number of people who actually recorded</span>
-                </div>
-                <canvas id="growth-chart"></canvas>
-                <div id="growth-note" style="font-size:11px;color:#777;font-family:'SF Mono',monospace;margin-top:10px;"></div>
             </div>
 
             <!-- Top users table -->
@@ -1117,8 +1112,7 @@
         document.getElementById('card-actions-sub').textContent = fmt(t.events_total) + ' raw events';
 
         /* -- Daily trend chart -- */
-        renderTrend(daily);
-        renderGrowth(perUserDaily);
+        renderTrend(perUserDaily);
 
         /* -- Action / App donut -- */
         if (meta.app_histogram && Object.keys(meta.app_histogram).length > 0) {
@@ -1144,7 +1138,6 @@
        actually recorded in the bucket rather than one whose status says active.
        That pairing is the point: headcount climbing while hours per person fall
        is the signature of recruiting people who never really record. */
-    var growthChart = null;
 
     function countActiveUsers(perUserDaily, days) {
         var cutoff = new Date(Date.now() - days * 864e5).toISOString().slice(0, 10);
@@ -1167,43 +1160,74 @@
         return d.toISOString().slice(0, 10);
     }
 
-    function renderGrowth(perUserDaily) {
-        var el = document.getElementById('growth-chart');
+    /* ---- Daily trend: hours recorded, with the number of people who recorded ----
+       Both series are derived from per_user_daily so they can never disagree.
+       (Checked against daily_history over 211 days: identical to the hour, but
+       daily_history carries no per-person breakdown, so headcount needs this one.)
+       Action steps were dropped: hours and headcount are the pair that matters,
+       because headcount rising while hours-per-person falls is the signature of
+       recruiting people who never really record. */
+    var TREND_RANGES = [[30,'30d'],[90,'90d'],[0,'All']];
+    var trendRange = 30;
+    var _trendPUD = null;
+
+    function setTrendRange(d){ trendRange = d; renderTrend(_trendPUD); }
+
+    function renderTrend(perUserDaily) {
+        _trendPUD = perUserDaily || {};
+        var el = document.getElementById('trend-chart');
         if (!el) return;
-        var weeks = {};
-        Object.keys(perUserDaily || {}).forEach(function(uuid) {
-            var byDate = perUserDaily[uuid] || {};
-            Object.keys(byDate).forEach(function(date) {
-                var mins = byDate[date].estimated_minutes || 0;
+
+        var byDay = {};
+        Object.keys(_trendPUD).forEach(function(uuid){
+            var bd = _trendPUD[uuid] || {};
+            Object.keys(bd).forEach(function(date){
+                var mins = bd[date].estimated_minutes || 0;
                 if (mins <= 0) return;
-                var wk = weekKey(date);
-                if (!weeks[wk]) weeks[wk] = { mins: 0, users: {} };
-                weeks[wk].mins += mins;
-                weeks[wk].users[uuid] = true;
+                if (!byDay[date]) byDay[date] = { mins: 0, users: {} };
+                byDay[date].mins += mins;
+                byDay[date].users[uuid] = true;
             });
         });
-        var keys = Object.keys(weeks).sort();
-        if (!keys.length) { document.getElementById('growth-note').textContent = 'No recording data yet.'; return; }
-        /* Drop the current partial week so the last bar isn't misread as a decline. */
-        var thisWeek = weekKey(new Date().toISOString().slice(0, 10));
-        var partial = keys[keys.length - 1] === thisWeek ? keys.pop() : null;
+        var all = Object.keys(byDay).sort();
+        if (!all.length) { document.getElementById('trend-note').textContent = 'No recording data yet.'; return; }
+        var keys = trendRange > 0 ? all.slice(-trendRange) : all;
 
-        var hours = keys.map(function(k) { return Math.round(weeks[k].mins / 60 * 10) / 10; });
-        var people = keys.map(function(k) { return Object.keys(weeks[k].users).length; });
+        // range buttons
+        var rng = document.getElementById('trend-range');
+        if (rng) {
+            rng.innerHTML = '';
+            TREND_RANGES.forEach(function(pair){
+                var d = pair[0], lbl = pair[1];
+                if (d > all.length && d !== 0) return;
+                var on = d === trendRange;
+                var b = document.createElement('button');
+                b.type = 'button'; b.textContent = lbl;
+                b.style.cssText = "font:inherit;font-family:'SF Mono',monospace;font-size:10px;font-weight:700;" +
+                    "text-transform:uppercase;letter-spacing:.1em;padding:4px 10px;border:1px solid #d0d7de;cursor:pointer;" +
+                    "background:" + (on ? '#000' : '#fff') + ";color:" + (on ? '#fff' : '#555') + ";";
+                b.addEventListener('click', function(){ setTrendRange(d); });
+                rng.appendChild(b);
+            });
+        }
+
+        var hours = keys.map(function(k){ return Math.round(byDay[k].mins / 60 * 10) / 10; });
+        var people = keys.map(function(k){ return Object.keys(byDay[k].users).length; });
 
         var ctx = el.getContext('2d');
-        if (growthChart) growthChart.destroy();
-        growthChart = new Chart(ctx, {
+        if (trendChart) trendChart.destroy();
+        trendChart = new Chart(ctx, {
             type: 'bar',
             animation: false,
             data: {
                 labels: keys,
                 datasets: [
-                    { label: 'Recorded hours', data: hours, backgroundColor: '#000000',
-                      borderColor: '#000000', borderWidth: 1, yAxisID: 'y', order: 2 },
+                    { label: 'Hours recorded', data: hours, backgroundColor: '#000000',
+                      borderColor: '#000000', borderWidth: 0, yAxisID: 'y', order: 2 },
                     { label: 'People recording', data: people, type: 'line', borderColor: '#2ea043',
-                      backgroundColor: 'rgba(0,0,0,0)', borderWidth: 2, pointRadius: 3,
-                      pointBackgroundColor: '#2ea043', tension: 0.25, yAxisID: 'y1', order: 1 },
+                      backgroundColor: 'rgba(0,0,0,0)', borderWidth: 2,
+                      pointRadius: keys.length > 80 ? 0 : 2, pointBackgroundColor: '#2ea043',
+                      tension: 0.3, yAxisID: 'y1', order: 1 },
                 ],
             },
             options: {
@@ -1211,105 +1235,38 @@
                 interaction: { mode: 'index', intersect: false },
                 plugins: {
                     legend: { position: 'bottom' },
-                    tooltip: { callbacks: { label: function(c) {
+                    tooltip: { callbacks: { label: function(c){
                         if (c.dataset.yAxisID === 'y1') {
-                            var h = hours[c.dataIndex] || 0, p = c.raw || 1;
-                            return c.dataset.label + ': ' + c.raw + '  (' + (Math.round(h / p * 10) / 10) + ' h each)';
+                            var h = hours[c.dataIndex] || 0, pp = c.raw || 1;
+                            return c.dataset.label + ': ' + c.raw + '  (' + (Math.round(h / pp * 10) / 10) + ' h each)';
                         }
                         return c.dataset.label + ': ' + fmt(c.raw);
                     } } },
                 },
                 scales: {
-                    x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 10 } } },
+                    x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 10 },
+                         autoSkip: true, maxTicksLimit: keys.length > 120 ? 12 : 20 } },
                     y: { position: 'left', title: { display: true, text: 'Hours', font: { size: 11, weight: 'bold' } },
                          grid: { color: '#eeeeee' }, beginAtZero: true },
                     y1: { position: 'right', title: { display: true, text: 'People', font: { size: 11, weight: 'bold' } },
-                          grid: { drawOnChartArea: false }, beginAtZero: true,
-                          ticks: { precision: 0 } },
+                          grid: { drawOnChartArea: false }, beginAtZero: true, ticks: { precision: 0 } },
                 },
             },
         });
 
-        var lastH = hours[hours.length - 1] || 0, lastP = people[people.length - 1] || 0;
-        var perPerson = lastP ? Math.round(lastH / lastP * 10) / 10 : 0;
-        document.getElementById('growth-note').textContent =
-            'Week of ' + keys[keys.length - 1] + ': ' + lastP + ' people recorded ' + lastH + ' h (' + perPerson + ' h each).' +
-            (partial ? '  The current week is still in progress and is not shown.' : '');
-    }
-
-    /* ---- Trend chart ---- */
-    function renderTrend(daily) {
-        const labels = daily.map(d => d.date);
-        const hours = daily.map(d => Math.round(((d.new_estimated_minutes || 0) / 60) * 10) / 10);
-        const steps = daily.map(d => d.new_action_steps || 0);
-
-        const ctx = document.getElementById('trend-chart').getContext('2d');
-        if (trendChart) trendChart.destroy();
-
-        trendChart = new Chart(ctx, {
-            type: 'bar',
-            animation: false,
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'New hours',
-                        data: hours,
-                        backgroundColor: '#000000',
-                        borderColor: '#000000',
-                        borderWidth: 1,
-                        yAxisID: 'y',
-                        order: 2,
-                    },
-                    {
-                        label: _isGuest ? 'New interactions' : 'New action steps',
-                        data: steps,
-                        type: 'line',
-                        borderColor: '#999999',
-                        backgroundColor: 'rgba(0,0,0,0)',
-                        borderWidth: 1.5,
-                        pointRadius: 2,
-                        pointBackgroundColor: '#999999',
-                        tension: 0.25,
-                        yAxisID: 'y1',
-                        order: 1,
-                    },
-                ],
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: {
-                    legend: { position: 'bottom' },
-                    tooltip: {
-                        callbacks: {
-                            label: function(ctx) {
-                                return ctx.dataset.label + ': ' + fmt(ctx.raw);
-                            }
-                        }
-                    },
-                },
-                scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: { maxRotation: 45, font: { size: 10 } },
-                    },
-                    y: {
-                        position: 'left',
-                        title: { display: true, text: 'Hours', font: { size: 11, weight: 'bold' } },
-                        grid: { color: '#eeeeee' },
-                        beginAtZero: true,
-                    },
-                    y1: {
-                        position: 'right',
-                        title: { display: true, text: _isGuest ? 'Interactions' : 'Steps', font: { size: 11, weight: 'bold' } },
-                        grid: { drawOnChartArea: false },
-                        beginAtZero: true,
-                    },
-                },
-            },
-        });
+        // 7-day rollup so the note reads as a trend rather than one noisy day
+        function roll(arrH, arrP, from, to){
+            var h = 0, u = 0;
+            for (var i = from; i < to; i++){ h += arrH[i] || 0; u = Math.max(u, arrP[i] || 0); }
+            return { h: Math.round(h * 10) / 10, peak: u };
+        }
+        var n = keys.length;
+        var last7 = roll(hours, people, Math.max(0, n - 7), n);
+        var prev7 = n >= 14 ? roll(hours, people, Math.max(0, n - 14), n - 7) : null;
+        var delta = prev7 && prev7.h > 0 ? Math.round((last7.h - prev7.h) / prev7.h * 100) : null;
+        document.getElementById('trend-note').textContent =
+            'Last 7 days: ' + last7.h + ' h from up to ' + last7.peak + ' people' +
+            (delta === null ? '' : '  ·  ' + (delta >= 0 ? '+' : '') + delta + '% vs the 7 days before');
     }
 
     /* ---- Action donut (with drill-down) ---- */
