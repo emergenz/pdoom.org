@@ -6,127 +6,27 @@
 <meta name="theme-color" content="#07130e">
 <title>Apply to crowd-cast · p(doom)</title>
 <link rel="icon" type="image/png" sizes="128x128" href="/favicon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <meta name="description" content="Get paid to record the work you already do.">
 <meta name="robots" content="noindex">
-<style>
-  @font-face {
-    font-family: "Instrument Sans";
-    src: url("/fonts/instrument-sans.woff2") format("woff2");
-    font-style: normal; font-weight: 400 700; font-display: swap;
-  }
-  @font-face {
-    font-family: "IBM Plex Mono";
-    src: url("/fonts/ibm-plex-mono.woff2") format("woff2");
-    font-style: normal; font-weight: 400 500; font-display: swap;
-  }
-
-  :root {
-    color-scheme: light;
-    --ink: #0b1015;
-    --white: #f0ece3;
-    --off-white: #e5e0d6;
-    --signal: #b7361e;
-    --steel-dark: #506777;
-    --rule: rgba(11, 16, 21, 0.2);
-    --muted: rgba(11, 16, 21, 0.62);
-    --gutter: 40px;
-  }
-  @media (max-width: 900px) { :root { --gutter: 24px; } }
-  @media (max-width: 620px) { :root { --gutter: 20px; } }
-
-  * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
-  body {
-    margin: 0;
-    min-height: 100svh;
-    background: var(--white);
-    color: var(--ink);
-    font-family: "Instrument Sans", Arial, sans-serif;
-    font-size: 16px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
-  a { color: inherit; text-decoration: none; }
-  .prose a { border-bottom: 1px solid currentColor; }
-  .prose a:hover { color: var(--signal); }
-
-  .shell { width: min(calc(100% - (2 * var(--gutter))), 1600px); margin-inline: auto; }
-
-  header.bar { padding: 26px 0; border-bottom: 1px solid var(--rule); }
-  .wordmark { font-size: 17px; font-weight: 500; letter-spacing: -0.01em; }
-  .wordmark:hover { color: var(--signal); }
-
-  main { padding: clamp(44px, 5vw, 76px) 0 clamp(70px, 8vw, 120px); }
-  .layout { display: grid; grid-template-columns: 5fr 7fr; gap: clamp(28px, 5vw, 72px); align-items: start; }
-  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; gap: 30px; } }
-
-  .kicker { font-size: 14px; color: var(--steel-dark); margin: 0 0 18px; }
-  h1 {
-    margin: 0;
-    font-size: clamp(42px, 5.2vw, 76px);
-    font-weight: 500;
-    line-height: 0.96;
-    letter-spacing: -0.015em;
-    text-wrap: balance;
-  }
-  .prose p { font-size: clamp(17px, 1.15vw, 19px); color: var(--ink); margin: 0 0 14px; max-width: 60ch; }
-  .prose p.sub { color: var(--muted); }
-
-  .via {
-    display: none; margin-top: 22px; padding: 12px 0;
-    border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
-    font-size: 15px; color: var(--muted);
-  }
-  .via b { color: var(--ink); font-weight: 500; }
-
-  form { margin-top: clamp(34px, 4vw, 54px); display: flex; flex-direction: column; gap: 30px; max-width: 720px; }
-  .field label {
-    display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px;
-  }
-  .field .hint { font-size: 14px; color: var(--muted); margin: 0 0 12px; max-width: 58ch; }
-  input[type=text], input[type=email], textarea {
-    width: 100%; padding: 12px 0; font-family: inherit; font-size: 17px; color: var(--ink);
-    background: transparent; border: 0; border-bottom: 1px solid var(--rule); border-radius: 0;
-    transition: border-color 180ms ease;
-  }
-  input::placeholder, textarea::placeholder { color: rgba(11,16,21,0.34); }
-  input:focus, textarea:focus { outline: none; border-bottom-color: var(--signal); }
-  textarea { min-height: 140px; resize: vertical; line-height: 1.5; }
-  .count { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--muted); margin-top: 8px; }
-  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-
-  button {
-    justify-self: start; align-self: flex-start;
-    display: inline-flex; align-items: center; gap: 12px;
-    font: inherit; font-size: 17px; font-weight: 500;
-    color: var(--off-white); background: var(--ink);
-    border: 0; border-radius: 0; padding: 17px 30px; cursor: pointer;
-    transition: background 180ms ease;
-  }
-  button:hover:not(:disabled) { background: #23303b; }
-  button:disabled { opacity: 0.5; cursor: default; }
-  button svg { transition: transform 180ms ease; }
-  button:hover:not(:disabled) svg { transform: translateX(4px); }
-
-  .err {
-    display: none; margin-top: 26px; padding: 13px 0;
-    border-top: 1px solid var(--signal); border-bottom: 1px solid var(--signal);
-    color: var(--signal); font-size: 15px;
-  }
-  .fine { margin-top: clamp(40px, 5vw, 64px); font-size: 14px; color: var(--muted); max-width: 62ch; }
-  .fine a { border-bottom: 1px solid currentColor; }
-  .fine a:hover { color: var(--signal); }
-
-  .done { max-width: 640px; }
-  .done h2 { font-size: clamp(30px, 3.4vw, 46px); font-weight: 500; line-height: 1.02; margin: 0 0 18px; letter-spacing: -0.01em; }
-  .done p { font-size: clamp(17px, 1.15vw, 19px); color: var(--muted); margin: 0 0 12px; max-width: 56ch; }
-  .done a { border-bottom: 1px solid currentColor; }
-
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
-</style>
+<link rel="preload" href="/fonts/instrument-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-mono.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/lora-pdoom-italic-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/pdoom-form.css">
 </head>
 <body>
-<header class="bar"><div class="shell"><a class="wordmark" href="/">p(doom)</a></div></header>
+
+<header class="site-header">
+  <a class="pdoom-brand" href="/" aria-label="p(doom) home">
+    <img src="/assets/pdoom-mark.webp" srcset="/assets/pdoom-mark-128.webp 128w, /assets/pdoom-mark-256.webp 256w, /assets/pdoom-mark.webp 512w" sizes="38px" alt="" aria-hidden="true" width="512" height="512" decoding="async">
+    <span>p(doom)</span>
+  </a>
+  <nav class="header-links" aria-label="Primary navigation">
+    <a href="/careers/paid-data-collection/">Programme details</a>
+    <a href="/docs/crowd-cast/">Documentation</a>
+    <a href="/careers/">Careers</a>
+  </nav>
+</header>
 
 <main class="shell">
   <div id="root">
@@ -168,8 +68,8 @@
         <label for="website">Leave this field empty</label>
         <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
       </div>
-      <button type="submit" id="submit">
-        Send application
+      <button type="submit" id="submit" class="button button--primary">
+        <span id="submit-label">Send application</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </button>
     </form>
@@ -187,6 +87,7 @@
   var btn = document.getElementById('submit');
   var blurb = document.getElementById('blurb');
   var count = document.getElementById('count');
+  var btnLabel = document.getElementById('submit-label');
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -238,7 +139,7 @@
     if (text.length < 40) { showErr('Please tell us a bit more about your work, at least a couple of sentences.'); return; }
 
     btn.disabled = true;
-    btn.textContent = 'Sending…';
+    btnLabel.textContent = 'Sending…';
     fetch(API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -265,11 +166,86 @@
       })
       .catch(function (err) {
         btn.disabled = false;
-        btn.textContent = 'Send application';
+        btnLabel.textContent = 'Send application';
         showErr(err.message || 'Something went wrong. Please try again.');
       });
   });
 })();
 </script>
+
+<div class="footer-canvas">
+<footer class="site-footer" data-nav-theme="light">
+  <img class="footer-backdrop" src="/assets/footer-delta-compressed.webp" alt="" aria-hidden="true" decoding="async" height="941" loading="lazy" width="1672">
+  <div class="footer-wordmark">
+    <span class="pdoom-brand pdoom-brand--large">
+      <img src="/assets/pdoom-mark.webp" srcset="/assets/pdoom-mark-128.webp 128w, /assets/pdoom-mark-256.webp 256w, /assets/pdoom-mark.webp 512w" sizes="(max-width: 680px) 76px, 180px" alt="" aria-hidden="true" width="512" height="512" loading="lazy" decoding="async">
+      <span>p(doom)</span>
+    </span>
+  </div>
+  <h2 class="sr-only" id="footer-navigation-title">Footer navigation</h2>
+  <nav class="footer-groups" aria-labelledby="footer-navigation-title">
+    <div class="footer-group">
+      <h3>Research</h3>
+      <a href="/#console">RESEARCH AGENDA</a>
+      <a href="/research/">ALL RESEARCH</a>
+    </div>
+    <div class="footer-group">
+      <h3>Releases</h3>
+      <a href="/research/crowd-cast/">CROWD-CAST</a>
+      <a href="/research/inverse-dynamics-model/">INVERSE DYNAMICS MODEL</a>
+      <a href="/research/agi-cast/">AGI-CAST</a>
+      <a href="/research/crowd-code/">CROWD-CODE</a>
+      <a href="/research/jasmine/">JASMINE</a>
+    </div>
+    <div class="footer-group">
+      <h3>Resources</h3>
+      <a href="/docs/crowd-cast/">DOCUMENTATION</a>
+      <a href="https://github.com/p-doom">GITHUB</a>
+      <a href="https://huggingface.co/p-doom">HUGGING FACE</a>
+    </div>
+    <div class="footer-group">
+      <h3>Opportunities</h3>
+      <a href="/careers/">CAREERS</a>
+      <a href="/careers/paid-data-collection/">PAID DATA COLLECTION</a>
+      <a href="/careers/residency/">RESEARCH RESIDENCY</a>
+    </div>
+    <div class="footer-group">
+      <h3>Lab</h3>
+      <a href="/about/">ABOUT</a>
+      <a href="/merch/">MERCH</a>
+    </div>
+    <div class="footer-group">
+      <h3>Connect</h3>
+      <a href="https://discord.gg/G4JNuPX2VR">DISCORD</a>
+      <a href="https://x.com/prob_doom">X</a>
+      <a href="https://www.linkedin.com/company/p-doom">LINKEDIN</a>
+    </div>
+    <div class="footer-legal">
+      <h3>Legal</h3>
+      <div>
+        <a href="/imprint/">IMPRINT</a>
+        <a href="/docs/crowd-cast-data-purchase-agreement.pdf">DATA PURCHASE AGREEMENT</a>
+        <a href="/docs/crowd-cast-privacy-consent.pdf">PRIVACY CONSENT</a>
+      </div>
+    </div>
+    <div class="footer-backing">
+      <a class="footer-sprind" href="https://www.sprind.org/" target="_blank" rel="noreferrer" aria-label="Visit SPRIND">
+        <img src="/assets/sprind.svg" alt="SPRIN-D" height="19" loading="lazy" width="136">
+      </a>
+    </div>
+  </nav>
+  <div class="footer-bottom">
+    <span>&copy;2026 P(DOOM).</span>
+    <div class="social-links">
+      <a href="https://x.com/prob_doom" aria-label="X"><span aria-hidden="true">X</span></a>
+      <a href="https://github.com/p-doom" aria-label="GH: GitHub"><span aria-hidden="true">GH</span></a>
+      <a href="https://huggingface.co/p-doom" aria-label="HF: Hugging Face"><span aria-hidden="true">HF</span></a>
+      <a href="https://www.linkedin.com/company/p-doom" aria-label="in: LinkedIn"><span aria-hidden="true">in</span></a>
+    </div>
+    <span>ALL RIGHTS RESERVED.</span>
+  </div>
+</footer>
+</div>
+<script src="/pdoom-footer.js" defer></script>
 </body>
 </html>

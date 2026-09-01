@@ -697,20 +697,79 @@
         </div>
     </main>
 
-    <footer class="site-footer">
-        <div class="container">
-            <div class="footer-row">
-                <a class="brand" href="/">
-                    <img class="sigil-img" src="/assets/pdoom-mark.webp" alt="" width="512" height="512">
-                    <span class="wm">p(doom)</span>
-                </a>
-                <nav class="footer-links">
-                    <a href="/docs/crowd-cast/">Documentation</a>
-                    <a href="/imprint/">Imprint</a>
-                </nav>
-            </div>
+    <div class="footer-canvas">
+<footer class="site-footer" data-nav-theme="light">
+      <img class="footer-backdrop" src="/assets/footer-delta-compressed.webp" alt="" aria-hidden="true" decoding="async" height="941" loading="lazy" width="1672">
+      <div class="footer-wordmark">
+        <span class="brand">
+          <img class="sigil-img" src="/assets/pdoom-mark.webp" srcset="/assets/pdoom-mark-128.webp 128w, /assets/pdoom-mark-256.webp 256w, /assets/pdoom-mark.webp 512w" sizes="(max-width: 680px) 76px, 180px" alt="" aria-hidden="true" width="512" height="512" loading="lazy" decoding="async">
+          <span class="wm">p(doom)</span>
+        </span>
+      </div>
+      <h2 class="sr-only" id="footer-navigation-title">Footer navigation</h2>
+      <nav class="footer-groups" aria-labelledby="footer-navigation-title">
+        <div class="footer-group">
+          <h3>Research</h3>
+          <a href="/#console">RESEARCH AGENDA</a>
+          <a href="/research/">ALL RESEARCH</a>
         </div>
+        <div class="footer-group">
+          <h3>Releases</h3>
+          <a href="/research/crowd-cast/">CROWD-CAST</a>
+          <a href="/research/inverse-dynamics-model/">INVERSE DYNAMICS MODEL</a>
+          <a href="/research/agi-cast/">AGI-CAST</a>
+          <a href="/research/crowd-code/">CROWD-CODE</a>
+          <a href="/research/jasmine/">JASMINE</a>
+        </div>
+        <div class="footer-group">
+          <h3>Resources</h3>
+          <a href="/docs/crowd-cast/">DOCUMENTATION</a>
+          <a href="https://github.com/p-doom">GITHUB</a>
+          <a href="https://huggingface.co/p-doom">HUGGING FACE</a>
+        </div>
+        <div class="footer-group">
+          <h3>Opportunities</h3>
+          <a href="/careers/">CAREERS</a>
+          <a href="/careers/paid-data-collection/">PAID DATA COLLECTION</a>
+          <a href="/careers/residency/">RESEARCH RESIDENCY</a>
+        </div>
+        <div class="footer-group">
+          <h3>Lab</h3>
+          <a href="/about/">ABOUT</a>
+          <a href="/merch/">MERCH</a>
+        </div>
+        <div class="footer-group">
+          <h3>Connect</h3>
+          <a href="https://discord.gg/G4JNuPX2VR">DISCORD</a>
+          <a href="https://x.com/prob_doom">X</a>
+          <a href="https://www.linkedin.com/company/p-doom">LINKEDIN</a>
+        </div>
+        <div class="footer-legal">
+          <h3>Legal</h3>
+          <div>
+            <a href="/imprint/">IMPRINT</a>
+            <a href="/docs/crowd-cast-data-purchase-agreement.pdf">DATA PURCHASE AGREEMENT</a>
+            <a href="/docs/crowd-cast-privacy-consent.pdf">PRIVACY CONSENT</a>
+          </div>
+        </div>
+        <div class="footer-backing">
+          <a class="footer-sprind" href="https://www.sprind.org/" target="_blank" rel="noreferrer" aria-label="Visit SPRIND">
+            <img src="/assets/sprind.svg" alt="SPRIN-D" height="19" loading="lazy" width="136">
+          </a>
+        </div>
+      </nav>
+      <div class="footer-bottom">
+        <span>&copy;2026 P(DOOM).</span>
+        <div class="social-links">
+          <a href="https://x.com/prob_doom" aria-label="X"><span aria-hidden="true">X</span></a>
+          <a href="https://github.com/p-doom" aria-label="GH: GitHub"><span aria-hidden="true">GH</span></a>
+          <a href="https://huggingface.co/p-doom" aria-label="HF: Hugging Face"><span aria-hidden="true">HF</span></a>
+          <a href="https://www.linkedin.com/company/p-doom" aria-label="in: LinkedIn"><span aria-hidden="true">in</span></a>
+        </div>
+        <span>ALL RIGHTS RESERVED.</span>
+      </div>
     </footer>
+</div>
 
     <script>
     const API_BASE = 'https://ob3iugfiy2.execute-api.us-east-1.amazonaws.com/v1';
@@ -1177,5 +1236,6 @@
     // Initialize on page load
     initToken();
     </script>
+<script src="/pdoom-footer.js" defer></script>
 </body>
 </html>
