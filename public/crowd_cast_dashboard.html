@@ -1168,7 +1168,8 @@
        because headcount rising while hours-per-person falls is the signature of
        recruiting people who never really record. */
     var TREND_RANGES = [[30,'30d'],[90,'90d'],[0,'All']];
-    var trendRange = 30;
+    /* Default to the full history so the landing view shows the whole growth curve. */
+    var trendRange = 0;
     var _trendPUD = null;
 
     function setTrendRange(d){ trendRange = d; renderTrend(_trendPUD); }
@@ -3870,6 +3871,7 @@
                     fraudHtml +
                     (a.work_summary ? '<div class="review-field"><div class="rf-label">What they do</div><div class="rf-body">' + escapeHtml(a.work_summary) + '</div></div>' : '') +
                     (a.blurb ? '<div class="review-field"><div class="rf-label">Application blurb</div><div class="rf-body" style="color:#555;">' + escapeHtml(a.blurb) + '</div></div>' : '') +
+                    (a.heard_via ? '<div class="review-field"><div class="rf-label">How they heard of us</div><div class="rf-body" style="color:#555;">' + escapeHtml(a.heard_via) + '</div></div>' : '') +
                     (a.reasoning ? '<div class="review-field"><div class="rf-label">Gate reasoning</div><div class="rf-body" style="color:#444;">' + escapeHtml(a.reasoning) + '</div></div>' : '') +
                     enrichHtml +
                     buildReviewEmailBox(a) +
