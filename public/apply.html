@@ -7,37 +7,35 @@
 <title>Apply to crowd-cast · p(doom)</title>
 <link rel="icon" type="image/png" sizes="128x128" href="/favicon.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<meta name="description" content="Get paid to record the work you already do.">
+<meta name="description" content="Apply to the crowd-cast data collection at p(doom).">
 <meta name="robots" content="noindex">
 <link rel="preload" href="/fonts/instrument-sans.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/ibm-plex-mono.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/lora-pdoom-italic-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-mono.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/pdoom-form.css">
 </head>
 <body>
 
 <header class="site-header">
-  <a class="pdoom-brand" href="/" aria-label="p(doom) home">
-    <img src="/assets/pdoom-mark.webp" srcset="/assets/pdoom-mark-128.webp 128w, /assets/pdoom-mark-256.webp 256w, /assets/pdoom-mark.webp 512w" sizes="38px" alt="" aria-hidden="true" width="512" height="512" decoding="async">
-    <span>p(doom)</span>
+  <a class="header-brand" href="/" aria-label="p(doom) home">
+    <span class="pdoom-brand">
+      <img src="/assets/pdoom-mark.webp" srcset="/assets/pdoom-mark-128.webp 128w, /assets/pdoom-mark-256.webp 256w, /assets/pdoom-mark.webp 512w" sizes="38px" alt="" aria-hidden="true" width="512" height="512" decoding="async">
+      <span>p(doom)</span>
+    </span>
   </a>
-  <nav class="header-links" aria-label="Primary navigation">
-    <a href="/careers/paid-data-collection/">Programme details</a>
-    <a href="/docs/crowd-cast/">Documentation</a>
-    <a href="/careers/">Careers</a>
-  </nav>
+  <nav class="desktop-nav" aria-label="Primary navigation"></nav>
+  <div class="header-actions">
+    <button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="mobile-navigation" aria-expanded="false"></button>
+  </div>
 </header>
 
 <main class="shell">
   <div id="root">
     <div class="layout">
-      <div>
-        <p class="kicker">crowd-cast</p>
-        <h1>Get paid to record your work.</h1>
-      </div>
+      <h1>Get paid to record your work</h1>
       <div class="prose">
-        <p>We pay top participants <strong>$1,000 per month</strong> for PhD-level research and professional engineering, and <strong>$300 per month</strong> for other qualifying long-horizon work.</p>
-        <p class="sub">Tell us what you are working on. We carefully read every application and reply within a few days.</p>
+        <p>crowd-cast pays top participants <strong>up to $1,000 per month</strong> for PhD-level research and professional engineering, and <strong>around $300 per month</strong> for other qualifying long-horizon work.</p>
+        <p class="sub">Tell us what you are working on. We read every application and reply within a few days.</p>
         <div class="via" id="via"></div>
       </div>
     </div>
@@ -55,14 +53,12 @@
       </div>
       <div class="field">
         <label for="blurb">Who are you and what do you work on?</label>
-        <p class="hint">The more concrete the better: what you are building or researching, which tools you use, and roughly how long the project runs.</p>
-        <textarea id="blurb" name="blurb" required placeholder="I am a PhD student at TUM working on simulation-based inference. Day to day I am in VS Code and on a SLURM cluster, running experiments for a project I have been on since last autumn."></textarea>
-        <div class="count" id="count">0 characters</div>
+        <p class="hint">The more concrete the better: what you are building or researching, which tools you use, and how long the project runs.</p>
+        <textarea id="blurb" name="blurb" required placeholder="I am a PhD student at TUM working on simulation-based inference, mostly in VS Code and on a SLURM cluster."></textarea>
       </div>
       <div class="field">
-        <label for="heard">How did you hear about us?</label>
-        <p class="hint">Optional.</p>
-        <input type="text" id="heard" name="heard" placeholder="a podcast, a flyer, a friend…">
+        <label for="heard">How did you hear about us? (optional)</label>
+        <input type="text" id="heard" name="heard" placeholder="a podcast, a flyer, a friend">
       </div>
       <div class="hp" aria-hidden="true">
         <label for="website">Leave this field empty</label>
@@ -70,7 +66,7 @@
       </div>
       <button type="submit" id="submit" class="button button--primary">
         <span id="submit-label">Send application</span>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
       </button>
     </form>
 
@@ -86,7 +82,6 @@
   var errBox = document.getElementById('err');
   var btn = document.getElementById('submit');
   var blurb = document.getElementById('blurb');
-  var count = document.getElementById('count');
   var btnLabel = document.getElementById('submit-label');
 
   function esc(s) {
@@ -98,11 +93,6 @@
     errBox.style.display = 'block';
     errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
-
-  blurb.addEventListener('input', function () {
-    var n = blurb.value.trim().length;
-    count.textContent = n + ' character' + (n === 1 ? '' : 's') + (n > 0 && n < 40 ? ', a little more please' : '');
-  });
 
   /* Referral: ?ref= here, else whatever the site remembered earlier. The server
      validates it against the partner list, so this is a hint, not a claim. */
@@ -157,9 +147,8 @@
       .then(function () {
         document.getElementById('root').innerHTML =
           '<div class="done">' +
-          '<p class="kicker">crowd-cast</p>' +
           '<h2>Thanks! We have received your application.</h2>' +
-          '<p>We carefully read every application and reply within a few days.</p>' +
+          '<p>We read every application and reply within a few days.</p>' +
           '<p>In the meantime, the <a href="/careers/paid-data-collection/">programme details</a> cover how recording works and what happens to the data.</p>' +
           '</div>';
         window.scrollTo(0, 0);
@@ -246,6 +235,7 @@
   </div>
 </footer>
 </div>
+<script src="/pdoom-header.js" defer></script>
 <script src="/pdoom-footer.js" defer></script>
 </body>
 </html>

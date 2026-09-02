@@ -15,15 +15,16 @@
 </head>
 <body>
 <header class="site-header">
-  <a class="pdoom-brand" href="/" aria-label="p(doom) home">
-    <img src="/assets/pdoom-mark.webp" srcset="/assets/pdoom-mark-128.webp 128w, /assets/pdoom-mark-256.webp 256w, /assets/pdoom-mark.webp 512w" sizes="38px" alt="" aria-hidden="true" width="512" height="512" decoding="async">
-    <span>p(doom)</span>
+  <a class="header-brand" href="/" aria-label="p(doom) home">
+    <span class="pdoom-brand">
+      <img src="/assets/pdoom-mark.webp" srcset="/assets/pdoom-mark-128.webp 128w, /assets/pdoom-mark-256.webp 256w, /assets/pdoom-mark.webp 512w" sizes="38px" alt="" aria-hidden="true" width="512" height="512" decoding="async">
+      <span>p(doom)</span>
+    </span>
   </a>
-  <nav class="header-links" aria-label="Primary navigation">
-    <a href="/careers/paid-data-collection/">Programme details</a>
-    <a href="/docs/crowd-cast/">Documentation</a>
-    <a href="/careers/">Careers</a>
-  </nav>
+  <nav class="desktop-nav" aria-label="Primary navigation"></nav>
+  <div class="header-actions">
+    <button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="mobile-navigation" aria-expanded="false"></button>
+  </div>
 </header>
 <main class="shell">
   <div id="root">
@@ -280,6 +281,7 @@
   </div>
 </footer>
 </div>
+<script src="/pdoom-header.js" defer></script>
 <script src="/pdoom-footer.js" defer></script>
 </body>
 </html>
