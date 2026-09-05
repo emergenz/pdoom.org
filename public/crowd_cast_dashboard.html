@@ -414,10 +414,6 @@
             font-size: 12px; font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
             color: #555; margin-bottom: 14px; word-break: break-all;
         }
-        .review-blocked {
-            font-size: 11px; font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
-            color: #b08800; margin-left: 8px;
-        }
         .review-links { margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px 14px; }
         .review-links a {
             font-size: 12px; font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
@@ -3855,7 +3851,6 @@
                 a.enrichment.map(function(e){ return escapeHtml(e); }).join('\n') + '</div></div>';
         }
 
-        var blockedHtml = a.blocked_domain ? '<span class="review-blocked">&#9888; blocked domain &mdash; email will be skipped</span>' : '';
         var tierClass = a.tier === 'invite' ? 'tier-invite' : a.tier === 'ask' ? 'tier-ask' : 'tier-decline';
 
         container.innerHTML =
@@ -3876,7 +3871,7 @@
                         '<span class="tier-badge ' + tierClass + '">' + escapeHtml(a.tier || '?') + '</span>' +
                         '<span class="conf-badge">id: ' + escapeHtml(a.identity_confidence || '?') + '</span>' +
                     '</div>' +
-                    '<div class="review-email-line">' + escapeHtml(a.email) + blockedHtml + '</div>' +
+                    '<div class="review-email-line">' + escapeHtml(a.email) + '</div>' +
                     (links ? '<div class="review-links">' + links + '</div>' : '') +
                     fraudHtml +
                     (a.work_summary ? '<div class="review-field"><div class="rf-label">What they do</div><div class="rf-body">' + escapeHtml(a.work_summary) + '</div></div>' : '') +
@@ -4510,8 +4505,6 @@
         var badgeClass = (isGhost || isCapture) ? 'tier-decline' : 'tier-ask';
         var badgeLabel = isCapture ? 'black frames' : isGhost ? 'not recording' : 'low volume';
 
-        var blockedHtml = n.blocked_domain ? '<span class="review-blocked">&#9888; their domain blocks pdoom.org mail &mdash; sending will be skipped</span>' : '';
-
         var metrics;
         if (isCapture) {
             metrics = 'Recording, but frames are coming through blank/black (hours look fine, data is unusable)';
@@ -4538,7 +4531,7 @@
                         '<h2>' + escapeHtml(n.name || '(no name)') + '</h2>' +
                         '<span class="tier-badge ' + badgeClass + '">' + badgeLabel + '</span>' +
                     '</div>' +
-                    '<div class="review-email-line">' + escapeHtml(n.email) + blockedHtml + '</div>' +
+                    '<div class="review-email-line">' + escapeHtml(n.email) + '</div>' +
                     '<div class="review-field"><div class="rf-body">' + escapeHtml(metrics) + '</div></div>' +
                     buildNudgeEmailBox(n) +
                     '<div class="review-actions" style="grid-template-columns:1fr 1fr;">' +
@@ -4560,7 +4553,7 @@
                 '<div class="review-email-body" style="display:none;">' +
                     '<input class="review-email-subject" value="' + escapeHtml(subj) + '" readonly>' +
                     '<textarea class="review-email-textarea" id="nudge-body">' + escapeHtml(bodyText) + '</textarea>' +
-                    '<div class="review-email-hint">Edit if you like. <b>Send</b> emails this to the participant now; <b>Skip</b> drops them for this week. Blocked domains are never emailed.</div>' +
+                    '<div class="review-email-hint">Edit if you like. <b>Send</b> emails this to the participant now; <b>Skip</b> drops them for this week.</div>' +
                 '</div>' +
             '</div>';
     }
@@ -4573,9 +4566,7 @@
         var bodyEl = document.getElementById('nudge-body');
         var body = (bodyEl ? bodyEl.value : '') || '';
 
-        if (choice === 'send' && n.blocked_domain) {
-            if (!window.confirm('⚠ ' + name + "'s domain blocks pdoom.org mail, so this can't be delivered. Mark them skipped for this week?")) return;
-        } else if (choice === 'send') {
+        if (choice === 'send') {
             if (!window.confirm('This will email ' + name + ' now:\n\n----------\n' + body + '\n----------\n\nSend it?')) return;
         } else {
             if (!window.confirm('Skip nudging ' + name + ' this week? (no email is sent)')) return;
