@@ -4502,13 +4502,21 @@
 
         var isGhost = n.bucket === 'ghosting';
         var isCapture = n.bucket === 'capture_broken';
+        var isUnlinked = n.bucket === 'unlinked';
         var badgeClass = (isGhost || isCapture) ? 'tier-decline' : 'tier-ask';
-        var badgeLabel = isCapture ? 'black frames' : isGhost ? 'not recording' : 'low volume';
+        var badgeLabel = isCapture ? 'black frames' : isGhost ? 'not recording'
+                       : isUnlinked ? 'never signed in' : 'low volume';
 
         var metrics;
         if (isCapture) {
             metrics = 'Recording, but frames are coming through blank/black (hours look fine, data is unusable)';
             if (typeof n.visible_fraction === 'number') metrics += ' &mdash; ' + Math.round(n.visible_fraction * 100) + '% visible';
+        } else if (isUnlinked) {
+            /* Hours are UNKNOWN here, not zero: either the app was never installed, or
+               it is recording and uploading without them ever having signed in, so the
+               data exists but cannot be attributed. Do not show an hours figure. */
+            metrics = 'Nothing has ever arrived under their account &mdash; either the app was never installed, or it is recording without them having signed in';
+            if (n.days_since != null) metrics += ' (onboarded ' + n.days_since + 'd ago)';
         } else if (isGhost) {
             metrics = 'No recordings in the last 7 days';
             if (n.days_since != null) metrics += ', last recording ' + n.days_since + 'd ago';
