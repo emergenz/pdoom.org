@@ -766,6 +766,7 @@
                 <span class="tab-btn" id="tab-review" onclick="switchTab('review')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Review</span>
                 <span class="tab-btn" id="tab-nudges" onclick="switchTab('nudges')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Nudges</span>
                 <span class="tab-btn" id="tab-followups" onclick="switchTab('followups')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Follow-ups</span>
+                <span class="tab-btn" id="tab-applicants" onclick="switchTab('applicants')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Applicants</span>
                 <span class="tab-btn" id="tab-partners" onclick="switchTab('partners')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Partners</span>
                 <span class="tab-btn" id="tab-participants" onclick="switchTab('participants')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Participants</span>
                 <span class="tab-btn" id="tab-payouts" onclick="switchTab('payouts')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Payouts</span>
@@ -919,6 +920,12 @@
 
             <!-- Applicant follow-up SLA surface (admin only): waiting-on-you / nudged / lapsing -->
             <div id="followups-view" style="display:none;"></div>
+
+            <!-- Every applicant, every status (admin only). The flat list the
+                 Google Sheet used to be: Review only shows needs_review and
+                 Follow-ups only shows asked/invited, so this is the one place
+                 a decided, rejected or lapsed applicant can still be found. -->
+            <div id="applicants-view" style="display:none;"></div>
 
             <!-- Partner referrals (admin only): podcasts/newsletters + bounty ledger -->
             <div id="partners-view" style="display:none;"></div>
@@ -2170,6 +2177,8 @@
         revEl.style.display = tab === 'review' ? 'block' : 'none';
         nudgeEl.style.display = tab === 'nudges' ? 'block' : 'none';
         if (followEl) followEl.style.display = tab === 'followups' ? 'block' : 'none';
+        var appsEl = document.getElementById('applicants-view');
+        if (appsEl) appsEl.style.display = tab === 'applicants' ? 'block' : 'none';
         var partnersEl = document.getElementById('partners-view');
         if (partnersEl) partnersEl.style.display = tab === 'partners' ? 'block' : 'none';
         /* Use position:absolute + visibility:hidden for all-users to preserve chart layout */
@@ -2203,6 +2212,11 @@
             followTab.style.borderBottomColor = tab === 'followups' ? '#000' : 'transparent';
             followTab.style.color = tab === 'followups' ? '#000' : '#999';
         }
+        var appsTab = document.getElementById('tab-applicants');
+        if (appsTab) {
+            appsTab.style.borderBottomColor = tab === 'applicants' ? '#000' : 'transparent';
+            appsTab.style.color = tab === 'applicants' ? '#000' : '#999';
+        }
         var partnersTab = document.getElementById('tab-partners');
         if (partnersTab) {
             partnersTab.style.borderBottomColor = tab === 'partners' ? '#000' : 'transparent';
@@ -2214,6 +2228,7 @@
         if (tab === 'review') renderReviewTab();
         if (tab === 'nudges') renderNudgesTab();
         if (tab === 'followups') renderFollowupsTab();
+        if (tab === 'applicants') renderApplicantsTab();
         if (tab === 'partners') renderPartnersTab();
     }
 
@@ -3654,6 +3669,8 @@
         document.getElementById('nudges-view').style.display = 'none';
         var tfu = document.getElementById('tab-followups'); if (tfu) tfu.style.display = 'none';
         var vfu = document.getElementById('followups-view'); if (vfu) vfu.style.display = 'none';
+        var tap = document.getElementById('tab-applicants'); if (tap) tap.style.display = 'none';
+        var vap = document.getElementById('applicants-view'); if (vap) vap.style.display = 'none';
         var tpa = document.getElementById('tab-partners'); if (tpa) tpa.style.display = 'none';
         var vpa = document.getElementById('partners-view'); if (vpa) vpa.style.display = 'none';
         document.getElementById('all-users-view').style.display = 'block';
@@ -3743,6 +3760,7 @@
             document.getElementById('tab-review').style.display = _isAdmin ? 'inline' : 'none';
             document.getElementById('tab-nudges').style.display = _isAdmin ? 'inline' : 'none';
             var tfuShow = document.getElementById('tab-followups'); if (tfuShow) tfuShow.style.display = _isAdmin ? 'inline' : 'none';
+            var tapShow = document.getElementById('tab-applicants'); if (tapShow) tapShow.style.display = _isAdmin ? 'inline' : 'none';
             var tpaShow = document.getElementById('tab-partners'); if (tpaShow) tpaShow.style.display = _isAdmin ? 'inline' : 'none';
             document.getElementById('tab-participants').style.display = _isAdmin ? 'inline' : 'none';
             document.getElementById('tab-payouts').style.display = _isAdmin ? 'inline' : 'none';
@@ -4392,13 +4410,13 @@
 
     function renderFollowupsView(data) {
         var c = document.getElementById('followups-view');
-        var wy = data.waiting_on_you || [], nu = data.nudged || [], sz = data.snoozed || [];
+        var wy = data.waiting_on_you || [], nu = data.nudged || [], sz = data.snoozed || [], qt = data.quiet || [];
         function esc(s){ return escapeHtml(String(s || '')); }
         function mailto(r, subj){ return 'mailto:' + encodeURIComponent(r.email) + '?subject=' + encodeURIComponent(subj); }
 
         var h = '<div style="max-width:860px;margin:0 auto;padding:8px 4px 40px;">';
         h += '<h2 style="font-size:18px;margin:0 0 4px;">Applicant follow-ups</h2>';
-        h += '<p style="color:#666;font-size:13px;margin:0 0 22px;">People we asked or invited who haven\'t resolved. <b>Waiting on you</b> replied and need a human answer; <b>nudged</b> are on the auto-nudge track (2 nudges, then they lapse).</p>';
+        h += '<p style="color:#666;font-size:13px;margin:0 0 22px;">People we asked or invited who haven\'t resolved. <b>Waiting on you</b> replied and need a human answer; <b>nudged</b> are on the auto-nudge track (2 nudges, then they lapse); <b>no reply yet</b> have heard nothing back from us since. Everyone here is asked or invited, so for decided, rejected or lapsed applicants use the <b>Applicants</b> tab.</p>';
 
         h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#c0392b;margin:0 0 10px;">Waiting on you (' + wy.length + ')</div>';
         if (!wy.length) {
@@ -4438,6 +4456,25 @@
             h += '</div>';
         }
 
+        h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#b08800;margin:0 0 10px;">No reply yet (' + qt.length + ')</div>';
+        if (!qt.length) {
+            h += '<p style="color:#999;font-size:13px;margin:0 0 26px;">Nobody sitting silent.</p>';
+        } else {
+            h += '<p style="color:#666;font-size:12px;margin:0 0 10px;">Asked or invited, no answer, and no nudge has gone out. These used to appear nowhere at all. Auto-nudging is still switched off, so this list only shrinks when you email them.</p>';
+            h += '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:28px;">';
+            qt.forEach(function(r){
+                h += '<div class="outline-box" style="padding:10px 14px;display:flex;align-items:center;gap:12px;">'
+                  + '<div style="flex:1;min-width:0;">'
+                  + '<div style="font-weight:600;font-size:14px;">' + esc(r.name || r.email) + ' <span style="color:#999;font-weight:400;font-size:12px;">' + esc(r.email) + '</span></div>'
+                  + '<div style="color:#666;font-size:12px;margin-top:2px;">' + esc(r.status) + (r.tier ? ' &middot; ' + esc(r.tier) : '') + ' &middot; we wrote ' + fuDays(r.executed_at || r.decided_at) + '</div>'
+                  + '</div>'
+                  + fuSnoozeBtns(r.email)
+                  + '<a href="' + mailto(r, 'Re: your crowd-cast application') + '" style="text-decoration:none;color:#888;font-size:12px;white-space:nowrap;">email &rarr;</a>'
+                  + '</div>';
+            });
+            h += '</div>';
+        }
+
         h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin:0 0 10px;">Snoozed (' + sz.length + ')</div>';
         if (!sz.length) {
             h += '<p style="color:#999;font-size:13px;margin:0 0 26px;">Nobody snoozed. Use the zz buttons when someone says they\'re away (vacation etc.), no nudges until they wake.</p>';
@@ -4457,6 +4494,288 @@
         }
         h += '</div>';
         c.innerHTML = h;
+    }
+
+    /* =================================================================
+       Applicants: every applicant, every status. The flat list the Google
+       Sheet used to be.
+
+       Review shows only needs_review and Follow-ups only asked/invited, so
+       this is the one place a decided, rejected or lapsed applicant can be
+       found again. Deliberately read-only: decisions still happen on the
+       Review card, where the drafted email and the undo window live.
+       ================================================================= */
+    var _appsAll = [];        /* every row, newest first, as the API returned */
+    var _appsFilter = 'all';  /* status chip currently selected */
+    var _appsQuery = '';      /* free-text search */
+    var _appsOpen = {};       /* email -> row expanded */
+    var _appsTrimmed = false; /* API shed the long prose to stay under 6 MB */
+
+    /* Chips in lifecycle order, so the row of counts reads as a funnel. The
+       list is for ordering and colour only, NOT for deciding what exists:
+       chips are built from the statuses actually in the data, so a status
+       nobody anticipated still gets a chip instead of hiding its rows behind
+       "All". already_actioned is the big one (the pre-automation applicants
+       reconcile_queue.py backfilled) and would have been invisible here. */
+    var APP_STATUSES = [
+        ['new',              'New',          '#b08800'],
+        ['needs_review',     'Needs review', '#b08800'],
+        ['decided',          'Decided',      '#7a5cc0'],
+        ['invited',          'Invited',      '#2ea043'],
+        ['asked',            'Asked',        '#0066cc'],
+        ['rejected',         'Rejected',     '#cf222e'],
+        ['lapsed',           'Lapsed',       '#999999'],
+        ['already_actioned', 'Pre-automation', '#777777'],
+        ['(none)',           'No status',    '#bbbbbb']
+    ];
+
+    function appStatusMeta(s) {
+        var key = s || '(none)';
+        for (var i = 0; i < APP_STATUSES.length; i++) if (APP_STATUSES[i][0] === key) return APP_STATUSES[i];
+        return [key, key, '#666'];
+    }
+    function appStatusColor(s) { return appStatusMeta(s)[2]; }
+    function appStatusLabel(s) { return appStatusMeta(s)[1]; }
+
+    /* name -> applicant_name -> email. The public apply.html intake writes
+       applicant_name and the vetting agent renames it to name later, so a
+       just-submitted application has no `name` at all. */
+    function appName(a) { return a.name || a.applicant_name || ''; }
+
+    function renderApplicantsTab() {
+        if (!_isAdmin) return;
+        var c = document.getElementById('applicants-view');
+        if (!c) return;
+        c.innerHTML = '<div style="max-width:1100px;margin:0 auto;padding:8px 4px 40px;">' +
+            '<div class="outline-box" style="padding:20px;"><div class="skel-line short"></div>' +
+            '<div class="skel-block" style="height:320px;background:#f8f8f8;margin-top:14px;"></div></div></div>';
+        fetch(ONBOARD_API + '/applicants/all', { headers: { 'Authorization': 'Bearer ' + _authToken } })
+            .then(function(resp){ if (!resp.ok) throw new Error('HTTP ' + resp.status); return resp.json(); })
+            .then(function(data){
+                _appsAll = data.applicants || [];
+                /* Stable numeric handle per row. The expand toggle passes this
+                   instead of the email: an email interpolated into an inline
+                   onclick has to survive both HTML-attribute and JS-string
+                   escaping, and an integer simply cannot break either. */
+                _appsAll.forEach(function(a, i){ a._idx = i; });
+                _appsTrimmed = !!data.trimmed;
+                renderApplicantsView();
+            })
+            .catch(function(err){
+                c.innerHTML = '<div style="max-width:1100px;margin:0 auto;padding:8px 4px;"><div class="outline-box" style="padding:20px;">' +
+                    '<p class="error-text">Failed to load applicants: ' + escapeHtml(String(err.message || err)) + '</p></div></div>';
+            });
+    }
+
+    function appsFiltered() {
+        var q = _appsQuery.trim().toLowerCase();
+        return _appsAll.filter(function(a){
+            if (_appsFilter !== 'all' && (a.status || '(none)') !== _appsFilter) return false;
+            if (!q) return true;
+            /* Search the fields you would actually remember someone by, plus
+               the LLM's own words, which is often the only thing that comes
+               back ("the guy doing protein folding"), plus skip_reason, which
+               is the entire story for the pre-automation rows. */
+            return (appName(a) + ' ' + a.email + ' ' + (a.work_summary || '') + ' ' +
+                    (a.blurb || '') + ' ' + (a.reasoning || '') + ' ' + (a.skip_reason || '') + ' ' +
+                    (a.heard_via || '') + ' ' + (a.links || []).join(' ')).toLowerCase().indexOf(q) !== -1;
+        });
+    }
+
+    function setAppsFilter(s) { _appsFilter = s; renderApplicantsView(); }
+
+    function onAppsSearch(v) {
+        _appsQuery = v;
+        renderApplicantsView();
+        /* Re-rendering blows away focus, so put the caret back where it was. */
+        var box = document.getElementById('apps-search');
+        if (box) { box.focus(); box.setSelectionRange(box.value.length, box.value.length); }
+    }
+
+    function toggleAppRow(idx) {
+        var a = _appsAll[idx];
+        if (!a) return;
+        _appsOpen[a.email] = !_appsOpen[a.email];
+        renderApplicantsView();
+    }
+
+    function appDate(iso) {
+        if (!iso) return '';
+        var d = new Date(iso);
+        if (isNaN(d.getTime())) return '';
+        return d.toLocaleDateString(undefined, { year: '2-digit', month: 'short', day: 'numeric' });
+    }
+
+    function renderApplicantsView() {
+        var c = document.getElementById('applicants-view');
+        if (!c) return;
+        function esc(s){ return escapeHtml(String(s || '')); }
+        var rows = appsFiltered();
+
+        var h = '<div style="max-width:1100px;margin:0 auto;padding:8px 4px 40px;">';
+        h += '<h2 style="font-size:18px;margin:0 0 4px;">Applicants</h2>';
+        h += '<p style="color:#666;font-size:13px;margin:0 0 16px;">Everyone who ever applied, whatever happened to them. Read-only: decisions still happen on the <b>Review</b> tab, where the drafted email and the 10-minute undo live.</p>';
+        if (_appsTrimmed) {
+            h += '<div style="border:1px solid #b08800;color:#8a6a00;padding:8px 10px;margin-bottom:14px;font-size:12px;">'
+               + 'The list outgrew the response limit, so summaries and reasoning are cut to 240 characters here. Nothing is lost in the database.</div>';
+        }
+
+        /* Filter chips, each with its count. Counts come from the full set, not
+           the filtered one, so they don't collapse to 0/n as you click around. */
+        var counts = { all: _appsAll.length };
+        _appsAll.forEach(function(a){ var k = a.status || '(none)'; counts[k] = (counts[k] || 0) + 1; });
+        h += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">';
+        var chip = function(key, label, color){
+            var on = _appsFilter === key;
+            var n = counts[key] || 0;
+            return '<span onclick="setAppsFilter(\'' + key + '\')" style="cursor:pointer;font-size:11px;font-weight:700;'
+                 + 'text-transform:uppercase;letter-spacing:1px;padding:5px 11px;border:1px solid '
+                 + (on ? '#000' : '#ddd') + ';background:' + (on ? '#000' : '#fff') + ';color:'
+                 + (on ? '#fff' : color) + ';">' + label + ' ' + n + '</span>';
+        };
+        h += chip('all', 'All', '#000');
+        /* Known statuses first, in lifecycle order, then anything unexpected,
+           so a status the code has never heard of still gets a chip. Only
+           statuses actually present are shown: a row of zeroes is noise. */
+        var seen = {};
+        APP_STATUSES.forEach(function(s){
+            if (counts[s[0]]) { seen[s[0]] = 1; h += chip(s[0], s[1], s[2]); }
+        });
+        Object.keys(counts).sort().forEach(function(k){
+            if (k !== 'all' && !seen[k]) h += chip(k, k, '#666');
+        });
+        h += '</div>';
+
+        h += '<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">';
+        h += '<input id="apps-search" type="text" value="' + esc(_appsQuery) + '" oninput="onAppsSearch(this.value)" '
+           + 'placeholder="search name, email, what they work on..." '
+           + 'style="flex:1;min-width:240px;padding:8px 10px;border:1px solid #ddd;font-size:13px;font-family:inherit;">';
+        h += '<span onclick="downloadApplicantsCsv()" style="cursor:pointer;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:8px 14px;border:1px solid #000;white-space:nowrap;">Download CSV</span>';
+        h += '</div>';
+
+        h += '<div style="font-size:12px;color:#999;margin-bottom:8px;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;">'
+           + rows.length + ' of ' + _appsAll.length + ' shown</div>';
+
+        if (!rows.length) {
+            h += '<div class="outline-box" style="padding:40px;text-align:center;color:#999;font-size:13px;">Nothing matches.</div></div>';
+            c.innerHTML = h;
+            return;
+        }
+
+        /* The table scrolls inside its own box so the page never scrolls sideways. */
+        h += '<div class="outline-box" style="overflow-x:auto;">';
+        h += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+        h += '<thead><tr style="border-bottom:1px solid #000;text-align:left;">'
+           + '<th style="padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Name</th>'
+           + '<th style="padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Status</th>'
+           + '<th style="padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Verdict</th>'
+           + '<th style="padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Applied</th>'
+           + '<th style="padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Decided</th>'
+           + '<th style="padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Heard via</th>'
+           + '</tr></thead><tbody>';
+
+        rows.forEach(function(a){
+            var open = !!_appsOpen[a.email];
+            var flagged = (a.fraud_flags || []).length > 0;
+            h += '<tr onclick="toggleAppRow(' + a._idx + ')" style="cursor:pointer;border-bottom:1px solid #eee;' + (open ? 'background:#fafafa;' : '') + '">'
+               + '<td style="padding:9px 12px;">'
+                 + '<span style="color:#999;margin-right:6px;">' + (open ? '&#9662;' : '&#9656;') + '</span>'
+                 + '<b>' + esc(appName(a) || '(no name)') + '</b>'
+                 + (flagged ? ' <span title="fraud flags" style="color:#cf222e;">&#9873;</span>' : '')
+                 + '<div style="color:#999;font-size:12px;margin-left:18px;">' + esc(a.email) + '</div>'
+               + '</td>'
+               + '<td style="padding:9px 12px;white-space:nowrap;color:' + appStatusColor(a.status) + ';font-weight:650;">' + esc(appStatusLabel(a.status))
+                 + (a.awaiting === 'you' ? '<div style="color:#c0392b;font-size:11px;font-weight:400;">replied</div>' : '')
+                 + (a.nudges_sent ? '<div style="color:#999;font-size:11px;font-weight:400;">' + a.nudges_sent + ' nudge(s)</div>' : '')
+                 /* For the pre-automation rows this is the only record of what
+                    happened, so it belongs in the collapsed row, not buried. */
+                 + (a.skip_reason ? '<div style="color:#888;font-size:11px;font-weight:400;white-space:normal;max-width:190px;">' + esc(a.skip_reason) + '</div>' : '')
+               + '</td>'
+               + '<td style="padding:9px 12px;white-space:nowrap;color:#666;">' + esc(a.tier || '')
+                 + (a.identity_confidence ? '<div style="color:#999;font-size:11px;">id: ' + esc(a.identity_confidence) + '</div>' : '')
+               + '</td>'
+               + '<td style="padding:9px 12px;white-space:nowrap;color:#666;">' + esc(appDate(a.timestamp)) + '</td>'
+               + '<td style="padding:9px 12px;white-space:nowrap;color:#666;">' + esc(appDate(a.executed_at || a.decided_at)) + '</td>'
+               + '<td style="padding:9px 12px;color:#666;">' + esc((a.heard_via || '').slice(0, 40)) + '</td>'
+               + '</tr>';
+
+            if (!open) return;
+            /* Expanded detail: everything the review card showed, minus the
+               drafted email, so you can reconstruct why a decision went the
+               way it did months later. */
+            var d = '';
+            if ((a.fraud_flags || []).length) {
+                d += '<div style="border:1px solid #cf222e;color:#cf222e;padding:8px 10px;margin-bottom:12px;font-size:12px;">'
+                   + '<b>Fraud flags:</b> ' + esc((a.fraud_flags || []).join(' | ')) + '</div>';
+            }
+            if ((a.links || []).length) {
+                d += '<div style="margin-bottom:12px;display:flex;flex-wrap:wrap;gap:6px 14px;">';
+                (a.links || []).forEach(function(l){
+                    d += '<a href="' + esc(l) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:12px;color:#0066cc;">' + esc(l.replace(/^https?:\/\//, '').slice(0, 60)) + '</a>';
+                });
+                d += '</div>';
+            }
+            var field = function(label, val){
+                if (!val) return '';
+                return '<div style="margin-bottom:10px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:3px;">'
+                     + label + '</div><div style="font-size:13px;line-height:1.55;color:#222;white-space:pre-wrap;">' + esc(val) + '</div></div>';
+            };
+            d += field('What they work on', a.work_summary || a.blurb);
+            d += field('Why the agent said ' + (a.tier || 'that'), a.reasoning);
+            if ((a.enrichment || []).length) d += field('Enrichment', (a.enrichment || []).join('\n'));
+
+            var meta = [];
+            if (a.skip_reason) meta.push('handled before the automation: ' + a.skip_reason);
+            if (a.reconciled_at) meta.push('reconciled ' + a.reconciled_at.slice(0, 10));
+            if (a.source) meta.push('source: ' + a.source);
+            if (a.decision) meta.push('decision: ' + a.decision);
+            if (a.decided_at) meta.push('decided ' + a.decided_at.slice(0, 16).replace('T', ' '));
+            if (a.executed_at) meta.push('sent ' + a.executed_at.slice(0, 16).replace('T', ' '));
+            if (a.last_nudge_at) meta.push('last nudge ' + a.last_nudge_at.slice(0, 10));
+            if (a.last_inbound_at) meta.push('they wrote ' + a.last_inbound_at.slice(0, 10));
+            if (a.snooze_until) meta.push('snoozed until ' + a.snooze_until.slice(0, 10));
+            if (a.lapsed_at) meta.push('lapsed ' + a.lapsed_at.slice(0, 10) + (a.prev_status ? ' (was ' + a.prev_status + ')' : ''));
+            if (a.partner_slug) meta.push('partner: ' + a.partner_slug);
+            if (meta.length) {
+                d += '<div style="font-size:11px;color:#999;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;margin-top:12px;">'
+                   + esc(meta.join('  ·  ')) + '</div>';
+            }
+            d += '<div style="margin-top:12px;"><a href="mailto:' + encodeURIComponent(a.email) + '?subject=' + encodeURIComponent('Re: your crowd-cast application')
+               + '" onclick="event.stopPropagation()" style="font-size:12px;color:#0066cc;">email them &rarr;</a></div>';
+
+            h += '<tr style="background:#fafafa;border-bottom:1px solid #eee;"><td colspan="6" style="padding:6px 12px 18px 30px;">' + d + '</td></tr>';
+        });
+
+        h += '</tbody></table></div></div>';
+        c.innerHTML = h;
+    }
+
+    function downloadApplicantsCsv() {
+        /* Exports what is on screen, filters and search included, because that
+           is what you were looking at when you decided you wanted it out. */
+        var rows = appsFiltered();
+        var cols = ['name', 'email', 'status', 'skip_reason', 'tier', 'identity_confidence', 'timestamp',
+                    'decision', 'decided_at', 'executed_at', 'nudges_sent', 'last_inbound_at',
+                    'heard_via', 'partner_slug', 'links', 'work_summary', 'reasoning'];
+        var q = function(v){
+            if (v === null || v === undefined) return '';
+            var s = Array.isArray(v) ? v.join(' | ') : String(v);
+            return '"' + s.replace(/"/g, '""') + '"';
+        };
+        var csv = cols.join(',') + '\n'
+                + rows.map(function(r){ return cols.map(function(k){
+                      return q(k === 'name' ? appName(r) : r[k]);
+                  }).join(','); }).join('\n');
+        /* BOM so Excel and Sheets read the UTF-8 names correctly. */
+        var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'crowd-cast-applicants-' + new Date().toISOString().slice(0, 10) + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
     function renderNudgesTab() {
