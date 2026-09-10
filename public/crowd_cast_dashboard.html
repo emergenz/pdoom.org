@@ -4217,38 +4217,112 @@
 
         var h = '<div style="max-width:1000px;margin:0 auto;padding:8px 4px 40px;">';
         h += '<h2 style="font-size:18px;margin:0 0 4px;">Referral partners</h2>';
-        h += '<p style="color:#666;font-size:13px;margin:0 0 20px;">Podcasts and newsletters that send us participants. Each gets a link and a private stats page. A bounty becomes owed once a referred person passes their trial week.</p>';
+        h += '<p style="color:#666;font-size:13px;margin:0 0 16px;">Everyone with a referral link: participants and friends who signed themselves up at /refer.html, plus any podcast or newsletter added by hand. Each gets a link and a private stats page. A bounty becomes owed once a referred person passes their trial week.</p>';
+
+        /* Totals first. Most partners have produced nothing yet, so without a
+           summary the table reads as nine rows of zeroes and hides the two
+           numbers that matter: whether anyone is actually arriving, and how
+           much money is outstanding. */
+        var tot = partners.reduce(function(s, p){
+            s.clicks += p.clicks || 0; s.signups += p.signups || 0;
+            s.passed += p.passed_trial || 0; s.owed += p.owed_usd || 0;
+            s.claimed += p.claimed_usd || 0; s.paid += p.paid_usd || 0;
+            if (p.signups) s.producing++;
+            return s;
+        }, { clicks: 0, signups: 0, passed: 0, owed: 0, claimed: 0, paid: 0, producing: 0 });
+        var stat = function(n, label, color){
+            return '<div style="flex:1;min-width:96px;padding:10px 12px;border-left:1px solid #eee;">'
+                 + '<div style="font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;' + (color ? 'color:' + color + ';' : '') + '">' + n + '</div>'
+                 + '<div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#999;margin-top:2px;">' + label + '</div></div>';
+        };
+        h += '<div class="outline-box" style="display:flex;flex-wrap:wrap;margin-bottom:20px;">'
+          + stat(partners.length, 'partners')
+          + stat(tot.producing, 'sent someone', tot.producing ? '#2ea043' : '#ccc')
+          + stat(tot.clicks, 'clicks')
+          + stat(tot.signups, 'signups')
+          + stat(tot.passed, 'passed trial')
+          + stat('$' + tot.owed, 'owed', tot.owed ? '#c0392b' : '#ccc')
+          + stat('$' + tot.paid, 'paid out')
+          + '</div>';
 
         if (owed.length) {
             h += '<div class="outline-box" style="padding:12px 14px;margin-bottom:20px;border-color:#c9a227;">'
               + '<b>$' + owedTotal + ' owed</b> across ' + owed.length + ' bounty' + (owed.length === 1 ? '' : 's') + '. The referrer claims via their stats page; the premium then appears in the Payouts tab for one-click payment. "Mark paid" below is only the manual fallback.</div>';
         }
 
-        h += '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">'
-          + '<thead><tr style="text-align:left;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;">'
-          + '<th style="padding:6px 8px;">Partner</th><th style="padding:6px 8px;">Link</th>'
-          + '<th style="padding:6px 8px;text-align:right;">Clicks</th><th style="padding:6px 8px;text-align:right;">Signups</th>'
-          + '<th style="padding:6px 8px;text-align:right;">Passed trial</th><th style="padding:6px 8px;text-align:right;">Owed</th>'
-          + '<th style="padding:6px 8px;text-align:right;">Paid</th><th style="padding:6px 8px;">Stats page</th></tr></thead><tbody>';
-        if (!partners.length) {
-            h += '<tr><td colspan="8" style="padding:14px 8px;color:#999;">No partners yet. Add one below.</td></tr>';
+        /* Two people signing up under the same display name is not a bug but
+           it is a trap: the slugs differ (rishi-dhar / rishi-dhar-2) and so do
+           the emails, so paying "Rishi Dhar" without looking pays the wrong
+           one. Flag it here rather than hoping it gets noticed in the table. */
+        var byName = {};
+        partners.forEach(function(p){ (byName[(p.name || '').trim().toLowerCase()] = byName[(p.name || '').trim().toLowerCase()] || []).push(p); });
+        var dupes = Object.keys(byName).filter(function(k){ return k && byName[k].length > 1; });
+        if (dupes.length) {
+            h += '<div class="outline-box" style="padding:10px 14px;margin-bottom:20px;border-color:#c9a227;font-size:12.5px;">'
+              + '<b>Same name, different people.</b> ';
+            h += dupes.map(function(k){
+                return byName[k].map(function(p){ return esc(p.name) + ' (' + esc(p.slug) + ', ' + esc(p.referrer_email || 'no email') + ')'; }).join(' and ');
+            }).join('; ');
+            h += '. Check the slug before paying, not the name.</div>';
         }
-        partners.forEach(function(p){
-            var statsUrl = 'https://pdoom.org/partner_stats.html?token=' + encodeURIComponent(p.stats_token || '');
-            h += '<tr style="border-top:1px solid #eee;' + (p.active ? '' : 'opacity:0.5;') + '">'
-              + '<td style="padding:8px;"><b>' + esc(p.name) + '</b>' + (p.active ? '' : ' <span style="font-size:11px;color:#999;">(inactive)</span>')
-              + '<div style="color:#999;font-size:11px;">' + esc(p.slug) + (p.payout_contact ? ' &middot; ' + esc(p.payout_contact) : '') + '</div></td>'
-              + '<td style="padding:8px;"><span style="font-family:monospace;font-size:11.5px;">/participate?ref=' + esc(p.slug) + '</span>'
-              + ' <span onclick="ccCopy(\'https://pdoom.org/participate?ref=' + esc(p.slug) + '\',this)" style="cursor:pointer;color:#888;font-size:11px;">copy</span></td>'
-              + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;">' + (p.clicks || 0) + '</td>'
-              + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;">' + (p.signups || 0) + '</td>'
-              + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;">' + (p.passed_trial || 0) + '</td>'
-              + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;' + (p.owed_usd ? 'color:#c0392b;font-weight:700;' : '') + '">$' + (p.owed_usd || 0) + '</td>'
-              + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;color:#888;">$' + (p.paid_usd || 0) + '</td>'
-              + '<td style="padding:8px;"><span onclick="ccCopy(\'' + esc(statsUrl) + '\',this)" style="cursor:pointer;color:#888;font-size:11px;">copy link</span></td>'
-              + '</tr>';
+
+        /* Three groups, because "partner" now covers wildly different things:
+           someone who has actually sent people, someone whose link has been
+           clicked but produced nothing, and someone who signed up and never
+           shared it. Lumping them into one alphabetical-ish list is what made
+           this page hard to read. The API already sorts by signups. */
+        var groups = [
+            ['Sending people',  partners.filter(function(p){ return p.signups > 0; }),
+             'Referrals have arrived through these links.'],
+            ['Link clicked, nothing yet', partners.filter(function(p){ return !p.signups && p.clicks > 0; }),
+             'Somebody followed the link but did not apply.'],
+            ['Quiet',           partners.filter(function(p){ return !p.signups && !p.clicks; }),
+             'Signed up for a link and it has never been clicked.']
+        ];
+
+        if (!partners.length) {
+            h += '<div class="outline-box" style="padding:14px;color:#999;font-size:13px;">No partners yet. Add one below.</div>';
+        }
+
+        groups.forEach(function(g){
+            var label = g[0], list = g[1], blurb = g[2];
+            if (!list.length) return;
+            h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin:22px 0 4px;">'
+               + label + ' (' + list.length + ')</div>';
+            h += '<p style="color:#999;font-size:12px;margin:0 0 8px;">' + blurb + '</p>';
+            h += '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">'
+              + '<thead><tr style="text-align:left;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;">'
+              + '<th style="padding:6px 8px;">Who</th>'
+              + '<th style="padding:6px 8px;text-align:right;">Clicks</th><th style="padding:6px 8px;text-align:right;">Signups</th>'
+              + '<th style="padding:6px 8px;text-align:right;">Passed</th><th style="padding:6px 8px;text-align:right;">Owed</th>'
+              + '<th style="padding:6px 8px;text-align:right;">Paid</th><th style="padding:6px 8px;">Links</th></tr></thead><tbody>';
+            list.forEach(function(p){
+                var statsUrl = 'https://pdoom.org/partner_stats.html?token=' + encodeURIComponent(p.stats_token || '');
+                var refUrl = 'https://pdoom.org/participate?ref=' + p.slug;
+                /* self_serve is a person who signed themselves up; anything
+                   else was added by hand and is a show, a newsletter or a
+                   deal. They get paid the same but you read them differently. */
+                var isSelf = p.source === 'self_serve';
+                h += '<tr style="border-top:1px solid #eee;' + (p.active ? '' : 'opacity:0.5;') + '">'
+                  + '<td style="padding:8px;"><b>' + esc(p.name) + '</b>'
+                  + (p.active ? '' : ' <span style="font-size:11px;color:#999;">(inactive)</span>')
+                  + ' <span style="font-size:9.5px;text-transform:uppercase;letter-spacing:1px;padding:1px 5px;border:1px solid ' + (isSelf ? '#ddd;color:#999' : '#7a5cc0;color:#7a5cc0') + ';">'
+                  + (isSelf ? 'self' : 'added') + '</span>'
+                  + '<div style="color:#999;font-size:11px;">' + esc(p.referrer_email || p.payout_contact || '') + '</div>'
+                  + '<div style="color:#bbb;font-size:10.5px;font-family:monospace;">' + esc(p.slug)
+                  + (p.last_click_at ? ' &middot; last click ' + esc(String(p.last_click_at).slice(0, 10)) : '') + '</div></td>'
+                  + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;' + (p.clicks ? '' : 'color:#ccc;') + '">' + (p.clicks || 0) + '</td>'
+                  + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;' + (p.signups ? 'font-weight:700;' : 'color:#ccc;') + '">' + (p.signups || 0) + '</td>'
+                  + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;' + (p.passed_trial ? '' : 'color:#ccc;') + '">' + (p.passed_trial || 0) + '</td>'
+                  + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;' + (p.owed_usd ? 'color:#c0392b;font-weight:700;' : 'color:#ccc;') + '">$' + (p.owed_usd || 0) + '</td>'
+                  + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;' + (p.paid_usd ? 'color:#888;' : 'color:#ccc;') + '">$' + (p.paid_usd || 0) + '</td>'
+                  + '<td style="padding:8px;white-space:nowrap;">'
+                  + '<span onclick="ccCopy(\'' + esc(refUrl) + '\',this)" style="cursor:pointer;color:#888;font-size:11px;">ref link</span>'
+                  + ' &middot; <span onclick="ccCopy(\'' + esc(statsUrl) + '\',this)" style="cursor:pointer;color:#888;font-size:11px;">stats</span>'
+                  + '</td></tr>';
+            });
+            h += '</tbody></table></div>';
         });
-        h += '</tbody></table></div>';
 
         h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin:28px 0 10px;">Bounties</div>';
         h += '<p style="color:#666;font-size:12.5px;margin:0 0 10px;">Each referral pays in two tranches: $' + trancheTrial + ' at trial-week pass, $' + trancheHours + ' at ' + trancheGate + ' recorded hours. Self-serve referrers claim from their stats page and you pay from the Payouts tab; "Mark paid" here is the manual fallback for when the money already left Qonto another way.</p>';
@@ -4290,7 +4364,8 @@
           + '<p style="color:#666;font-size:12.5px;margin:0 0 10px;">People who answered "how did you hear about us" but carry no partner credit, e.g. they cleared the prefilled answer and typed the show\'s name. Credit the right partner here and the bounty follows automatically.</p>'
           + '<div id="unattributed-list" style="color:#999;font-size:13px;">Loading…</div>';
 
-        h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin:28px 0 10px;">Add or edit a partner</div>'
+        h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin:28px 0 6px;">Add or edit a partner</div>'
+          + '<p style="color:#666;font-size:12.5px;margin:0 0 10px;">For a show, newsletter or anyone you are setting up yourself. Individuals do not need this: they get a link instantly at <a href="https://pdoom.org/refer.html" target="_blank" rel="noopener" style="color:#0066cc;">pdoom.org/refer.html</a>, which is where every partner in the list above came from.</p>'
           + '<div class="outline-box" style="padding:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">'
           + '<label style="font-size:12px;color:#666;">Name<br><input id="pt-name" placeholder="Dwarkesh Podcast" style="padding:6px 8px;border:1px solid #ddd;font-size:13px;width:190px;"></label>'
           + '<label style="font-size:12px;color:#666;">Slug<br><input id="pt-slug" placeholder="dwarkesh" style="padding:6px 8px;border:1px solid #ddd;font-size:13px;width:150px;font-family:monospace;"></label>'
