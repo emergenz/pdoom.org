@@ -451,6 +451,24 @@
                     <label class="field-label" for="f-bank">Bank name and country *</label>
                     <input class="field-input" type="text" id="f-bank" name="bank" autocomplete="off" placeholder="Commerzbank, Germany">
                 </div>
+                <!-- Transfers that leave on the SWIFT rail (Nepal, Armenia) cannot be
+                     sent without the account holder's own address: the bank requires
+                     street, city and postal code as separate fields. Countries with
+                     local rails do not ask, so this stays hidden for them. -->
+                <div id="w-benaddr" style="display:none">
+                    <div class="field">
+                        <label class="field-label" for="f-benaddr-line">Your street address *</label>
+                        <input class="field-input" type="text" id="f-benaddr-line" name="benaddr_line" autocomplete="address-line1" placeholder="Jangal-panauti Rd">
+                    </div>
+                    <div class="field">
+                        <label class="field-label" for="f-benaddr-city">Your city *</label>
+                        <input class="field-input" type="text" id="f-benaddr-city" name="benaddr_city" autocomplete="address-level2" placeholder="Banepa">
+                    </div>
+                    <div class="field">
+                        <label class="field-label" for="f-benaddr-post">Your postal code *</label>
+                        <input class="field-input" type="text" id="f-benaddr-post" name="benaddr_post" autocomplete="postal-code" placeholder="45210">
+                    </div>
+                </div>
                 <div class="field">
                     <div class="field-hint">Payouts are denominated in USD and paid to your account in its local currency (EUR for European accounts) at the official ECB exchange rate. Each payment statement shows the exact conversion.</div>
                 </div>
@@ -925,6 +943,7 @@
         show('w-branchcode', mode === 'jp');
         show('w-account-type', mode === 'us' || mode === 'jp');
         show('w-bic', mode === 'in' || mode === 'iban' || mode === 'default' || mode === 'am' || mode === 'np');
+        show('w-benaddr', mode === 'am' || mode === 'np');
         if (mode === 'us') {
             lIban.textContent = 'Account number *';
             fIban.placeholder = 'e.g. 12345678 (4-17 digits)';
@@ -1013,6 +1032,14 @@
         } else {
             // IBAN countries + India (IFSC lives in the BIC field)
             pd.bic = clean('f-bic').toUpperCase();
+        }
+        if (mode === 'am' || mode === 'np') {
+            /* Qonto's SWIFT rail requires all four, so a missing one fails the
+               payout at approve time with an unhelpful error rather than here. */
+            pd.addr_first_line = document.getElementById('f-benaddr-line').value.trim();
+            pd.addr_city = document.getElementById('f-benaddr-city').value.trim();
+            pd.addr_post_code = document.getElementById('f-benaddr-post').value.trim();
+            pd.addr_country_iso = COUNTRY_ISO[document.getElementById('f-country').value] || '';
         }
         return pd;
     }
@@ -1129,6 +1156,12 @@
                 if (ibanVal.length < 8) markBank('f-iban', 'Please enter your IBAN or account number.');
             }
 
+            if (mode === 'am' || mode === 'np') {
+                if (fieldVal('f-benaddr-line').length < 3) markBank('f-benaddr-line', 'Your street address is required for an international transfer.');
+                if (fieldVal('f-benaddr-city').length < 2) markBank('f-benaddr-city', 'Your city is required for an international transfer.');
+                if (fieldVal('f-benaddr-post').length < 3) markBank('f-benaddr-post', 'Your postal code is required for an international transfer.');
+            }
+
             // Bank name: required
             checkField('f-bank',
                 v => v && v.length >= 3,
@@ -1157,8 +1190,36 @@
     }
 
 
+    /* Ask the API what it makes of the address, and if it cannot verify it,
+       say so and let the person decide. It used to be a hard block at submit
+       time, which turned away real participants: an address like
+       "Vill- X, P.O.- Y, P.S.- Z, Dist- ..., 743437" is the normal rural
+       Indian format and has no premise-level data in Google, so a correct
+       address looks exactly like a wrong one. We do not post anything to
+       these addresses, so a warning is the honest control. Any network
+       trouble here is ignored on purpose: this must never be what stops
+       somebody onboarding. */
+    async function addressLooksOk() {
+        var addr = document.getElementById('f-address').value.trim();
+        var country = document.getElementById('f-country').value.trim();
+        if (!addr || !country) return true;
+        var warnings = [];
+        try {
+            const resp = await fetch(API_BASE + '/onboard/validate-fields', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ address: addr, country: country }),
+            });
+            const out = await resp.json();
+            warnings = (out && out.warnings) || [];
+        } catch (e) { return true; }
+        if (!warnings.length) return true;
+        return window.confirm(warnings.join('\n') + '\n\nContinue with this address?');
+    }
+
     async function submitOnboarding() {
         if (!validateStep(2)) return;
+        if (!(await addressLooksOk())) return;
 
         const submitBtn = document.querySelector('#step-2 .btn-next');
         submitBtn.disabled = true;
