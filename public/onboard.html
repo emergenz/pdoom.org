@@ -373,6 +373,7 @@
                         <option value="Mexico">Mexico</option>
                         <option value="Armenia">Armenia</option>
                         <option value="Nepal">Nepal</option>
+                        <option value="Ethiopia">Ethiopia</option>
                     </select>
                 </div>
 
@@ -906,7 +907,7 @@
         'Romania':'RO','Ireland':'IE','Greece':'GR','India':'IN','China':'CN','Japan':'JP',
         'United States':'US','Canada':'CA','Australia':'AU','Israel':'IL','Turkey':'TR',
         'Singapore':'SG','Hong Kong':'HK','South Korea':'KR','Taiwan':'TW','Brazil':'BR',
-        'Mexico':'MX','South Africa':'ZA','Armenia':'AM','Nepal':'NP',
+        'Mexico':'MX','South Africa':'ZA','Armenia':'AM','Nepal':'NP','Ethiopia':'ET',
     };
     const IBAN_COUNTRIES = ['DE','GB','CH','AT','NL','FR','SE','DK','NO','FI','BE','IT','ES','PT','PL','CZ','HU','RO','IE','GR','IL','TR','BR'];
 
@@ -914,7 +915,7 @@
         const country = document.getElementById('f-country').value;
         if (!country) return 'default';
         const iso = COUNTRY_ISO[country] || '';
-        const modes = { US:'us', IN:'in', CA:'ca', AU:'au', JP:'jp', SG:'sg', HK:'hk', MX:'mx', AM:'am', NP:'np' };
+        const modes = { US:'us', IN:'in', CA:'ca', AU:'au', JP:'jp', SG:'sg', HK:'hk', MX:'mx', AM:'am', NP:'np', ET:'et' };
         if (modes[iso]) return modes[iso];
         if (IBAN_COUNTRIES.indexOf(iso) >= 0) return 'iban';
         return 'iban'; // every remaining country in the dropdown uses IBAN
@@ -942,8 +943,8 @@
         show('w-bankcode', mode === 'jp' || mode === 'sg' || mode === 'hk');
         show('w-branchcode', mode === 'jp');
         show('w-account-type', mode === 'us' || mode === 'jp');
-        show('w-bic', mode === 'in' || mode === 'iban' || mode === 'default' || mode === 'am' || mode === 'np');
-        show('w-benaddr', mode === 'am' || mode === 'np');
+        show('w-bic', mode === 'in' || mode === 'iban' || mode === 'default' || mode === 'am' || mode === 'np' || mode === 'et');
+        show('w-benaddr', mode === 'am' || mode === 'np' || mode === 'et');
         if (mode === 'us') {
             lIban.textContent = 'Account number *';
             fIban.placeholder = 'e.g. 12345678 (4-17 digits)';
@@ -984,12 +985,12 @@
             fIban.placeholder = 'AM.. IBAN or your account number';
             lBic.textContent = 'SWIFT/BIC code *';
             fBic.placeholder = 'e.g. ARMIAM22';
-        } else if (mode === 'np') {
+        } else if (mode === 'np' || mode === 'et') {
             // USD-via-SWIFT corridor: account number + mandatory SWIFT/BIC.
             lIban.textContent = 'Account number *';
             fIban.placeholder = 'as shown in your banking app';
             lBic.textContent = 'SWIFT/BIC code *';
-            fBic.placeholder = 'e.g. NARBNPKA';
+            fBic.placeholder = mode === 'et' ? 'e.g. CBETETAA' : 'e.g. NARBNPKA';
         } else if (mode === 'iban') {
             lIban.textContent = 'IBAN *';
             fIban.placeholder = 'DE89 3704 0044 0532 0130 00';
@@ -1033,7 +1034,7 @@
             // IBAN countries + India (IFSC lives in the BIC field)
             pd.bic = clean('f-bic').toUpperCase();
         }
-        if (mode === 'am' || mode === 'np') {
+        if (mode === 'am' || mode === 'np' || mode === 'et') {
             /* Qonto's SWIFT rail requires all four, so a missing one fails the
                payout at approve time with an unhelpful error rather than here. */
             pd.addr_first_line = document.getElementById('f-benaddr-line').value.trim();
@@ -1146,9 +1147,10 @@
                 if (!/^[A-Za-z0-9]{4,34}$/.test(ibanVal)) markBank('f-iban', 'Please enter your IBAN or bank account number.');
                 else if (ibanVal.indexOf('AM') === 0 && !validateIBAN(ibanVal)) markBank('f-iban', 'That IBAN does not look valid; please double-check it.');
                 if (!/^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(bicVal)) markBank('f-bic', 'SWIFT/BIC code is required for transfers to Armenia (8 or 11 characters, ask your bank).');
-            } else if (mode === 'np') {
+            } else if (mode === 'np' || mode === 'et') {
+                const where = mode === 'et' ? 'Ethiopia' : 'Nepal';
                 if (!/^[A-Za-z0-9]{4,34}$/.test(ibanVal)) markBank('f-iban', 'Please enter your bank account number.');
-                if (!/^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(bicVal)) markBank('f-bic', 'SWIFT/BIC code is required for transfers to Nepal (8 or 11 characters, ask your bank).');
+                if (!/^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(bicVal)) markBank('f-bic', 'SWIFT/BIC code is required for transfers to ' + where + ' (8 or 11 characters, ask your bank).');
             } else if (mode === 'iban') {
                 if (!validateIBAN(ibanVal)) markBank('f-iban', 'Please enter a valid IBAN (your country uses IBAN for bank transfers).');
                 if (bicVal && !/^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(bicVal)) markBank('f-bic', 'BIC/SWIFT must be 8 or 11 characters.');
@@ -1156,7 +1158,7 @@
                 if (ibanVal.length < 8) markBank('f-iban', 'Please enter your IBAN or account number.');
             }
 
-            if (mode === 'am' || mode === 'np') {
+            if (mode === 'am' || mode === 'np' || mode === 'et') {
                 if (fieldVal('f-benaddr-line').length < 3) markBank('f-benaddr-line', 'Your street address is required for an international transfer.');
                 if (fieldVal('f-benaddr-city').length < 2) markBank('f-benaddr-city', 'Your city is required for an international transfer.');
                 if (fieldVal('f-benaddr-post').length < 3) markBank('f-benaddr-post', 'Your postal code is required for an international transfer.');
