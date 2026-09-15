@@ -2811,6 +2811,7 @@
         html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Period</th>';
         html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Type</th>';
         html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:right;padding:8px 12px;border-bottom:2px solid #000;">Days</th>';
+        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Recorded in period</th>';
         html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:right;padding:8px 12px;border-bottom:2px solid #000;">Amount</th>';
         html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Status</th>';
         html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Note to participant</th>';
@@ -2845,10 +2846,25 @@
             html += '<td style="padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;color:#777;border-bottom:1px solid #eee;">' + escapeHtml(p.period_start) + ' to ' + escapeHtml(p.period_end) + '</td>';
             html += '<td style="padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">' + typeLabel + '</td>';
             html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;text-align:right;border-bottom:1px solid #eee;">' + (isPremium ? '\u2014' : p.days) + '</td>';
+            html += '<td style="padding:7px 12px;border-bottom:1px solid #eee;min-width:190px;">' + evidenceCell(p, isPremium) + '</td>';
             var _cur = (p.currency || 'USD').toUpperCase();
             var _amt = (p.amount != null ? p.amount : p.amount_usd);
             var _sym = _cur === 'EUR' ? '€' : _cur === 'GBP' ? '£' : '$';
-            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;text-align:right;border-bottom:1px solid #eee;font-weight:700;">' + _sym + Number(_amt).toFixed(2) + '</td>';
+            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;text-align:right;border-bottom:1px solid #eee;font-weight:700;">';
+            // Amount is a button while the payout is still approvable: adjusting it
+            // writes the new figure plus Mihir's internal reason onto the row.
+            if (canApprove && !isPremium) {
+                html += '<span class="payout-amount" data-id="' + escapeHtml(p.payout_id) + '" title="Click to adjust" style="cursor:pointer;border-bottom:1px dashed #999;">' + _sym + Number(_amt).toFixed(2) + '</span>';
+            } else {
+                html += _sym + Number(_amt).toFixed(2);
+            }
+            if (p.original_amount != null && Number(p.original_amount) !== Number(_amt)) {
+                html += '<br><span style="font-size:10px;font-weight:400;color:#b08800;">adj. from ' + _sym + Number(p.original_amount).toFixed(2) + '</span>';
+            }
+            if (p.adjustment_note) {
+                html += '<br><span title="' + escapeHtml(p.adjustment_note) + '" style="font-size:10px;font-weight:400;color:#777;">' + escapeHtml(p.adjustment_note.length > 34 ? p.adjustment_note.slice(0, 34) + '\u2026' : p.adjustment_note) + '</span>';
+            }
+            html += '</td>';
             html += '<td style="padding:7px 12px;font-size:11px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">';
             html += '<span style="color:' + statusColor + ';font-weight:700;text-transform:uppercase;">' + escapeHtml(p.status) + '</span>';
             if (isOverdue) html += ' <span style="background:#cf222e;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;letter-spacing:0.5px;">OVERDUE</span>';
@@ -2889,6 +2905,9 @@
         document.querySelectorAll('.payout-note').forEach(function(inp) {
             inp.addEventListener('input', function() { setPayoutNoteStatus(inp.dataset.id, 'unsaved'); });
             inp.addEventListener('change', function() { savePayoutNote(inp.dataset.id, inp.value); });
+        });
+        document.querySelectorAll('.payout-amount').forEach(function(el) {
+            el.addEventListener('click', function() { adjustPayoutAmount(el.dataset.id); });
         });
 
         // Summary
@@ -2949,6 +2968,162 @@
         } else {
             summaryDiv.innerHTML = '';
         }
+    }
+
+    /* --- Recording evidence on a payout row ---
+       Hours, active days and visible fraction for THAT row's period, plus the
+       value agent's last verdict. The point is to decide "is this earned?"
+       without opening the weekly value mail and the metadata dashboard.
+
+       unlinked is NOT zero. recorder_emails is set on only a handful of
+       participants, so anyone who installed the recorder under a different
+       Google account resolves to no uuid and shows nothing. Rejecting those
+       rows would be wrong, so they read "unlinked", never "0.0h". */
+    function periodWeeks(p) {
+        if (!p.period_start || !p.period_end) return 0;
+        var a = new Date(p.period_start + 'T00:00:00');
+        var b = new Date(p.period_end + 'T00:00:00');
+        var days = Math.round((b - a) / 86400000) + 1;
+        return days > 0 ? days / 7 : 0;
+    }
+
+    /* How much of the row's period has actually elapsed. An 'open' row is still
+       running, so its hours are a partial count and the band has to be read
+       against the elapsed days, not the whole period. */
+    function periodProgress(p) {
+        if (!p.period_start || !p.period_end) return { state: 'done', frac: 1 };
+        var today = new Date(); today.setHours(0, 0, 0, 0);
+        var a = new Date(p.period_start + 'T00:00:00');
+        var b = new Date(p.period_end + 'T00:00:00');
+        if (today < a) return { state: 'future', frac: 0 };
+        if (today >= b) return { state: 'done', frac: 1 };
+        var total = Math.round((b - a) / 86400000) + 1;
+        var gone = Math.round((today - a) / 86400000) + 1;
+        return { state: 'open', frac: total > 0 ? Math.min(1, gone / total) : 1 };
+    }
+
+    /* The August bands, verbatim and deliberately coarse: >=15 h/wk full,
+       8-15 two-thirds, 4-8 one-third, <4 nothing. Grace-for-cause (first
+       month, our bugs, a communicated absence) means no adjustment at all,
+       which is why this is a hint and not an automatic amount. */
+    function bandFor(hoursPerWeek) {
+        if (hoursPerWeek >= 15) return { label: 'full', frac: 1 };
+        if (hoursPerWeek >= 8) return { label: '2/3', frac: 2 / 3 };
+        if (hoursPerWeek >= 4) return { label: '1/3', frac: 1 / 3 };
+        return { label: 'none', frac: 0 };
+    }
+
+    function evidenceCell(p, isPremium) {
+        if (isPremium) return '<span style="font-size:12px;font-family:\'SF Mono\',monospace;color:#999;">—</span>';
+        var ev = p.evidence;
+        var mono = 'font-size:12px;font-family:\'SF Mono\',monospace;';
+        if (!ev) return '<span style="' + mono + 'color:#999;">no data</span>';
+        if (!ev.linked) {
+            return '<span title="No recorder account resolves to this participant, so we cannot see their data. This is not the same as them recording nothing: link their recorder email on the Participants tab." style="' + mono + 'color:#999;border-bottom:1px dotted #999;">unlinked</span>';
+        }
+        // A period that has not finished has not earned its hours yet. Judge an
+        // in-flight row on the rate SO FAR, never on the total: a September row
+        // read on the 15th otherwise looks like half a month of nothing.
+        var prog = periodProgress(p);
+        if (prog.state === 'future') {
+            return '<span title="This period has not started yet." style="' + mono + 'color:#999;">not started</span>';
+        }
+        var wks = periodWeeks(p) * prog.frac;
+        var hpw = wks > 0 ? ev.hours / wks : 0;
+        var band = bandFor(hpw);
+        var hoursColor = band.frac === 1 ? '#2ea043' : band.frac === 0 ? '#cf222e' : '#b08800';
+        var out = '<div style="' + mono + 'color:' + hoursColor + ';font-weight:700;">' + Number(ev.hours).toFixed(1) + 'h'
+            + '<span style="font-weight:400;color:#777;"> · ' + ev.active_days + 'd'
+            + (wks > 1 ? ' · ' + hpw.toFixed(1) + 'h/wk' : '')
+            + (prog.state === 'open' ? ' · so far' : '') + '</span></div>';
+
+        var bits = [];
+        if (ev.visible_fraction != null) {
+            var vf = Math.round(ev.visible_fraction * 100);
+            var vfColor = ev.visible_fraction < 0.15 ? '#cf222e' : ev.visible_fraction < 0.5 ? '#b08800' : '#777';
+            bits.push('<span title="Share of captured frames that were not blank or black. Low means the recorder was running but capturing nothing usable." style="color:' + vfColor + ';">' + vf + '% visible</span>');
+        }
+        if (ev.value_relevance) {
+            var rel = ev.value_relevance;
+            var relColor = rel === 'high' ? '#2ea043' : rel === 'low' ? '#cf222e' : '#b08800';
+            var drift = ev.value_prev_relevance && ev.value_prev_relevance !== rel;
+            bits.push('<span title="Weekly value agent' + (ev.value_scored_at ? ', scored ' + escapeHtml(ev.value_scored_at.slice(0, 10)) : '') + '" style="color:' + relColor + ';">'
+                + (drift ? escapeHtml(ev.value_prev_relevance) + '→' : '') + escapeHtml(rel) + '</span>');
+        } else {
+            bits.push('<span style="color:#bbb;">unscored</span>');
+        }
+        if (ev.value_recommendation && ev.value_recommendation !== 'keep') {
+            var recColor = ev.value_recommendation === 'wind_down' ? '#cf222e' : '#b08800';
+            bits.push('<span style="color:' + recColor + ';font-weight:700;">' + escapeHtml(ev.value_recommendation) + '</span>');
+        }
+        out += '<div style="font-size:10px;font-family:\'SF Mono\',monospace;margin-top:2px;">' + bits.join(' · ') + '</div>';
+        return out;
+    }
+
+    /* --- Adjusting an amount ---
+       Downward only, bounded by what was generated, because the monthly fee in
+       the DPA is a fixed figure and the approve path caps a record at $301.
+       The reason is mandatory and stays INTERNAL (adjustment_note); anything
+       the participant should read goes in the note column instead. */
+    function adjustPayoutAmount(payoutId) {
+        var row = null;
+        for (var i = 0; i < (_payoutsData || []).length; i++) {
+            if (_payoutsData[i].payout_id === payoutId) { row = _payoutsData[i]; break; }
+        }
+        if (!row) return;
+        var cur = row.amount != null ? row.amount : row.amount_usd;
+        var orig = row.original_amount != null ? row.original_amount : cur;
+        var sym = (row.currency || 'USD').toUpperCase() === 'EUR' ? '€' : '$';
+        var ev = row.evidence;
+
+        var hint = '';
+        if (ev && ev.linked) {
+            var prog = periodProgress(row);
+            var wks = periodWeeks(row) * prog.frac;
+            var hpw = wks > 0 ? ev.hours / wks : 0;
+            var band = bandFor(hpw);
+            hint = ev.hours.toFixed(1) + 'h over ' + ev.active_days + ' active days'
+                + (prog.state === 'open' ? ' SO FAR, period still running' : '')
+                + (wks > 1 ? ' (' + hpw.toFixed(1) + 'h/wk)' : '')
+                + (ev.visible_fraction != null ? ', ' + Math.round(ev.visible_fraction * 100) + '% visible' : '')
+                + (ev.value_relevance ? ', value ' + ev.value_relevance : '')
+                + '\nAugust band for that rate: ' + band.label
+                + ' = ' + sym + (Math.round(orig * band.frac * 100) / 100).toFixed(2)
+                + '\n(Grace-for-cause, first month, our bugs, a communicated absence, means no adjustment.)';
+        } else if (ev) {
+            hint = 'No recorder account is linked, so there are no hours to go on here.';
+        }
+
+        var raw = prompt('Adjust ' + payoutId + '\n' + hint
+            + '\n\nGenerated: ' + sym + Number(orig).toFixed(2)
+            + '\nCurrently: ' + sym + Number(cur).toFixed(2)
+            + '\n\nNew amount (downward only, ' + sym + '0 to ' + sym + Number(orig).toFixed(2) + '):',
+            String(Number(cur).toFixed(2)));
+        if (raw === null) return;
+        var next = parseFloat(String(raw).replace(/[^0-9.\-]/g, ''));
+        if (!isFinite(next) || next < 0) { alert('Not a number.'); return; }
+        if (next > orig) { alert('Adjustments only go down. A top-up above ' + sym + Number(orig).toFixed(2) + ' has to be its own payout.'); return; }
+
+        var reason = prompt('Why ' + sym + next.toFixed(2) + '? This is INTERNAL, it is never emailed.\n'
+            + 'Use the "Note to participant" column for what they should read.');
+        if (reason === null) return;
+        if (!String(reason).trim()) { alert('A reason is required.'); return; }
+
+        fetch(ONBOARD_API + '/payouts/adjust', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ payout_id: payoutId, amount: next, adjustment_note: String(reason).trim() })
+        })
+        .then(function(r) { return r.json().then(function(j) { return { ok: r.ok, body: j }; }); })
+        .then(function(res) {
+            if (!res.ok) { alert('Adjust failed: ' + (res.body.error || 'unknown error')); return; }
+            row.amount = res.body.amount;
+            row.amount_usd = res.body.amount;
+            row.original_amount = res.body.original_amount;
+            row.adjustment_note = res.body.adjustment_note;
+            renderPayoutsTable();
+        })
+        .catch(function(err) { alert('Adjust failed: ' + err); });
     }
 
     /* --- Note to participant on a payout ---
