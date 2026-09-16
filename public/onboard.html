@@ -502,7 +502,7 @@
                     <p>p(doom) reviews submitted recordings for project relevance, technical quality, and legal/privacy safety. p(doom) may reject data that is staged, mostly idle, private/sensitive, corrupted, or legally risky. p(doom) will exercise this right in good faith and will not unreasonably withhold acceptance. Only accepted data is eligible for payment.</p>
 
                     <h2>Compensation</h2>
-                    <p>The standard monthly compensation is <strong>$300 USD</strong> for regular contributions of qualifying recording data. If you selected a non-USD currency, payment will be converted at the prevailing exchange rate of the payment provider on the date of transfer. p(doom) may adjust compensation for a given period if the volume of accepted data is significantly below regular levels. Any adjustment will be communicated to the participant before payment, and the participant may terminate the agreement if they do not accept the adjustment.</p>
+                    <p>Your monthly compensation is <strong id="comp-figure">$300</strong> for regular contributions of qualifying recording data. If your payout currency differs from <span id="comp-currency">USD</span>, payment will be converted at the prevailing exchange rate of the payment provider on the date of transfer. p(doom) may adjust compensation for a given period if the volume of accepted data is significantly below regular levels. Any adjustment will be communicated to the participant before payment, and the participant may terminate the agreement if they do not accept the adjustment.</p>
 
                     <h2>What you may record</h2>
                     <ul>
@@ -795,6 +795,12 @@
     let currentStep = 0;
     let inviteToken = null;
     let inviteEmail = null;
+    /* Compensation as priced by the API for THIS invite's tier. The agreement on
+       screen must state the figure the generated DPA will print, so the amounts
+       arrive pre-formatted and the page only picks the region by country. Until
+       the API answers, the fallback matches the server's own default (standard,
+       unknown country -> Rest of world). */
+    let compInfo = null;
 
     // Token validation on page load
     async function initToken() {
@@ -821,6 +827,8 @@
             }
             inviteToken = token;
             inviteEmail = data.email;
+            compInfo = data.comp || null;
+            renderCompensation();
             document.getElementById('f-email').value = inviteEmail;
             document.getElementById('f-email').readOnly = true;
             document.getElementById('f-email').style.color = 'var(--fg-dim)';
@@ -842,10 +850,38 @@
             </div>`;
     }
 
+    /* Mirror of the server's regionForCountry: trim, lowercase, drop a trailing
+       dot, then membership. Only the RULE is here; the country lists and the
+       formatted amounts come from the API, so there is no second copy of the
+       compensation policy in this page. */
+    function renderCompensation() {
+        /* Never let a display concern break the flow: goStep calls this, so an
+           exception here would strand someone mid-agreement. On any failure the
+           clause keeps its rendered default. */
+        try {
+            if (!compInfo || !compInfo.regions) return;
+            const figure = document.getElementById('comp-figure');
+            const currency = document.getElementById('comp-currency');
+            if (!figure) return;
+            const raw = (document.getElementById('f-country') || {}).value || '';
+            const c = raw.trim().toLowerCase().replace(/\.$/, '');
+            let region = 'RoW';
+            if ((compInfo.na_countries || []).indexOf(c) !== -1) region = 'NA';
+            else if ((compInfo.eu_countries || []).indexOf(c) !== -1) region = 'EU';
+            const band = compInfo.regions[region];
+            if (!band) return;
+            figure.textContent = band.display;
+            if (currency) currency.textContent = band.currency;
+        } catch (err) {
+            console.error('compensation render failed', err);
+        }
+    }
+
     function goStep(n) {
         if (n > currentStep && !validateStep(currentStep)) return;
 
         currentStep = n;
+        renderCompensation();
         document.querySelectorAll('.step-panel').forEach((p, i) => {
             p.classList.toggle('active', i === n);
         });
@@ -1004,6 +1040,7 @@
         }
     }
     document.getElementById('f-country').addEventListener('change', updateBankFields);
+    document.getElementById('f-country').addEventListener('change', renderCompensation);
 
     // Build the payout_details payload: sanitized (no spaces/dashes, uppercased
     // where applicable) and containing ONLY the fields relevant to the selected
