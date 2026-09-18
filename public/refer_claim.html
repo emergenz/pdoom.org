@@ -64,16 +64,9 @@
 
       <div class="field">
         <label>A few confirmations</label>
-        <p class="hint">We need these once per payout, for German tax and bookkeeping rules.</p>
+        <p class="hint">We need these once per payout, for German tax and bookkeeping rules. The premium is for private referrals only. If you are referring as a business, reply to your referral email instead and we will sort it out directly.</p>
         <div class="checks">
-          <label class="check"><input type="radio" name="vat" value="none" checked>
-            <span>I made this referral <strong>privately, not as a business</strong> (no trade, self-employment, or freelance activity) and I have no VAT ID.</span></label>
-          <label class="check"><input type="radio" name="vat" value="kleinunternehmer">
-            <span>I am a German small business under <strong>&sect; 19 UStG</strong> (Kleinunternehmer).</span></label>
-          <label class="check"><input type="radio" name="vat" value="regelbesteuert">
-            <span>I <strong>charge VAT on my invoices</strong> (a VAT-registered business / regelbesteuert). We'll then ask you to invoice us instead. <em>This choice can't be undone here, so pick it only if it's true.</em></span></label>
-        </div>
-        <div class="checks" style="margin-top:18px;">
+          <label class="check"><input type="checkbox" id="c-private"><span>I made this referral <strong>as a private person</strong>, not as a business (no trade, self-employment, or freelance activity), and I have no VAT ID.</span></label>
           <label class="check"><input type="checkbox" id="c-age"><span>I am 18 or older.</span></label>
           <label class="check"><input type="checkbox" id="c-emp"><span>I am not an employee of p(doom).</span></label>
           <label class="check"><input type="checkbox" id="c-self"><span>I did not refer myself or anyone living in my household.</span></label>
@@ -132,12 +125,6 @@
     })
     .then(function (d) {
       needsDetails = !!d.needs_details;
-      // Pre-select the VAT option they chose before, so a returning referrer
-      // stays consistent across their own claims.
-      if (d.vat_status) {
-        var pre = document.querySelector('input[name=vat][value="' + d.vat_status + '"]');
-        if (pre) pre.checked = true;
-      }
       if (!d.claimable || !d.claimable.length) {
         sub.textContent = 'Nothing to claim right now. Once a premium is earned it shows up here.';
         return;
@@ -160,18 +147,20 @@
     err.style.display = 'none';
     var email = document.getElementById('claim_email').value.trim();
     if (!email) return fail('Please enter the email your referral link was sent to.');
-    var vat = (document.querySelector('input[name=vat]:checked') || {}).value || 'none';
+    if (!document.getElementById('c-private').checked) {
+      return fail('The premium is for private referrals only. If you referred as a business, reply to your referral email and we will arrange it directly.');
+    }
     if (!document.getElementById('c-age').checked || !document.getElementById('c-emp').checked ||
         !document.getElementById('c-self').checked || !document.getElementById('c-off').checked ||
         !document.getElementById('c-rules').checked) {
-      return fail('Please confirm all five statements.');
+      return fail('Please confirm all six statements.');
     }
     var body = {
-      token: token, email: email, vat_status: vat,
+      token: token, email: email, vat_status: 'none', confirm_private: true,
       confirm_over_18: true, confirm_not_employee: true, confirm_not_self_household: true,
       confirm_not_official: true, confirm_rules: true
     };
-    if (needsDetails && vat !== 'regelbesteuert') {
+    if (needsDetails) {
       var legal = document.getElementById('legal_name').value.trim();
       var addr = document.getElementById('address').value.trim();
       var ctry = document.getElementById('country').value.trim();

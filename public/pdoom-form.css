@@ -453,6 +453,11 @@ h1 {
   line-height: 0.95;
   text-wrap: balance;
 }
+/* h1 has margin:0 and line-height .95, so a lede set directly beneath it
+   collided with the headline's descenders. The gap belongs here rather than on
+   h1 itself, which is also used without a lede. */
+h1 + .prose { margin-top: 18px; }
+
 .prose p { font-size: clamp(18px, 1.25vw, 20px); line-height: 1.38; margin: 0; max-width: 60ch; }
 .prose p + p { margin-top: 1.15em; }
 .prose p.sub { color: var(--muted); }
