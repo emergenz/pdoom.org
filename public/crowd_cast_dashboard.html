@@ -4781,22 +4781,25 @@
           + '</div>';
     }
 
-    function fcBar(label, now, projected, target, unit, good) {
+    /* state: 'good' | 'short' | 'over'. Overshooting the budget is not success,
+       so it must not render in the same colour as landing the hours. */
+    function fcBar(label, now, projected, target, unit, state, sub) {
         var pct = Math.max(0, Math.min(100, projected / target * 100));
         var nowPct = Math.max(0, Math.min(100, now / target * 100));
-        var col = good ? '#1e7e34' : '#c0392b';
+        var col = state === 'good' ? '#1e7e34' : state === 'over' ? '#b8860b' : '#c0392b';
+        var tag = state === 'over' ? ' <span style="color:#b8860b;font-weight:700;">(' + (projected / target * 100).toFixed(0) + '% of it)</span>' : '';
         return '<div style="margin-bottom:18px;">'
           + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;">'
           + '<span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">' + label + '</span>'
           + '<span style="font-size:13px;font-variant-numeric:tabular-nums;"><b style="color:' + col + ';">' + unit + fcNum(projected) + '</b>'
-          + ' <span style="color:#999;">of ' + unit + fcNum(target) + '</span></span></div>'
+          + ' <span style="color:#999;">of ' + unit + fcNum(target) + '</span>' + tag + '</span></div>'
           + '<div style="position:relative;height:22px;background:#f0f0f0;border:1px solid #e0e0e0;">'
           + '<div style="position:absolute;left:0;top:0;bottom:0;width:' + pct + '%;background:' + col + ';opacity:.85;"></div>'
           + '<div style="position:absolute;left:0;top:0;bottom:0;width:' + nowPct + '%;background:#000;"></div>'
           + '</div>'
           + '<div style="font-size:11px;color:#999;margin-top:3px;">'
           + '<span style="display:inline-block;width:8px;height:8px;background:#000;margin-right:4px;"></span>banked today ' + unit + fcNum(now)
-          + ' &nbsp;&nbsp;<span style="display:inline-block;width:8px;height:8px;background:' + col + ';opacity:.85;margin-right:4px;"></span>projected by the deadline'
+          + ' &nbsp;&nbsp;<span style="display:inline-block;width:8px;height:8px;background:' + col + ';opacity:.85;margin-right:4px;"></span>' + (sub || 'projected by the deadline')
           + '</div></div>';
     }
 
@@ -4833,12 +4836,21 @@
         h += '</div>';
 
         /* ---- the two targets ---- */
+        var spendRatio = p.spendAtDeadline / d.targets.budget_eur;
+        var hState = p.hoursAtDeadline >= p.target ? 'good' : 'short';
+        var bState = spendRatio > 1.03 ? 'over' : spendRatio >= 0.95 ? 'good' : 'short';
+        h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin:0 0 10px;">'
+          + 'If nothing changes, recruiting ' + p.joins.toFixed(2) + ' a day all the way to the deadline</div>';
         h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-bottom:8px;">';
-        h += '<div>' + fcBar('Recorded hours', m.total_hours, p.hoursAtDeadline, p.target, '', p.hoursAtDeadline >= p.target) + '</div>';
-        h += '<div>' + fcBar('Budget spent', d.model.committed_eur, p.spendAtDeadline, d.targets.budget_eur, '&euro;', p.spendAtDeadline >= d.targets.budget_eur * 0.97) + '</div>';
+        h += '<div>' + fcBar('Recorded hours', m.total_hours, p.hoursAtDeadline, p.target, '', hState) + '</div>';
+        h += '<div>' + fcBar('Budget spent', d.model.committed_eur, p.spendAtDeadline, d.targets.budget_eur, '&euro;', bState) + '</div>';
         h += '</div>';
-        h += '<p style="font-size:12px;color:#888;margin:0 0 26px;">Both bars carry on at the sliders below, including recruiting at '
-          + p.joins.toFixed(2) + ' a day for the whole window. Spending past the budget is not a plan, it is what the current pace does.</p>';
+        h += '<p style="font-size:12px;color:#888;margin:0 0 26px;max-width:720px;">'
+          + (bState === 'over'
+              ? 'That is the catch. Carrying on does reach the hours, but only by spending EUR '
+                + fcNum(p.spendAtDeadline - d.targets.budget_eur) + ' we do not have, and the money actually runs out first. '
+              : '')
+          + 'The verdict above is the same model held to the budget instead.</p>';
 
         /* ---- which wall first ---- */
         h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;">';
@@ -4858,7 +4870,7 @@
         h += '<div><div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">The levers</div>';
         h += fcSlider('participation', 'Share recording on a given day', 0.1, 1, 0.01, fcVal('participation'),
               function(v){ return (v*100).toFixed(0) + '%'; },
-              'Measured ' + (m.participation_28d*100).toFixed(0) + '% over 28 days. ' + d.funnel.went_quiet + ' people recorded once and stopped.');
+              'Measured ' + (m.participation_28d*100).toFixed(0) + '% over 28 days: on a normal day, fewer than half the people we are paying record anything at all.');
         h += fcSlider('hpr', 'Hours on a day they do record', 0.5, 6, 0.05, fcVal('hpr'),
               function(v){ return Number(v).toFixed(2) + ' h'; },
               'Measured ' + m.hours_per_recording_day_28d + ' h. They agreed to 20-25 h a week, which is 2.9 to 3.6 h a day.');
