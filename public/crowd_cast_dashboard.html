@@ -4983,7 +4983,10 @@
           + 'Hours are every recorded hour including staff (' + (m.staff_share_all_time*100).toFixed(0) + '% of the all-time total, '
           + m.staff_h_per_day_28d + ' h/day lately). Spend is participant payouts only: EUR ' + fcNum(m.spent_eur) + ' paid, EUR '
           + fcNum(m.pending_eur) + ' pending, EUR ' + fcNum(m.premium_eur) + ' referral premiums. '
-          + 'If part of the EUR ' + fcNum(d.targets.budget_eur) + ' is meant to cover anything other than participant payments, lower the budget box above by that much.</p>';
+          + 'If part of the EUR ' + fcNum(d.targets.budget_eur) + ' is meant to cover anything other than participant payments, lower the budget box above by that much. '
+          + 'Yield is measured per <i>paying</i> head per day, against the headcount on each day rather than today\'s, so the September ramp does not deflate it. '
+          + 'About a sixth of external hours come from recorder accounts we cannot match to anyone we pay: those hours count toward the target either way, '
+          + 'so yield slightly flatters what a paid participant produces.</p>';
 
         h += '</div>';
         document.getElementById('forecast-view').innerHTML = h;
