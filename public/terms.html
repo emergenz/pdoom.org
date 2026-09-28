@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07130e">
+<title>Updated terms · crowd-cast</title>
+<link rel="icon" type="image/png" sizes="128x128" href="/favicon.png">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<link rel="preload" href="/fonts/instrument-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-mono.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/lora-pdoom-italic-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/pdoom-form.css">
+<style>
+  .terms-changes { max-width: 62ch; margin: 0 0 20px; padding-left: 20px; }
+  .terms-changes li { margin: 6px 0; }
+  details.doc { border: 1px solid rgba(0,0,0,.18); margin: 0 0 14px; max-width: 72ch; background: rgba(255,255,255,.5); }
+  details.doc > summary { cursor: pointer; padding: 12px 16px; font-weight: 700; }
+  details.doc .doc-body { max-height: 420px; overflow: auto; padding: 4px 18px 16px; font-size: 14px; line-height: 1.55; border-top: 1px solid rgba(0,0,0,.1); }
+  details.doc .doc-body h2 { font-size: 15px; margin: 18px 0 6px; }
+  details.doc .doc-body ul { padding-left: 20px; }
+  .terms-check { display: flex; gap: 12px; align-items: flex-start; font-size: 15px; max-width: 62ch; cursor: pointer; margin: 10px 0; }
+  .terms-check input { margin-top: 4px; flex: 0 0 auto; accent-color: var(--signal); }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <a class="header-brand" href="/" aria-label="p(doom) home">
+    <span class="pdoom-brand">
+      <img src="/assets/pdoom-mark.webp" srcset="/assets/pdoom-mark-128.webp 128w, /assets/pdoom-mark-256.webp 256w, /assets/pdoom-mark.webp 512w" sizes="38px" alt="" aria-hidden="true" width="512" height="512" decoding="async">
+      <span>p(doom)</span>
+    </span>
+  </a>
+  <nav class="desktop-nav" aria-label="Primary navigation"></nav>
+  <div class="header-actions">
+    <button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="mobile-navigation" aria-expanded="false"></button>
+  </div>
+</header>
+<main class="shell">
+  <div id="root">
+    <p class="kicker">crowd-cast</p>
+    <h1 id="title">Updated terms</h1>
+    <div class="prose"><p class="sub" id="sub">Loading&hellip;</p></div>
+    <div class="err" id="err"></div>
+    <form id="form" novalidate style="display:none;">
+      <ul class="terms-changes prose">
+        <li id="pay-line">Your pay and how you record stay the same.</li>
+        <li>Data you upload is sold to p(doom) when you upload it and becomes a permanent part of the dataset, including data you uploaded before. Your GDPR rights, such as objecting for personal reasons, still apply.</li>
+        <li>Both documents now also describe how crowd-cast works today, for example which services we use.</li>
+      </ul>
+      <p class="prose" style="max-width:62ch;">To keep recording with crowd-cast, please review both documents and accept below.</p>
+      <details class="doc" open><summary>Data Purchase and Participation Agreement</summary><div class="doc-body" id="doc-dpa"></div></details>
+      <details class="doc"><summary>Privacy and Recording Consent</summary><div class="doc-body" id="doc-privacy"></div></details>
+      <label class="terms-check"><input type="checkbox" id="agree-purchase"><span id="label-purchase"></span></label>
+      <label class="terms-check"><input type="checkbox" id="agree-privacy"><span id="label-privacy"></span></label>
+      <label class="terms-check"><input type="checkbox" id="agree-special"><span id="label-special"></span></label>
+      <button type="submit" id="submit" class="button button--primary">
+        <span id="submit-label">Accept updated terms</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </form>
+    <div class="done" id="done" style="display:none;"><h2 id="done-title">All set.</h2><p id="done-msg"></p></div>
+  </div>
+</main>
+<script>
+(function () {
+  var API = 'https://ob3iugfiy2.execute-api.us-east-1.amazonaws.com/v1';
+  function esc(s) { return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  var pid='', token='';
+  try { var q=new URLSearchParams(window.location.search); pid=q.get('pid')||''; token=q.get('token')||''; } catch(e) {}
+  var sub=document.getElementById('sub'), err=document.getElementById('err'), form=document.getElementById('form');
+  function fail(m) { err.style.display='block'; err.textContent=m; }
+  function showDone(t,m) { form.style.display='none'; document.getElementById('done').style.display=''; document.getElementById('done-title').textContent=t; document.getElementById('done-msg').textContent=m; }
+  if (!pid || !token) { sub.textContent=''; fail('This page needs your personal link. Please use the link we emailed you.'); return; }
+  function fmt(c) { if (!c) return ''; var sym = c.currency==='EUR' ? '€' : (c.currency==='USD' ? '$' : ''); return sym ? sym + c.amount : c.amount + ' ' + c.currency; }
+  // The legal texts are read from the onboarding page itself, so this page can never drift from it.
+  var docsP = fetch('/onboard.html', { cache: 'no-store' }).then(function(r) { if (!r.ok) throw new Error('docs'); return r.text(); })
+    .then(function(h) { return new DOMParser().parseFromString(h, 'text/html'); });
+  var infoP = fetch(API+'/terms-info?pid='+encodeURIComponent(pid)+'&token='+encodeURIComponent(token))
+    .then(function(r) { if (r.status===404) throw new Error('This link is not valid any more. Ask us for a fresh one.'); if (!r.ok) throw new Error('Could not load your terms. Please try again shortly.'); return r.json(); });
+  Promise.all([infoP, docsP]).then(function(res) {
+    var d = res[0], doc = res[1];
+    if (d.already_accepted) { sub.textContent=''; showDone('Already accepted.', 'You have already accepted the updated terms. Nothing more to do.'); return; }
+    var dpa = doc.getElementById('agreement-1'), priv = doc.getElementById('agreement-2');
+    var lp = doc.querySelector('label[for="f-agree-purchase"]'), lv = doc.querySelector('label[for="f-agree-privacy"]'), ls = doc.querySelector('label[for="f-agree-special"]');
+    if (!dpa || !priv || !lp || !lv || !ls) throw new Error('Could not load the documents. Please try again shortly.');
+    var fig = dpa.querySelector('#comp-figure'), cur = dpa.querySelector('#comp-currency');
+    if (fig) fig.textContent = fmt(d.compensation);
+    if (cur && d.compensation) cur.textContent = d.compensation.currency;
+    document.getElementById('doc-dpa').innerHTML = dpa.innerHTML;
+    document.getElementById('doc-privacy').innerHTML = priv.innerHTML;
+    document.getElementById('label-purchase').textContent = lp.textContent.trim();
+    document.getElementById('label-privacy').textContent = lv.textContent.trim();
+    document.getElementById('label-special').textContent = ls.textContent.trim();
+    sub.innerHTML = 'Hi <b>'+esc((d.name||'there').split(' ')[0])+'</b>, we have updated the crowd-cast Data Purchase Agreement and Privacy Consent (version '+esc(String(d.version||'').replace(/^v/,''))+').';
+    if (d.compensation) document.getElementById('pay-line').textContent = 'Your pay and how you record stay the same: ' + fmt(d.compensation) + ' per month.';
+    form.style.display='';
+  }).catch(function(e) { sub.textContent=''; fail(e.message==='docs' ? 'Could not load the documents. Please try again shortly.' : (e.message||String(e))); });
+  form.addEventListener('submit', function(ev) {
+    ev.preventDefault(); err.style.display='none';
+    var a=document.getElementById('agree-purchase').checked, b=document.getElementById('agree-privacy').checked, c=document.getElementById('agree-special').checked;
+    if (!a || !b || !c) return fail('Please tick all three boxes to accept.');
+    var btn=document.getElementById('submit'); btn.disabled=true;
+    fetch(API+'/terms-accept', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({pid:pid, token:token, agree_purchase:a, agree_privacy:b, agree_special:c, user_agent:navigator.userAgent}) })
+      .then(function(r) { return r.json().then(function(d) { return {ok:r.ok, d:d}; }); })
+      .then(function(res) { btn.disabled=false; if (!res.ok) return fail(res.d.error||'Something went wrong.'); showDone('Accepted. Thank you.', 'Your acceptance and signed copies are on record. Nothing else changes, you can keep recording as usual.'); })
+      .catch(function() { btn.disabled=false; fail('Network error. Please try again.'); });
+  });
+})();
+</script>
+<div class="footer-canvas">
+<footer class="site-footer" data-nav-theme="light">
+  <img class="footer-backdrop" src="/assets/footer-delta-compressed.webp" alt="" aria-hidden="true" decoding="async" height="941" loading="lazy" width="1672">
+  <div class="footer-wordmark">
+    <span class="pdoom-brand pdoom-brand--large">
+      <img src="/assets/pdoom-mark.webp" srcset="/assets/pdoom-mark-128.webp 128w, /assets/pdoom-mark-256.webp 256w, /assets/pdoom-mark.webp 512w" sizes="(max-width: 680px) 76px, 180px" alt="" aria-hidden="true" width="512" height="512" loading="lazy" decoding="async">
+      <span>p(doom)</span>
+    </span>
+  </div>
+  <h2 class="sr-only" id="footer-navigation-title">Footer navigation</h2>
+  <nav class="footer-groups" aria-labelledby="footer-navigation-title">
+    <div class="footer-group">
+      <h3>Research</h3>
+      <a href="/#console">RESEARCH AGENDA</a>
+      <a href="/research/">ALL RESEARCH</a>
+    </div>
+    <div class="footer-group">
+      <h3>Releases</h3>
+      <a href="/research/crowd-cast/">CROWD-CAST</a>
+      <a href="/research/inverse-dynamics-model/">INVERSE DYNAMICS MODEL</a>
+      <a href="/research/agi-cast/">AGI-CAST</a>
+      <a href="/research/crowd-code/">CROWD-CODE</a>
+      <a href="/research/jasmine/">JASMINE</a>
+    </div>
+    <div class="footer-group">
+      <h3>Resources</h3>
+      <a href="/docs/crowd-cast/">DOCUMENTATION</a>
+      <a href="https://github.com/p-doom">GITHUB</a>
+      <a href="https://huggingface.co/p-doom">HUGGING FACE</a>
+    </div>
+    <div class="footer-group">
+      <h3>Opportunities</h3>
+      <a href="/careers/">CAREERS</a>
+      <a href="/careers/paid-data-collection/">PAID DATA COLLECTION</a>
+      <a href="/careers/residency/">RESEARCH RESIDENCY</a>
+    </div>
+    <div class="footer-group">
+      <h3>Lab</h3>
+      <a href="/about/">ABOUT</a>
+      <a href="/merch/">MERCH</a>
+    </div>
+    <div class="footer-group">
+      <h3>Connect</h3>
+      <a href="https://discord.gg/G4JNuPX2VR">DISCORD</a>
+      <a href="https://x.com/prob_doom">X</a>
+      <a href="https://www.linkedin.com/company/p-doom">LINKEDIN</a>
+    </div>
+    <div class="footer-legal">
+      <h3>Legal</h3>
+      <div>
+        <a href="/imprint/">IMPRINT</a>
+        <a href="/docs/crowd-cast-data-purchase-agreement.pdf">DATA PURCHASE AGREEMENT</a>
+        <a href="/docs/crowd-cast-privacy-consent.pdf">PRIVACY CONSENT</a>
+      </div>
+    </div>
+    <div class="footer-backing">
+      <a class="footer-sprind" href="https://www.sprind.org/" target="_blank" rel="noreferrer" aria-label="Visit SPRIND">
+        <img src="/assets/sprind.svg" alt="SPRIN-D" height="19" loading="lazy" width="136">
+      </a>
+    </div>
+  </nav>
+  <div class="footer-bottom">
+    <span>&copy;2026 P(DOOM).</span>
+    <div class="social-links">
+      <a href="https://x.com/prob_doom" aria-label="X"><span aria-hidden="true">X</span></a>
+      <a href="https://github.com/p-doom" aria-label="GH: GitHub"><span aria-hidden="true">GH</span></a>
+      <a href="https://huggingface.co/p-doom" aria-label="HF: Hugging Face"><span aria-hidden="true">HF</span></a>
+      <a href="https://www.linkedin.com/company/p-doom" aria-label="in: LinkedIn"><span aria-hidden="true">in</span></a>
+    </div>
+    <span>ALL RIGHTS RESERVED.</span>
+  </div>
+</footer>
+</div>
+<script src="/pdoom-header.js" defer></script>
+<script src="/pdoom-footer.js" defer></script>
+</body>
+</html>

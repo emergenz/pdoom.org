@@ -3604,6 +3604,29 @@
                     });
                 });
             });
+            reviewDiv.querySelectorAll('.terms-issue-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var pid = btn.dataset.id, nm = btn.dataset.name || pid, label = btn.textContent;
+                    showConfirmModal('Issue v2 terms link', 'Create a v2 terms accept link for ' + nm + '?\n\nNothing is emailed. You get the link to send yourself. Their pay does not change.', function() {
+                        btn.textContent = '...'; btn.style.pointerEvents = 'none';
+                        fetch(ONBOARD_API + '/onboard/terms-issue', {
+                            method: 'POST',
+                            headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ participant_ids: [pid] })
+                        })
+                        .then(function(resp){ return resp.json(); })
+                        .then(function(data){
+                            var r = (data.results || [])[0] || {};
+                            if (data.error || r.error) { alert(data.error || r.error); btn.textContent = label; btn.style.pointerEvents = ''; return; }
+                            if (r.already_accepted) { alert(nm + ' has already accepted ' + data.version + '.'); fetchPendingReview(); return; }
+                            try { navigator.clipboard.writeText(r.accept_url); } catch (e) {}
+                            alert('v2 terms link for ' + nm + ' (copied to clipboard):\n\n' + r.accept_url);
+                            fetchPendingReview();
+                        })
+                        .catch(function(err){ console.error('Issue terms failed:', err); btn.textContent = label; btn.style.pointerEvents = ''; });
+                    });
+                });
+            });
         })
         .catch(function(err) { console.error('Fetch pending failed:', err); });
     }
@@ -3756,6 +3779,23 @@
             html += '<span class="comp-reissue-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-name="' + escapeHtml(p.name || '') + '" style="' + btnBase + 'border:1px solid #8250df;color:#8250df;">Re-issue DPA</span>';
             html += '</div>';
             html += '<div style="font-size:11px;color:#aaa;margin-top:6px;">Set the tier, then re-issue the DPA. Re-issuing resets acceptance, so they keep their current rate until they accept the new agreement.</div>';
+            html += '</div></div>';
+
+            /* Legal terms version (separate from the comp tier above: accepting terms never changes pay) */
+            var TERMS_CURRENT = 'v2026-09-28';
+            var tv = p.terms_version || p.agreement_version || '';
+            var termsStatus, termsColor;
+            if (tv === TERMS_CURRENT) { termsStatus = TERMS_CURRENT + ' accepted' + (p.terms_accepted_at ? ' ' + p.terms_accepted_at.slice(0, 10) : ''); termsColor = '#2ea043'; }
+            else if (p.terms_pending) { termsStatus = 'link issued, awaiting acceptance (on ' + (tv || 'v1') + ')'; termsColor = '#b08800'; }
+            else { termsStatus = 'on ' + (tv || 'v1') + ', not issued yet'; termsColor = '#999'; }
+            html += '<div style="background:#fafaf7;padding:0 20px 16px;">';
+            html += '<div style="border-top:1px dashed #ddd;padding-top:12px;">';
+            html += '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Legal terms</span> ';
+            html += '<span style="font-size:11px;font-weight:700;color:' + termsColor + ';">' + escapeHtml(termsStatus) + '</span>';
+            if (tv !== TERMS_CURRENT) {
+                html += '<div style="margin-top:8px;"><span class="terms-issue-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-name="' + escapeHtml(p.name || '') + '" style="' + btnBase + 'border:1px solid #8250df;color:#8250df;">' + (p.terms_pending ? 'Re-issue v2 terms link' : 'Issue v2 terms link') + '</span></div>';
+                html += '<div style="font-size:11px;color:#aaa;margin-top:6px;">Creates a single-use accept link and shows it to you. Sends nothing. Re-issuing replaces the previous link.</div>';
+            }
             html += '</div></div>';
 
             html += '</td></tr>';
