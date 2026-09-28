@@ -4705,6 +4705,8 @@
 
         var I = function(x){ return N0 * x + j * x * x / 2; };
         var eurPerHour = yld > 0 ? eurD / yld : Infinity;
+        var breakEven = left / Math.max(1, target - base - staff * T);
+        var margin = breakEven / eurPerHour - 1;
         var avgHeads = eurD > 0 ? left / T / eurD : 0;
         var hoursIfSpent = base + staff * T + yld * avgHeads * T;
         var yieldBoth = avgHeads > 0 ? (target - base - staff * T) / (avgHeads * T) : Infinity;
@@ -4716,20 +4718,25 @@
         var hoursDate = null, budgetDate = null, hoursAtWall = 0;
         var cov = Date.parse(d.already_paid_through + 'T00:00:00Z');
         for (var x = 1; x <= T; x++) {
-            var h = base + staff * x + yld * I(x);
+            var hh = base + staff * x + yld * I(x);
             var sp = eurD * I(x);
-            if (!hoursDate && h >= target) hoursDate = new Date(cov + x * 86400000).toISOString().slice(0,10);
-            if (!budgetDate && sp >= left) { budgetDate = new Date(cov + x * 86400000).toISOString().slice(0,10); hoursAtWall = h; }
+            if (!hoursDate && hh >= target) hoursDate = new Date(cov + x * 86400000).toISOString().slice(0,10);
+            if (!budgetDate && sp >= left) { budgetDate = new Date(cov + x * 86400000).toISOString().slice(0,10); hoursAtWall = hh; }
         }
         return {
             yld: yld, joins: j, target: target,
-            eurPerHour: eurPerHour,
-            eurPerHourNeeded: left / Math.max(1, target - base - staff * T),
+            eurPerHour: eurPerHour, eurPerHourNeeded: breakEven,
+            margin: margin,
+            /* Three states, not two. Every correction to this model has moved the
+               price 10-20%, and the 7, 14 and 28 day windows straddle break-even,
+               so a green light or a red light would both be false confidence. */
+            state: Math.abs(margin) <= 0.12 ? 'marginal' : margin > 0 ? 'clear' : 'short',
             hoursIfSpent: hoursIfSpent,
             short: Math.max(0, target - hoursIfSpent),
+            spare: Math.max(0, hoursIfSpent - target),
             avgHeads: avgHeads,
             endHeads: 2 * avgHeads - N0,
-            joinsForBudget: (2 * avgHeads - N0 - N0) / T,
+            joinsForBudget: (2 * avgHeads - 2 * N0) / T,
             yieldBoth: yieldBoth,
             yieldLift: yld > 0 ? (yieldBoth / yld - 1) * 100 : 0,
             partNeeded: yieldBoth / fcVal('hpr'),
@@ -4784,56 +4791,81 @@
     function renderForecastView() {
         var d = _fcData, p = fcProject(d), m = d.measured;
         var esc = function(x){ return escapeHtml(String(x || '')); };
-        var ok = p.hoursIfSpent >= p.target;
-        var RED = '#b0242a', GRN = '#1c7a3e';
-        var col = ok ? GRN : RED;
+        var RED = '#b0242a', GRN = '#1c7a3e', AMB = '#9a6b00';
+        var col = p.state === 'clear' ? GRN : p.state === 'marginal' ? AMB : RED;
         var num = 'font-variant-numeric:tabular-nums;';
 
         var h = '<div style="max-width:820px;margin:0 auto;padding:28px 4px 60px;">';
 
-        /* ---------- the answer ---------- */
         h += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#999;margin-bottom:22px;">'
           + fcNum(d.targets.hours) + ' hours and &euro;' + fcNum(d.targets.budget_eur) + ' by ' + fcDate(d.deadline)
           + ' &nbsp;&middot;&nbsp; ' + d.days_to_deadline + ' days left</div>';
 
-        h += '<div style="display:flex;align-items:flex-end;gap:38px;flex-wrap:wrap;margin-bottom:18px;">';
-        h += '<div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:6px;">We make an hour for</div>'
+        /* ---------- the price, which is the whole question ---------- */
+        h += '<div style="display:flex;align-items:flex-end;gap:38px;flex-wrap:wrap;margin-bottom:16px;">';
+        h += '<div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:6px;">An hour costs us</div>'
           + '<div style="font-size:52px;font-weight:800;line-height:1;letter-spacing:-1px;' + num + 'color:' + col + ';">&euro;' + p.eurPerHour.toFixed(2) + '</div></div>';
         h += '<div style="width:1px;align-self:stretch;background:#e5e5e5;margin:4px 0 8px;"></div>';
         h += '<div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:6px;">We can afford</div>'
           + '<div style="font-size:52px;font-weight:800;line-height:1;letter-spacing:-1px;' + num + '">&euro;' + p.eurPerHourNeeded.toFixed(2) + '</div></div>';
         h += '</div>';
 
-        h += '<p style="font-size:15px;line-height:1.5;margin:0 0 6px;max-width:620px;">'
-          + (ok
-             ? 'We are making hours cheaply enough. Spend the rest of the budget and we land <b>' + fcNum(p.hoursIfSpent) + ' hours</b>.'
-             : 'Too expensive by <b>' + ((p.eurPerHour / p.eurPerHourNeeded - 1) * 100).toFixed(0) + '%</b>. '
-               + 'Spend every euro and we land <b>' + fcNum(p.hoursIfSpent) + ' hours</b>, ' + fcNum(p.short) + ' short.')
-          + '</p>';
-        h += '<p style="font-size:13px;line-height:1.5;color:#666;margin:0 0 34px;max-width:620px;">'
-          + 'Hiring more people does not help. Each one costs &euro;' + fcVal('eur_per_participant_day').toFixed(2)
-          + ' a day and makes ' + p.yld.toFixed(2) + ' h, so it moves the hours and the spend by the same ratio. '
+        if (p.state === 'marginal') {
+            h += '<p style="font-size:15px;line-height:1.5;margin:0 0 6px;max-width:640px;">'
+              + '<b>Too close to call.</b> ' + Math.abs(p.margin * 100).toFixed(0) + '% '
+              + (p.margin > 0 ? 'of headroom' : 'over') + ', and the price measured over the last 7, 14 and 28 days is &euro;'
+              + d.headline.price_by_window.d7.toFixed(2) + ', &euro;' + d.headline.price_by_window.d14.toFixed(2)
+              + ' and &euro;' + d.headline.price_by_window.d28.toFixed(2) + '. Break-even sits inside that spread.</p>';
+        } else if (p.state === 'clear') {
+            h += '<p style="font-size:15px;line-height:1.5;margin:0 0 6px;max-width:640px;">'
+              + Math.abs(p.margin * 100).toFixed(0) + '% of headroom. Spend the rest of the budget and we land <b>'
+              + fcNum(p.hoursIfSpent) + ' hours</b>, ' + fcNum(p.spare) + ' past the target.</p>';
+        } else {
+            h += '<p style="font-size:15px;line-height:1.5;margin:0 0 6px;max-width:640px;">'
+              + 'Too expensive by <b>' + Math.abs(p.margin * 100).toFixed(0) + '%</b>. Spend every euro and we land <b>'
+              + fcNum(p.hoursIfSpent) + ' hours</b>, ' + fcNum(p.short) + ' short.</p>';
+        }
+        h += '<p style="font-size:13px;line-height:1.5;color:#666;margin:0 0 30px;max-width:640px;">'
+          + 'Hiring more people does not move this. Each one costs &euro;' + fcVal('eur_per_participant_day').toFixed(2)
+          + ' a day and makes ' + p.yld.toFixed(2) + ' h, so it moves the hours and the spend together. '
           + 'Only the hours per person change the price.</p>';
 
-        /* ---------- what happens ---------- */
         h += fcTimeline(d, p);
 
-        /* ---------- the fix ---------- */
-        if (!ok) {
-            h += '<div style="border-top:2px solid #000;padding-top:20px;margin-bottom:30px;">';
-            h += '<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:14px;">'
-              + '<span style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;">To hit both</span>'
-              + '<span style="font-size:13px;color:#666;">every paying participant goes from ' + p.yld.toFixed(2)
-              + ' to <b style="color:#000;">' + p.yieldBoth.toFixed(2) + ' h a day</b>, up ' + p.yieldLift.toFixed(0) + '%</span></div>';
+        /* ---------- what actually decides it ---------- */
+        h += '<div style="border-top:2px solid #000;padding-top:20px;margin-bottom:30px;">';
+        h += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;">'
+          + (p.state === 'short' ? 'To close the gap' : 'What decides it') + '</div>';
+
+        if (p.state === 'short') {
+            h += '<p style="font-size:13px;color:#666;margin:0 0 14px;">Every paying participant goes from ' + p.yld.toFixed(2)
+              + ' to <b style="color:#000;">' + p.yieldBoth.toFixed(2) + ' h a day</b>, up ' + p.yieldLift.toFixed(0) + '%. Either route on its own is enough.</p>';
             h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">';
             h += fcRoute('More of them record', (fcVal('participation')*100).toFixed(0) + '%', (p.partNeeded*100).toFixed(0) + '%',
                          'of paying participants on a normal day');
             h += fcRoute('Or they record longer', fcVal('hpr').toFixed(2) + ' h', p.hprNeeded.toFixed(2) + ' h',
                          'on a day they do record. They signed up for 2.9 to 3.6.');
             h += '</div>';
-            h += '<p style="font-size:12px;color:#888;margin:12px 0 0;">Either one is enough on its own, and both sit inside what people already agreed to.</p>';
+        } else {
+            /* Three things can still move the price by more than the margin. Naming
+               them beats a green light nobody should trust. */
+            var q = d.review_queue, ph = d.price_history || [];
+            var last = ph.length ? ph[ph.length - 1] : null, first = ph.length ? ph[0] : null;
+            h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">';
+            h += fcRisk('The review queue', q.waiting + ' waiting',
+                  'Median ' + q.median_age_days + ' days, oldest ' + q.oldest_age_days + '. They cost nothing and record nothing, '
+                  + 'so every day they wait is ' + q.hours_per_day_while_they_wait + ' h we never get. '
+                  + fcNum(q.hours_forgone_so_far) + ' h forgone so far.', q.waiting > 10 ? RED : '#111');
+            h += fcRisk('What new joins cost',
+                  last && first ? '&euro;' + first.eur_per_hour.toFixed(2) + ' &rarr; &euro;' + last.eur_per_hour.toFixed(2) : 'rising',
+                  'An hour got dearer every month as the cohort moved off cheap trials onto full monthly rates. '
+                  + 'New joiners are landing on the $500 and $1,000 tiers, not $300.', AMB);
+            h += fcRisk('September review', '&euro;' + fcNum(m.pending_eur) + ' pending',
+                  'Not yet reviewed, so it is an upper bound. In August the review cut six rows by 43%. '
+                  + 'Cutting under-recorders lowers the price directly.', '#111');
             h += '</div>';
         }
+        h += '</div>';
 
         /* ---------- controls ---------- */
         h += '<div style="border-top:1px solid #e5e5e5;padding-top:22px;">';
@@ -4843,9 +4875,10 @@
               function(v){ return (v*100).toFixed(0) + '%'; }, 'measured ' + (m.participation_28d*100).toFixed(0) + '%');
         h += fcSlider('hpr', 'Hours on a recording day', 0.5, 6, 0.05, fcVal('hpr'),
               function(v){ return Number(v).toFixed(2) + ' h'; }, 'measured ' + m.hours_per_recording_day_28d);
-        h += fcSlider('joins_per_day', 'New participants per day', 0, 6, 0.05, fcVal('joins_per_day'),
+        h += fcSlider('joins_per_day', 'People approved per day', 0, 4, 0.05, fcVal('joins_per_day'),
               function(v){ return Number(v).toFixed(2); },
-              'now ' + m.joins_per_day + ' &middot; budget allows ' + p.joinsForBudget.toFixed(2));
+              'now ' + m.joins_per_day + ' approved of ' + m.signups_per_day + ' signing up &middot; LinkedIn roster has ~'
+              + fcNum(d.supply.roster_participants_left) + ' participants left in it');
         h += fcSlider('eur_per_participant_day', 'Cost per person per day', 4, 20, 0.1, fcVal('eur_per_participant_day'),
               function(v){ return '&euro;' + Number(v).toFixed(2); }, 'measured &euro;' + m.eur_per_participant_day);
         h += fcSlider('buffer_pct', 'Aim past the target', 0, 30, 1, fcVal('buffer_pct'),
@@ -4862,7 +4895,6 @@
           + '</div>';
         h += '</div></div>';
 
-        /* ---------- evidence, folded away ---------- */
         h += '<div style="margin-top:30px;">'
           + '<span onclick="fcToggleDetail()" style="cursor:pointer;font-size:12px;color:#888;border-bottom:1px dotted #bbb;">'
           + (_fcDetail ? 'Hide the working' : 'Show the working') + '</span>'
@@ -4870,6 +4902,13 @@
 
         h += '</div>';
         document.getElementById('forecast-view').innerHTML = h;
+    }
+
+    function fcRisk(label, figure, note, colour) {
+        return '<div class="outline-box" style="padding:14px 16px;">'
+          + '<div style="font-size:12px;font-weight:700;margin-bottom:6px;">' + label + '</div>'
+          + '<div style="font-size:22px;font-weight:800;letter-spacing:-.5px;color:' + colour + ';font-variant-numeric:tabular-nums;">' + figure + '</div>'
+          + '<div style="font-size:11px;color:#888;margin-top:5px;line-height:1.45;">' + note + '</div></div>';
     }
 
     /* Today to the deadline on one line, with the two walls on it. Two dates in
@@ -4929,14 +4968,14 @@
 
     /* Everything a sceptic needs, and nothing a reader has to walk past. */
     function fcDetail(d, p) {
-        var m = d.measured, esc = function(x){ return escapeHtml(String(x || '')); };
+        var m = d.measured, q = d.review_queue, esc = function(x){ return escapeHtml(String(x || '')); };
         var h = '<div style="margin-top:18px;font-size:12px;color:#555;line-height:1.6;">';
 
         h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;">';
         [['Recorded so far', fcNum(m.total_hours) + ' h', fcNum(m.external_hours) + ' h from participants'],
-         ['Paying now', m.paying_now, d.funnel.onboarded_ever + ' onboarded ever'],
+         ['Paying now', m.paying_now, q.waiting + ' more awaiting review'],
          ['Hours per head', m.yield_28d.toFixed(2) + ' h/day', '7d ' + m.yield_7d.toFixed(2) + ' &middot; 14d ' + m.yield_14d.toFixed(2)],
-         ['Spent', '&euro;' + fcNum(m.spent_eur), '&euro;' + fcNum(m.pending_eur) + ' pending']
+         ['Cost per head', '&euro;' + m.eur_per_participant_day.toFixed(2) + '/day', '&euro;' + fcNum(m.spent_eur) + ' paid, &euro;' + fcNum(m.pending_eur) + ' pending']
         ].forEach(function(r){
             h += '<div><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#aaa;">' + r[0] + '</div>'
               + '<div style="font-size:18px;font-weight:700;color:#000;font-variant-numeric:tabular-nums;margin:2px 0 1px;">' + r[1] + '</div>'
@@ -4944,15 +4983,35 @@
         });
         h += '</div>';
 
-        h += '<p style="margin:0 0 10px;"><b>Joins per day, by week:</b> '
+        h += '<p style="margin:0 0 10px;"><b>What an hour actually cost, by month:</b> '
+          + (d.price_history || []).map(function(r){
+              return r.month.slice(5) + ' &euro;' + r.eur_per_hour.toFixed(2) + (r.partial ? ' (part month)' : '');
+            }).join(' &rarr; ')
+          + '. Rising because July and August were mostly seven-day trials and pilot recorders nobody paid, '
+          + 'and the cohort has since moved onto full monthly rates. The model uses cost per head over yield, not this series, '
+          + 'but the two should stay in the same neighbourhood.</p>';
+
+        h += '<p style="margin:0 0 10px;"><b>Who counts as paying:</b> ' + m.paying_now + ' active or paused. '
+          + 'The ' + q.waiting + ' with status <i>onboarded</i> are waiting on Mihir\'s review, and no payout row is ever minted for them. '
+          + 'They recorded almost nothing, so counting them would inflate both the cost and the hours per head and cancel out to roughly the same price, '
+          + 'while making every headcount on this page wrong.</p>';
+
+        h += '<p style="margin:0 0 10px;"><b>Approvals, not signups:</b> ' + m.signups_per_day + ' people a day sign up, '
+          + m.joins_per_day + ' a day get approved. Weekly approvals ran '
           + m.joins_by_week.map(function(w){ return w.per_day.toFixed(1); }).join(' &rarr; ')
-          + '. Accelerating, but the LinkedIn channel tops out near 1.3 a day, so holding ' + m.joins_per_day + ' is its own question.</p>';
+          + '. The recruiting slider is approvals, because an unapproved signup costs nothing and records nothing. '
+          + 'On supply: the LinkedIn roster has ' + fcNum(d.supply.roster_names_left) + ' names left and converts at '
+          + (d.supply.invite_to_participant * 100).toFixed(2) + '%, so it is worth about '
+          + d.supply.roster_participants_left + ' more participants in total. Everything beyond that has to come from referrals, '
+          + 'the apply page and Salan\'s outreach.</p>';
 
-        h += '<p style="margin:0 0 10px;"><b>Why hours per head is safe to project on:</b> headcount doubled through September and it held at '
-          + m.yield_28d.toFixed(2) + ' (' + (m.participation_28d*100).toFixed(0) + '% of people recording on a day, '
-          + m.hours_per_recording_day_28d + ' h when they do). It is measured against the paying headcount on each day, not today\'s.</p>';
+        h += '<p style="margin:0 0 10px;"><b>Why hours per head is safe to project on:</b> it held at '
+          + m.yield_28d.toFixed(2) + ' through September while the paying headcount doubled ('
+          + (m.participation_28d*100).toFixed(0) + '% of people recording on a day, ' + m.hours_per_recording_day_28d
+          + ' h when they do), and it is measured against the paying headcount on each day rather than today\'s.</p>';
 
-        h += '<p style="margin:0 0 10px;"><b>Funnel:</b> ' + d.funnel.onboarded_ever + ' onboarded, ' + d.funnel.paying_now + ' paying, '
+        h += '<p style="margin:0 0 10px;"><b>Funnel:</b> ' + d.funnel.onboarded_ever + ' onboarded ever, ' + d.funnel.paying_now + ' paying, '
+          + d.funnel.awaiting_review + ' awaiting review, ' + d.funnel.paused_or_terminated + ' paused or ended, '
           + d.funnel.active_14d + ' recorded in the last fortnight, ' + d.funnel.went_quiet + ' recorded once then stopped. '
           + 'The ' + d.funnel.unlinked_not_visible + ' we cannot link to a recorder account are not dropouts: they installed under another Google login, '
           + 'so their hours are in the totals but not attributable to them.</p>';
@@ -4964,7 +5023,8 @@
               : '') + '</p>';
 
         h += '<p style="margin:0;color:#999;">Spend counts participant payouts only (&euro;' + fcNum(m.premium_eur)
-          + ' of that is referral premiums). If part of the &euro;' + fcNum(d.targets.budget_eur)
+          + ' of that is referral premiums), and each row is spread over the days it covers so a trailing window prices exactly. '
+          + 'If part of the &euro;' + fcNum(d.targets.budget_eur)
           + ' is meant for anything else, lower the budget box. Payouts already cover us to ' + fcDate(d.already_paid_through)
           + ', so the projection runs over the ' + d.model.T + ' days after that. Generated ' + esc(d.generated_at) + '.</p>';
 
