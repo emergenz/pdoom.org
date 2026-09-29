@@ -2714,6 +2714,9 @@
     var ONBOARD_API = DASHBOARD_API.replace('/dashboard', '/onboard');
     var _payoutsData = null;
     var _payoutsParticipants = null;
+    // Rows the lambda did not mint because the participant has not re-accepted
+    // the current terms (shown greyed out under the table).
+    var _payoutsHeld = [];
     var _lastOnboardParticipants = [];
 
     /* Persist a participant's linked recorder emails, then refresh the table */
@@ -2784,6 +2787,7 @@
             if (data.error) { if (tableEl) tableEl.innerHTML = '<div style="padding:12px;font-size:13px;color:#cf222e;font-family:\'SF Mono\',monospace;">' + escapeHtml(data.error) + '</div>'; return; }
             _payoutsData = data.payouts || [];
             _payoutsParticipants = data.participants || {};
+            _payoutsHeld = data.terms_held || [];
             renderPayoutsTable();
             updateTabBadges();
         })
@@ -2796,7 +2800,7 @@
     function renderPayoutsTable() {
         var tableDiv = document.getElementById('payouts-table');
         var summaryDiv = document.getElementById('payouts-summary');
-        if (!_payoutsData || _payoutsData.length === 0) {
+        if ((!_payoutsData || _payoutsData.length === 0) && !_payoutsHeld.length) {
             tableDiv.innerHTML = '<div style="padding:12px;font-size:13px;color:#999;font-family:\'SF Mono\',monospace;">No payouts for this period.</div>';
             summaryDiv.innerHTML = '';
             return;
@@ -2846,10 +2850,13 @@
             var statusColor = p.status === 'approved' ? '#2ea043' : p.status === 'paid' ? '#0066cc' : p.status === 'rejected' ? '#cf222e' : p.status === 'merged' ? '#777' : '#b08800';
             var typeLabel = p.merged_from ? 'Merged' : p.payout_type === 'referral_premium' ? ('Premium T' + (p.tranche || '?')) : p.payout_type === 'trial' ? 'Trial' : p.payout_type === 'partial' ? 'Partial' : 'Full';
             var rowBg = isOverdue ? '#fff0f0' : isDueSoon ? '#fffbe6' : '';
+            // Re-accept gate: greyed out, and ticking the box asks for "pay anyway".
+            var isGated = !!p.terms_gated;
+            if (isGated) rowBg = '#f4f4f4';
 
-            html += '<tr style="background:' + rowBg + ';">';
+            html += '<tr style="background:' + rowBg + ';' + (isGated ? 'color:#999;' : '') + '">';
             html += '<td style="padding:7px 12px;border-bottom:1px solid #eee;">';
-            if (canApprove) html += '<input type="checkbox" class="payout-checkbox" data-id="' + escapeHtml(p.payout_id) + '">';
+            if (canApprove) html += '<input type="checkbox" class="payout-checkbox" data-id="' + escapeHtml(p.payout_id) + '"' + (isGated ? ' data-gated="1"' : '') + '>';
             html += '</td>';
             var isPremium = p.payout_type === 'referral_premium';
             var displayName = isPremium ? (p.recipient_name || p.partner_slug || p.participant_id) : (part.name || p.participant_id);
@@ -2881,6 +2888,8 @@
             if (isOverdue) html += ' <span style="background:#cf222e;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;letter-spacing:0.5px;">OVERDUE</span>';
             else if (isDueSoon) html += ' <span style="background:#b08800;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;letter-spacing:0.5px;">DUE SOON</span>';
             if (isScaRetry) html += ' <span style="background:#b08800;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;letter-spacing:0.5px;">AWAITING SCA</span>';
+            if (isGated) html += ' <span style="background:#888;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;letter-spacing:0.5px;">RE-ACCEPT PENDING</span><br><span style="color:#999;font-size:10px;text-transform:none;">' + termsStatusLabel(part) + '</span>';
+            if (p.terms_override_by) html += '<br><span style="color:#999;font-size:10px;text-transform:none;">paid without re-accept, by ' + escapeHtml(p.terms_override_by) + '</span>';
             if (p.approved_by) html += '<br><span style="color:#999;font-size:10px;">by ' + escapeHtml(p.approved_by) + '</span>';
             if (p.merged_into) html += '<br><span style="color:#999;font-size:10px;">into ' + escapeHtml(p.merged_into) + '</span>';
             else if (p.merged_from) html += '<br><span style="color:#999;font-size:10px;">incl. ' + escapeHtml(p.merged_from) + '</span>';
@@ -2901,17 +2910,52 @@
             html += '</tr>';
         }
 
+        // Held: not generated at all until the participant re-accepts.
+        for (var h = 0; h < _payoutsHeld.length; h++) {
+            var hp = _payoutsHeld[h];
+            var hpart = _payoutsParticipants[hp.participant_id] || {};
+            var hcur = (hp.currency || 'USD').toUpperCase();
+            var hsym = hcur === 'EUR' ? '€' : hcur === 'GBP' ? '£' : '$';
+            var htype = hp.payout_type === 'trial' ? 'Trial' : hp.payout_type === 'partial' ? 'Partial' : 'Full';
+            var tdH = 'padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;color:#aaa;';
+            html += '<tr style="background:#f4f4f4;">';
+            html += '<td style="' + tdH + '"></td>';
+            html += '<td style="' + tdH + 'font-size:13px;">' + escapeHtml(hp.name || hp.participant_id) + '</td>';
+            html += '<td style="' + tdH + '">' + escapeHtml(hp.period_start) + ' to ' + escapeHtml(hp.period_end) + '</td>';
+            html += '<td style="' + tdH + '">' + htype + '</td>';
+            html += '<td style="' + tdH + 'text-align:right;font-size:13px;">' + hp.days + '</td>';
+            html += '<td style="' + tdH + '"></td>';
+            html += '<td style="' + tdH + 'text-align:right;font-size:13px;">' + hsym + Number(hp.amount).toFixed(2) + '</td>';
+            html += '<td style="' + tdH + 'font-size:11px;"><span style="font-weight:700;text-transform:uppercase;">held</span> <span style="background:#888;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;letter-spacing:0.5px;">RE-ACCEPT PENDING</span><br><span style="font-size:10px;">' + termsStatusLabel(hpart) + '. Created once they accept.</span></td>';
+            html += '<td style="' + tdH + '"></td>';
+            html += '</tr>';
+        }
+
         html += '</tbody></table>';
         tableDiv.innerHTML = html;
 
-        // Select all checkbox
+        // Select all checkbox. Skips rows held by the re-accept gate: paying one of
+        // those has to be a deliberate, per-row choice.
         document.getElementById('select-all-payouts').addEventListener('change', function() {
             var checked = this.checked;
-            document.querySelectorAll('.payout-checkbox').forEach(function(cb) { cb.checked = checked; });
+            document.querySelectorAll('.payout-checkbox').forEach(function(cb) { if (!cb.dataset.gated) cb.checked = checked; });
             updatePayoutsSummary();
         });
         document.querySelectorAll('.payout-checkbox').forEach(function(cb) {
-            cb.addEventListener('change', updatePayoutsSummary);
+            cb.addEventListener('change', function() {
+                if (cb.dataset.gated && cb.checked) {
+                    cb.checked = false;
+                    var gp = null;
+                    for (var g = 0; g < _payoutsData.length; g++) if (_payoutsData[g].payout_id === cb.dataset.id) gp = _payoutsData[g];
+                    var gname = gp ? ((_payoutsParticipants[gp.participant_id] || {}).name || gp.participant_id) : cb.dataset.id;
+                    showConfirmModal('Pay without re-accept?',
+                        gname + ' has not accepted the new terms yet. Pay this payout anyway? This applies to this payout only; next month is not generated until they accept.',
+                        function() { cb.checked = true; cb.dataset.override = '1'; updatePayoutsSummary(); });
+                    return;
+                }
+                if (!cb.checked) delete cb.dataset.override;
+                updatePayoutsSummary();
+            });
         });
         document.querySelectorAll('.payout-note').forEach(function(inp) {
             inp.addEventListener('input', function() { setPayoutNoteStatus(inp.dataset.id, 'unsaved'); });
@@ -2931,10 +2975,14 @@
             if (dueK && dueK < now) overdueCount++;
             else if (dueK && (dueK.getTime() - now.getTime()) <= sevenDaysMs) dueSoonCount++;
         }
+        var gatedCount = _payoutsData.filter(function(x) { return x.terms_gated; }).length;
         var summaryHint = '';
         if (overdueCount > 0) summaryHint = overdueCount + ' overdue, ' + dueSoonCount + ' due within 7 days';
         else if (dueSoonCount > 0) summaryHint = dueSoonCount + ' due within 7 days';
 
+        if (gatedCount || _payoutsHeld.length) {
+            summaryHint += (summaryHint ? ' \u00b7 ' : '') + (gatedCount + _payoutsHeld.length) + ' waiting on re-accept of the new terms';
+        }
         if (pendingCount > 0) {
             summaryDiv.innerHTML = (summaryHint ? '<div style="font-size:12px;font-family:\'SF Mono\',monospace;padding:8px 0;color:#b08800;">' + (overdueCount > 0 ? '<span style="color:#cf222e;">' + summaryHint + '</span>' : summaryHint) + '</div>' : '') +
             '<div style="display:flex;gap:12px;align-items:center;padding:12px 0;">' +
@@ -3278,12 +3326,17 @@
             fetch(ONBOARD_API + '/payouts/approve', {
                 method: 'POST',
                 headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ payout_ids: payoutIds })
+                body: JSON.stringify({ payout_ids: payoutIds, terms_override_ids: payoutIds.filter(function(id) {
+                    var cb = document.querySelector('.payout-checkbox[data-id="' + id + '"]');
+                    return cb && cb.dataset.override === '1';
+                }) })
             })
             .then(function(resp) { return resp.json(); })
             .then(function(data) {
                 document.body.removeChild(overlay);
                 if (data.error) alert(data.error);
+                var held = (data.results || []).filter(function(r) { return r.terms_gated; });
+                if (held.length) alert(held.length + ' payout(s) not paid: waiting on re-accept of the new terms.');
                 refreshPayoutsAfterApprove();
             })
             .catch(function(err) {
@@ -3326,8 +3379,9 @@
             if (data.payouts) {
                 _payoutsData = data.payouts;
                 _payoutsParticipants = data.participants || {};
+                _payoutsHeld = data.terms_held || [];
             }
-            var pending = (data.payouts || []).filter(function(p) { return p.status === 'pending'; }).length;
+            var pending = (data.payouts || []).filter(function(p) { return p.status === 'pending' && !p.terms_gated; }).length;
             var tab = document.getElementById('tab-payouts');
             if (tab) tab.textContent = pending > 0 ? 'Payouts (' + pending + ')' : 'Payouts';
         })
@@ -3395,6 +3449,11 @@
         var s = parts.join(' + ');
         if (curs.length > 1) s += ' (~$' + t.usd.toFixed(2) + ')';
         return s;
+    }
+
+    function termsStatusLabel(part) {
+        if (part.terms_status === 'link_sent') return 'terms link sent' + (part.terms_issued_at ? ' ' + part.terms_issued_at.slice(0, 10) : '');
+        return 'terms link not sent yet';
     }
 
     function updatePayoutsSummary() {
