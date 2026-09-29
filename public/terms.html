@@ -44,8 +44,9 @@
     <div class="err" id="err"></div>
     <form id="form" novalidate style="display:none;">
       <ul class="terms-changes prose">
-        <li id="pay-line">Your pay and how you record stay the same.</li>
-        <li>Data you upload is sold to p(doom) when you upload it and becomes a permanent part of the dataset, including data you uploaded before. Your GDPR rights, such as objecting for personal reasons, still apply.</li>
+        <li id="pay-line">Your monthly amount and how you record stay the same.</li>
+        <li>Data you upload is sold to p(doom) when you upload it and becomes a permanent part of the dataset. These terms also apply to data you uploaded before, and replace the earlier option to have it removed from future dataset versions. Your GDPR rights, such as objecting for personal reasons, stay the same.</li>
+        <li>We may license or sell the dataset to companies, including for commercial AI training.</li>
         <li>Both documents now also describe how crowd-cast works today, for example which services we use.</li>
       </ul>
       <p class="prose" style="max-width:62ch;">To keep recording with crowd-cast, please review both documents and accept below.</p>
@@ -54,6 +55,7 @@
       <label class="terms-check"><input type="checkbox" id="agree-purchase"><span id="label-purchase"></span></label>
       <label class="terms-check"><input type="checkbox" id="agree-privacy"><span id="label-privacy"></span></label>
       <label class="terms-check"><input type="checkbox" id="agree-special"><span id="label-special"></span></label>
+      <label class="terms-check"><input type="checkbox" id="agree-past"><span>I agree that these terms also apply to data I uploaded before today, replacing the earlier option to have it removed from future dataset versions.</span></label>
       <button type="submit" id="submit" class="button button--primary">
         <span id="submit-label">Accept updated terms</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -93,15 +95,15 @@
     document.getElementById('label-privacy').textContent = lv.textContent.trim();
     document.getElementById('label-special').textContent = ls.textContent.trim();
     sub.innerHTML = 'Hi <b>'+esc((d.name||'there').split(' ')[0])+'</b>, we have updated the crowd-cast Data Purchase Agreement and Privacy Consent (version '+esc(String(d.version||'').replace(/^v/,''))+').';
-    if (d.compensation) document.getElementById('pay-line').textContent = 'Your pay and how you record stay the same: ' + fmt(d.compensation) + ' per month.';
+    if (d.compensation) document.getElementById('pay-line').textContent = 'Your monthly amount and how you record stay the same: ' + fmt(d.compensation) + ' per month.';
     form.style.display='';
   }).catch(function(e) { sub.textContent=''; fail(e.message==='docs' ? 'Could not load the documents. Please try again shortly.' : (e.message||String(e))); });
   form.addEventListener('submit', function(ev) {
     ev.preventDefault(); err.style.display='none';
-    var a=document.getElementById('agree-purchase').checked, b=document.getElementById('agree-privacy').checked, c=document.getElementById('agree-special').checked;
-    if (!a || !b || !c) return fail('Please tick all three boxes to accept.');
+    var a=document.getElementById('agree-purchase').checked, b=document.getElementById('agree-privacy').checked, c=document.getElementById('agree-special').checked, e=document.getElementById('agree-past').checked;
+    if (!a || !b || !c || !e) return fail('Please tick all four boxes to accept.');
     var btn=document.getElementById('submit'); btn.disabled=true;
-    fetch(API+'/terms-accept', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({pid:pid, token:token, agree_purchase:a, agree_privacy:b, agree_special:c, user_agent:navigator.userAgent}) })
+    fetch(API+'/terms-accept', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({pid:pid, token:token, agree_purchase:a, agree_privacy:b, agree_special:c, agree_past_data:e, user_agent:navigator.userAgent}) })
       .then(function(r) { return r.json().then(function(d) { return {ok:r.ok, d:d}; }); })
       .then(function(res) { btn.disabled=false; if (!res.ok) return fail(res.d.error||'Something went wrong.'); showDone('Accepted. Thank you.', 'Your acceptance and signed copies are on record. Nothing else changes, you can keep recording as usual.'); })
       .catch(function() { btn.disabled=false; fail('Network error. Please try again.'); });
