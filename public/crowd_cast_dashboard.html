@@ -2901,8 +2901,12 @@
             if (isPremium) {
                 html += '<div style="font-size:11px;font-family:\'SF Mono\',monospace;color:#999;">referral #' + escapeHtml(String(p.referral_no || '?')) + ' \u00b7 ' + escapeHtml(p.partner_slug || '') + '</div>';
             } else if (canApprove) {
-                html += '<input type="text" class="payout-note" data-id="' + escapeHtml(p.payout_id) + '" maxlength="1000" value="' + escapeHtml(p.participant_note || '') + '" placeholder="Optional, emailed with the statement" style="width:100%;box-sizing:border-box;font-size:12px;font-family:\'SF Mono\',monospace;padding:5px 8px;border:1px solid #ccc;background:#fff;outline:none;">';
-                html += '<div class="payout-note-status" data-id="' + escapeHtml(p.payout_id) + '" style="font-size:10px;font-family:\'SF Mono\',monospace;color:#999;margin-top:3px;min-height:12px;"></div>';
+                // Empty notes are prefilled with a suggestion built from the row's
+                // evidence. It is NOT saved until approve (or an edit), and the
+                // confirm modal lists every note that will be emailed.
+                var suggestion = p.participant_note ? '' : suggestPayoutNote(p);
+                html += '<input type="text" class="payout-note" data-id="' + escapeHtml(p.payout_id) + '"' + (suggestion ? ' data-suggested="1"' : '') + ' maxlength="1000" value="' + escapeHtml(p.participant_note || suggestion) + '" placeholder="Optional, emailed with the statement" style="width:100%;box-sizing:border-box;font-size:12px;font-family:\'SF Mono\',monospace;padding:5px 8px;border:1px solid ' + (suggestion ? '#e0c060' : '#ccc') + ';background:' + (suggestion ? '#fffbea' : '#fff') + ';outline:none;">';
+                html += '<div class="payout-note-status" data-id="' + escapeHtml(p.payout_id) + '" style="font-size:10px;font-family:\'SF Mono\',monospace;color:' + (suggestion ? '#b08800' : '#999') + ';margin-top:3px;min-height:12px;">' + (suggestion ? 'suggested, edit or clear before approving' : '') + '</div>';
             } else if (p.participant_note) {
                 html += '<div style="font-size:11px;font-family:\'SF Mono\',monospace;color:#777;line-height:1.4;">' + escapeHtml(p.participant_note) + '</div>';
             }
@@ -2958,8 +2962,13 @@
             });
         });
         document.querySelectorAll('.payout-note').forEach(function(inp) {
-            inp.addEventListener('input', function() { setPayoutNoteStatus(inp.dataset.id, 'unsaved'); });
-            inp.addEventListener('change', function() { savePayoutNote(inp.dataset.id, inp.value); });
+            inp.addEventListener('input', function() { inp.dataset.edited = '1'; setPayoutNoteStatus(inp.dataset.id, 'unsaved'); });
+            inp.addEventListener('change', function() {
+                // Clearing a suggestion means "no note": remember that so the
+                // suggestion does not come back on the next render.
+                if (inp.dataset.suggested && !inp.value.trim()) dismissNoteSuggestion(inp.dataset.id);
+                savePayoutNote(inp.dataset.id, inp.value);
+            });
         });
         document.querySelectorAll('.payout-amount').forEach(function(el) {
             el.addEventListener('click', function() { adjustPayoutAmount(el.dataset.id); });
@@ -2998,7 +3007,7 @@
 
                 // A note typed but not yet blurred must reach DynamoDB before the
                 // approve call reads it back for the email.
-                flushPayoutNotes().then(function() { showPayoutConfirmModal(selected); });
+                flushPayoutNotes(selected).then(function() { showPayoutConfirmModal(selected); });
             });
 
             document.getElementById('reject-payouts-btn').addEventListener('click', function() {
@@ -3235,9 +3244,12 @@
 
     /* Persist every note edited but not yet blurred, so the confirm modal and the
        approve call both see exactly what the participant will read. */
-    function flushPayoutNotes() {
+    function flushPayoutNotes(selected) {
         var saves = [];
         document.querySelectorAll('.payout-note').forEach(function(inp) {
+            // An untouched suggestion is only saved for a row being approved now;
+            // on every other row it stays a suggestion.
+            if (inp.dataset.suggested && !inp.dataset.edited && (!selected || selected.indexOf(inp.dataset.id) < 0)) return;
             if (inp.value.trim() !== savedPayoutNote(inp.dataset.id)) saves.push(savePayoutNote(inp.dataset.id, inp.value));
         });
         return Promise.all(saves);
@@ -3449,6 +3461,45 @@
         var s = parts.join(' + ');
         if (curs.length > 1) s += ' (~$' + t.usd.toFixed(2) + ')';
         return s;
+    }
+
+    // --- Note suggestions ---
+    // Mihir's standard wording for low volume and low relevance, filled from the
+    // row's evidence. Volume uses the same per-week rate as the evidence column
+    // (rate so far for an open period). Relevance uses the weekly value agent's
+    // participant-facing phrase. The adjustment sentence only appears once the
+    // amount has actually been lowered, and never on a trial row.
+    var NOTE_EXPECTED_HPW = 20;
+    function noteSuggestionDismissed(id) {
+        try { return localStorage.getItem('cc_note_dismissed_' + id) === '1'; } catch (e) { return false; }
+    }
+    function dismissNoteSuggestion(id) {
+        try { localStorage.setItem('cc_note_dismissed_' + id, '1'); } catch (e) {}
+    }
+    function suggestPayoutNote(p) {
+        if (!p || p.payout_type === 'referral_premium' || noteSuggestionDismissed(p.payout_id)) return '';
+        var ev = p.evidence;
+        if (!ev || !ev.linked) return '';
+        var parts = [];
+        var prog = periodProgress(p);
+        if (prog.state !== 'future') {
+            var wks = periodWeeks(p) * prog.frac;
+            var hpw = wks > 0 ? ev.hours / wks : 0;
+            if (wks > 0 && hpw < NOTE_EXPECTED_HPW) {
+                parts.push('Contributed volume was ' + (Math.round(hpw * 10) / 10) + ' hours/week, which is lower than what we expect (20-25 hours per week).');
+            }
+        }
+        var lowRel = ev.value_relevance === 'low' || ev.value_relevance === 'medium' || ev.value_recommendation === 'wind_down';
+        if (lowRel && ev.value_recordings_phrase) {
+            parts.push('Recordings largely consisted of ' + ev.value_recordings_phrase.replace(/\.$/, '') + '.');
+        }
+        if (ev.visible_fraction != null && ev.visible_fraction < 0.5) {
+            parts.push('A large share of the recorded frames were blank.');
+        }
+        if (!parts.length) return '';
+        var adjusted = p.original_amount != null && Number(p.amount) < Number(p.original_amount);
+        if (adjusted && p.payout_type !== 'trial') parts.push('Thus, we are adjusting the payment accordingly.');
+        return parts.join(' ');
     }
 
     function termsStatusLabel(part) {
