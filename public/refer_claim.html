@@ -12,6 +12,17 @@
 <link rel="preload" href="/fonts/ibm-plex-mono.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/lora-pdoom-italic-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/pdoom-form.css">
+<style>
+  /* pdoom-form.css styles text inputs only; match them for the selects here. */
+  .field select {
+    width: 100%; padding: 12px 0; font-size: 17px; color: var(--ink);
+    background: transparent; border: 0; border-bottom: 1px solid var(--rule-strong); border-radius: 0;
+  }
+  .field select:focus { outline: none; border-bottom-color: var(--signal); }
+  .field .error, .field input.error, .field select.error { border-bottom-color: var(--signal); }
+  .bank-block { display: flex; flex-direction: column; gap: 30px; }
+  .bank-block > .hint { font-size: 14px; color: var(--muted); margin: 0; max-width: 58ch; }
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -40,26 +51,129 @@
         <p class="hint">The address your referral link was sent to. We check it matches, so your link alone can't be used by anyone else.</p>
         <input type="email" id="claim_email" autocomplete="email" placeholder="you@example.com">
       </div>
-      <div class="field" id="f-legal">
+      <div class="field" id="w-legal">
         <label for="legal_name">Your full legal name</label>
         <p class="hint">As it appears on your bank account. This goes on the payment record.</p>
         <input type="text" id="legal_name" autocomplete="name" placeholder="Ada Lovelace">
       </div>
-      <div class="field" id="f-address">
+      <div class="field" id="w-address">
         <label for="address">Your address</label>
         <p class="hint">Street and number, postal code, city.</p>
         <input type="text" id="address" autocomplete="street-address" placeholder="Musterstr. 1, 80636 Munich">
       </div>
-      <div class="field" id="f-country">
-        <label for="country">Country</label>
-        <input type="text" id="country" autocomplete="country-name" placeholder="Germany">
+      <div class="field" id="w-country">
+        <label for="f-country">Country of residence</label>
+        <p class="hint">Where you live. This decides which bank details we need below.</p>
+        <select id="f-country" autocomplete="country-name">
+          <option value="">Select country...</option>
+          <option value="Germany">Germany</option>
+          <option value="United Kingdom">United Kingdom</option>
+          <option value="Switzerland">Switzerland</option>
+          <option value="Austria">Austria</option>
+          <option value="Netherlands">Netherlands</option>
+          <option value="France">France</option>
+          <option value="Sweden">Sweden</option>
+          <option value="Denmark">Denmark</option>
+          <option value="Norway">Norway</option>
+          <option value="Finland">Finland</option>
+          <option value="Belgium">Belgium</option>
+          <option value="Italy">Italy</option>
+          <option value="Spain">Spain</option>
+          <option value="Portugal">Portugal</option>
+          <option value="Poland">Poland</option>
+          <option value="Czech Republic">Czech Republic</option>
+          <option value="Hungary">Hungary</option>
+          <option value="Romania">Romania</option>
+          <option value="Ireland">Ireland</option>
+          <option value="Greece">Greece</option>
+          <option value="India">India</option>
+          <option value="Japan">Japan</option>
+          <option value="United States">United States</option>
+          <option value="Canada">Canada</option>
+          <option value="Australia">Australia</option>
+          <option value="Israel">Israel</option>
+          <option value="Turkey">Turkey</option>
+          <option value="Singapore">Singapore</option>
+          <option value="Hong Kong">Hong Kong</option>
+          <option value="Brazil">Brazil</option>
+          <option value="Mexico">Mexico</option>
+          <option value="Armenia">Armenia</option>
+          <option value="Nepal">Nepal</option>
+          <option value="Ethiopia">Ethiopia</option>
+          
+        </select>
       </div>
-      <div class="field" id="f-bank">
-        <label for="holder">Bank details</label>
-        <p class="hint">IBAN for European accounts. Outside the IBAN area, put your local account and routing details in the second field.</p>
-        <input type="text" id="holder" placeholder="Account holder" style="margin-bottom:10px;">
-        <input type="text" id="iban" placeholder="IBAN (or leave empty for non-IBAN accounts)" style="margin-bottom:10px;">
-        <input type="text" id="other_details" placeholder="Non-IBAN details: account number, routing/sort code, bank name">
+
+      <!-- Bank details: same fields, ids and rules as onboard.html (logic in
+           /bank_fields.js), so the payout_details we send has the shape the
+           payment code expects for every country, not just IBAN ones. -->
+      <div id="w-bankdetails" class="bank-block">
+        <div class="field">
+          <label for="f-holder">Account holder name *</label>
+          <p class="hint">Bank details for the payout via bank transfer.</p>
+          <input type="text" id="f-holder" autocomplete="name" placeholder="As shown on your bank account">
+        </div>
+        <div class="field">
+          <label id="l-iban" for="f-iban">IBAN or account number *</label>
+          <input type="text" id="f-iban" autocomplete="off" placeholder="DE89 3704 0044 0532 0130 00">
+        </div>
+        <div class="field" id="w-routing" style="display:none;">
+          <label for="f-routing">ACH routing number *</label>
+          <input type="text" id="f-routing" autocomplete="off" placeholder="9 digits, e.g. 026009593" inputmode="numeric">
+        </div>
+        <div class="field" id="w-institution" style="display:none;">
+          <label for="f-institution">Institution number *</label>
+          <input type="text" id="f-institution" autocomplete="off" placeholder="3 digits, e.g. 004" inputmode="numeric">
+        </div>
+        <div class="field" id="w-transit" style="display:none;">
+          <label for="f-transit">Transit number *</label>
+          <input type="text" id="f-transit" autocomplete="off" placeholder="5 digits" inputmode="numeric">
+        </div>
+        <div class="field" id="w-bsb" style="display:none;">
+          <label for="f-bsb">BSB code *</label>
+          <input type="text" id="f-bsb" autocomplete="off" placeholder="6 digits, e.g. 062000" inputmode="numeric">
+        </div>
+        <div class="field" id="w-bankcode" style="display:none;">
+          <label id="l-bankcode" for="f-bankcode">Bank code *</label>
+          <input type="text" id="f-bankcode" autocomplete="off" placeholder="e.g. 7171" inputmode="numeric">
+        </div>
+        <div class="field" id="w-branchcode" style="display:none;">
+          <label for="f-branchcode">Branch code *</label>
+          <input type="text" id="f-branchcode" autocomplete="off" placeholder="3 digits" inputmode="numeric">
+        </div>
+        <div class="field" id="w-account-type" style="display:none;">
+          <label for="f-account-type">Account type *</label>
+          <select id="f-account-type" autocomplete="off">
+            <option value="">Select...</option>
+            <option value="checking">Checking</option>
+            <option value="savings">Savings</option>
+          </select>
+        </div>
+        <div class="field" id="w-bic">
+          <label id="l-bic" for="f-bic">BIC/SWIFT</label>
+          <input type="text" id="f-bic" autocomplete="off" placeholder="COBADEFFXXX">
+        </div>
+        <div class="field">
+          <label for="f-bank">Bank name and country *</label>
+          <input type="text" id="f-bank" autocomplete="off" placeholder="Commerzbank, Germany">
+        </div>
+        <!-- SWIFT-rail countries (Armenia, Nepal, Ethiopia) need the holder's
+             address as separate fields; hidden everywhere else. -->
+        <div id="w-benaddr" class="bank-block" style="display:none">
+          <div class="field">
+            <label for="f-benaddr-line">Your street address *</label>
+            <input type="text" id="f-benaddr-line" autocomplete="address-line1" placeholder="Jangal-panauti Rd">
+          </div>
+          <div class="field">
+            <label for="f-benaddr-city">Your city *</label>
+            <input type="text" id="f-benaddr-city" autocomplete="address-level2" placeholder="Banepa">
+          </div>
+          <div class="field">
+            <label for="f-benaddr-post">Your postal code *</label>
+            <input type="text" id="f-benaddr-post" autocomplete="postal-code" placeholder="45210">
+          </div>
+        </div>
+        <p class="hint">Payouts are paid to your account in its local currency. The payment record shows the exact conversion.</p>
       </div>
 
       <div class="field">
@@ -90,6 +204,7 @@
     <p class="fine" id="fine" style="display:none;">Your bank details are stored encrypted and only used to pay you. The payment record (Pr&auml;mienbeleg) we email you documents the payout for your and our bookkeeping; the premium may be taxable for you in your country of residence, and that part is your responsibility. We do not withhold anything.</p>
   </div>
 </main>
+<script src="/bank_fields.js"></script>
 <script>
 (function () {
   var API = 'https://ob3iugfiy2.execute-api.us-east-1.amazonaws.com/v1/referral-claim';
@@ -105,6 +220,10 @@
   var needsDetails = true;
 
   function fail(msg) { err.style.display = 'block'; err.textContent = msg; }
+  var bank = window.pdoomBankFields;
+  function val(id) { var el = document.getElementById(id); return el && el.value ? String(el.value) : ''; }
+  document.getElementById('f-country').addEventListener('change', bank.updateBankFields);
+  bank.updateBankFields();
 
   if (!token) { sub.textContent = ''; fail('This page needs your personal link. Open it from your stats page.'); return; }
   document.getElementById('back-stats').href = '/partner_stats.html?token=' + encodeURIComponent(token);
@@ -133,7 +252,7 @@
       sub.innerHTML = 'For <b>' + esc(d.name) + '</b>: <b>$' + total + '</b> earned across ' + d.claimable.length +
         ' premium' + (d.claimable.length === 1 ? '' : 's') + '. Fill this in once and we pay it out.';
       if (!needsDetails) {
-        ['f-legal', 'f-address', 'f-country', 'f-bank'].forEach(function (id) {
+        ['w-legal', 'w-address', 'w-country', 'w-bankdetails'].forEach(function (id) {
           document.getElementById(id).style.display = 'none';
         });
       }
@@ -163,14 +282,24 @@
     if (needsDetails) {
       var legal = document.getElementById('legal_name').value.trim();
       var addr = document.getElementById('address').value.trim();
-      var ctry = document.getElementById('country').value.trim();
-      var holder = document.getElementById('holder').value.trim();
-      var iban = document.getElementById('iban').value.trim();
-      var other = document.getElementById('other_details').value.trim();
+      var ctry = val('f-country').trim();
       if (!legal || !addr || !ctry) return fail('Please fill in your legal name, address and country.');
-      if (!holder || (!iban && !other)) return fail('Please fill in your bank details.');
+      // Same country-aware checks as onboarding (bank_fields.js); the server
+      // re-validates with validateBankDetails either way.
+      bank.FIELD_IDS.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.classList.remove('error');
+      });
+      var bankErrors = bank.validateBank(val);
+      if (bankErrors.length) {
+        bankErrors.forEach(function (e) {
+          var el = document.getElementById(e.id);
+          if (el) el.classList.add('error');
+        });
+        return fail(bankErrors.map(function (e) { return e.msg; }).join(' '));
+      }
       body.legal_name = legal; body.address = addr; body.country = ctry;
-      body.payout_details = { holder: holder, iban: iban, other: other };
+      body.payout_details = bank.buildPayoutDetails(val);
     }
     var btn = document.getElementById('submit');
     btn.disabled = true;
@@ -180,8 +309,8 @@
         btn.disabled = false;
         if (!res.ok) { return fail(res.d.error || 'Something went wrong.'); }
         if (res.d.manual_route) {
-          // Payment can't go through the form (non-European account or a bad
-          // IBAN). Keep the form so they can correct it and try again.
+          // We can't pay this account automatically (e.g. a country with no
+          // payout route). Keep the form so they can see why.
           return fail(res.d.message || 'We could not process that bank account. Please check it and try again, or reply to your referral email.');
         }
         if (res.d.invoice_route) {
