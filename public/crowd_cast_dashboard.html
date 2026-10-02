@@ -2728,6 +2728,16 @@
         }).then(function(resp) { return resp.json(); });
     }
 
+    /* Approve and link can backdate pay to the first recorded day (and on link
+       mint a back-pay row); say what happened rather than doing it silently. */
+    function activationNotice(data) {
+        var msg = [];
+        if (data.activation) msg.push('Pay now accrues from ' + data.activation.to.slice(0, 10) + ' (first recorded ' + data.activation.basis.first_recorded_day + ' as ' + data.activation.basis.identity + '), was ' + String(data.activation.from).slice(0, 10) + '.');
+        if (data.backpay_payout_id) msg.push('Back-pay row ' + data.backpay_payout_id + ' minted (pending): ' + data.backpay.period_start + ' to ' + data.backpay.period_end + ', ' + data.backpay.days + ' days, ' + data.backpay.currency + ' ' + data.backpay.amount + (data.backpay_terms_held ? ' (held until they accept the new terms)' : '') + '.');
+        if (data.activation_error) msg.push('Could not check recordings for backdating: ' + data.activation_error);
+        if (msg.length) alert(msg.join('\n\n'));
+    }
+
     function renderPayoutsView() {
         if (!_isAdmin) return;
         var container = document.getElementById('payouts-view');
@@ -3596,6 +3606,7 @@
                     sel.disabled = true;
                     saveRecorderLinks(pid, current).then(function(data) {
                         if (data.error) { alert(data.error); sel.disabled = false; return; }
+                        activationNotice(data);
                         fetchPendingReview();
                     }).catch(function(err) { console.error('Link recorder failed:', err); sel.disabled = false; });
                 });
@@ -3612,6 +3623,7 @@
                     current = current.filter(function(x) { return x !== email; });
                     saveRecorderLinks(pid, current).then(function(data) {
                         if (data.error) { alert(data.error); return; }
+                        activationNotice(data);
                         fetchPendingReview();
                     }).catch(function(err) { console.error('Unlink recorder failed:', err); });
                 });
@@ -3634,6 +3646,7 @@
                         .then(function(resp) { return resp.json(); })
                         .then(function(data) {
                             if (data.error) { alert(data.error); btn.textContent = action; btn.style.pointerEvents = ''; return; }
+                            activationNotice(data);
                             fetchPendingReview();
                         })
                         .catch(function(err) { console.error('Review failed:', err); btn.textContent = action; btn.style.pointerEvents = ''; });
