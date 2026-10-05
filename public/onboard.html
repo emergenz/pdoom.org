@@ -1261,13 +1261,17 @@
             const resp = await fetch(API_BASE + '/onboard/validate-fields', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ address: addr, country: country }),
+                body: JSON.stringify({
+                    address: addr, country: country,
+                    name: document.getElementById('f-name').value.trim(),
+                    holder: document.getElementById('f-holder').value.trim(),
+                }),
             });
             const out = await resp.json();
             warnings = (out && out.warnings) || [];
         } catch (e) { return true; }
         if (!warnings.length) return true;
-        return window.confirm(warnings.join('\n') + '\n\nContinue with this address?');
+        return window.confirm(warnings.join('\n\n') + '\n\nContinue anyway?');
     }
 
     async function submitOnboarding() {

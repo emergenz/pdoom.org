@@ -3836,7 +3836,9 @@
             html += '<tr>';
             html += '<td style="' + tdStyle + 'text-align:center;cursor:pointer;"><span class="onboard-expand-btn" data-idx="' + i + '" style="font-size:14px;font-weight:700;color:#000;user-select:none;">+</span></td>';
             html += '<td style="' + tdStyle + '"><span class="status-dot" style="background:' + dotColor + ';"></span><span style="font-size:11px;font-weight:700;text-transform:uppercase;color:' + dotColor + ';">' + escapeHtml(p.status) + '</span></td>';
-            html += '<td style="' + tdStyle + 'font-size:13px;">' + escapeHtml(p.name || '') + '</td>';
+            html += '<td style="' + tdStyle + 'font-size:13px;">' + escapeHtml(p.name || '')
+                + (p.holder_mismatch ? ' <span title="The bank account holder name does not match this participant\'s name. Check whose account it is before approving or paying." style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#cf222e;border:1px solid #cf222e;padding:1px 4px;margin-left:4px;white-space:nowrap;">Holder differs</span>' : '')
+                + '</td>';
             html += '<td style="' + tdStyle + 'color:#777;">' + escapeHtml(p.email || '') + '</td>';
             html += '<td style="' + tdStyle + 'text-align:right;">' + fmtDec(stats.last7dHours, 1) + 'h</td>';
             html += '<td style="' + tdStyle + 'text-align:right;">' + fmtDec(stats.prior7dHours, 1) + 'h</td>';
@@ -3863,7 +3865,7 @@
             html += '<tr id="onboard-detail-' + i + '" style="display:none;"><td colspan="9" style="padding:0;border-bottom:1px solid #eee;">';
             html += '<div style="background:#fafaf7;padding:14px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px 24px;">';
             html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Country</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(p.country || '--') + '</span></div>';
-            html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Holder</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(holder || '--') + '</span></div>';
+            html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Holder</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;' + (p.holder_mismatch ? 'color:#cf222e;font-weight:700;' : '') + '">' + escapeHtml(holder || '--') + (p.holder_mismatch ? ' (not their name)' : '') + '</span></div>';
             html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">IBAN / Account</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(bank || '--') + '</span></div>';
             html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Currency</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(currency || '--') + '</span></div>';
             html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Accepted At</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(acceptedAt || '--') + '</span></div>';
