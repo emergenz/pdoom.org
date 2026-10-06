@@ -1055,6 +1055,11 @@
     }
     document.getElementById('f-country').addEventListener('change', updateBankFields);
     document.getElementById('f-country').addEventListener('change', renderCompensation);
+    // A reload or back-navigation can restore the selected country without a
+    // change event, which left the labels on "BIC/SWIFT" while validation asked
+    // for an IFSC. Sync the labels to whatever country is selected right now.
+    updateBankFields();
+    window.addEventListener('pageshow', updateBankFields);
 
     // Build the payout_details payload: sanitized (no spaces/dashes, uppercased
     // where applicable) and containing ONLY the fields relevant to the selected
