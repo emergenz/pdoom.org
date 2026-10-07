@@ -521,9 +521,19 @@
             body {
                 padding: 16px 12px 40px;
             }
+            /* Phones: the four numbers sit in a compact 2x2 block so the growth
+               chart starts on the first screen instead of three swipes down. */
             .cards {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                margin-bottom: 10px;
             }
+            .cards .card { padding: 12px 14px; margin: 0; }
+            .cards .card-label { font-size: 9px; letter-spacing: 1px; margin-bottom: 4px; }
+            .cards .card-value { font-size: 19px; letter-spacing: -0.5px; }
+            .cards .card-sub { font-size: 10px; }
+            .chart-box { padding: 16px; }
+            #trend-chart { height: 300px !important; max-height: none; }
             .site-header {
                 flex-direction: column;
                 align-items: flex-start;
