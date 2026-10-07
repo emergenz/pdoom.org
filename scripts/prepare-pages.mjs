@@ -224,6 +224,9 @@ const legacyRoutes = {
   ),
   'about.html': '/about/',
   'blog.html': '/research/',
+  // Short link: pdoom.org/dashboard (and /dashboard/) -> the crowd-cast dashboard.
+  'dashboard.html': '/crowd_cast_dashboard.html',
+  'dashboard/index.html': '/crowd_cast_dashboard.html',
   'imprint.html': '/imprint/',
   'open_calls.html': '/careers/',
   'participate.html': '/careers/paid-data-collection/',

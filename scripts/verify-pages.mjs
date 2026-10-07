@@ -16,6 +16,8 @@ const requiredFiles = [
   'dist/participate/index.html',
   'dist/onboard.html',
   'dist/crowd_cast_dashboard.html',
+  'dist/dashboard.html',
+  'dist/dashboard/index.html',
   'dist/crowd-cast-quickstart.html',
   'dist/docs/crowd-cast/index.html',
   'dist/docs/crowd-cast/install/index.html',
@@ -71,6 +73,8 @@ assertEqual(
 
 const redirects = [
   ['dist/about.html', '/about/'],
+  ['dist/dashboard.html', '/crowd_cast_dashboard.html'],
+  ['dist/dashboard/index.html', '/crowd_cast_dashboard.html'],
   ['dist/blog.html', '/research/'],
   ['dist/participate.html', '/careers/paid-data-collection/'],
   ['dist/open_calls/04_crowd_cast.html', '/careers/paid-data-collection/'],
