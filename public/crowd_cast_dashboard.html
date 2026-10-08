@@ -5446,14 +5446,22 @@
 
         var isGhost = n.bucket === 'ghosting';
         var isCapture = n.bucket === 'capture_broken';
+        var isCaptureDegraded = n.bucket === 'capture_degraded';
         var isUnlinked = n.bucket === 'unlinked';
         var badgeClass = (isGhost || isCapture) ? 'tier-decline' : 'tier-ask';
-        var badgeLabel = isCapture ? 'black frames' : isGhost ? 'not recording'
-                       : isUnlinked ? 'never signed in' : 'low volume';
+        var badgeLabel = isCapture ? 'black frames' : isCaptureDegraded ? 'partial capture'
+                       : isGhost ? 'not recording' : isUnlinked ? 'never signed in' : 'low volume';
 
         var metrics;
         if (isCapture) {
             metrics = 'Recording, but frames are coming through blank/black (hours look fine, data is unusable)';
+            if (typeof n.visible_fraction === 'number') metrics += ' &mdash; ' + Math.round(n.visible_fraction * 100) + '% visible';
+        } else if (isCaptureDegraded) {
+            /* A narrower band than capture_broken: some real work IS coming through,
+               just not all of it, usually a too-narrow app whitelist rather than a
+               recorder bug. Hours also look fine here (0 here is a placeholder — the
+               real figure is in visible_fraction), so don't show an hours number. */
+            metrics = 'Recording real work, but part of it is coming through blank/black (likely an app missing from their whitelist)';
             if (typeof n.visible_fraction === 'number') metrics += ' &mdash; ' + Math.round(n.visible_fraction * 100) + '% visible';
         } else if (isUnlinked) {
             /* Hours are UNKNOWN here, not zero: either the app was never installed, or
