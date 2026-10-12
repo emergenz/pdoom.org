@@ -61,14 +61,14 @@
         'Romania':'RO','Ireland':'IE','Greece':'GR','India':'IN','China':'CN','Japan':'JP',
         'United States':'US','Canada':'CA','Australia':'AU','Israel':'IL','Turkey':'TR',
         'Singapore':'SG','Hong Kong':'HK','South Korea':'KR','Taiwan':'TW','Brazil':'BR',
-        'Mexico':'MX','South Africa':'ZA','Armenia':'AM','Nepal':'NP','Ethiopia':'ET',
+        'Mexico':'MX','South Africa':'ZA','Armenia':'AM','Nepal':'NP','Ethiopia':'ET','Kenya':'KE','Nigeria':'NG',
     };
     const IBAN_COUNTRIES = ['DE','GB','CH','AT','NL','FR','SE','DK','NO','FI','BE','IT','ES','PT','PL','CZ','HU','RO','IE','GR','IL','TR','BR'];
 
     function bankMode(country) {
         if (!country) return 'default';
         const iso = COUNTRY_ISO[country] || '';
-        const modes = { US:'us', IN:'in', CA:'ca', AU:'au', JP:'jp', SG:'sg', HK:'hk', MX:'mx', AM:'am', NP:'np', ET:'et' };
+        const modes = { US:'us', IN:'in', CA:'ca', AU:'au', JP:'jp', SG:'sg', HK:'hk', MX:'mx', AM:'am', NP:'np', ET:'et', KE:'et', NG:'et' };
         if (modes[iso]) return modes[iso];
         if (IBAN_COUNTRIES.indexOf(iso) >= 0) return 'iban';
         return 'iban'; // every remaining country in the dropdown uses IBAN
@@ -258,7 +258,7 @@
             else if (ibanVal.indexOf('AM') === 0 && !validateIBAN(ibanVal)) markBank('f-iban', 'That IBAN does not look valid; please double-check it.');
             if (!/^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(bicVal)) markBank('f-bic', 'SWIFT/BIC code is required for transfers to Armenia (8 or 11 characters, ask your bank).');
         } else if (mode === 'np' || mode === 'et') {
-            const where = mode === 'et' ? 'Ethiopia' : 'Nepal';
+            const where = mode === 'np' ? 'Nepal' : document.getElementById('f-country').value;
             if (!/^[A-Za-z0-9]{4,34}$/.test(ibanVal)) markBank('f-iban', 'Please enter your bank account number.');
             if (!/^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(bicVal)) markBank('f-bic', 'SWIFT/BIC code is required for transfers to ' + where + ' (8 or 11 characters, ask your bank).');
         } else if (mode === 'iban') {
