@@ -2963,6 +2963,17 @@
         } else {
             bits.push('<span style="color:#bbb;">unscored</span>');
         }
+        /* Value-agent flags: recordings vs application, top tier below high, unstable verdict, coursework. */
+        if (ev.value_matches_application === 'no' || ev.value_matches_application === 'partly') {
+            var maNo = ev.value_matches_application === 'no';
+            bits.push('<span title="' + escapeHtml(ev.value_mismatch_note || '') + '" style="color:' + (maNo ? '#cf222e' : '#b08800') + ';font-weight:700;border-bottom:1px dotted;">'
+                + (maNo ? 'not as applied' : 'partly as applied') + '</span>');
+        }
+        (ev.value_flags ? ev.value_flags.split(',') : []).forEach(function(f) {
+            if (f.indexOf('top_tier_') === 0) bits.push('<span title="Paid the top rate, but the value agent rates the work ' + escapeHtml(f.slice(9)) + '" style="color:#cf222e;font-weight:700;">top tier, ' + escapeHtml(f.slice(9)) + '</span>');
+            else if (f.indexOf('unstable') === 0) bits.push('<span title="The value agent disagreed with itself (' + escapeHtml(f.split(':')[1] || '') + '); the middle verdict is shown. Worth a look." style="color:#b08800;">unstable</span>');
+            else if (f.indexOf('coursework_heavy') === 0) bits.push('<span title="Share of days whose summary mentions coursework (assignments, exams, lectures, term reports)" style="color:#b08800;">coursework ' + escapeHtml(f.split(':')[1] || '') + '</span>');
+        });
         if (ev.value_recommendation && ev.value_recommendation !== 'keep') {
             var recColor = ev.value_recommendation === 'wind_down' ? '#cf222e' : '#b08800';
             bits.push('<span style="color:' + recColor + ';font-weight:700;">' + escapeHtml(ev.value_recommendation) + '</span>');
@@ -4285,6 +4296,14 @@
             // The tier buttons in this modal are the commit: nothing is sent until
             // one is clicked, so there is no default tier to click past.
             showTierChoiceModal(name, isCustom, function(tier) {
+                // Top tier is for PhD students and above (Mihir, 2026-10-14, after Fehad,
+                // an M.S.(R) student, got it). Warn when the application shows no such role.
+                if (tier === 'top') {
+                    // Their own words first: vetting's work_summary can say "into PhD work" for a master's student.
+                    var appText = a.blurb || a.work_summary || '';
+                    if (!/\b(ph\.? ?d|doctoral|doctorate|postdoc|post-doc|professor|faculty|lecturer|research scientist|principal investigator)\b/i.test(appText)
+                        && !window.confirm('Top tier is for PhD students and above.\n\nNothing in ' + name + '\'s application mentions a PhD, postdoc or faculty role. Give the top tier anyway?')) return;
+                }
                 payload.comp_tier = tier;
                 submitReviewDecision(a, choice, payload);
             });
