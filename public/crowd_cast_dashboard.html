@@ -719,6 +719,7 @@
                         <span class="section-title">Contribution History</span>
                         <div id="user-heatmap"></div>
                     </div>
+                    <div id="user-work-profile" style="display:none;margin-top:20px;"></div>
                     <div class="activity-summaries" style="margin-top:20px;">
                         <span class="section-title">Activity Summaries</span>
                         <div id="user-activity-summaries"></div>
@@ -1623,8 +1624,48 @@
         /* Heatmap */
         renderHeatmap(userDaily);
 
-        /* Activity summaries */
+        /* Work profile (admins only), then activity summaries */
+        renderUserWorkProfile(uuids);
         renderActivitySummaries(uuids);
+    }
+
+    /* Participants list (with work profiles) for the per-person view; fetched once. */
+    var _profileParticipantsPromise = null;
+    function loadProfileParticipants() {
+        if (_lastOnboardParticipants && _lastOnboardParticipants.length) return Promise.resolve(_lastOnboardParticipants);
+        if (!_profileParticipantsPromise) {
+            _profileParticipantsPromise = fetch(ONBOARD_API + '/participants', { headers: { 'Authorization': 'Bearer ' + _authToken } })
+                .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+                .then(function(d) { return d.participants || []; })
+                .catch(function(e) { _profileParticipantsPromise = null; throw e; });
+        }
+        return _profileParticipantsPromise;
+    }
+
+    function renderUserWorkProfile(uuids) {
+        var box = document.getElementById('user-work-profile');
+        box.style.display = 'none'; box.innerHTML = '';
+        if (!_isAdmin) return;
+        var emails = {};
+        uuids.forEach(function(u) { var e = (_cachedUserNames[u] || {}).email; if (e) emails[e.toLowerCase()] = true; });
+        if (!Object.keys(emails).length) return;
+        var want = uuids.join(',');
+        loadProfileParticipants().then(function(list) {
+            if (box.dataset.for !== want) return; // user navigated to someone else meanwhile
+            var p = list.find(function(x) {
+                if (x.email && emails[x.email.toLowerCase()]) return true;
+                return (x.recorder_emails || []).some(function(e) { return emails[String(e).toLowerCase()]; });
+            });
+            if (!p) return;
+            var html = '<span class="section-title">Work Profile</span>';
+            if (p.work_profile_at) html += '<div style="font-size:11px;color:#999;margin:-4px 0 6px;">' + escapeHtml(p.participant_id || '') + ' · generated ' + escapeHtml(p.work_profile_at.slice(0, 10)) + (p.work_profile_days ? ' from ' + p.work_profile_days + ' daily summaries' : '') + ', refreshed weekly</div>';
+            html += p.work_profile
+                ? '<div class="work-profile">' + renderProfileMd(p.work_profile) + '</div>'
+                : '<div style="font-size:12px;color:#999;">No profile yet.</div>';
+            box.innerHTML = '<div class="outline-box" style="padding:18px 22px;">' + html + '</div>';
+            box.style.display = 'block';
+        }).catch(function(e) { console.warn('work profile load failed', e); });
+        box.dataset.for = want;
     }
 
     /** Convert markdown (bold, inline code, code blocks) to HTML, escape the rest. */
