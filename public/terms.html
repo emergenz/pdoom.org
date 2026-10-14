@@ -45,18 +45,19 @@
     <form id="form" novalidate style="display:none;">
       <ul class="terms-changes prose">
         <li id="pay-line">Your monthly amount and how you record stay the same.</li>
-        <li>p(doom) buys the exclusive rights to the data you upload, so the same recordings are not also sold elsewhere. The research, code, and other work you do while recording stay entirely yours.</li>
-        <li>Data you upload is sold to p(doom) when you upload it and becomes a permanent part of the dataset. These terms also apply to data you uploaded before, and replace the earlier option to have it removed from future dataset versions. Your GDPR rights, such as objecting for personal reasons, stay the same.</li>
-        <li>We may license or sell the dataset to companies, including for commercial AI training.</li>
-        <li>Both documents now also describe how crowd-cast works today, for example which services we use.</li>
+        <li>We've reworded the agreement so it clearly reads as a sale: the data you upload is sold to p(doom), which holds the rights to it exclusively. Your research, code, and other work you do while recording stay entirely yours.</li>
+        <!-- Shown only to people still on the first version (terms-info from_first_terms): for everyone on v2026-09-28 these already applied. -->
+        <li class="first-only" style="display:none;">These terms also apply to data you uploaded before, and replace the earlier option to have it removed from future dataset versions. Your GDPR rights, such as objecting for personal reasons, stay the same.</li>
+        <li class="first-only" style="display:none;">We may license or sell the dataset to companies, including for commercial AI training.</li>
+        <li class="first-only" style="display:none;">Both documents now also describe how crowd-cast works today, for example which services we use.</li>
       </ul>
-      <p class="prose" style="max-width:62ch;">To keep recording with crowd-cast, please review both documents and accept below.</p>
+      <p class="prose" style="max-width:62ch;">Please review the documents below and accept.</p>
       <details class="doc" open><summary>Data Purchase and Participation Agreement</summary><div class="doc-body" id="doc-dpa"></div></details>
       <details class="doc"><summary>Privacy and Recording Consent</summary><div class="doc-body" id="doc-privacy"></div></details>
       <label class="terms-check"><input type="checkbox" id="agree-purchase"><span id="label-purchase"></span></label>
       <label class="terms-check"><input type="checkbox" id="agree-privacy"><span id="label-privacy"></span></label>
       <label class="terms-check"><input type="checkbox" id="agree-special"><span id="label-special"></span></label>
-      <label class="terms-check"><input type="checkbox" id="agree-past"><span>I agree that these terms also apply to data I uploaded before today, replacing the earlier option to have it removed from future dataset versions.</span></label>
+      <label class="terms-check"><input type="checkbox" id="agree-past"><span id="label-past">I agree that these terms also apply to data I uploaded before today.</span></label>
       <button type="submit" id="submit" class="button button--primary">
         <span id="submit-label">Accept updated terms</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -95,7 +96,10 @@
     document.getElementById('label-purchase').textContent = lp.textContent.trim();
     document.getElementById('label-privacy').textContent = lv.textContent.trim();
     document.getElementById('label-special').textContent = ls.textContent.trim();
-    sub.innerHTML = 'Hi <b>'+esc((d.name||'there').split(' ')[0])+'</b>, we have updated the crowd-cast Data Purchase Agreement and Privacy Consent (version '+esc(String(d.version||'').replace(/^v/,''))+').';
+    var first = d.from_first_terms !== false;
+    sub.innerHTML = 'We have updated the crowd-cast ' + (first ? 'Data Purchase Agreement and Privacy Consent' : 'Data Purchase Agreement') + ' (version '+esc(String(d.version||'').replace(/^v/,''))+').';
+    Array.prototype.forEach.call(document.querySelectorAll('.first-only'), function(li) { li.style.display = first ? '' : 'none'; });
+    if (d.past_data_text) document.getElementById('label-past').textContent = d.past_data_text;
     if (d.compensation) document.getElementById('pay-line').textContent = 'Your monthly amount and how you record stay the same: ' + fmt(d.compensation) + ' per month.';
     form.style.display='';
   }).catch(function(e) { sub.textContent=''; fail(e.message==='docs' ? 'Could not load the documents. Please try again shortly.' : (e.message||String(e))); });
