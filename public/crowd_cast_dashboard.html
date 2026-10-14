@@ -27,6 +27,11 @@
         }
 
         /* -- Outline box (shared border style) -- */
+        .work-profile { font-size: 13px; line-height: 1.55; color: #222; max-width: 860px; margin-top: 4px; }
+        .work-profile p { margin: 7px 0; }
+        .work-profile ul { margin: 4px 0 8px; padding-left: 20px; }
+        .work-profile li { margin: 3px 0; }
+        .work-profile code { font-family: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace; font-size: 11.5px; background: #eee; padding: 0 3px; }
         .outline-box {
             border: 1px solid #000000;
             background: #ffffff;
@@ -3589,6 +3594,26 @@
         .catch(function(err) { console.error('Fetch pending failed:', err); });
     }
 
+    /* Minimal markdown for work profiles: **bold**, `code`, "- " bullets, paragraphs. Escapes first. */
+    function renderProfileMd(md) {
+        var inline = function(t) {
+            return escapeHtml(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`([^`]+)`/g, '<code>$1</code>');
+        };
+        var out = [], inList = false;
+        String(md || '').split('\n').forEach(function(line) {
+            var t = line.trim();
+            if (/^[-*] /.test(t)) {
+                if (!inList) { out.push('<ul>'); inList = true; }
+                out.push('<li>' + inline(t.slice(2)) + '</li>');
+                return;
+            }
+            if (inList) { out.push('</ul>'); inList = false; }
+            if (t) out.push('<p>' + inline(t) + '</p>');
+        });
+        if (inList) out.push('</ul>');
+        return out.join('');
+    }
+
     function _buildUnifiedOnboardTable(participants) {
         var thStyle = 'font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;white-space:nowrap;';
         var tdStyle = 'padding:7px 12px;font-size:12px;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;border-bottom:1px solid #eee;';
@@ -3621,6 +3646,7 @@
         html += '<th style="' + thStyle + '">Status</th>';
         html += '<th style="' + thStyle + '">Name</th>';
         html += '<th style="' + thStyle + '">Email</th>';
+        html += '<th style="' + thStyle + '" title="One-line summary from the weekly work profile (open the row for the full profile)">Works on</th>';
         html += '<th style="' + thStyle + 'text-align:right;">Last 7d</th>';
         html += '<th style="' + thStyle + 'text-align:right;">Prior 7d</th>';
         html += '<th style="' + thStyle + '">Last Active</th>';
@@ -3668,6 +3694,7 @@
                 + (p.holder_mismatch ? ' <span title="The bank account holder name does not match this participant\'s name. Check whose account it is before approving or paying." style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#cf222e;border:1px solid #cf222e;padding:1px 4px;margin-left:4px;white-space:nowrap;">Holder differs</span>' : '')
                 + '</td>';
             html += '<td style="' + tdStyle + 'color:#777;">' + escapeHtml(p.email || '') + '</td>';
+            html += '<td style="' + tdStyle + 'max-width:320px;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;font-size:12.5px;line-height:1.4;color:' + (p.work_oneliner ? '#333' : '#bbb') + ';">' + escapeHtml(p.work_oneliner || '--') + '</td>';
             html += '<td style="' + tdStyle + 'text-align:right;">' + fmtDec(stats.last7dHours, 1) + 'h</td>';
             html += '<td style="' + tdStyle + 'text-align:right;">' + fmtDec(stats.prior7dHours, 1) + 'h</td>';
             html += '<td style="' + tdStyle + '">' + escapeHtml(stats.lastActive) + '</td>';
@@ -3690,7 +3717,7 @@
             html += '</td></tr>';
 
             /* Expandable detail row (hidden by default) */
-            html += '<tr id="onboard-detail-' + i + '" style="display:none;"><td colspan="9" style="padding:0;border-bottom:1px solid #eee;">';
+            html += '<tr id="onboard-detail-' + i + '" style="display:none;"><td colspan="10" style="padding:0;border-bottom:1px solid #eee;">';
             html += '<div style="background:#fafaf7;padding:14px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px 24px;">';
             html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Country</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(p.country || '--') + '</span></div>';
             html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Holder</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;' + (p.holder_mismatch ? 'color:#cf222e;font-weight:700;' : '') + '">' + escapeHtml(holder || '--') + (p.holder_mismatch ? ' (not their name)' : '') + '</span></div>';
@@ -3699,6 +3726,17 @@
             html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Accepted At</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(acceptedAt || '--') + '</span></div>';
             html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Participant ID</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(p.participant_id || '--') + '</span></div>';
             html += '</div>';
+
+            /* Work profile (weekly, from all daily summaries; vetting Lambda "work-profiles") */
+            html += '<div style="background:#fafaf7;padding:0 20px 14px;"><div style="border-top:1px dashed #ddd;padding-top:12px;">';
+            html += '<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline;">';
+            html += '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Work profile</span>';
+            if (p.work_profile_at) html += '<span style="font-size:11px;color:#aaa;">generated ' + escapeHtml(p.work_profile_at.slice(0, 10)) + (p.work_profile_days ? ' from ' + p.work_profile_days + ' daily summaries' : '') + ', refreshed weekly</span>';
+            html += '</div>';
+            html += p.work_profile
+                ? '<div class="work-profile">' + renderProfileMd(p.work_profile) + '</div>'
+                : '<div style="font-size:12px;color:#999;margin-top:6px;">No profile yet (no daily summaries for this participant\'s recorder accounts).</div>';
+            html += '</div></div>';
 
             /* Recorder email linking (drives activity stats) */
             html += '<div style="background:#fafaf7;padding:0 20px 14px;">';
