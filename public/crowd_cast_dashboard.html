@@ -3747,7 +3747,7 @@
             var tv = p.terms_version || p.agreement_version || '';
             var termsStatus, termsColor;
             if (tv === TERMS_CURRENT) { termsStatus = TERMS_CURRENT + ' accepted' + (p.terms_accepted_at ? ' ' + p.terms_accepted_at.slice(0, 10) : ''); termsColor = '#2ea043'; }
-            else if (tv && tv >= TERMS_MIN && !p.terms_pending) { termsStatus = tv + ' accepted (paid; ' + TERMS_CURRENT + ' not yet accepted)'; termsColor = '#2ea043'; }
+            else if (tv && tv >= TERMS_MIN && !p.terms_pending) { termsStatus = tv + ' accepted (October paid; November on needs ' + TERMS_CURRENT + ')'; termsColor = '#b08800'; }
             else if (p.terms_pending) { termsStatus = 'link issued, awaiting acceptance (on ' + (tv || 'v1') + ')'; termsColor = '#b08800'; }
             else { termsStatus = 'on ' + (tv || 'v1') + ', not issued yet'; termsColor = '#999'; }
             html += '<div style="background:#fafaf7;padding:0 20px 16px;">';
