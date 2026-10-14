@@ -1642,6 +1642,20 @@
         return _profileParticipantsPromise;
     }
 
+    /* Integrity/risk tags from the daily "integrity" task (vetting Lambda): red chips,
+       the reasons in the tooltip. SCAM is filled so it can't be missed. */
+    function riskChips(tags, reasons) {
+        if (typeof tags === 'string') tags = tags ? tags.split(',') : [];
+        if (typeof reasons === 'string') reasons = reasons ? reasons.split('\n') : [];
+        if (!tags || !tags.length) return '';
+        var tip = escapeHtml((reasons || []).join('\n'));
+        return tags.map(function(t) {
+            var scam = t === 'SCAM';
+            return ' <span title="' + tip + '" style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;padding:1px 4px;margin-left:3px;border:1px solid #cf222e;'
+                + (scam ? 'background:#cf222e;color:#fff;' : 'color:#cf222e;') + 'cursor:help;">' + escapeHtml(t) + '</span>';
+        }).join('');
+    }
+
     function renderUserWorkProfile(uuids) {
         var box = document.getElementById('user-work-profile');
         box.style.display = 'none'; box.innerHTML = '';
@@ -1658,6 +1672,8 @@
             });
             if (!p) return;
             var html = '<span class="section-title">Work Profile</span>';
+            if (p.risk_tags && p.risk_tags.length) html += '<div style="margin:-2px 0 8px;">' + riskChips(p.risk_tags, p.risk_reasons)
+                + '<div style="font-size:11px;color:#cf222e;margin-top:4px;line-height:1.5;white-space:pre-line;">' + escapeHtml(p.risk_reasons.join('\n')) + '</div></div>';
             if (p.work_profile_at) html += '<div style="font-size:11px;color:#999;margin:-4px 0 6px;">' + escapeHtml(p.participant_id || '') + ' · generated ' + escapeHtml(p.work_profile_at.slice(0, 10)) + (p.work_profile_days ? ' from ' + p.work_profile_days + ' daily summaries' : '') + ', refreshed weekly</div>';
             html += p.work_profile
                 ? '<div class="work-profile">' + renderProfileMd(p.work_profile) + '</div>'
@@ -3015,6 +3031,7 @@
             else if (f.indexOf('unstable') === 0) bits.push('<span title="The value agent disagreed with itself (' + escapeHtml(f.split(':')[1] || '') + '); the middle verdict is shown. Worth a look." style="color:#b08800;">unstable</span>');
             else if (f.indexOf('coursework_heavy') === 0) bits.push('<span title="Share of days whose summary mentions coursework (assignments, exams, lectures, term reports)" style="color:#b08800;">coursework ' + escapeHtml(f.split(':')[1] || '') + '</span>');
         });
+        if (ev.risk_tags) bits.push(riskChips(ev.risk_tags, ev.risk_reasons).trim());
         if (ev.value_recommendation && ev.value_recommendation !== 'keep') {
             var recColor = ev.value_recommendation === 'wind_down' ? '#cf222e' : '#b08800';
             bits.push('<span style="color:' + recColor + ';font-weight:700;">' + escapeHtml(ev.value_recommendation) + '</span>');
@@ -3184,6 +3201,27 @@
             var who = (_payoutsParticipants[pn.participant_id] || {}).name || pn.participant_id;
             noteRows += '<div style="margin-bottom:6px;"><strong>' + escapeHtml(who) + ':</strong> ' + escapeHtml(pn.participant_note) + '</div>';
         }
+        // Flagged payees (integrity tags) are listed with the reasons; any SCAM tag
+        // raises the confirm phrase so a flagged payout can't go out on autopilot.
+        var flagRows = '', anyScam = false, seenPid = {};
+        for (var f = 0; f < (_payoutsData || []).length; f++) {
+            var pf = _payoutsData[f];
+            var evf = pf.evidence || {};
+            if (payoutIds.indexOf(pf.payout_id) < 0 || !evf.risk_tags || seenPid[pf.participant_id]) continue;
+            seenPid[pf.participant_id] = true;
+            if (evf.risk_tags.split(',').indexOf('SCAM') >= 0) anyScam = true;
+            var whoF = (_payoutsParticipants[pf.participant_id] || {}).name || pf.participant_id;
+            flagRows += '<div style="margin-bottom:8px;"><strong>' + escapeHtml(whoF) + '</strong>' + riskChips(evf.risk_tags, evf.risk_reasons)
+                + '<div style="color:#555;white-space:pre-line;margin-top:2px;">' + escapeHtml(evf.risk_reasons || '') + '</div></div>';
+        }
+        var phrase = anyScam ? 'CONFIRM FLAGGED' : 'CONFIRM';
+        var flagBlock = flagRows
+            ? '<div style="border:1px solid #cf222e;background:#fff5f5;padding:10px 12px;margin-bottom:20px;font-size:12px;line-height:1.5;max-height:240px;overflow-y:auto;">' +
+                  '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#cf222e;margin-bottom:8px;">Flagged payees</div>' +
+                  flagRows +
+              '</div>'
+            : '';
+
         var notesBlock = noteRows
             ? '<div style="border:1px solid #eee;background:#fafafa;padding:10px 12px;margin-bottom:20px;font-size:12px;line-height:1.5;">' +
                   '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#777;margin-bottom:8px;">Notes emailed to participants</div>' +
@@ -3194,9 +3232,9 @@
         modal.innerHTML = '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;">Confirm Payouts</div>' +
             '<div style="font-size:14px;margin-bottom:8px;"><strong>' + payoutIds.length + ' payouts</strong> totaling <strong>' + _fmtCurTotals(_payoutCurTotals(payoutIds)) + '</strong></div>' +
             '<div style="font-size:12px;color:#666;margin-bottom:20px;">This will generate Auszahlungsbelege and email them to participants.</div>' +
-            notesBlock +
-            '<div style="font-size:12px;margin-bottom:16px;">Type <strong>CONFIRM</strong> to proceed:</div>' +
-            '<input type="text" id="confirm-input" style="width:100%;font-size:14px;font-family:\'SF Mono\',monospace;padding:8px 12px;border:1px solid #ccc;margin-bottom:20px;outline:none;" placeholder="CONFIRM">' +
+            flagBlock + notesBlock +
+            '<div style="font-size:12px;margin-bottom:16px;">Type <strong>' + phrase + '</strong> to proceed' + (anyScam ? ' (a SCAM-tagged payee is selected)' : '') + ':</div>' +
+            '<input type="text" id="confirm-input" style="width:100%;font-size:14px;font-family:\'SF Mono\',monospace;padding:8px 12px;border:1px solid #ccc;margin-bottom:20px;outline:none;" placeholder="' + phrase + '">' +
             '<div style="display:flex;gap:8px;justify-content:flex-end;">' +
                 '<span id="modal-cancel" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #000;cursor:pointer;">Cancel</span>' +
                 '<span id="modal-approve" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #ccc;background:#ccc;color:#999;cursor:not-allowed;">Approve</span>' +
@@ -3210,7 +3248,7 @@
         input.focus();
 
         input.addEventListener('input', function() {
-            if (input.value.trim() === 'CONFIRM') {
+            if (input.value.trim() === phrase) {
                 approveBtn.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #2ea043;background:#2ea043;color:#fff;cursor:pointer;';
             } else {
                 approveBtn.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #ccc;background:#ccc;color:#999;cursor:not-allowed;';
@@ -3226,7 +3264,7 @@
         });
 
         approveBtn.addEventListener('click', function() {
-            if (input.value.trim() !== 'CONFIRM') return;
+            if (input.value.trim() !== phrase) return;
             approveBtn.textContent = 'Processing...';
             approveBtn.style.pointerEvents = 'none';
 
@@ -3256,7 +3294,7 @@
         });
 
         input.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && input.value.trim() === 'CONFIRM') approveBtn.click();
+            if (e.key === 'Enter' && input.value.trim() === phrase) approveBtn.click();
             if (e.key === 'Escape') document.body.removeChild(overlay);
         });
     }
@@ -3743,6 +3781,7 @@
             html += '<td style="' + tdStyle + 'text-align:center;cursor:pointer;"><span class="onboard-expand-btn" data-idx="' + i + '" style="font-size:14px;font-weight:700;color:#000;user-select:none;">+</span></td>';
             html += '<td style="' + tdStyle + '"><span class="status-dot" style="background:' + dotColor + ';"></span><span style="font-size:11px;font-weight:700;text-transform:uppercase;color:' + dotColor + ';">' + escapeHtml(p.status) + '</span></td>';
             html += '<td style="' + tdStyle + 'font-size:13px;">' + escapeHtml(p.name || '')
+                + riskChips(p.risk_tags, p.risk_reasons)
                 + (p.holder_mismatch ? ' <span title="The bank account holder name does not match this participant\'s name. Check whose account it is before approving or paying." style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#cf222e;border:1px solid #cf222e;padding:1px 4px;margin-left:4px;white-space:nowrap;">Holder differs</span>' : '')
                 + '</td>';
             html += '<td style="' + tdStyle + 'color:#777;">' + escapeHtml(p.email || '') + '</td>';
