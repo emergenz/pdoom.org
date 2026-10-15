@@ -332,9 +332,9 @@
                     <input class="field-input" type="email" id="f-email" name="email" autocomplete="email" placeholder="jane@university.edu" required>
                 </div>
                 <div class="field">
-                    <label class="field-label" for="f-address">Mailing address *</label>
+                    <label class="field-label" for="f-address">Home address (where you live) *</label>
                     <input class="field-input" type="text" id="f-address" name="address" autocomplete="street-address" aria-describedby="f-address-hint" placeholder="Street 123, 80636 Munich, Germany" required>
-                    <div class="field-hint" id="f-address-hint">Street, postal code, city</div>
+                    <div class="field-hint" id="f-address-hint">Street, postal code, city. Your own address, not your bank's.</div>
                 </div>
                 <div class="field">
                     <label class="field-label" for="f-country">Country of residence *</label>
@@ -1132,9 +1132,15 @@
                 'Please enter a valid email address.');
 
             // Address: reasonable length and structure
+            // Fintech USD accounts show the bank's address next to the account details;
+            // pay depends on where you live, so the bank's address is refused (server too).
+            const bankAddrRx = /1801\s+main\s+st|89[-\s]?16\s+jamaica\s+av|6070\s+poplar\s+av|4501\s+23rd\s+av|2115\s+linwood\s+av|\b1\s+letterman\s+dr/i;
+            const addrVal = (document.getElementById('f-address').value || '').trim();
             checkField('f-address',
-                v => v && v.length >= 10,
-                'Please enter your full mailing address (street, postal code, city).');
+                v => v && v.length >= 10 && !bankAddrRx.test(v),
+                bankAddrRx.test(addrVal)
+                    ? 'This looks like your bank\'s address, not where you live. Please enter your own home address.'
+                    : 'Please enter your full home address (street, postal code, city).');
 
             // Country: must be selected
             checkField('f-country',
