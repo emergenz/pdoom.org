@@ -2779,6 +2779,9 @@
             if (p.original_amount != null && Number(p.original_amount) !== Number(_amt)) {
                 html += '<br><span style="font-size:10px;font-weight:400;color:#b08800;">adj. from ' + _sym + Number(p.original_amount).toFixed(2) + '</span>';
             }
+            if (p.hold_until && p.hold_until > new Date().toISOString() && p.status === 'pending') {
+                html += '<br><span title="' + escapeHtml(p.hold_reason || '') + '" style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#fff;background:#b08800;padding:1px 4px;">Held till ' + escapeHtml(p.hold_until.slice(0, 10)) + '</span>';
+            }
             if (p.adjustment_note) {
                 html += '<br><span title="' + escapeHtml(p.adjustment_note) + '" style="font-size:10px;font-weight:400;color:#777;">' + escapeHtml(p.adjustment_note.length > 34 ? p.adjustment_note.slice(0, 34) + '\u2026' : p.adjustment_note) + '</span>';
             }
@@ -3282,6 +3285,8 @@
                 if (data.error) alert(data.error);
                 var held = (data.results || []).filter(function(r) { return r.terms_gated; });
                 if (held.length) alert(held.length + ' payout(s) not paid: waiting on re-accept of the new terms.');
+                var onHold = (data.results || []).filter(function(r) { return r.held; });
+                if (onHold.length) alert(onHold.length + ' payout(s) not paid, on hold:\n' + onHold.map(function(r) { return r.payout_id + ': ' + r.error; }).join('\n'));
                 refreshPayoutsAfterApprove();
             })
             .catch(function(err) {
