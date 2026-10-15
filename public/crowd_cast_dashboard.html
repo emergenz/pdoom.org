@@ -5167,6 +5167,36 @@
             .catch(function(err){ alert('Snooze failed: ' + (err.message || err)); });
     }
 
+    /* Decide on someone who answered our question ("asked" + replied), straight from
+       Follow-ups. Same endpoint and 10-minute undo window as the Review tab. */
+    var _fuLast = null;
+    function fuDecide(email, choice, tier) {
+        var verb = choice === 'reject' ? 'Reject' : 'Accept' + (tier === 'top' ? ' at the TOP tier' : '');
+        if (!window.confirm(verb + ' ' + email + '?\n\nThe ' + (choice === 'reject' ? 'standard decline email' : 'onboarding link') + ' goes out after the 10-minute undo window.')) return;
+        var payload = { email: email, choice: choice };
+        if (choice === 'accept') payload.comp_tier = tier;
+        fetch(ONBOARD_API + '/applicants/decision', {
+            method: 'POST', headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then(function(resp){ return resp.json().then(function(j){ return { ok: resp.ok, j: j }; }); })
+        .then(function(r){
+            if (!r.ok) { alert('Decision failed: ' + (r.j.error || 'unknown')); return; }
+            _fuLast = { email: email, verb: verb };
+            renderFollowupsTab();
+        }).catch(function(err){ alert('Decision failed: ' + (err.message || err)); });
+    }
+    function fuUndo() {
+        if (!_fuLast) return;
+        fetch(ONBOARD_API + '/applicants/undo', {
+            method: 'POST', headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: _fuLast.email })
+        }).then(function(resp){ return resp.json().then(function(j){ return { ok: resp.ok, j: j }; }); })
+        .then(function(r){
+            if (!r.ok) { alert('Undo failed: ' + (r.j.error || 'unknown') + '\n(The 10-minute window may have passed.)'); return; }
+            _fuLast = null; renderFollowupsTab();
+        });
+    }
+
     function fuSnoozeBtns(email) {
         var mk = function(d, lab){ return '<span onclick="snoozeApplicant(\'' + email + '\',' + d + ')" style="cursor:pointer;color:#888;font-size:11px;border:1px solid #ddd;border-radius:4px;padding:2px 7px;white-space:nowrap;" title="Pause nudges for ' + lab + ' (e.g. vacation)">zz ' + lab + '</span>'; };
         return '<span style="display:inline-flex;gap:4px;">' + mk(7,'1w') + mk(14,'2w') + mk(30,'1m') + '</span>';
@@ -5182,6 +5212,7 @@
         h += '<h2 style="font-size:18px;margin:0 0 4px;">Applicant follow-ups</h2>';
         h += '<p style="color:#666;font-size:13px;margin:0 0 22px;">People we asked or invited who haven\'t resolved. <b>Waiting on you</b> replied and need a human answer; <b>nudged</b> are on the auto-nudge track (2 nudges, then they lapse); <b>no reply yet</b> have heard nothing back from us since. Everyone here is asked or invited, so for decided, rejected or lapsed applicants use the <b>Applicants</b> tab.</p>';
 
+        if (_fuLast) h += '<div class="outline-box" style="padding:10px 14px;margin-bottom:16px;font-size:13px;">' + esc(_fuLast.verb) + ': ' + esc(_fuLast.email) + '. Sends in 10 minutes. <span onclick="fuUndo()" style="cursor:pointer;text-decoration:underline;font-weight:700;">Undo</span></div>';
         h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#c0392b;margin:0 0 10px;">Waiting on you (' + wy.length + ')</div>';
         if (!wy.length) {
             h += '<p style="color:#999;font-size:13px;margin:0 0 26px;">Nobody waiting. Nice.</p>';
@@ -5195,6 +5226,11 @@
                   + (r.blurb ? '<div style="color:#888;font-size:12px;margin-top:4px;">' + esc(r.blurb) + '</div>' : '')
                   + '</div>'
                   + fuSnoozeBtns(r.email)
+                  + (r.status === 'asked'
+                      ? '<span onclick="fuDecide(\'' + esc(r.email) + '\',\'accept\',\'standard\')" class="review-btn rb-accept" style="cursor:pointer;padding:8px 12px;white-space:nowrap;" title="Accept at the standard tier; the onboarding link goes out after the 10-minute undo window">Accept</span>'
+                        + '<span onclick="fuDecide(\'' + esc(r.email) + '\',\'accept\',\'top\')" class="review-btn rb-accept" style="cursor:pointer;padding:8px 12px;white-space:nowrap;" title="Accept at the top tier (PhD and above)">Accept top</span>'
+                        + '<span onclick="fuDecide(\'' + esc(r.email) + '\',\'reject\')" class="review-btn" style="cursor:pointer;padding:8px 12px;white-space:nowrap;border:1px solid #c0392b;color:#c0392b;" title="Standard decline email, sent after the 10-minute undo window">Reject</span>'
+                      : '')
                   + '<a href="' + mailto(r, 'Re: your crowd-cast application') + '" class="review-btn rb-accept" style="text-decoration:none;padding:8px 16px;white-space:nowrap;">Reply</a>'
                   + '</div>';
             });
