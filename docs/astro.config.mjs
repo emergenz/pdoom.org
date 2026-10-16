@@ -14,6 +14,9 @@ export default defineConfig({
         'Install, configure and run crowd-cast, the p(doom) screen and input recording agent.',
       favicon: '/favicon.png',
       customCss: ['./src/styles/pdoom.css'],
+      expressiveCode: {
+        defaultProps: { frame: 'code' },
+      },
       components: {
         Header: './src/components/Header.astro',
         SiteTitle: './src/components/SiteTitle.astro',

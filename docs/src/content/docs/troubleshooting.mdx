@@ -8,16 +8,56 @@ import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 If your problem is a known limitation rather than a fix-it issue, check
 [Known issues](/docs/crowd-cast/known-issues/) too.
 
+## crowd-cast can't capture your screen (macOS)
+
+If crowd-cast tells you it can't capture your screen, macOS's screen-capture
+service (`replayd`) has usually gotten stuck, often after a display change or
+waking from sleep. Restart that service:
+
+1. Quit crowd-cast from the menu-bar icon.
+2. In Terminal, run:
+
+   ```bash
+   pkill -9 -x replayd
+   ```
+
+   macOS restarts `replayd` on its own right away. You don't need `sudo`.
+3. Reopen CrowdCast.
+
+That usually gets recording working again. If it doesn't, restart your Mac.
+
+## "Permissions Required" notification (macOS)
+
+A missing permission shows up as a notification banner titled **Permissions
+Required**, not as a popup. You'll see one of these:
+
+- **"Recording not started."** followed by "Accessibility permission is required
+  for keyboard and mouse capture", "Screen Recording permission is required for
+  window capture", or both. The tray icon also switches to an error state.
+- **"crowd-cast does not have Screen Recording permission, so recordings are
+  black."** This one appears when Screen Recording was revoked while recording
+  was running.
+
+To fix it, open **System Settings → Privacy & Security** and go to
+**Accessibility** or **Screen Recording**, whichever the message names. If
+CrowdCast is already listed, **remove it from the list** (select it and click
+the minus button), then **add it back**. On macOS this often works where simply
+toggling the switch does not. Quit and relaunch crowd-cast afterwards.
+
+<Aside type="note">
+  These banners need notification permission (see [Notifications don't
+  appear](#notifications-dont-appear)). Without it, the "Recording not started"
+  case only shows as an error in the tray menu.
+</Aside>
+
 ## Recording shows "no capture sources"
 
 <Tabs syncKey="os">
 <TabItem label="macOS">
 
-The **Screen Recording** permission was denied, revoked, or has gone stale. Open
-**System Settings → Privacy & Security → Screen Recording**. If CrowdCast is
-already listed, **remove it from the list** (select it and click the minus
-button), then **add it back**. On macOS this often works where simply toggling
-the switch does not. Quit and relaunch crowd-cast afterwards.
+The **Screen Recording** permission was denied, revoked, or has gone stale.
+Re-grant it as described under
+["Permissions Required" notification](#permissions-required-notification-macos).
 
 </TabItem>
 <TabItem label="Windows">

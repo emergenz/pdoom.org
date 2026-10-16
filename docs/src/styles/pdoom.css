@@ -42,6 +42,9 @@
   --sl-sidebar-width: 19rem;
   --sl-content-width: 50rem;
   --sl-content-pad-x: clamp(1.25rem, 3vw, 3rem);
+  --sl-text-h2: 1.6rem;
+  --sl-text-h3: 1.25rem;
+  --sl-line-height-headings: 1.2;
 
   --ec-brdRad: 4px;
   --ec-frm-frameBoxShdCssVal: none;
@@ -135,12 +138,9 @@ mobile-starlight-toc summary {
 }
 
 .sidebar-content summary {
-  color: var(--sl-color-gray-3);
-  font-family: var(--sl-font-mono);
-  font-size: 0.69rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--sl-color-gray-2);
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .sidebar-content a {
@@ -204,41 +204,22 @@ site-search button:hover {
 }
 
 .content-panel h1 {
-  max-width: 18ch;
   margin-top: 0.25rem;
-  font-size: clamp(2.5rem, 6vw, 4.75rem);
-  line-height: 0.98;
-}
-
-.content-panel h1::before {
-  content: 'CROWD-CAST / DOCUMENTATION';
-  display: block;
-  margin-bottom: 1.1rem;
-  color: var(--pd-signal);
-  font-family: var(--sl-font-mono);
-  font-size: 0.68rem;
-  font-weight: 500;
-  line-height: 1.2;
-  letter-spacing: 0.08em;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  line-height: 1.1;
 }
 
 .sl-markdown-content {
   font-size: 1rem;
-  line-height: 1.72;
+  line-height: 1.6;
 }
 
-.sl-markdown-content h2 {
-  margin-top: 3.5rem;
-  padding-top: 1.1rem;
-  border-top: 1px solid color-mix(in srgb, var(--sl-color-gray-4) 46%, transparent);
-  font-size: clamp(1.65rem, 3vw, 2.25rem);
-  line-height: 1.08;
-}
-
-.sl-markdown-content h3 {
+.sl-markdown-content .sl-heading-wrapper.level-h2 {
   margin-top: 2.5rem;
-  font-size: 1.3rem;
-  line-height: 1.2;
+}
+
+.sl-markdown-content .sl-heading-wrapper.level-h3 {
+  margin-top: 2rem;
 }
 
 .sl-markdown-content :where(p, li) {
@@ -263,12 +244,11 @@ site-search button:hover {
 }
 
 .sl-markdown-content code:not(:where(pre code, .expressive-code *)) {
-  border: 1px solid color-mix(in srgb, var(--sl-color-gray-4) 42%, transparent);
-  border-radius: 2px;
-  padding: 0.1em 0.35em;
-  background: var(--sl-color-gray-7);
+  border-radius: 3px;
+  padding: 0.1em 0.3em;
+  background: color-mix(in srgb, var(--sl-color-gray-5) 30%, transparent);
   font-family: var(--sl-font-mono);
-  font-size: 0.9em;
+  font-size: 0.875em;
 }
 
 .expressive-code .frame,
@@ -298,6 +278,7 @@ site-search button:hover {
 
 .card .title {
   font-family: var(--sl-font);
+  font-size: 1.15rem;
   font-weight: 500;
   letter-spacing: 0;
 }
@@ -309,11 +290,8 @@ site-search button:hover {
 }
 
 .starlight-aside__title {
-  font-family: var(--sl-font-mono);
-  font-size: 0.69rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .starlight-aside__icon {
@@ -340,12 +318,9 @@ site-search button:hover {
 }
 
 .sl-markdown-content th {
-  color: var(--sl-color-gray-3);
-  font-family: var(--sl-font-mono);
-  font-size: 0.68rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--sl-color-white);
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .sl-markdown-content :where(th, td) {
@@ -406,6 +381,21 @@ site-search button:hover {
   color: var(--pd-signal);
 }
 
+.sl-steps > li::before {
+  font-size: 1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--sl-color-white);
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+  content: counter(steps-counter) '.';
+}
+
+.sl-steps > li::after {
+  display: none;
+}
+
 .tablist-wrapper ul[role='tablist'] {
   border-bottom-color: color-mix(in srgb, var(--sl-color-gray-4) 42%, transparent);
 }
@@ -416,12 +406,9 @@ site-search button:hover {
 }
 
 starlight-toc h2 {
-  color: var(--sl-color-gray-3);
-  font-family: var(--sl-font-mono);
-  font-size: 0.66rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--sl-color-gray-2);
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 starlight-toc a {
@@ -442,12 +429,6 @@ starlight-toc a[aria-current='true'] {
   border-color: var(--pd-signal);
 }
 
-.edit-link {
-  font-family: var(--sl-font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-}
-
 @media (max-width: 50rem) {
   :root {
     --pd-announcement-height: 3rem;
@@ -465,16 +446,11 @@ starlight-toc a[aria-current='true'] {
   }
 
   .content-panel h1 {
-    font-size: clamp(2.25rem, 12vw, 3.5rem);
+    font-size: 2rem;
   }
 
-  .content-panel h1::before {
-    margin-bottom: 0.9rem;
-    font-size: 0.62rem;
-  }
-
-  .sl-markdown-content h2 {
-    margin-top: 3rem;
+  :root {
+    --sl-text-h2: 1.4rem;
   }
 }
 
