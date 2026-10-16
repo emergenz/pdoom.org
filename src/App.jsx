@@ -739,7 +739,7 @@ function ReadySection() {
                   </div>
                   <div className="ready-card-actions">
                     <div className="ready-links">
-                      {card.links.map((link) => <a href={link.href} key={link.label}><ArrowRight size={14} />{link.label}</a>)}
+                      {card.links.map((link) => <a href={link.href} key={link.label}>{link.label}</a>)}
                     </div>
                     <a className="button button--primary" href={card.ctaHref}>{card.cta}<ArrowRight size={16} /></a>
                   </div>
