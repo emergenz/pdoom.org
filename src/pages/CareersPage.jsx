@@ -33,7 +33,7 @@ const opportunities = [
         ordered: true,
         items: [
           <>Apply through the <a href={signUpHref}>signup form</a>.</>,
-          <>If accepted, install <a href="https://github.com/p-doom/crowd-cast/releases" target="_blank" rel="noreferrer">crowd-cast</a> on macOS, Windows, or Linux.</>,
+          <>If accepted, install <a href="/docs/crowd-cast/">crowd-cast</a> on macOS, Windows, or Linux.</>,
           <>On first launch, choose which applications can be recorded. Everything outside that list is automatically excluded.</>,
           <>The recorder captures five-minute segments and uploads them to a private S3 bucket. At the end of each segment, its local copy is deleted.</>,
         ],
