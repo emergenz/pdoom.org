@@ -588,6 +588,7 @@
                 <span class="tab-btn" id="tab-all" onclick="switchTab('all')" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">All Users</span>
                 <span class="tab-btn" id="tab-review" onclick="switchTab('review')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Review</span>
                 <span class="tab-btn" id="tab-nudges" onclick="switchTab('nudges')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Nudges</span>
+                <span class="tab-btn" id="tab-cases" onclick="switchTab('cases')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Cases</span>
                 <span class="tab-btn" id="tab-followups" onclick="switchTab('followups')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Follow-ups</span>
                 <span class="tab-btn" id="tab-applicants" onclick="switchTab('applicants')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Applicants</span>
                 <span class="tab-btn" id="tab-partners" onclick="switchTab('partners')" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:8px 16px;cursor:pointer;color:#999;border-bottom:2px solid transparent;">Partners</span>
@@ -742,6 +743,8 @@
             <div id="review-view" style="display:none;"></div>
             <!-- Participant recording-health nudges "Tinder" queue (admin only) -->
             <div id="nudges-view" style="display:none;"></div>
+            <!-- Review cases: question, 3-day window, keep/end decision (admin only) -->
+            <div id="cases-view" style="display:none;"></div>
 
             <!-- Applicant follow-up SLA surface (admin only): waiting-on-you / nudged / lapsing -->
             <div id="followups-view" style="display:none;"></div>
@@ -2070,6 +2073,13 @@
         revEl.style.display = tab === 'review' ? 'block' : 'none';
         nudgeEl.style.display = tab === 'nudges' ? 'block' : 'none';
         if (followEl) followEl.style.display = tab === 'followups' ? 'block' : 'none';
+        var casesEl = document.getElementById('cases-view');
+        if (casesEl) casesEl.style.display = tab === 'cases' ? 'block' : 'none';
+        var casesTab = document.getElementById('tab-cases');
+        if (casesTab) {
+            casesTab.style.borderBottomColor = tab === 'cases' ? '#000' : 'transparent';
+            casesTab.style.color = tab === 'cases' ? '#000' : '#999';
+        }
         var fcEl = document.getElementById('forecast-view');
         if (fcEl) fcEl.style.display = tab === 'forecast' ? 'block' : 'none';
         var appsEl = document.getElementById('applicants-view');
@@ -2127,6 +2137,7 @@
         if (tab === 'payouts') renderPayoutsView();
         if (tab === 'review') renderReviewTab();
         if (tab === 'nudges') renderNudgesTab();
+        if (tab === 'cases') renderCasesTab();
         if (tab === 'followups') renderFollowupsTab();
         if (tab === 'applicants') renderApplicantsTab();
         if (tab === 'partners') renderPartnersTab();
@@ -3176,7 +3187,7 @@
         var modal = document.createElement('div');
         modal.style.cssText = 'background:#fff;border:1px solid #000;padding:32px;max-width:400px;width:90%;font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;';
         modal.innerHTML = '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;">' + escapeHtml(title) + '</div>' +
-            '<div style="font-size:13px;margin-bottom:24px;line-height:1.5;">' + escapeHtml(message) + '</div>' +
+            '<div style="font-size:13px;margin-bottom:24px;line-height:1.5;white-space:pre-line;">' + escapeHtml(message) + '</div>' +
             '<div style="display:flex;gap:8px;justify-content:flex-end;">' +
                 '<span class="modal-cancel" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #000;cursor:pointer;">Cancel</span>' +
                 '<span class="modal-confirm" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #000;background:#000;color:#fff;cursor:pointer;">Confirm</span>' +
@@ -4075,6 +4086,8 @@
             /* Show review, nudges, participants and payouts tabs for admins */
             document.getElementById('tab-review').style.display = _isAdmin ? 'inline' : 'none';
             document.getElementById('tab-nudges').style.display = _isAdmin ? 'inline' : 'none';
+            var tcaShow = document.getElementById('tab-cases'); if (tcaShow) tcaShow.style.display = _isAdmin ? 'inline' : 'none';
+            if (_isAdmin) { fetchCasesBadge(); if (location.hash === '#cases') switchTab('cases'); }
             var tfuShow = document.getElementById('tab-followups'); if (tfuShow) tfuShow.style.display = _isAdmin ? 'inline' : 'none';
             var tapShow = document.getElementById('tab-applicants'); if (tapShow) tapShow.style.display = _isAdmin ? 'inline' : 'none';
             var tpaShow = document.getElementById('tab-partners'); if (tpaShow) tpaShow.style.display = _isAdmin ? 'inline' : 'none';
@@ -5601,6 +5614,134 @@
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    }
+
+
+    /* =================================================================
+       Review cases: one question, 3 days to answer, payouts held meanwhile,
+       then keep / end. Opened daily by the vetting Lambda (task review-cases).
+       Policy: docs/participant-review-policy.md in the data-collection repo.
+       ================================================================= */
+    var _cases = [];
+    var CASE_TYPE = { reapplied: 'reapplied after rejection', off_topic: 'recordings not research' };
+    var CASE_STATUS = { draft: 'question to send', asked: 'waiting for reply', answered: 'replied: decide',
+                        expired: 'no reply: decide', closed: 'closed' };
+
+    function fetchCasesBadge() {
+        fetch(ONBOARD_API + '/cases', { headers: { 'Authorization': 'Bearer ' + _authToken } })
+            .then(function(r){ return r.json(); })
+            .then(function(d){ updateCasesBadge(d.cases || []); }).catch(function(){});
+    }
+    function updateCasesBadge(list) {
+        var tab = document.getElementById('tab-cases'); if (!tab) return;
+        var n = list.filter(function(c){ return ['draft','answered','expired'].indexOf(c.status) >= 0; }).length;
+        tab.textContent = n > 0 ? 'Cases (' + n + ')' : 'Cases';
+        if (n > 0 && tab.style.borderBottomColor !== 'rgb(0, 0, 0)') tab.style.color = '#c0392b';
+    }
+    function caseFirst(c) { var f = String(c.name || '').trim().split(/\s+/)[0] || ''; return f ? f.charAt(0).toUpperCase() + f.slice(1).toLowerCase() : ''; }
+    function caseOutcomeMail(c, choice) {
+        var hi = caseFirst(c) ? 'Hi ' + caseFirst(c) + ',' : 'Hey,';
+        var noReply = c.status === 'expired';
+        if (choice === 'keep') return noReply ? '' : hi + '\n\nthanks for explaining, that makes sense. Carry on as you are.\n\nMihir';
+        if (choice === 'end_nopay') return hi + '\n\n' + (noReply ? 'since I didn\'t hear back, ' : '') +
+            'we\'re ending your crowd-cast participation as of today. Your application didn\'t mention the earlier one, so there\'s no payment, and we\'ll delete your recordings. You can uninstall the recorder.\n\nMihir';
+        return hi + '\n\n' + (noReply ? 'since I didn\'t hear back, ' : 'thanks for getting back to me. ') +
+            'we\'re ending your crowd-cast participation as of today, since the recordings aren\'t the kind of work we can use for the dataset. You\'ll be paid for the days up to today, adjusted for how much of it was usable research work, with the next payout run. You can uninstall the recorder.\n\nThanks for taking part.\n\nMihir';
+    }
+    function renderCasesTab() {
+        if (!_isAdmin) return;
+        var el = document.getElementById('cases-view');
+        el.innerHTML = '<div class="review-wrap"><div class="outline-box review-card"><div class="skel-line short"></div></div></div>';
+        fetch(ONBOARD_API + '/cases', { headers: { 'Authorization': 'Bearer ' + _authToken } })
+            .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then(function(d){ _cases = d.cases || []; updateCasesBadge(_cases); drawCases(); })
+            .catch(function(err){ el.innerHTML = '<div class="review-wrap"><p class="error-text">Failed to load cases: ' + escapeHtml(String(err.message || err)) + '</p></div>'; });
+    }
+    function caseDay(iso) { return iso ? String(iso).slice(0, 10) : ''; }
+    function drawCases() {
+        var el = document.getElementById('cases-view');
+        var h = '<div class="review-wrap" style="max-width:860px;">';
+        h += '<p style="color:#666;font-size:13px;margin:0 0 18px;">Opened automatically each morning. Their pending payouts are held until you close the case. ' +
+             'Send the question, wait 3 days, then decide. Concealment with no good answer: <b>end, no pay</b> (recordings get deleted). Recordings that aren\'t research: <b>end, pro rata</b> (banded).</p>';
+        if (!_cases.length) h += '<div class="outline-box review-empty"><div class="re-big">No open cases</div></div>';
+        _cases.forEach(function(c, i) {
+            var urgent = ['draft','answered','expired'].indexOf(c.status) >= 0;
+            h += '<div class="outline-box review-card" style="margin-bottom:18px;' + (c.status === 'closed' ? 'opacity:.55;' : '') + '">';
+            h += '<div class="review-card-head"><h2>' + escapeHtml(c.name || c.participant_id) + ' <span style="color:#999;font-size:12px;">' + escapeHtml(c.participant_id || '') + '</span></h2>' +
+                 '<span class="tier-badge ' + (c.type === 'reapplied' ? 'tier-decline' : 'tier-ask') + '">' + escapeHtml(CASE_TYPE[c.type] || c.type) + '</span></div>';
+            h += '<div style="font-size:12px;margin:4px 0 10px;color:' + (urgent ? '#c0392b' : '#666') + ';font-weight:700;">' + escapeHtml(CASE_STATUS[c.status] || c.status) +
+                 (c.asked_at ? ' &middot; asked ' + caseDay(c.asked_at) : '') + (c.deadline && c.status === 'asked' ? ' &middot; deadline ' + caseDay(c.deadline) : '') +
+                 (c.outcome ? ' &middot; ' + escapeHtml(c.outcome) : '') + '</div>';
+            h += '<div class="review-field"><div class="rf-body" style="font-size:12px;">' + escapeHtml(c.facts || '') + '</div></div>';
+            if ((c.history || []).length) {
+                h += '<details style="margin:8px 0;"><summary style="cursor:pointer;font-size:12px;">Recent mail with them (' + c.history.length + ')</summary><div style="font-size:12px;margin-top:6px;">';
+                c.history.forEach(function(m) {
+                    h += '<div style="margin:4px 0;"><b>' + escapeHtml(m.date) + ' ' + (m.dir === 'us' ? 'us' : 'them') + '</b> &middot; ' + escapeHtml(m.subject) + '<div style="color:#666;">' + escapeHtml(m.text) + '</div></div>';
+                });
+                h += '</div></details>';
+            }
+            if (c.reply_snippet) h += '<div class="review-field"><div class="rf-label">Their reply</div><div class="rf-body" style="font-size:12px;">' + escapeHtml(c.reply_snippet) + '</div></div>';
+            if (c.status === 'draft') {
+                h += '<div style="font-size:11px;color:#999;margin-top:8px;">{deadline} becomes the date 3 days from sending</div>';
+                h += '<input id="case-subj-' + i + '" value="' + escapeHtml(c.draft_subject || '') + '" style="width:100%;box-sizing:border-box;font:inherit;font-size:12px;padding:6px;margin:4px 0;border:1px solid #ccc;">';
+                h += '<textarea id="case-body-' + i + '" rows="8" style="width:100%;box-sizing:border-box;font:inherit;font-size:12px;padding:6px;border:1px solid #ccc;">' + escapeHtml(c.draft_body || '') + '</textarea>';
+                h += '<div class="review-actions" style="grid-template-columns:1fr 1fr;"><button class="review-btn rb-reject" onclick="caseDecide(' + i + ',\'keep\',true)">False alarm: close</button>' +
+                     '<button class="review-btn rb-accept" onclick="caseSend(' + i + ')">Send question</button></div>';
+            } else if (c.status === 'asked') {
+                h += '<details><summary style="cursor:pointer;font-size:12px;">What we sent</summary><pre style="white-space:pre-wrap;font-size:12px;">' + escapeHtml(c.sent_body || '') + '</pre></details>';
+                h += '<div style="font-size:12px;color:#666;margin-top:8px;">You can decide early: <a href="#" onclick="caseChoose(' + i + ');return false;">decide now</a></div><div id="case-decide-' + i + '"></div>';
+            } else if (c.status === 'answered' || c.status === 'expired') {
+                h += '<div id="case-decide-' + i + '"></div>';
+            }
+            h += '</div>';
+        });
+        el.innerHTML = h + '</div>';
+        _cases.forEach(function(c, i){ if (c.status === 'answered' || c.status === 'expired') caseChoose(i); });
+    }
+    function caseChoose(i) {
+        var c = _cases[i], box = document.getElementById('case-decide-' + i); if (!box) return;
+        var def = c.type === 'reapplied' ? 'end_nopay' : 'end_prorata';
+        var opt = function(v, lab){ return '<label style="margin-right:14px;font-size:12px;"><input type="radio" name="case-ch-' + i + '" value="' + v + '"' + (v === def ? ' checked' : '') + ' onchange="caseMailFor(' + i + ')"> ' + lab + '</label>'; };
+        box.innerHTML = '<div style="margin:10px 0 4px;">' + opt('keep', 'Keep') + opt('end_prorata', 'End, pro rata') + opt('end_nopay', 'End, no pay, delete data') + '</div>' +
+            '<div style="font-size:11px;color:#999;">Mail to them (clear it to send nothing)</div>' +
+            '<textarea id="case-out-' + i + '" rows="8" style="width:100%;box-sizing:border-box;font:inherit;font-size:12px;padding:6px;border:1px solid #ccc;"></textarea>' +
+            '<div class="review-actions" style="grid-template-columns:1fr;"><button class="review-btn rb-accept" onclick="caseDecide(' + i + ')">Confirm decision</button></div>';
+        caseMailFor(i);
+    }
+    function caseMailFor(i) {
+        var ch = (document.querySelector('input[name="case-ch-' + i + '"]:checked') || {}).value;
+        document.getElementById('case-out-' + i).value = caseOutcomeMail(_cases[i], ch);
+    }
+    function casePost(body) {
+        return fetch(ONBOARD_API + '/cases/decision', { method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify(body) }).then(function(r){ return r.json(); });
+    }
+    function caseSend(i) {
+        var c = _cases[i];
+        var body = { case_id: c.case_id, choice: 'send', subject: document.getElementById('case-subj-' + i).value, body: document.getElementById('case-body-' + i).value };
+        casePost(Object.assign({ dry_run: true }, body)).then(function(p) {
+            if (p.error) { alert(p.error); return; }
+            showConfirmModal('Send question', 'To: ' + p.to + '\nSubject: ' + p.subject + '\n\n' + p.body, function() {
+                casePost(body).then(function(r){ if (r.error) alert(r.error); renderCasesTab(); });
+            });
+        });
+    }
+    function caseDecide(i, choice, silent) {
+        var c = _cases[i];
+        choice = choice || (document.querySelector('input[name="case-ch-' + i + '"]:checked') || {}).value;
+        var mailEl = document.getElementById('case-out-' + i);
+        var mail = silent ? '' : (mailEl ? mailEl.value : '');
+        var body = { case_id: c.case_id, choice: choice, body: mail, subject: c.type === 'reapplied' ? 'crowd-cast: your application' : 'crowd-cast: your recordings' };
+        casePost(Object.assign({ dry_run: true }, body)).then(function(p) {
+            if (p.error) { alert(p.error); return; }
+            var lines = (p.cuts || []).map(function(x){ return x.payout_id + ' ' + x.period + ': ' + x.amount + ' -> ' + x.new_amount + ' ' + x.currency; });
+            var msg = (choice === 'keep' ? 'Close the case and release the held payouts.' : choice === 'end_nopay' ? 'End today, all pending payouts to 0, recordings flagged for deletion.' : 'End today, pending payouts cut to today (then banded).') +
+                (lines.length ? '\n\n' + lines.join('\n') : '') + '\n\n' + (mail ? 'Mail to ' + p.to + ':\n' + mail : 'No mail.');
+            showConfirmModal('Decide: ' + choice, msg, function() {
+                casePost(body).then(function(r){ if (r.error) alert(r.error); renderCasesTab(); });
+            });
+        });
     }
 
     function renderNudgesTab() {
