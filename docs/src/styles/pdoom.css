@@ -42,6 +42,9 @@
   --sl-sidebar-width: 19rem;
   --sl-content-width: 50rem;
   --sl-content-pad-x: clamp(1.25rem, 3vw, 3rem);
+  --sl-text-h2: 1.6rem;
+  --sl-text-h3: 1.25rem;
+  --sl-line-height-headings: 1.2;
 
   --ec-brdRad: 4px;
   --ec-frm-frameBoxShdCssVal: none;
@@ -208,19 +211,15 @@ site-search button:hover {
 
 .sl-markdown-content {
   font-size: 1rem;
-  line-height: 1.72;
+  line-height: 1.6;
 }
 
-.sl-markdown-content h2 {
-  margin-top: 3rem;
-  font-size: 1.6rem;
-  line-height: 1.2;
-}
-
-.sl-markdown-content h3 {
+.sl-markdown-content .sl-heading-wrapper.level-h2 {
   margin-top: 2.5rem;
-  font-size: 1.3rem;
-  line-height: 1.2;
+}
+
+.sl-markdown-content .sl-heading-wrapper.level-h3 {
+  margin-top: 2rem;
 }
 
 .sl-markdown-content :where(p, li) {
@@ -245,12 +244,11 @@ site-search button:hover {
 }
 
 .sl-markdown-content code:not(:where(pre code, .expressive-code *)) {
-  border: 1px solid color-mix(in srgb, var(--sl-color-gray-4) 42%, transparent);
-  border-radius: 2px;
-  padding: 0.1em 0.35em;
-  background: var(--sl-color-gray-7);
+  border-radius: 3px;
+  padding: 0.1em 0.3em;
+  background: color-mix(in srgb, var(--sl-color-gray-5) 30%, transparent);
   font-family: var(--sl-font-mono);
-  font-size: 0.9em;
+  font-size: 0.875em;
 }
 
 .expressive-code .frame,
@@ -451,8 +449,8 @@ starlight-toc a[aria-current='true'] {
     font-size: 2rem;
   }
 
-  .sl-markdown-content h2 {
-    margin-top: 3rem;
+  :root {
+    --sl-text-h2: 1.4rem;
   }
 }
 
