@@ -77,29 +77,20 @@
         .work-profile li { margin: 3px 0; }
         .work-profile code { font-family: var(--mono); font-size: 12px; background: var(--paper-soft); padding: 0 3px; border-radius: 2px; }
 
-        /* -- Page heading: title, then status / sign-in -- */
+        /* -- Sign-in row (signed in; signed out it moves into the hero) -- */
         .dash-head {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            flex-wrap: wrap;
-            gap: 14px 24px;
-            padding-bottom: 22px;
+            justify-content: flex-end;
             margin-bottom: 24px;
-            border-bottom: 1px solid var(--rule);
         }
-
-        .dash-head h1 {
-            font-size: 22px;
-            font-weight: 500;
-            line-height: 1.2;
-        }
+        body.is-guest .dash-head { display: none; }
 
         #header-updated {
-            margin-top: 2px;
-            font-size: 14px;
+            font-size: 13px;
             color: var(--muted);
         }
+        .hero-actions { margin-top: 28px; }
+        .hero-actions #auth-area { gap: 20px; }
 
         .header-meta {
             font-size: 14px;
@@ -583,7 +574,7 @@
             .cards .card-sub { font-size: 12px; margin-top: 2px; }
             .chart-box, .table-box, .health-box { padding: 16px; }
             #trend-chart { height: 300px !important; max-height: none; }
-            .dash-head { align-items: flex-start; flex-direction: column; }
+            .dash-head { justify-content: flex-start; }
         }
 
         /* ---- Sign-in (header) ---- */
@@ -623,15 +614,9 @@
         body.is-guest .hero-intro { display: block; }
         .hero-title {
             font-size: clamp(36px, 4.6vw, 60px);
-            font-weight: 400;
-            line-height: 1.02;
-            letter-spacing: -0.01em;
+            font-weight: 500;
+            line-height: 0.98;
             max-width: 17ch;
-        }
-        .hero-title em {
-            font-family: "Lora", Georgia, serif;
-            font-style: italic;
-            font-weight: 400;
         }
         .hero-lede {
             margin-top: 18px;
@@ -640,30 +625,23 @@
             line-height: 1.45;
             color: var(--muted);
         }
-        .hero-total-line { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-        .hero-total .card-value { font-size: 34px; font-weight: 500; }
-        .hero-total .card-label { font-size: 15px; color: var(--muted); margin: 0; }
-        .hero-total .card-sub { margin-top: 4px; font-size: 14px; }
-        .live-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            background: var(--ok);
-            box-shadow: 0 0 0 4px var(--ok-bg);
-            align-self: center;
+        .delta {
+            display: inline-block;
+            margin-right: 8px;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
         }
-        .delta-up { color: var(--ok); }
-        .delta-down { color: var(--bad); }
-        .hero-stats { border-top: 1px solid var(--rule); font-size: 15px; }
-        .stat-row {
-            display: grid;
-            grid-template-columns: 9.5em 1fr;
-            align-items: baseline;
-            gap: 16px;
-            padding: 16px 0;
-            border-bottom: 1px solid var(--rule);
-        }
-        .stat-row .card-value { font-size: 24px; font-weight: 500; line-height: 1.2; }
-        .stat-row .card-label { font-size: 15px; color: var(--ink); margin: 0; }
-        .stat-row .card-sub { margin-top: 2px; }
+        .delta-up { color: var(--ok); background: var(--ok-bg); }
+        .delta-down { color: var(--bad); background: var(--bad-bg); }
+        .hero .card { padding: 0; margin: 0; }
+        .hero-stats { display: flex; flex-direction: column; gap: 22px; }
+        .stat-line { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+        .stat-row .card-value { font-size: 26px; font-weight: 500; line-height: 1.15; }
+        .stat-row .card-label { font-size: 15px; color: var(--muted); margin: 0; }
+        .stat-row .card-sub { margin-top: 4px; display: flex; align-items: center; }
+        .hero-total .card-value { font-size: 34px; }
 
         /* -- Panels -- */
         #all-users-view .outline-box,
@@ -758,11 +736,10 @@
         @media (max-width: 560px) {
             .hero-lede { font-size: 16px; }
             .hero-total .card-value { font-size: 30px; }
-            .stat-row { padding: 12px 0; }
+            .hero-stats { gap: 18px; }
         }
 
         tr.guest-rest td { font-weight: 500; border-top: 1px solid var(--rule-strong); border-bottom: 0; }
-        .card-sub .nowrap { white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -786,10 +763,6 @@
 
             <!-- Header -->
             <div class="dash-head">
-                <div>
-                    <h1>crowd-cast</h1>
-                    <p id="header-updated"></p>
-                </div>
                 <div class="header-meta">
                     <span id="auth-area">
                         <a class="header-docs" href="/docs/crowd-cast/">Documentation</a>
@@ -860,31 +833,29 @@
             <div class="hero">
                 <div class="hero-main">
                     <div class="hero-intro">
-                        <h2 class="hero-title">Capturing <em>real</em> human computer work</h2>
+                        <h1 class="hero-title">Capturing real human computer work</h1>
                         <p class="hero-lede">crowd-cast records paired screen video and keyboard and mouse input from people doing their actual work, building an open dataset for research.</p>
-                    </div>
-                    <div class="card hero-total">
-                        <div class="hero-total-line">
-                            <span class="live-dot" aria-hidden="true"></span>
-                            <span class="card-value" id="card-hours">--</span>
-                            <span class="card-label">hours recorded</span>
-                        </div>
-                        <div class="card-sub" id="card-minutes-sub"></div>
+                        <div class="hero-actions"></div>
                     </div>
                 </div>
                 <div class="hero-stats">
-                    <div class="card stat-row">
-                        <div class="card-value" id="card-sessions">--</div>
-                        <div><div class="card-label">Sessions</div><div class="card-sub" id="card-segments-sub"></div></div>
+                    <div class="card stat-row hero-total">
+                        <div class="stat-line"><span class="card-value" id="card-hours">--</span><span class="card-label">Hours recorded</span></div>
+                        <div class="card-sub" id="card-minutes-sub"></div>
                     </div>
                     <div class="card stat-row">
-                        <div class="card-value" id="card-users">--</div>
-                        <div><div class="card-label">Users</div><div class="card-sub" id="card-users-sub"></div></div>
+                        <div class="stat-line"><span class="card-value" id="card-sessions">--</span><span class="card-label">Sessions</span></div>
+                        <div class="card-sub" id="card-segments-sub"></div>
                     </div>
                     <div class="card stat-row">
-                        <div class="card-value" id="card-actions">--</div>
-                        <div><div class="card-label">Action steps</div><div class="card-sub" id="card-actions-sub"></div></div>
+                        <div class="stat-line"><span class="card-value" id="card-users">--</span><span class="card-label">Users</span></div>
+                        <div class="card-sub" id="card-users-sub"></div>
                     </div>
+                    <div class="card stat-row">
+                        <div class="stat-line"><span class="card-value" id="card-actions">--</span><span class="card-label">Action steps</span></div>
+                        <div class="card-sub" id="card-actions-sub"></div>
+                    </div>
+                    <p id="header-updated"></p>
                 </div>
             </div>
 
@@ -1326,13 +1297,14 @@
         var prev7 = n >= 14 ? roll(hours, Math.max(0, n - 14), n - 7) : null;
         var delta = prev7 ? Math.round((last7 - prev7) / prev7 * 100) : null;
         var hoursSub = document.getElementById('card-minutes-sub');
-        hoursSub.textContent = '+' + fmt(Math.round(last7)) + ' h in the last 7 days ';
+        hoursSub.textContent = '';
         if (delta !== null) {
             var deltaEl = document.createElement('span');
-            deltaEl.className = 'nowrap ' + (delta >= 0 ? 'delta-up' : 'delta-down');
-            deltaEl.textContent = '· ' + (delta >= 0 ? '↑' : '↓') + Math.abs(delta) + '%';
+            deltaEl.className = 'delta ' + (delta >= 0 ? 'delta-up' : 'delta-down');
+            deltaEl.textContent = (delta >= 0 ? '↑ ' : '↓ ') + Math.abs(delta) + '%';
             hoursSub.appendChild(deltaEl);
         }
+        hoursSub.appendChild(document.createTextNode('+' + fmt(Math.round(last7)) + ' h in the last 7 days'));
         hoursSub.title = delta === null ? '' : (delta >= 0 ? 'Up ' : 'Down ') + Math.abs(delta) + '% on the 7 days before';
         document.getElementById('trend-note').textContent = '';
     }
@@ -4214,6 +4186,7 @@
     function enterGuestView() {
         _isGuest = true;
         document.body.classList.add('is-guest');
+        document.querySelector('.hero-actions').appendChild(document.getElementById('auth-area'));
         document.getElementById('dashboard').style.display = 'block';
         /* Hide tabs — guest only sees All users */
         document.getElementById('dashboard-tabs').style.display = 'none';
@@ -4289,6 +4262,7 @@
         if (!_authToken) return;
         _isGuest = false;
         document.body.classList.remove('is-guest');
+        document.querySelector('.dash-head .header-meta').appendChild(document.getElementById('auth-area'));
         var fullMeta = loadFullMeta();   // the signed-in views need the full file, fetch it alongside auth
         document.getElementById('dashboard').style.display = 'block';
         document.getElementById('auth-signin-wrap').style.display = 'none';
