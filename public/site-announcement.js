@@ -1,22 +1,9 @@
 (() => {
-  const storageKey = 'pdoom-paid-data-announcement-dismissed'
-
-  try {
-    if (localStorage.getItem(storageKey) === '1') {
-      document.documentElement.classList.add('paid-announcement-dismissed')
-    }
-  } catch {
-    // The announcement remains available when storage is blocked.
-  }
-
+  // Dismissing hides the announcement for the current page only; it is not
+  // persisted, so a reload brings it back.
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-dismiss-paid-announcement]').forEach((button) => {
       button.addEventListener('click', () => {
-        try {
-          localStorage.setItem(storageKey, '1')
-        } catch {
-          // Dismissal still applies for the current page.
-        }
         document.documentElement.classList.add('paid-announcement-dismissed')
       })
     })
