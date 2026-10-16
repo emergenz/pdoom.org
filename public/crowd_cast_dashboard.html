@@ -597,31 +597,18 @@
             .header-meta { flex-wrap: wrap; row-gap: 12px; }
             #auth-area { flex-wrap: wrap; row-gap: 10px; }
         }
-        /* Overview sections sit on the page, separated by space and a hairline,
-           instead of each living in its own box. Admin views keep their boxes. */
-        .cards .card.outline-box,
-        .chart-box.outline-box,
-        .table-box.outline-box,
-        .health-box.outline-box,
-        #my-overview > .outline-box {
+        /* The four headline numbers sit on the page as a plain row; the charts
+           and tables below keep their panes. */
+        .cards .card.outline-box {
             border: 0;
             border-radius: 0;
             background: transparent;
-            padding: 0 !important;
+            padding: 0;
         }
-        .cards { gap: 32px; margin-bottom: 44px; }
-        .charts-row { gap: 48px; margin-bottom: 44px; }
-        .chart-box.outline-box,
-        .table-box.outline-box,
-        .health-box.outline-box,
-        #my-overview > .outline-box {
-            padding-top: 20px !important;
-            border-top: 1px solid var(--rule);
-            margin-bottom: 44px;
-        }
+        .cards { gap: 32px; margin-bottom: 28px; }
         @media (max-width: 560px) {
-            .cards { gap: 24px 20px; margin-bottom: 32px; }
-            .charts-row { gap: 32px; margin-bottom: 32px; }
+            .cards { gap: 24px 20px; margin-bottom: 24px; }
+            .cards .card.outline-box { padding: 0; }
         }
 
         tr.guest-rest td { font-weight: 500; border-top: 1px solid var(--rule-strong); border-bottom: 0; }
