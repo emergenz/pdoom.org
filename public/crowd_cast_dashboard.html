@@ -86,7 +86,7 @@
         body.is-guest .dash-head { display: none; }
 
         #header-updated {
-            font-size: 13px;
+            font-size: 14px;
             color: var(--muted);
         }
         .hero-actions { margin-top: 28px; }
@@ -627,21 +627,29 @@
         }
         .delta {
             display: inline-block;
-            margin-right: 8px;
-            padding: 1px 6px;
+            margin-left: 10px;
+            padding: 0 6px;
             border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
+            font-size: inherit;
         }
         .delta-up { color: var(--ok); background: var(--ok-bg); }
         .delta-down { color: var(--bad); background: var(--bad-bg); }
         .hero .card { padding: 0; margin: 0; }
-        .hero-stats { display: flex; flex-direction: column; gap: 22px; }
-        .stat-line { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-        .stat-row .card-value { font-size: 26px; font-weight: 500; line-height: 1.15; }
-        .stat-row .card-label { font-size: 15px; color: var(--muted); margin: 0; }
-        .stat-row .card-sub { margin-top: 4px; display: flex; align-items: center; }
-        .hero-total .card-value { font-size: 34px; }
+        .hero-stats.outline-box {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            margin: 0;
+            padding: 26px 28px;
+            background: rgba(255, 255, 255, 0.55);
+            border-radius: 10px;
+        }
+        .stat-row .card-value { font-size: 30px; font-weight: 500; line-height: 1.15; }
+        .stat-meta { margin-top: 4px; font-size: 14px; color: var(--muted); display: flex; align-items: center; flex-wrap: wrap; gap: 4px 0; }
+        .stat-meta .card-label { font-size: inherit; color: inherit; margin: 0; }
+        .stat-meta .card-sub { font-size: inherit; color: inherit; margin: 0; display: inline-flex; align-items: center; }
+        .stat-meta .card-sub:not(:empty)::before { content: '·'; margin: 0 6px; }
+        .hero-total .stat-meta .card-sub::before { content: none; }
 
         /* -- Panels -- */
         #all-users-view .outline-box,
@@ -736,7 +744,7 @@
         @media (max-width: 560px) {
             .hero-lede { font-size: 16px; }
             .hero-total .card-value { font-size: 30px; }
-            .hero-stats { gap: 18px; }
+            .hero-stats.outline-box { gap: 18px; padding: 20px; }
         }
 
         tr.guest-rest td { font-weight: 500; border-top: 1px solid var(--rule-strong); border-bottom: 0; }
@@ -838,22 +846,22 @@
                         <div class="hero-actions"></div>
                     </div>
                 </div>
-                <div class="hero-stats">
+                <div class="hero-stats outline-box">
                     <div class="card stat-row hero-total">
-                        <div class="stat-line"><span class="card-value" id="card-hours">--</span><span class="card-label">Hours recorded</span></div>
-                        <div class="card-sub" id="card-minutes-sub"></div>
+                        <div class="card-value" id="card-hours">--</div>
+                        <div class="stat-meta"><span class="card-label">Hours recorded</span><span class="card-sub" id="card-minutes-sub"></span></div>
                     </div>
                     <div class="card stat-row">
-                        <div class="stat-line"><span class="card-value" id="card-sessions">--</span><span class="card-label">Sessions</span></div>
-                        <div class="card-sub" id="card-segments-sub"></div>
+                        <div class="card-value" id="card-sessions">--</div>
+                        <div class="stat-meta"><span class="card-label">Sessions</span><span class="card-sub" id="card-segments-sub"></span></div>
                     </div>
                     <div class="card stat-row">
-                        <div class="stat-line"><span class="card-value" id="card-users">--</span><span class="card-label">Users</span></div>
-                        <div class="card-sub" id="card-users-sub"></div>
+                        <div class="card-value" id="card-users">--</div>
+                        <div class="stat-meta"><span class="card-label">Users</span><span class="card-sub" id="card-users-sub"></span></div>
                     </div>
                     <div class="card stat-row">
-                        <div class="stat-line"><span class="card-value" id="card-actions">--</span><span class="card-label">Action steps</span></div>
-                        <div class="card-sub" id="card-actions-sub"></div>
+                        <div class="card-value" id="card-actions">--</div>
+                        <div class="stat-meta"><span class="card-label">Action steps</span><span class="card-sub" id="card-actions-sub"></span></div>
                     </div>
                     <p id="header-updated"></p>
                 </div>
@@ -1301,12 +1309,10 @@
         if (delta !== null) {
             var deltaEl = document.createElement('span');
             deltaEl.className = 'delta ' + (delta >= 0 ? 'delta-up' : 'delta-down');
-            deltaEl.textContent = (delta >= 0 ? '↑ ' : '↓ ') + Math.abs(delta) + '%';
+            deltaEl.textContent = (delta >= 0 ? '↑ ' : '↓ ') + Math.abs(delta) + '% vs. last week';
             hoursSub.appendChild(deltaEl);
         }
-        hoursSub.appendChild(document.createTextNode(delta !== null
-            ? 'vs. the week before'
-            : '+' + fmt(Math.round(last7)) + ' h in the last 7 days'));
+        if (delta === null) hoursSub.appendChild(document.createTextNode('+' + fmt(Math.round(last7)) + ' h in the last 7 days'));
         hoursSub.title = '+' + fmt(Math.round(last7)) + ' h in the last 7 days' +
             (prev7 !== null ? ', ' + fmt(Math.round(prev7)) + ' h in the 7 days before' : '');
         document.getElementById('trend-note').textContent = '';
