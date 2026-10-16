@@ -648,8 +648,14 @@
         .stat-meta { margin-top: 4px; font-size: 14px; color: var(--muted); display: flex; align-items: center; flex-wrap: wrap; gap: 4px 0; }
         .stat-meta .card-label { font-size: inherit; color: inherit; margin: 0; }
         .stat-meta .card-sub { font-size: inherit; color: inherit; margin: 0; display: inline-flex; align-items: center; }
-        .stat-meta .card-sub:not(:empty)::before { content: '·'; margin: 0 6px; }
-        .hero-total .stat-meta .card-sub::before { content: none; }
+        /* A detail next to a label is a small tag, like the weekly change. */
+        #card-users-sub:not(:empty) {
+            margin-left: 10px;
+            padding: 0 6px;
+            border-radius: 4px;
+            background: var(--paper-soft);
+            color: var(--ink);
+        }
 
         /* -- Panels -- */
         #all-users-view .outline-box,
@@ -853,7 +859,7 @@
                     </div>
                     <div class="card stat-row">
                         <div class="card-value" id="card-sessions">--</div>
-                        <div class="stat-meta"><span class="card-label">Sessions</span><span class="card-sub" id="card-segments-sub"></span></div>
+                        <div class="stat-meta"><span class="card-label">Sessions</span></div>
                     </div>
                     <div class="card stat-row">
                         <div class="card-value" id="card-users">--</div>
@@ -861,7 +867,7 @@
                     </div>
                     <div class="card stat-row">
                         <div class="card-value" id="card-actions">--</div>
-                        <div class="stat-meta"><span class="card-label">Action steps</span><span class="card-sub" id="card-actions-sub"></span></div>
+                        <div class="stat-meta"><span class="card-label">Action steps</span></div>
                     </div>
                     <p id="header-updated"></p>
                 </div>
@@ -1125,7 +1131,6 @@
         document.getElementById('card-minutes-sub').textContent = fmt(Math.round(t.estimated_minutes || 0)) + ' minutes';
 
         document.getElementById('card-sessions').textContent = fmt(t.sessions);
-        document.getElementById('card-segments-sub').textContent = fmt(t.recording_segments) + ' segments';
 
         /* Deduplicate users: merge UUIDs that share an email (from auth data). */
         const _seenEmails = new Set();
@@ -1148,11 +1153,10 @@
         // delivering nothing, so headcount by status flatters the number.
         var activeRecent = countActiveUsers(perUserDaily, 7);
         var subEl = document.getElementById('card-users-sub');
-        subEl.textContent = activeRecent.n + ' active in the last 7 days';
+        subEl.textContent = activeRecent.n + ' active this week';
         subEl.title = activeRecent.n + ' of ' + activeRecent.total + ' recorded at least once in the last 7 days';
 
         document.getElementById('card-actions').textContent = fmt(t.action_steps_total);
-        document.getElementById('card-actions-sub').textContent = fmt(t.events_total) + ' raw events';
 
         /* -- Daily trend chart -- */
         renderTrend(perUserDaily);
