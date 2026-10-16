@@ -3588,21 +3588,41 @@
                     var pid = btn.dataset.id;
                     var newStatus = btn.dataset.status;
                     var label = newStatus === 'paused' ? 'Pause' : newStatus === 'active' ? 'Resume' : 'Terminate';
-                    showConfirmModal(label + ' Participant', label + ' participant ' + pid + '?', function() {
-                        btn.textContent = '...';
-                        btn.style.pointerEvents = 'none';
-                        fetch(ONBOARD_API + '/status', {
+                    var post = function(body) {
+                        return fetch(ONBOARD_API + '/status', {
                             method: 'POST',
                             headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ participant_id: pid, status: newStatus })
-                        })
-                        .then(function(resp) { return resp.json(); })
-                        .then(function(data) {
+                            body: JSON.stringify(body)
+                        }).then(function(resp) { return resp.json(); });
+                    };
+                    var apply = function(body) {
+                        btn.textContent = '...';
+                        btn.style.pointerEvents = 'none';
+                        post(body).then(function(data) {
                             if (data.error) { alert(data.error); btn.textContent = label; btn.style.pointerEvents = ''; return; }
                             fetchPendingReview();
                         })
                         .catch(function(err) { console.error('Status update failed:', err); btn.textContent = label; btn.style.pointerEvents = ''; });
-                    });
+                    };
+                    if (newStatus === 'active') {
+                        showConfirmModal(label + ' Participant', label + ' participant ' + pid + '?', function() { apply({ participant_id: pid, status: newStatus }); });
+                        return;
+                    }
+                    // Pause/end: ask for the last paid day, preview the pending-row cuts, then confirm.
+                    var today = new Date().toISOString().slice(0, 10);
+                    var lastPaid = prompt(label + ' ' + pid + ': last paid day (YYYY-MM-DD). Pending payouts after this day are cut pro rata.', today);
+                    if (!lastPaid) return;
+                    var reason = prompt('Internal reason (stored on the payout rows, never emailed):', '') || '';
+                    var body = { participant_id: pid, status: newStatus, last_paid_day: lastPaid.trim(), reason: reason };
+                    post(Object.assign({ dry_run: true }, body)).then(function(prev) {
+                        if (prev.error) { alert(prev.error); return; }
+                        var lines = (prev.cuts || []).map(function(c) {
+                            return c.payout_id + '  ' + c.period + ':  ' + c.amount + ' -> ' + c.new_amount + ' ' + c.currency;
+                        });
+                        var msg = label + ' ' + pid + ', paid through ' + prev.last_paid_day + '.\n\n' +
+                            (lines.length ? 'Pending payouts cut:\n' + lines.join('\n') : 'No pending payouts to cut.');
+                        showConfirmModal(label + ' Participant', msg, function() { apply(body); });
+                    }).catch(function(err) { alert('Preview failed: ' + err); });
                 });
             });
 
