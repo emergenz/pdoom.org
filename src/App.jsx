@@ -95,7 +95,8 @@ const readyCards = [
     tags: ['Human work', 'Month-long horizons', 'Passive recordings'],
     body: 'Capture months-long human computer work as aligned streams of video and human inputs.',
     links: [
-      { label: 'crowd-cast', href: '/research/crowd-cast/' },
+      { label: 'Contribute recordings', href: '/careers/paid-data-collection/' },
+      { label: 'Dashboard', href: '/crowd_cast_dashboard.html' },
       { label: 'AGI-CAST', href: '/research/agi-cast/' },
     ],
     cta: 'Read the project',
