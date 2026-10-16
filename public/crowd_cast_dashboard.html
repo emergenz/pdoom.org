@@ -10,7 +10,7 @@
     <link rel="preload" href="/fonts/lora-pdoom-italic-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="/pdoom-form.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://accounts.google.com/gsi/client?hl=en" async defer></script>
     <style>
         /* The site chrome, fonts, tokens and .button come from /pdoom-form.css.
            Everything below is the dashboard itself, on the same paper/ink
@@ -95,6 +95,12 @@
             line-height: 1.05;
         }
 
+        #header-updated {
+            margin-top: 8px;
+            font-size: 14px;
+            color: var(--muted);
+        }
+
         .header-meta {
             font-size: 14px;
             color: var(--muted);
@@ -114,9 +120,6 @@
             vertical-align: 1px;
         }
 
-        .status-ok { background: var(--ok); }
-        .status-error { background: var(--bad); }
-        .status-unknown { background: var(--faint); }
 
         /* -- Section titles -- */
         .section-title {
@@ -189,6 +192,7 @@
         }
         .chart-head .section-title { margin-bottom: 0; }
         .chart-note { font-size: 13px; color: var(--muted); }
+        .chart-foot:empty { display: none; }
         .chart-foot { font-size: 13px; color: var(--muted); margin-top: 12px; font-variant-numeric: tabular-nums; }
         .text-link { font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--rule-strong); cursor: pointer; }
         .text-link:hover { color: var(--signal); border-color: currentColor; }
@@ -593,8 +597,35 @@
             .header-meta { flex-wrap: wrap; row-gap: 12px; }
             #auth-area { flex-wrap: wrap; row-gap: 10px; }
         }
-        /* Guests see the top contributors only; the list fades out. */
-        .guest-more { font-size: 13px; color: var(--muted); padding: 12px 12px 0; }
+        /* Overview sections sit on the page, separated by space and a hairline,
+           instead of each living in its own box. Admin views keep their boxes. */
+        .cards .card.outline-box,
+        .chart-box.outline-box,
+        .table-box.outline-box,
+        .health-box.outline-box,
+        #my-overview > .outline-box {
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            padding: 0 !important;
+        }
+        .cards { gap: 32px; margin-bottom: 44px; }
+        .charts-row { gap: 48px; margin-bottom: 44px; }
+        .chart-box.outline-box,
+        .table-box.outline-box,
+        .health-box.outline-box,
+        #my-overview > .outline-box {
+            padding-top: 20px !important;
+            border-top: 1px solid var(--rule);
+            margin-bottom: 44px;
+        }
+        @media (max-width: 560px) {
+            .cards { gap: 24px 20px; margin-bottom: 32px; }
+            .charts-row { gap: 32px; margin-bottom: 32px; }
+        }
+
+        tr.guest-rest td { font-weight: 500; border-top: 1px solid var(--rule-strong); border-bottom: 0; }
+        .card-sub .nowrap { white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -618,18 +649,19 @@
 
             <!-- Header -->
             <div class="dash-head">
-                <h1>crowd-cast</h1>
+                <div>
+                    <h1>crowd-cast</h1>
+                    <p id="header-updated"></p>
+                </div>
                 <div class="header-meta">
-                    <span id="header-status"></span>
-                    <span id="header-updated"></span>
                     <span id="auth-area">
-                        <a class="header-docs" href="https://pdoom.org/docs/crowd-cast/" target="_blank">docs</a>
+                        <a class="header-docs" href="/docs/crowd-cast/">Documentation</a>
                         <span id="auth-signin-wrap" style="display:inline-flex;align-items:center;gap:8px;">
                             <div id="auth-signin"></div>
                         </span>
                         <span id="auth-user" style="display:none;">
                             <span id="auth-user-name"></span>
-                            <span class="sign-out" onclick="signOut()">sign out</span>
+                            <span class="sign-out" onclick="signOut()">Sign out</span>
                         </span>
                     </span>
                 </div>
@@ -637,8 +669,8 @@
 
             <!-- Tabs (only visible when logged in) -->
             <div id="dashboard-tabs" style="display:none;">
-                <span class="tab-btn active" id="tab-my" onclick="switchTab('my')" style="color:var(--ink);border-bottom:2px solid var(--ink);">My Overview</span>
-                <span class="tab-btn" id="tab-all" onclick="switchTab('all')" style="color:var(--muted);border-bottom:2px solid transparent;">All Users</span>
+                <span class="tab-btn active" id="tab-my" onclick="switchTab('my')" style="color:var(--ink);border-bottom:2px solid var(--ink);">My overview</span>
+                <span class="tab-btn" id="tab-all" onclick="switchTab('all')" style="color:var(--muted);border-bottom:2px solid transparent;">All users</span>
                 <span class="tab-btn" id="tab-review" onclick="switchTab('review')" style="display:none;color:var(--muted);border-bottom:2px solid transparent;">Review</span>
                 <span class="tab-btn" id="tab-nudges" onclick="switchTab('nudges')" style="display:none;color:var(--muted);border-bottom:2px solid transparent;">Nudges</span>
                 <span class="tab-btn" id="tab-followups" onclick="switchTab('followups')" style="display:none;color:var(--muted);border-bottom:2px solid transparent;">Follow-ups</span>
@@ -649,11 +681,11 @@
                 <span class="tab-btn" id="tab-forecast" onclick="switchTab('forecast')" style="display:none;color:var(--muted);border-bottom:2px solid transparent;">Forecast</span>
             </div>
 
-            <!-- My Overview (only visible when logged in) -->
+            <!-- My overview (only visible when logged in) -->
             <div id="my-overview" style="display:none;">
                 <div class="cards">
                     <div class="card outline-box">
-                        <div class="card-label">Your Hours</div>
+                        <div class="card-label">Your hours</div>
                         <div class="card-value" id="my-hours">--</div>
                         <div class="card-sub" id="my-hours-sub"></div>
                     </div>
@@ -663,34 +695,34 @@
                         <div class="card-sub" id="my-visible-sub"></div>
                     </div>
                     <div class="card outline-box">
-                        <div class="card-label">Days Active</div>
+                        <div class="card-label">Days active</div>
                         <div class="card-value" id="my-days-active">--</div>
                         <div class="card-sub" id="my-days-active-sub"></div>
                     </div>
                     <div class="card outline-box">
-                        <div class="card-label">Your Rank</div>
+                        <div class="card-label">Your rank</div>
                         <div class="card-value" id="my-rank">--</div>
                         <div class="card-sub" id="my-rank-sub"></div>
                     </div>
                 </div>
                 <div id="my-weekly-summary" class="weekly-summary"></div>
                 <div class="outline-box" style="padding:22px;">
-                    <span class="section-title">Contribution History</span>
+                    <span class="section-title">Contribution history</span>
                     <div id="my-heatmap"></div>
                 </div>
                 <div class="outline-box" style="padding:22px;">
-                    <span class="section-title">Activity Summaries</span>
+                    <span class="section-title">Activity summaries</span>
                     <div id="my-activity-summaries"></div>
                 </div>
             </div>
 
-            <!-- All Users view -->
+            <!-- All users view -->
             <div id="all-users-view">
 
             <!-- Summary cards -->
             <div class="cards">
                 <div class="card outline-box">
-                    <div class="card-label">Total Hours</div>
+                    <div class="card-label">Total hours</div>
                     <div class="card-value" id="card-hours">--</div>
                     <div class="card-sub" id="card-minutes-sub"></div>
                 </div>
@@ -705,7 +737,7 @@
                     <div class="card-sub" id="card-users-sub"></div>
                 </div>
                 <div class="card outline-box">
-                    <div class="card-label">Action Steps</div>
+                    <div class="card-label">Action steps</div>
                     <div class="card-value" id="card-actions">--</div>
                     <div class="card-sub" id="card-actions-sub"></div>
                 </div>
@@ -715,8 +747,7 @@
             <div class="charts-row">
                 <div class="chart-box outline-box">
                     <div class="chart-head">
-                        <span class="section-title">Daily Trend</span>
-                        <span class="chart-note">hours recorded, and how many people recorded</span>
+                        <span class="section-title">Daily trend</span>
                         <span id="trend-range" style="margin-left:auto;display:flex;gap:4px;"></span>
                     </div>
                     <canvas id="trend-chart"></canvas>
@@ -724,7 +755,7 @@
                 </div>
                 <div class="chart-box outline-box">
                     <div class="chart-head">
-                        <span class="section-title" id="action-chart-title">Action Families</span>
+                        <span class="section-title" id="action-chart-title">Action families</span>
                         <a href="#" id="action-back-btn" class="text-link" style="display:none;" onclick="showFamilyView();return false;">&larr; Back to families</a>
                     </div>
                     <canvas id="action-chart"></canvas>
@@ -744,7 +775,7 @@
             <!-- Top users table -->
             <div class="table-box outline-box" id="users-section">
                 <div id="users-table-view">
-                    <span class="section-title" id="users-table-title">Users by Estimated Hours</span>
+                    <span class="section-title" id="users-table-title">Users by estimated hours</span>
                     <div style="overflow-x: auto;">
                         <table id="users-table">
                             <thead>
@@ -754,7 +785,7 @@
                                     <th data-col="sessions" class="align-right">Sessions <span class="sort-arrow">&#9650;</span></th>
                                     <th data-col="segments" class="align-right">Segments <span class="sort-arrow">&#9650;</span></th>
                                     <th data-col="hours" class="align-right sorted">Hours <span class="sort-arrow">&#9660;</span></th>
-                                    <th data-col="steps" class="align-right">Action Steps <span class="sort-arrow">&#9650;</span></th>
+                                    <th data-col="steps" class="align-right">Action steps <span class="sort-arrow">&#9650;</span></th>
                                 </tr>
                             </thead>
                             <tbody id="users-tbody"></tbody>
@@ -769,12 +800,12 @@
                     <div class="user-detail-stats" id="user-detail-stats"></div>
                     <div id="user-weekly-summary" class="weekly-summary"></div>
                     <div class="heatmap-wrapper">
-                        <span class="section-title">Contribution History</span>
+                        <span class="section-title">Contribution history</span>
                         <div id="user-heatmap"></div>
                     </div>
                     <div id="user-work-profile" style="display:none;margin-top:20px;"></div>
                     <div class="activity-summaries" style="margin-top:20px;">
-                        <span class="section-title">Activity Summaries</span>
+                        <span class="section-title">Activity summaries</span>
                         <div id="user-activity-summaries"></div>
                     </div>
                 </div>
@@ -782,7 +813,7 @@
 
             <!-- Health panel -->
             <div class="health-box outline-box">
-                <span class="section-title">Pipeline Health</span>
+                <span class="section-title">Pipeline health</span>
                 <div class="health-grid" id="health-grid"></div>
             </div>
 
@@ -955,13 +986,9 @@
         const daily = dailyRaw.slice(1); // skip first day (inflated by pre-existing files)
 
         /* -- Header -- */
-        const statusOk = j.last_run_status === 'ok';
-        const dotClass = j.last_run_status ? (statusOk ? 'status-ok' : 'status-error') : 'status-unknown';
-        document.getElementById('header-status').innerHTML =
-            '<span class="status-dot ' + dotClass + '"></span>' +
-            (j.last_run_status ? j.last_run_status.toUpperCase() : 'UNKNOWN');
-        document.getElementById('header-updated').textContent =
-            meta.generated_at ? 'Updated ' + meta.generated_at : '';
+        const updatedEl = document.getElementById('header-updated');
+        updatedEl.textContent = meta.generated_at ? 'Updated ' + fmtUpdated(meta.generated_at) : '';
+        updatedEl.title = meta.generated_at ? new Date(meta.generated_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : '';
 
         /* -- Summary cards -- */
         document.getElementById('card-hours').textContent = fmtDec(t.estimated_hours, 1);
@@ -991,7 +1018,7 @@
         // delivering nothing, so headcount by status flatters the number.
         var activeRecent = countActiveUsers(perUserDaily, 7);
         var subEl = document.getElementById('card-users-sub');
-        subEl.textContent = activeRecent.n + ' active in last 7d';
+        subEl.textContent = activeRecent.n + ' active in the last 7 days';
         subEl.title = activeRecent.n + ' of ' + activeRecent.total + ' recorded at least once in the last 7 days';
 
         document.getElementById('card-actions').textContent = fmt(t.action_steps_total);
@@ -1137,19 +1164,26 @@
             },
         });
 
-        // 7-day rollup so the note reads as a trend rather than one noisy day
-        function roll(arrH, arrP, from, to){
-            var h = 0, u = 0;
-            for (var i = from; i < to; i++){ h += arrH[i] || 0; u = Math.max(u, arrP[i] || 0); }
-            return { h: Math.round(h * 10) / 10, peak: u };
+        // 7-day rollup so the Total hours card shows a trend rather than one noisy day
+        function roll(arr, from, to){
+            var h = 0;
+            for (var i = from; i < to; i++) h += arr[i] || 0;
+            return h;
         }
         var n = keys.length;
-        var last7 = roll(hours, people, Math.max(0, n - 7), n);
-        var prev7 = n >= 14 ? roll(hours, people, Math.max(0, n - 14), n - 7) : null;
-        var delta = prev7 && prev7.h > 0 ? Math.round((last7.h - prev7.h) / prev7.h * 100) : null;
-        document.getElementById('trend-note').textContent =
-            'Last 7 days: ' + last7.h + ' h from up to ' + last7.peak + ' people' +
-            (delta === null ? '' : '  ·  ' + (delta >= 0 ? '+' : '') + delta + '% vs the 7 days before');
+        var last7 = roll(hours, Math.max(0, n - 7), n);
+        var prev7 = n >= 14 ? roll(hours, Math.max(0, n - 14), n - 7) : null;
+        var delta = prev7 ? Math.round((last7 - prev7) / prev7 * 100) : null;
+        var hoursSub = document.getElementById('card-minutes-sub');
+        hoursSub.textContent = '+' + fmt(Math.round(last7)) + ' h in the last 7 days ';
+        if (delta !== null) {
+            var deltaEl = document.createElement('span');
+            deltaEl.className = 'nowrap';
+            deltaEl.textContent = '· ' + (delta >= 0 ? '↑' : '↓') + Math.abs(delta) + '%';
+            hoursSub.appendChild(deltaEl);
+        }
+        hoursSub.title = delta === null ? '' : (delta >= 0 ? 'Up ' : 'Down ') + Math.abs(delta) + '% on the 7 days before';
+        document.getElementById('trend-note').textContent = '';
     }
 
     /* ---- Action donut (with drill-down) ---- */
@@ -1187,7 +1221,7 @@
             }
         }
 
-        document.getElementById('action-chart-title').textContent = _isGuest ? 'Interaction Types' : 'Action Families';
+        document.getElementById('action-chart-title').textContent = _isGuest ? 'Interaction types' : 'Action families';
         document.getElementById('action-back-btn').style.display = 'none';
         document.getElementById('action-detail-table').style.display = 'none';
 
@@ -1344,7 +1378,7 @@
         var data = sorted.map(function(e) { return e[1]; });
         var colors = sorted.map(function(e) { return CATEGORY_COLORS[e[0]] || '#a9a49a'; });
 
-        document.getElementById('action-chart-title').textContent = 'How We Work';
+        document.getElementById('action-chart-title').textContent = 'How we work';
         document.getElementById('action-back-btn').style.display = 'none';
         document.getElementById('action-detail-table').style.display = 'none';
 
@@ -1547,16 +1581,14 @@
     }
 
     /* Signed-out visitors see the top contributors only (that is all the public
-       file contains), and the last rows fade out instead of ending on a hard edge. */
-    var GUEST_FADE = [1, 1, 1, 1, 1, 0.85, 0.65, 0.45, 0.28, 0.12];
+       file contains). A closing row sums up everyone else from the overall totals,
+       so it's clear the list is a small slice. */
     function renderUsersRows() {
         const tbody = document.getElementById('users-tbody');
         let html = '';
         usersData.forEach((row, i) => {
             const clickable = canDrillInto(row.user);
-            const fade = _isGuest ? (GUEST_FADE[i] !== undefined ? GUEST_FADE[i] : 0) : 1;
-            if (fade === 0) return;
-            html += '<tr style="' + (clickable ? 'cursor:pointer;' : 'cursor:default;') + (fade < 1 ? 'opacity:' + fade + ';' : '') + '"' +
+            html += '<tr style="' + (clickable ? 'cursor:pointer;' : 'cursor:default;') + '"' +
                 (clickable ? ' onclick="drillIntoUser(\'' + escapeHtml(row.user) + '\')"' : '') + '>' +
                 '<td>' + (i + 1) + '</td>' +
                 '<td class="user-hash" title="' + escapeHtml(row.user) + '">' + escapeHtml(_isGuest ? 'Contributor ' + (i + 1) : displayName(row.user)) + '</td>' +
@@ -1566,17 +1598,29 @@
                 '<td class="align-right">' + fmt(row.steps) + '</td>' +
                 '</tr>';
         });
-        tbody.innerHTML = html;
-        var more = document.getElementById('guest-more');
-        if (!more) {
-            more = document.createElement('div');
-            more.id = 'guest-more'; more.className = 'guest-more';
-            document.getElementById('users-table').parentNode.appendChild(more);
-        }
-        var total = (window._lastMeta && window._lastMeta.contributors_total) || 0;
+        var meta = window._lastMeta || {};
+        var total = meta.contributors_total || 0;
         var rest = total - usersData.length;
-        more.style.display = _isGuest && rest > 0 ? '' : 'none';
-        more.textContent = rest > 0 ? '+ ' + fmt(rest) + ' more contributors' : '';
+        if (_isGuest && rest > 0) {
+            var t = meta.totals || {};
+            var shown = usersData.reduce(function(acc, r) {
+                acc.sessions += r.sessions; acc.segments += r.segments;
+                acc.hours += r.hours; acc.steps += r.steps;
+                return acc;
+            }, { sessions: 0, segments: 0, hours: 0, steps: 0 });
+            var left = function(all, part) { return Math.max(0, (all || 0) - part); };
+            html += '<tr class="guest-rest">' +
+                '<td></td>' +
+                '<td>' + fmt(rest) + ' more contributors</td>' +
+                '<td class="align-right">' + fmt(left(t.sessions, shown.sessions)) + '</td>' +
+                '<td class="align-right">' + fmt(left(t.recording_segments, shown.segments)) + '</td>' +
+                '<td class="align-right">' + fmtDec(left(t.estimated_hours, shown.hours), 2) + '</td>' +
+                '<td class="align-right">' + fmt(left(t.action_steps_total, shown.steps)) + '</td>' +
+                '</tr>';
+            document.getElementById('users-table-title').textContent =
+                'Top ' + usersData.length + ' of ' + fmt(total) + ' contributors';
+        }
+        tbody.innerHTML = html;
     }
 
     /* Table header click sorting */
@@ -1659,7 +1703,7 @@
             ['Sessions', fmt(u.sessions)],
             ['Segments', fmt(u.segments)],
             ['Hours', fmtDec((u.estimated_minutes || 0) / 60, 2)],
-            ['Action Steps', fmt(u.action_steps)],
+            ['Action steps', fmt(u.action_steps)],
         ];
         document.getElementById('user-detail-stats').innerHTML = stats.map(([label, value]) =>
             '<div class="user-detail-stat">' +
@@ -1721,7 +1765,7 @@
                 return (x.recorder_emails || []).some(function(e) { return emails[String(e).toLowerCase()]; });
             });
             if (!p) return;
-            var html = '<span class="section-title">Work Profile</span>';
+            var html = '<span class="section-title">Work profile</span>';
             if (p.risk_tags && p.risk_tags.length) html += '<div style="margin:-2px 0 8px;">' + riskChips(p.risk_tags, p.risk_reasons)
                 + '<div style="font-size:12.5px;color:var(--bad);margin-top:4px;line-height:1.5;white-space:pre-line;">' + escapeHtml(p.risk_reasons.join('\n')) + '</div></div>';
             if (p.work_profile_at) html += '<div style="font-size:12.5px;color:var(--faint);margin:-4px 0 6px;">' + escapeHtml(p.participant_id || '') + ' · generated ' + escapeHtml(p.work_profile_at.slice(0, 10)) + (p.work_profile_days ? ' from ' + p.work_profile_days + ' daily summaries' : '') + ', refreshed weekly</div>';
@@ -1925,7 +1969,7 @@
         /* Week label */
         var weekLabel;
         if (_weekOffset === 0) {
-            weekLabel = 'This Week';
+            weekLabel = 'This week';
         } else {
             var mo1 = monday.toLocaleString('en-US', { month: 'short' });
             var d1 = monday.getDate();
@@ -2399,7 +2443,7 @@
         var inviteBtnStyle = 'display:inline-block;font-size:13px;font-weight:500;padding:6px 16px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer;border-radius:3px;font-variant-numeric:tabular-nums;';
         html += '<div class="outline-box" style="padding:20px 24px;margin-bottom:20px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">';
         html += '<span style="font-size:13px;font-weight:500;color:var(--ink);margin-right:8px;">Onboarding</span>';
-        html += '<span class="invite-btn" style="' + inviteBtnStyle + '">Invite by Email</span>';
+        html += '<span class="invite-btn" style="' + inviteBtnStyle + '">Invite by email</span>';
         html += '</div>';
 
         /* Unified onboarded participants (rendered async by fetchPendingReview) */
@@ -2510,7 +2554,7 @@
                 input.style.cssText = 'font-size:13px;font-variant-numeric:tabular-nums;padding:6px 12px;border:1px solid var(--rule-strong);background:var(--paper);width:300px;outline:none;';
 
                 var sendBtn = document.createElement('span');
-                sendBtn.textContent = 'Generate Link';
+                sendBtn.textContent = 'Generate link';
                 sendBtn.style.cssText = 'display:inline-block;font-size:13px;font-weight:500;padding:6px 16px;border:1px solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer;border-radius:3px;font-variant-numeric:tabular-nums;';
 
                 var resultDiv = document.createElement('div');
@@ -2545,7 +2589,7 @@
                     .then(function(data) {
                         if (data.error) {
                             resultDiv.innerHTML = '<span style="color:var(--bad);">' + escapeHtml(data.error) + '</span>';
-                            sendBtn.textContent = 'Generate Link';
+                            sendBtn.textContent = 'Generate link';
                             sendBtn.style.pointerEvents = '';
                             return;
                         }
@@ -2562,13 +2606,13 @@
                                 setTimeout(function() { resultDiv.querySelector('.invite-copy-btn').textContent = 'Copy'; }, 2000);
                             });
                         });
-                        sendBtn.textContent = 'Generate Link';
+                        sendBtn.textContent = 'Generate link';
                         sendBtn.style.pointerEvents = '';
                         input.value = '';
                     }).catch(function(err) {
                         console.error('Invite failed:', err);
                         resultDiv.innerHTML = '<span style="color:var(--bad);">Failed to generate invite. Try again.</span>';
-                        sendBtn.textContent = 'Generate Link';
+                        sendBtn.textContent = 'Generate link';
                         sendBtn.style.pointerEvents = '';
                     });
                 }
@@ -2610,7 +2654,7 @@
         html += '<th style="font-size:13px;font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);white-space:nowrap;">Email</th>';
         html += '<th style="font-size:13px;font-weight:500;text-align:right;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);white-space:nowrap;">Last 7d</th>';
         html += '<th style="font-size:13px;font-weight:500;text-align:right;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);white-space:nowrap;">Prior 7d</th>';
-        html += '<th style="font-size:13px;font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);white-space:nowrap;">Last Active</th>';
+        html += '<th style="font-size:13px;font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);white-space:nowrap;">Last active</th>';
         html += '<th style="font-size:13px;font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);white-space:nowrap;">Actions</th>';
         html += '</tr></thead>';
         html += '<tbody>';
@@ -2639,11 +2683,11 @@
         html += '</tbody></table></div>';
 
         /* Add button */
-        var btnLabel = role === 'admin' ? 'Add Admin' : 'Add Participant';
+        var btnLabel = role === 'admin' ? 'Add admin' : 'Add participant';
         html += '<div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">';
         html += '<span class="participant-add-btn" data-role="' + escapeHtml(role) + '" style="display:inline-block;font-size:13px;font-weight:500;padding:6px 16px;border:1px solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer;border-radius:3px;font-variant-numeric:tabular-nums;">' + escapeHtml(btnLabel) + '</span>';
         if (role === 'participant') {
-            html += '<span class="invite-btn" style="display:inline-block;font-size:13px;font-weight:500;padding:6px 16px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer;border-radius:3px;font-variant-numeric:tabular-nums;">Invite by Email</span>';
+            html += '<span class="invite-btn" style="display:inline-block;font-size:13px;font-weight:500;padding:6px 16px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer;border-radius:3px;font-variant-numeric:tabular-nums;">Invite by email</span>';
         }
         html += '</div>';
 
@@ -3282,7 +3326,7 @@
               '</div>'
             : '';
 
-        modal.innerHTML = '<div style="font-size:13px;font-weight:500;margin-bottom:16px;">Confirm Payouts</div>' +
+        modal.innerHTML = '<div style="font-size:13px;font-weight:500;margin-bottom:16px;">Confirm payouts</div>' +
             '<div style="font-size:14px;margin-bottom:8px;"><strong>' + payoutIds.length + ' payouts</strong> totaling <strong>' + _fmtCurTotals(_payoutCurTotals(payoutIds)) + '</strong></div>' +
             '<div style="font-size:13px;color:var(--muted);margin-bottom:20px;">This will generate Auszahlungsbelege and email them to participants.</div>' +
             flagBlock + notesBlock +
@@ -3814,7 +3858,7 @@
         html += '<th style="' + thStyle + '" title="One-line summary from the weekly work profile (open the row for the full profile)">Works on</th>';
         html += '<th style="' + thStyle + 'text-align:right;">Last 7d</th>';
         html += '<th style="' + thStyle + 'text-align:right;">Prior 7d</th>';
-        html += '<th style="' + thStyle + '">Last Active</th>';
+        html += '<th style="' + thStyle + '">Last active</th>';
         html += '<th style="' + thStyle + '">Agreement</th>';
         html += '<th style="' + thStyle + '">Actions</th>';
         html += '</tr></thead><tbody>';
@@ -3889,7 +3933,7 @@
             html += '<div><span style="font-size:13px;font-weight:500;color:var(--faint);">Holder</span><br><span style="font-size:13px;font-variant-numeric:tabular-nums;' + (p.holder_mismatch ? 'color:var(--bad);font-weight:600;' : '') + '">' + escapeHtml(holder || '--') + (p.holder_mismatch ? ' (not their name)' : '') + '</span></div>';
             html += '<div><span style="font-size:13px;font-weight:500;color:var(--faint);">IBAN / Account</span><br><span style="font-size:13px;font-variant-numeric:tabular-nums;">' + escapeHtml(bank || '--') + '</span></div>';
             html += '<div><span style="font-size:13px;font-weight:500;color:var(--faint);">Currency</span><br><span style="font-size:13px;font-variant-numeric:tabular-nums;">' + escapeHtml(currency || '--') + '</span></div>';
-            html += '<div><span style="font-size:13px;font-weight:500;color:var(--faint);">Accepted At</span><br><span style="font-size:13px;font-variant-numeric:tabular-nums;">' + escapeHtml(acceptedAt || '--') + '</span></div>';
+            html += '<div><span style="font-size:13px;font-weight:500;color:var(--faint);">Accepted at</span><br><span style="font-size:13px;font-variant-numeric:tabular-nums;">' + escapeHtml(acceptedAt || '--') + '</span></div>';
             html += '<div><span style="font-size:13px;font-weight:500;color:var(--faint);">Participant ID</span><br><span style="font-size:13px;font-variant-numeric:tabular-nums;">' + escapeHtml(p.participant_id || '--') + '</span></div>';
             html += '</div>';
 
@@ -3971,6 +4015,18 @@
         return html;
     }
 
+    /* "12 minutes ago" for recent runs, a plain date once it's older than a day. */
+    function fmtUpdated(iso) {
+        var then = new Date(iso);
+        if (isNaN(then)) return iso;
+        var mins = Math.round((Date.now() - then) / 60000);
+        if (mins < 1) return 'just now';
+        if (mins < 60) return mins + (mins === 1 ? ' minute ago' : ' minutes ago');
+        var hrs = Math.round(mins / 60);
+        if (hrs < 24) return hrs + (hrs === 1 ? ' hour ago' : ' hours ago');
+        return 'on ' + then.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    }
+
     function initGoogleSignIn() {
         if (typeof google === 'undefined') {
             setTimeout(initGoogleSignIn, 200);
@@ -3982,7 +4038,7 @@
         });
         google.accounts.id.renderButton(
             document.getElementById('auth-signin'),
-            { theme: 'outline', size: 'small', text: 'signin', shape: 'rectangular' }
+            { theme: 'outline', size: 'large', text: 'signin_with', shape: 'rectangular', locale: 'en' }
         );
     }
 
@@ -3990,7 +4046,7 @@
     function enterGuestView() {
         _isGuest = true;
         document.getElementById('dashboard').style.display = 'block';
-        /* Hide tabs — guest only sees All Users */
+        /* Hide tabs — guest only sees All users */
         document.getElementById('dashboard-tabs').style.display = 'none';
         document.getElementById('my-overview').style.display = 'none';
         document.getElementById('all-users-view').style.display = 'block';
@@ -3999,9 +4055,9 @@
         document.getElementById('all-users-view').style.height = 'auto';
         /* Simplify labels for external visitors */
         var sessionsLabel = document.querySelector('#card-sessions')?.closest('.card')?.querySelector('.card-label');
-        if (sessionsLabel) sessionsLabel.textContent = 'Recording Sessions';
+        if (sessionsLabel) sessionsLabel.textContent = 'Recording sessions';
         var actionsLabel = document.querySelector('#card-actions')?.closest('.card')?.querySelector('.card-label');
-        if (actionsLabel) actionsLabel.textContent = 'Interactions Captured';
+        if (actionsLabel) actionsLabel.textContent = 'Interactions captured';
         /* Rename table title for guests */
         document.getElementById('users-table-title').textContent = 'Contributors';
         /* Hide internal-facing panels */
@@ -4050,9 +4106,9 @@
         var sessionsLabel = document.querySelector('#card-sessions')?.closest('.card')?.querySelector('.card-label');
         if (sessionsLabel) sessionsLabel.textContent = 'Sessions';
         var actionsLabel = document.querySelector('#card-actions')?.closest('.card')?.querySelector('.card-label');
-        if (actionsLabel) actionsLabel.textContent = 'Action Steps';
+        if (actionsLabel) actionsLabel.textContent = 'Action steps';
         if (document.querySelector('.health-box')) document.querySelector('.health-box').style.display = '';
-        document.getElementById('users-table-title').textContent = 'Users by Estimated Hours';
+        document.getElementById('users-table-title').textContent = 'Users by estimated hours';
         document.getElementById('auth-signin-wrap').style.display = 'inline-flex';
         /* Back to the public view (and the public data, so nothing private lingers). */
         window._lastMeta = null; _fullMetaPromise = null;
@@ -4137,7 +4193,7 @@
                 fetchBadgeCounts();
             }
 
-            /* Restore My Overview HTML from skeleton and render */
+            /* Restore My overview HTML from skeleton and render */
             document.getElementById('my-overview').innerHTML = _myOverviewOrigHTML;
             document.getElementById('dashboard-tabs').style.display = 'block';
             await fullMeta;
