@@ -90,13 +90,13 @@
         }
 
         .dash-head h1 {
-            font-size: clamp(32px, 3.2vw, 44px);
+            font-size: 22px;
             font-weight: 500;
-            line-height: 1.05;
+            line-height: 1.2;
         }
 
         #header-updated {
-            margin-top: 8px;
+            margin-top: 2px;
             font-size: 14px;
             color: var(--muted);
         }
@@ -611,6 +611,156 @@
             .cards .card.outline-box { padding: 0; }
         }
 
+        /* -- Hero (overview) -- */
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+            gap: 24px 64px;
+            align-items: end;
+            margin: 8px 0 40px;
+        }
+        .hero-intro { display: none; margin-bottom: 28px; }
+        body.is-guest .hero-intro { display: block; }
+        .hero-title {
+            font-size: clamp(36px, 4.6vw, 60px);
+            font-weight: 400;
+            line-height: 1.02;
+            letter-spacing: -0.01em;
+            max-width: 17ch;
+        }
+        .hero-title em {
+            font-family: "Lora", Georgia, serif;
+            font-style: italic;
+            font-weight: 400;
+        }
+        .hero-lede {
+            margin-top: 18px;
+            max-width: 46ch;
+            font-size: 18px;
+            line-height: 1.45;
+            color: var(--muted);
+        }
+        .hero-total-line { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+        .hero-total .card-value { font-size: 34px; font-weight: 500; }
+        .hero-total .card-label { font-size: 15px; color: var(--muted); margin: 0; }
+        .hero-total .card-sub { margin-top: 4px; font-size: 14px; }
+        .live-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--ok);
+            box-shadow: 0 0 0 4px var(--ok-bg);
+            align-self: center;
+        }
+        .delta-up { color: var(--ok); }
+        .delta-down { color: var(--bad); }
+        .hero-stats { border-top: 1px solid var(--rule); font-size: 15px; }
+        .stat-row {
+            display: grid;
+            grid-template-columns: 9.5em 1fr;
+            align-items: baseline;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--rule);
+        }
+        .stat-row .card-value { font-size: 24px; font-weight: 500; line-height: 1.2; }
+        .stat-row .card-label { font-size: 15px; color: var(--ink); margin: 0; }
+        .stat-row .card-sub { margin-top: 2px; }
+
+        /* -- Panels -- */
+        #all-users-view .outline-box,
+        #my-overview > .outline-box {
+            background: rgba(255, 255, 255, 0.55);
+            border-radius: 10px;
+        }
+        #all-users-view .section-title { font-size: 20px; font-weight: 400; }
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            font-size: 12px;
+            color: var(--muted);
+            border: 1px solid var(--rule);
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+        .guest-only { display: none; }
+        body.is-guest .guest-only { display: block; }
+        body.is-guest .chip.guest-only { display: inline-flex; }
+        body.is-guest .users-table-wrap { display: none; }
+
+        /* -- Ranked bars -- */
+        .bar-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 0;
+            border: 0;
+            background: none;
+            font: inherit;
+            color: inherit;
+            text-align: left;
+        }
+        button.bar-row { cursor: pointer; }
+        button.bar-row:hover .bar-label { text-decoration: underline; text-underline-offset: 3px; }
+        .bar-rank {
+            flex: 0 0 auto;
+            min-width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-variant-numeric: tabular-nums;
+            color: var(--muted);
+            border: 1px solid var(--rule);
+            border-radius: 4px;
+            background: var(--paper);
+        }
+        .bar-track { position: relative; flex: 1 1 auto; min-width: 0; height: 34px; }
+        .bar-fill { position: absolute; inset: 0 auto 0 0; border-radius: 4px; }
+        .bar-label {
+            position: relative;
+            display: block;
+            padding: 0 12px;
+            line-height: 34px;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .bar-value {
+            flex: 0 0 auto;
+            min-width: 7ch;
+            text-align: right;
+            font-size: 14px;
+            font-variant-numeric: tabular-nums;
+        }
+        .bar-rest { margin: 14px 0 0 34px; font-size: 14px; color: var(--muted); }
+        .bar-rest:empty { display: none; }
+        .panel-button {
+            display: block;
+            margin-top: 22px;
+            padding: 12px 16px;
+            text-align: center;
+            font-size: 15px;
+            color: var(--ink);
+            border: 1px solid var(--rule-strong);
+            border-radius: 8px;
+            background: var(--paper);
+            text-decoration: none;
+        }
+        .panel-button:hover { border-color: var(--ink); }
+
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; gap: 28px; }
+        }
+        @media (max-width: 560px) {
+            .hero-lede { font-size: 16px; }
+            .hero-total .card-value { font-size: 30px; }
+            .stat-row { padding: 12px 0; }
+        }
+
         tr.guest-rest td { font-weight: 500; border-top: 1px solid var(--rule-strong); border-bottom: 0; }
         .card-sub .nowrap { white-space: nowrap; }
     </style>
@@ -706,27 +856,35 @@
             <!-- All users view -->
             <div id="all-users-view">
 
-            <!-- Summary cards -->
-            <div class="cards">
-                <div class="card outline-box">
-                    <div class="card-label">Total hours</div>
-                    <div class="card-value" id="card-hours">--</div>
-                    <div class="card-sub" id="card-minutes-sub"></div>
+            <!-- Hero: headline (signed out only), the total, and the other headline numbers -->
+            <div class="hero">
+                <div class="hero-main">
+                    <div class="hero-intro">
+                        <h2 class="hero-title">Capturing <em>real</em> human computer work</h2>
+                        <p class="hero-lede">crowd-cast records paired screen video and keyboard and mouse input from people doing their actual work, building an open dataset for research.</p>
+                    </div>
+                    <div class="card hero-total">
+                        <div class="hero-total-line">
+                            <span class="live-dot" aria-hidden="true"></span>
+                            <span class="card-value" id="card-hours">--</span>
+                            <span class="card-label">hours recorded</span>
+                        </div>
+                        <div class="card-sub" id="card-minutes-sub"></div>
+                    </div>
                 </div>
-                <div class="card outline-box">
-                    <div class="card-label">Sessions</div>
-                    <div class="card-value" id="card-sessions">--</div>
-                    <div class="card-sub" id="card-segments-sub"></div>
-                </div>
-                <div class="card outline-box">
-                    <div class="card-label">Users</div>
-                    <div class="card-value" id="card-users">--</div>
-                    <div class="card-sub" id="card-users-sub"></div>
-                </div>
-                <div class="card outline-box">
-                    <div class="card-label">Action steps</div>
-                    <div class="card-value" id="card-actions">--</div>
-                    <div class="card-sub" id="card-actions-sub"></div>
+                <div class="hero-stats">
+                    <div class="card stat-row">
+                        <div class="card-value" id="card-sessions">--</div>
+                        <div><div class="card-label">Sessions</div><div class="card-sub" id="card-segments-sub"></div></div>
+                    </div>
+                    <div class="card stat-row">
+                        <div class="card-value" id="card-users">--</div>
+                        <div><div class="card-label">Users</div><div class="card-sub" id="card-users-sub"></div></div>
+                    </div>
+                    <div class="card stat-row">
+                        <div class="card-value" id="card-actions">--</div>
+                        <div><div class="card-label">Action steps</div><div class="card-sub" id="card-actions-sub"></div></div>
+                    </div>
                 </div>
             </div>
 
@@ -743,9 +901,11 @@
                 <div class="chart-box outline-box">
                     <div class="chart-head">
                         <span class="section-title" id="action-chart-title">Action families</span>
+                        <span class="chip" id="action-chart-chip">Share of recorded time</span>
                         <a href="#" id="action-back-btn" class="text-link" style="display:none;" onclick="showFamilyView();return false;">&larr; Back to families</a>
                     </div>
                     <canvas id="action-chart"></canvas>
+                    <div id="action-bars" class="bar-list" style="display:none;"></div>
                     <div id="action-detail-table" style="display:none;margin-top:14px;max-height:200px;overflow-y:auto;">
                         <table style="width:100%;">
                             <thead><tr>
@@ -762,8 +922,12 @@
             <!-- Top users table -->
             <div class="table-box outline-box" id="users-section">
                 <div id="users-table-view">
-                    <span class="section-title" id="users-table-title">Users by estimated hours</span>
-                    <div style="overflow-x: auto;">
+                    <div class="chart-head">
+                        <span class="section-title" id="users-table-title">Users by estimated hours</span>
+                        <span class="chip guest-only">By hours</span>
+                    </div>
+                    <div id="guest-bars" class="guest-only"></div>
+                    <div class="users-table-wrap" style="overflow-x: auto;">
                         <table id="users-table">
                             <thead>
                                 <tr>
@@ -1165,7 +1329,7 @@
         hoursSub.textContent = '+' + fmt(Math.round(last7)) + ' h in the last 7 days ';
         if (delta !== null) {
             var deltaEl = document.createElement('span');
-            deltaEl.className = 'nowrap';
+            deltaEl.className = 'nowrap ' + (delta >= 0 ? 'delta-up' : 'delta-down');
             deltaEl.textContent = '· ' + (delta >= 0 ? '↑' : '↓') + Math.abs(delta) + '%';
             hoursSub.appendChild(deltaEl);
         }
@@ -1191,6 +1355,7 @@
     }
 
     function _drawFamilyDonut() {
+        showActionBars(false);
         const hist = _cachedHist;
         const labels = [];
         const data = [];
@@ -1331,11 +1496,36 @@
         }
         return appId;
     }
-    var CATEGORY_COLORS = {
-        'Coding': '#506777', 'Terminal': '#2f4a5c', 'Browser': '#b7361e',
-        'Research': '#c9a46a', 'Science': '#8a6f9e', 'Design': '#7a8f6a',
-        'Communication': '#7fa3b5', 'AI Assistants': '#c9b19f', 'Other': '#a9a49a',
-    };
+    /* Ranked horizontal bars (rank, label, bar proportional to the value, value text). */
+    function renderBarList(el, items, opts) {
+        opts = opts || {};
+        var max = items.reduce(function(m, it) { return Math.max(m, it.value); }, 0) || 1;
+        el.innerHTML = '';
+        items.forEach(function(it, i) {
+            var row = document.createElement(it.onClick ? 'button' : 'div');
+            row.className = 'bar-row';
+            if (it.onClick) { row.type = 'button'; row.addEventListener('click', it.onClick); }
+            var width = Math.max(2, it.value / max * 100);
+            /* Higher ranks get a stronger tint, like a heat ramp down the list. */
+            var strength = Math.round(34 - (i / Math.max(1, items.length - 1)) * 22);
+            row.innerHTML =
+                (opts.ranked ? '<span class="bar-rank">' + (i + 1) + '</span>' : '') +
+                '<span class="bar-track"><span class="bar-fill" style="width:' + width + '%;' +
+                'background:color-mix(in srgb, ' + (it.color || 'var(--steel)') + ' ' + strength + '%, transparent);"></span>' +
+                '<span class="bar-label"></span></span>' +
+                '<span class="bar-value"></span>';
+            row.querySelector('.bar-label').textContent = it.label;
+            row.querySelector('.bar-value').textContent = it.valueText;
+            el.appendChild(row);
+        });
+    }
+    function showActionBars(on) {
+        document.getElementById('action-chart').style.display = on ? 'none' : '';
+        document.getElementById('action-bars').style.display = on ? '' : 'none';
+        document.getElementById('action-chart-chip').style.display = on ? '' : 'none';
+        if (on && actionChart) { actionChart.destroy(); actionChart = null; }
+    }
+
     var _appHist = {};
     var _appDonutMode = 'category';
 
@@ -1360,33 +1550,19 @@
 
         var sorted = Object.entries(cats).sort(function(a, b) { return b[1] - a[1]; });
         var total = sorted.reduce(function(s, e) { return s + e[1]; }, 0);
-        var catKeys = sorted.map(function(e) { return e[0]; });
-        var labels = sorted.map(function(e) { return e[0] + ' (' + Math.round(e[1] / total * 100) + '%)'; });
-        var data = sorted.map(function(e) { return e[1]; });
-        var colors = sorted.map(function(e) { return CATEGORY_COLORS[e[0]] || '#a9a49a'; });
 
         document.getElementById('action-chart-title').textContent = 'How we work';
         document.getElementById('action-back-btn').style.display = 'none';
         document.getElementById('action-detail-table').style.display = 'none';
 
-        var ctx = document.getElementById('action-chart').getContext('2d');
-        if (actionChart) actionChart.destroy();
-
-        actionChart = new Chart(ctx, {
-            type: 'doughnut',
-            animation: false,
-            data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderColor: '#f5f2ec', borderWidth: 2 }] },
-            options: {
-                responsive: true, maintainAspectRatio: false, cutout: '55%',
-                onClick: function(evt, elems) {
-                    if (elems.length > 0) _drillIntoCategory(catKeys[elems[0].index]);
-                },
-                plugins: {
-                    legend: { position: 'right', labels: { font: { size: 12, family: "'Instrument Sans', Arial, sans-serif" } } },
-                    tooltip: { callbacks: { label: function(c) { return c.label.split(' (')[0] + ': ' + (c.raw / 3600).toFixed(1) + 'h'; } } },
-                },
-            },
-        });
+        showActionBars(true);
+        renderBarList(document.getElementById('action-bars'), sorted.map(function(e) {
+            return {
+                label: e[0], value: e[1],
+                valueText: Math.round(e[1] / total * 100) + '%',
+                onClick: function() { _drillIntoCategory(e[0]); },
+            };
+        }).filter(function(it) { return it.valueText !== '0%'; }));
     }
 
     var _cachedCatApps = {};
@@ -1396,33 +1572,19 @@
         var apps = _cachedCatApps[category] || {};
         var sorted = Object.entries(apps).sort(function(a, b) { return b[1] - a[1]; });
         var total = sorted.reduce(function(s, e) { return s + e[1]; }, 0);
-        var labels = sorted.map(function(e) { return e[0] + ' (' + Math.round(e[1] / total * 100) + '%)'; });
-        var data = sorted.map(function(e) { return e[1]; });
-        var baseColor = CATEGORY_COLORS[category] || '#a9a49a';
-        var colors = sorted.map(function(_, i) { return shadeColor(baseColor, i, sorted.length); });
 
         document.getElementById('action-chart-title').textContent = category;
         document.getElementById('action-back-btn').style.display = '';
         document.getElementById('action-back-btn').onclick = function(e) { e.preventDefault(); _drawCategoryDonut(); };
 
-        var ctx = document.getElementById('action-chart').getContext('2d');
-        if (actionChart) actionChart.destroy();
-
-        actionChart = new Chart(ctx, {
-            type: 'doughnut',
-            animation: false,
-            data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderColor: '#f5f2ec', borderWidth: 2 }] },
-            options: {
-                responsive: true, maintainAspectRatio: false, cutout: '55%',
-                plugins: {
-                    legend: { position: 'right', labels: { font: { size: 12, family: "'Instrument Sans', Arial, sans-serif" } } },
-                    tooltip: { callbacks: { label: function(c) { return c.label.split(' (')[0] + ': ' + (c.raw / 3600).toFixed(1) + 'h'; } } },
-                },
-            },
-        });
+        showActionBars(true);
+        renderBarList(document.getElementById('action-bars'), sorted.slice(0, 10).map(function(e) {
+            return { label: e[0], value: e[1], valueText: Math.round(e[1] / total * 100) + '%' };
+        }));
     }
 
     function _drillIntoFamily(family) {
+        showActionBars(false);
         history.pushState({ view: 'family', family: family }, '');
         _donutMode = family;
         const detail = _cachedDetail;
@@ -1588,6 +1750,7 @@
         var meta = window._lastMeta || {};
         var total = meta.contributors_total || 0;
         var rest = total - usersData.length;
+        if (_isGuest) renderGuestBars(meta, total, rest);
         if (_isGuest && rest > 0) {
             var t = meta.totals || {};
             var shown = usersData.reduce(function(acc, r) {
@@ -1608,6 +1771,24 @@
                 'Top ' + usersData.length + ' of ' + fmt(total) + ' contributors';
         }
         tbody.innerHTML = html;
+    }
+
+    /* Signed out: the top contributors as ranked bars, everyone else summed up
+       underneath, and a way in for people who want to contribute. */
+    function renderGuestBars(meta, total, rest) {
+        var el = document.getElementById('guest-bars');
+        var top = usersData.slice().sort(function(a, b) { return b.hours - a.hours; });
+        el.innerHTML = '<div class="bar-list"></div><div class="bar-rest"></div>' +
+            '<a class="panel-button" href="/careers/paid-data-collection/">Contribute your recordings</a>';
+        renderBarList(el.querySelector('.bar-list'), top.map(function(r, i) {
+            return { label: 'Contributor ' + (i + 1), value: r.hours, valueText: fmtDec(r.hours, 1) + ' h' };
+        }), { ranked: true });
+        var shownHours = top.reduce(function(sum, r) { return sum + r.hours; }, 0);
+        var restHours = Math.max(0, ((meta.totals || {}).estimated_hours || 0) - shownHours);
+        el.querySelector('.bar-rest').textContent = rest > 0
+            ? '+ ' + fmt(rest) + ' more contributors with ' + fmtDec(restHours, 1) + ' h between them'
+            : '';
+        if (total) document.getElementById('users-table-title').textContent = 'Top ' + top.length + ' of ' + fmt(total) + ' contributors';
     }
 
     /* Table header click sorting */
@@ -4032,6 +4213,7 @@
     var _isGuest = false;
     function enterGuestView() {
         _isGuest = true;
+        document.body.classList.add('is-guest');
         document.getElementById('dashboard').style.display = 'block';
         /* Hide tabs — guest only sees All users */
         document.getElementById('dashboard-tabs').style.display = 'none';
@@ -4106,6 +4288,7 @@
     async function fetchAuthData() {
         if (!_authToken) return;
         _isGuest = false;
+        document.body.classList.remove('is-guest');
         var fullMeta = loadFullMeta();   // the signed-in views need the full file, fetch it alongside auth
         document.getElementById('dashboard').style.display = 'block';
         document.getElementById('auth-signin-wrap').style.display = 'none';
