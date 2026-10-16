@@ -304,12 +304,8 @@ function AnnouncementBar() {
     () => !document.documentElement.classList.contains('paid-announcement-dismissed'),
   )
 
+  // Not persisted: a reload brings the announcement back.
   const dismiss = () => {
-    try {
-      localStorage.setItem('pdoom-paid-data-announcement-dismissed', '1')
-    } catch {
-      // Dismissal still applies for the current page when storage is unavailable.
-    }
     document.documentElement.classList.add('paid-announcement-dismissed')
     setVisible(false)
   }
