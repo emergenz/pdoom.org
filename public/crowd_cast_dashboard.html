@@ -94,7 +94,7 @@
             color: var(--muted);
         }
         .hero-actions { margin-top: 28px; }
-        .hero-actions #auth-area { gap: 20px; }
+        .hero-actions #auth-area { gap: 12px; }
 
         .header-meta {
             font-size: 14px;
@@ -583,8 +583,20 @@
 
         /* ---- Sign-in (header) ---- */
         #auth-area { display: inline-flex; align-items: center; gap: 14px; }
-        .header-docs { color: var(--ink); border-bottom: 1px solid currentColor; }
-        .header-docs:hover { color: var(--signal); }
+        /* Same height, border and corners as Google's sign-in button beside it. */
+        .header-docs {
+            display: inline-flex;
+            align-items: center;
+            height: 40px;
+            padding: 0 16px;
+            font-size: 14px;
+            color: var(--ink);
+            background: #fff;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .header-docs:hover { border-color: var(--ink); }
         .sign-out { cursor: pointer; color: var(--muted); margin-left: 10px; border-bottom: 1px solid var(--rule-strong); }
         .sign-out:hover { color: var(--signal); border-color: currentColor; }
         @media (max-width: 600px) {
@@ -735,19 +747,7 @@
         }
         .bar-rest { margin: 14px 0 0 34px; font-size: 14px; color: var(--muted); }
         .bar-rest:empty { display: none; }
-        .panel-button {
-            display: block;
-            margin-top: 22px;
-            padding: 12px 16px;
-            text-align: center;
-            font-size: 15px;
-            color: var(--ink);
-            border: 1px solid var(--rule-strong);
-            border-radius: 8px;
-            background: var(--paper);
-            text-decoration: none;
-        }
-        .panel-button:hover { border-color: var(--ink); }
+        .panel-cta { margin-top: 22px; }
 
         @media (max-width: 900px) {
             .hero { grid-template-columns: 1fr; gap: 28px; }
@@ -1769,15 +1769,13 @@
         var el = document.getElementById('guest-bars');
         var top = usersData.slice().sort(function(a, b) { return b.hours - a.hours; });
         el.innerHTML = '<div class="bar-list"></div><div class="bar-rest"></div>' +
-            '<a class="panel-button" href="/careers/paid-data-collection/">Contribute your recordings</a>';
+            '<a class="button button--primary panel-cta" href="/careers/paid-data-collection/">' +
+            '<span>Contribute your recordings</span>' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>';
         renderBarList(el.querySelector('.bar-list'), top.map(function(r, i) {
             return { label: 'Contributor ' + (i + 1), value: r.hours, valueText: fmtDec(r.hours, 1) + ' h' };
         }), { ranked: true });
-        var shownHours = top.reduce(function(sum, r) { return sum + r.hours; }, 0);
-        var restHours = Math.max(0, ((meta.totals || {}).estimated_hours || 0) - shownHours);
-        el.querySelector('.bar-rest').textContent = rest > 0
-            ? '+ ' + fmt(rest) + ' more contributors with ' + fmtDec(restHours, 1) + ' h between them'
-            : '';
+        el.querySelector('.bar-rest').textContent = rest > 0 ? '+ ' + fmt(rest) + ' more contributors' : '';
         if (total) document.getElementById('users-table-title').textContent = 'Top ' + top.length + ' of ' + fmt(total) + ' contributors';
     }
 
