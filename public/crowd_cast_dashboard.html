@@ -93,7 +93,7 @@
             font-size: 12px;
             color: var(--muted);
         }
-        .hero-actions { margin-top: 28px; }
+
         .hero-actions #auth-area { gap: 12px; }
 
         .header-meta {
@@ -623,11 +623,13 @@
             display: grid;
             grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
             gap: 24px 64px;
-            align-items: end;
+            align-items: stretch;
             margin: 8px 0 40px;
         }
-        .hero-intro { display: none; margin-bottom: 28px; }
-        body.is-guest .hero-intro { display: block; }
+        /* Headline top lines up with the numbers pane's top, the buttons with its bottom. */
+        .hero-intro { display: none; }
+        body.is-guest .hero-intro { display: flex; flex-direction: column; height: 100%; }
+        .hero-actions { margin-top: auto; padding-top: 28px; }
         .hero-title {
             font-size: clamp(36px, 4.6vw, 60px);
             font-weight: 500;
