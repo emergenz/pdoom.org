@@ -5641,11 +5641,12 @@
     function caseFirst(c) { var f = String(c.name || '').trim().split(/\s+/)[0] || ''; return f ? f.charAt(0).toUpperCase() + f.slice(1).toLowerCase() : ''; }
     function caseOutcomeMail(c, choice) {
         var hi = caseFirst(c) ? 'Hi ' + caseFirst(c) + ',' : 'Hey,';
-        var noReply = c.status === 'expired';
+        var noReply = c.status !== 'answered';
         if (choice === 'keep') return noReply ? '' : hi + '\n\nthanks for explaining, that makes sense. Carry on as you are.\n\nMihir';
-        if (choice === 'end_nopay') return hi + '\n\n' + (noReply ? 'since I didn\'t hear back, ' : '') +
+        var silent = c.status === 'expired';
+        if (choice === 'end_nopay') return hi + '\n\n' + (silent ? 'since I didn\'t hear back, ' : '') +
             'we\'re ending your crowd-cast participation as of today. Your application didn\'t mention the earlier one, so there\'s no payment, and we\'ll delete your recordings. You can uninstall the recorder.\n\nMihir';
-        return hi + '\n\n' + (noReply ? 'since I didn\'t hear back, ' : 'thanks for getting back to me. ') +
+        return hi + '\n\n' + (silent ? 'since I didn\'t hear back, ' : c.status === 'answered' ? 'thanks for getting back to me. ' : '') +
             'we\'re ending your crowd-cast participation as of today, since the recordings aren\'t the kind of work we can use for the dataset. You\'ll be paid for the days up to today, adjusted for how much of it was usable research work, with the next payout run. You can uninstall the recorder.\n\nThanks for taking part.\n\nMihir';
     }
     function renderCasesTab() {
@@ -5686,7 +5687,8 @@
                 h += '<input id="case-subj-' + i + '" value="' + escapeHtml(c.draft_subject || '') + '" style="width:100%;box-sizing:border-box;font:inherit;font-size:12px;padding:6px;margin:4px 0;border:1px solid #ccc;">';
                 h += '<textarea id="case-body-' + i + '" rows="8" style="width:100%;box-sizing:border-box;font:inherit;font-size:12px;padding:6px;border:1px solid #ccc;">' + escapeHtml(c.draft_body || '') + '</textarea>';
                 h += '<div class="review-actions" style="grid-template-columns:1fr 1fr;"><button class="review-btn rb-reject" onclick="caseDecide(' + i + ',\'keep\',true)">False alarm: close</button>' +
-                     '<button class="review-btn rb-accept" onclick="caseSend(' + i + ')">Send question</button></div>';
+                     '<button class="review-btn rb-accept" onclick="caseSend(' + i + ')">Send question</button></div>' +
+                     '<div style="font-size:12px;color:#666;margin-top:8px;">Clear-cut already? <a href="#" onclick="caseChoose(' + i + ');return false;">decide without asking</a></div><div id="case-decide-' + i + '"></div>';
             } else if (c.status === 'asked') {
                 h += '<details><summary style="cursor:pointer;font-size:12px;">What we sent</summary><pre style="white-space:pre-wrap;font-size:12px;">' + escapeHtml(c.sent_body || '') + '</pre></details>';
                 h += '<div style="font-size:12px;color:#666;margin-top:8px;">You can decide early: <a href="#" onclick="caseChoose(' + i + ');return false;">decide now</a></div><div id="case-decide-' + i + '"></div>';
