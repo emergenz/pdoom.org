@@ -85,8 +85,12 @@
         }
         body.is-guest .dash-head { display: none; }
 
+        /* Small timestamp in the corner of the numbers pane. */
         #header-updated {
-            font-size: 14px;
+            position: absolute;
+            top: 18px;
+            right: 20px;
+            font-size: 12px;
             color: var(--muted);
         }
         .hero-actions { margin-top: 28px; }
@@ -636,6 +640,7 @@
         .delta-down { color: var(--bad); background: var(--bad-bg); }
         .hero .card { padding: 0; margin: 0; }
         .hero-stats.outline-box {
+            position: relative;
             display: flex;
             flex-direction: column;
             gap: 22px;
@@ -847,7 +852,7 @@
             <div class="hero">
                 <div class="hero-main">
                     <div class="hero-intro">
-                        <h1 class="hero-title">Capturing real human computer work</h1>
+                        <h1 class="hero-title">Capture <span style="white-space:nowrap">months-long</span> human computer work</h1>
                         <p class="hero-lede">crowd-cast records paired screen video and keyboard and mouse input from people doing their actual work, building an open dataset for research.</p>
                         <div class="hero-actions"></div>
                     </div>
