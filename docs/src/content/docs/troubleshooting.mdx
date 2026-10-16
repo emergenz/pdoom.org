@@ -8,11 +8,11 @@ import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 If your problem is a known limitation rather than a fix-it issue, check
 [Known issues](/docs/crowd-cast/known-issues/) too.
 
-## "CrowdCast cannot capture your screen" (macOS)
+## crowd-cast can't capture your screen (macOS)
 
-This popup means macOS's screen-capture service (`replayd`) has gotten stuck,
-often after a display change or waking from sleep. Before trying the fixes the
-popup suggests, restart that service:
+If crowd-cast tells you it can't capture your screen, macOS's screen-capture
+service (`replayd`) has usually gotten stuck, often after a display change or
+waking from sleep. Restart that service:
 
 1. Quit crowd-cast from the menu-bar icon.
 2. In Terminal, run:
@@ -24,9 +24,7 @@ popup suggests, restart that service:
    macOS restarts `replayd` on its own right away. You don't need `sudo`.
 3. Reopen CrowdCast.
 
-That usually gets recording working again. If the popup keeps coming back,
-continue with the fixes it lists: reconnect your monitor, log out and back in,
-or restart your Mac.
+That usually gets recording working again. If it doesn't, restart your Mac.
 
 ## "Permissions Required" notification (macOS)
 
