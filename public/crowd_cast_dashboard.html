@@ -733,7 +733,7 @@
                     <div class="chart-head">
                         <span class="section-title">Daily Trend</span>
                         <span class="chart-note">hours recorded, and how many people recorded</span>
-                        <span id="trend-range" style="margin-left:auto;display:flex;gap:0;"></span>
+                        <span id="trend-range" style="margin-left:auto;display:flex;gap:4px;"></span>
                     </div>
                     <canvas id="trend-chart"></canvas>
                     <div id="trend-note" class="chart-foot"></div>
@@ -747,9 +747,9 @@
                     <div id="action-detail-table" style="display:none;margin-top:14px;max-height:200px;overflow-y:auto;">
                         <table style="width:100%;">
                             <thead><tr>
-                                <th style="font-size:12px;padding:4px 8px;">Action</th>
-                                <th style="font-size:12px;padding:4px 8px;" class="align-right">Count</th>
-                                <th style="font-size:12px;padding:4px 8px;" class="align-right">%</th>
+                                <th style="font-size:13px;padding:4px 8px;">Action</th>
+                                <th style="font-size:13px;padding:4px 8px;" class="align-right">Count</th>
+                                <th style="font-size:13px;padding:4px 8px;" class="align-right">%</th>
                             </tr></thead>
                             <tbody id="action-detail-tbody"></tbody>
                         </table>
@@ -1110,9 +1110,9 @@
                 var on = d === trendRange;
                 var b = document.createElement('button');
                 b.type = 'button'; b.textContent = lbl;
-                b.style.cssText = "font:inherit;font-family:'SF Mono',monospace;font-size:10px;font-weight:700;" +
-                    "text-transform:uppercase;letter-spacing:.1em;padding:4px 10px;border:1px solid #d0d7de;cursor:pointer;" +
-                    "background:" + (on ? '#000' : '#fff') + ";color:" + (on ? '#fff' : '#555') + ";";
+                b.style.cssText = "font:inherit;font-size:12.5px;font-weight:500;" +
+                    "padding:4px 10px;border:1px solid var(--rule);cursor:pointer;border-radius:3px;" +
+                    "background:" + (on ? 'var(--ink)' : 'var(--paper)') + ";color:" + (on ? 'var(--paper)' : 'var(--muted)') + ";";
                 b.addEventListener('click', function(){ setTrendRange(d); });
                 rng.appendChild(b);
             });
@@ -1452,9 +1452,9 @@
         const dtbody = document.getElementById('action-detail-tbody');
         dtable.style.display = 'block';
         dtbody.innerHTML = entries.slice(0, 50).map(([lbl, cnt]) =>
-            '<tr><td style="font-size:12px;padding:3px 8px;font-family:monospace;word-break:break-all;">' + escapeHtml(lbl) + '</td>' +
-            '<td class="align-right" style="font-size:12px;padding:3px 8px;font-family:monospace;">' + fmt(cnt) + '</td>' +
-            '<td class="align-right" style="font-size:12px;padding:3px 8px;font-family:monospace;">' + pct(cnt, total) + '</td></tr>'
+            '<tr><td style="font-size:13px;padding:3px 8px;font-variant-numeric:tabular-nums;word-break:break-all;">' + escapeHtml(lbl) + '</td>' +
+            '<td class="align-right" style="font-size:13px;padding:3px 8px;font-variant-numeric:tabular-nums;">' + fmt(cnt) + '</td>' +
+            '<td class="align-right" style="font-size:13px;padding:3px 8px;font-variant-numeric:tabular-nums;">' + pct(cnt, total) + '</td></tr>'
         ).join('');
 
         const ctx = document.getElementById('action-chart').getContext('2d');
@@ -1721,8 +1721,8 @@
         var tip = escapeHtml((reasons || []).join('\n'));
         return tags.map(function(t) {
             var scam = t === 'SCAM';
-            return ' <span title="' + tip + '" style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;padding:1px 4px;margin-left:3px;border:1px solid #cf222e;'
-                + (scam ? 'background:#cf222e;color:#fff;' : 'color:#cf222e;') + 'cursor:help;">' + escapeHtml(t) + '</span>';
+            return ' <span title="' + tip + '" style="font-size:13px;font-weight:500;white-space:nowrap;padding:1px 4px;margin-left:3px;border:1px solid var(--bad);'
+                + (scam ? 'background:var(--bad);color:var(--paper);' : 'color:var(--bad);') + 'cursor:help;">' + escapeHtml(t) + '</span>';
         }).join('');
     }
 
@@ -1743,11 +1743,11 @@
             if (!p) return;
             var html = '<span class="section-title">Work Profile</span>';
             if (p.risk_tags && p.risk_tags.length) html += '<div style="margin:-2px 0 8px;">' + riskChips(p.risk_tags, p.risk_reasons)
-                + '<div style="font-size:11px;color:#cf222e;margin-top:4px;line-height:1.5;white-space:pre-line;">' + escapeHtml(p.risk_reasons.join('\n')) + '</div></div>';
-            if (p.work_profile_at) html += '<div style="font-size:11px;color:#999;margin:-4px 0 6px;">' + escapeHtml(p.participant_id || '') + ' · generated ' + escapeHtml(p.work_profile_at.slice(0, 10)) + (p.work_profile_days ? ' from ' + p.work_profile_days + ' daily summaries' : '') + ', refreshed weekly</div>';
+                + '<div style="font-size:12.5px;color:var(--bad);margin-top:4px;line-height:1.5;white-space:pre-line;">' + escapeHtml(p.risk_reasons.join('\n')) + '</div></div>';
+            if (p.work_profile_at) html += '<div style="font-size:12.5px;color:var(--faint);margin:-4px 0 6px;">' + escapeHtml(p.participant_id || '') + ' · generated ' + escapeHtml(p.work_profile_at.slice(0, 10)) + (p.work_profile_days ? ' from ' + p.work_profile_days + ' daily summaries' : '') + ', refreshed weekly</div>';
             html += p.work_profile
                 ? '<div class="work-profile">' + renderProfileMd(p.work_profile) + '</div>'
-                : '<div style="font-size:12px;color:#999;">No profile yet.</div>';
+                : '<div style="font-size:13px;color:var(--faint);">No profile yet.</div>';
             box.innerHTML = '<div class="outline-box" style="padding:18px 22px;">' + html + '</div>';
             box.style.display = 'block';
         }).catch(function(e) { console.warn('work profile load failed', e); });
@@ -1758,7 +1758,7 @@
     function renderMd(text) {
         const escaped = escapeHtml(text);
         return escaped
-            .replace(/`([^`]+)`/g, '<code style="background:#f0f0f0;padding:1px 4px;border-radius:3px;font-size:12px;">$1</code>')
+            .replace(/`([^`]+)`/g, '<code style="background:var(--paper-soft);padding:1px 4px;border-radius:3px;font-size:13px;">$1</code>')
             .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     }
 
@@ -1837,7 +1837,7 @@
                     _pinnedDate = date;
                     _showSummary(date, true);
                     (heatmapEl || document).querySelectorAll('.heatmap-cell').forEach(c => c.style.outline = '');
-                    cell.style.outline = '2px solid #000';
+                    cell.style.outline = '2px solid var(--ink)';
                 }
             });
         });
@@ -1849,7 +1849,7 @@
         if (!entry) {
             container.innerHTML = '<div class="activity-summary-entry">' +
                 '<div class="activity-summary-date">' + escapeHtml(date) + '</div>' +
-                '<div class="activity-summary-text" style="color:#999;">No summary available for this day.</div>' +
+                '<div class="activity-summary-text" style="color:var(--faint);">No summary available for this day.</div>' +
                 '</div>';
             return;
         }
@@ -1859,14 +1859,14 @@
         if (entry.total_hours != null) parts.push(fmtDec(entry.total_hours, 1) + 'h');
         if (entry.visible_fraction != null) parts.push(Math.round(entry.visible_fraction * 100) + '% visible');
         if (parts.length > 0) statsHtml = ' · ' + parts.join(' · ');
-        var unpinHint = pinned ? ' <span style="font-size:9px;color:#999;letter-spacing:0;">(click day again to unpin)</span>' : '';
+        var unpinHint = pinned ? ' <span style="font-size:11.5px;color:var(--faint);letter-spacing:0;">(click day again to unpin)</span>' : '';
         var devices = entry._devices || [];
         var bodyHtml = '';
         if (devices.length > 1) {
-            bodyHtml += '<div style="font-size:12px;color:#555;font-family:\'SF Mono\',monospace;margin-bottom:10px;">Recorded on ' + devices.length + ' devices.</div>';
+            bodyHtml += '<div style="font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;margin-bottom:10px;">Recorded on ' + devices.length + ' devices.</div>';
             for (var di = 0; di < devices.length; di++) {
                 bodyHtml += '<div style="margin-bottom:10px;">' +
-                    '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:4px;">Device ' + (di + 1) + '</div>' +
+                    '<div style="font-size:13px;font-weight:500;color:var(--faint);margin-bottom:4px;">Device ' + (di + 1) + '</div>' +
                     '<div class="activity-summary-text">' + renderMd(devices[di]) + '</div>' +
                     '</div>';
             }
@@ -1874,7 +1874,7 @@
             bodyHtml = '<div class="activity-summary-text">' + renderMd(devices[0] || '') + '</div>';
         }
         container.innerHTML = '<div class="activity-summary-entry' + (pinned ? ' pinned' : '') + '">' +
-            '<div class="activity-summary-date">' + escapeHtml(date) + '<span style="font-weight:400;color:#777;">' + statsHtml + '</span>' + unpinHint + '</div>' +
+            '<div class="activity-summary-date">' + escapeHtml(date) + '<span style="font-weight:400;color:var(--muted);">' + statsHtml + '</span>' + unpinHint + '</div>' +
             bodyHtml +
             '</div>';
     }
@@ -1954,11 +1954,11 @@
             weekLabel = mo1 === mo2 ? mo1 + ' ' + d1 + '–' + d2 : mo1 + ' ' + d1 + ' – ' + mo2 + ' ' + d2;
         }
 
-        var arrowStyle = 'cursor:pointer;user-select:none;padding:0 6px;color:#999;';
+        var arrowStyle = 'cursor:pointer;user-select:none;padding:0 6px;color:var(--faint);';
         var leftArrow = '<span style="' + arrowStyle + '" onclick="_weekOffset--;_renderWeek();">&#9664;</span>';
         var rightArrow = _weekOffset < 0
             ? '<span style="' + arrowStyle + '" onclick="_weekOffset++;_renderWeek();">&#9654;</span>'
-            : '<span style="padding:0 6px;color:#ddd;">&#9654;</span>';
+            : '<span style="padding:0 6px;color:var(--faint);">&#9654;</span>';
 
         var statsText;
         if (totalSegments === 0) {
@@ -1971,7 +1971,7 @@
         }
 
         container.innerHTML = leftArrow +
-            '<span style="text-transform:uppercase;font-size:11px;font-weight:700;letter-spacing:1.5px;">' + escapeHtml(weekLabel) + '</span>' +
+            '<span style="font-size:13px;font-weight:500;">' + escapeHtml(weekLabel) + '</span>' +
             rightArrow + ' · ' + statsText;
     }
 
@@ -1984,7 +1984,7 @@
         /* Determine date range from user's own per_user_daily data */
         const userDates = Object.keys(userDaily).sort();
         if (userDates.length === 0) {
-            container.innerHTML = '<span style="font-size:12px;color:#999;">No daily data available for this user.</span>';
+            container.innerHTML = '<span style="font-size:13px;color:var(--faint);">No daily data available for this user.</span>';
             return;
         }
 
@@ -2158,39 +2158,39 @@
             allEl.style.height = '0';
             allEl.style.overflow = 'hidden';
         }
-        document.getElementById('tab-my').style.borderBottomColor = tab === 'my' ? '#000' : 'transparent';
-        document.getElementById('tab-my').style.color = tab === 'my' ? '#000' : '#999';
-        document.getElementById('tab-all').style.borderBottomColor = tab === 'all' ? '#000' : 'transparent';
-        document.getElementById('tab-all').style.color = tab === 'all' ? '#000' : '#999';
-        document.getElementById('tab-participants').style.borderBottomColor = tab === 'participants' ? '#000' : 'transparent';
-        document.getElementById('tab-participants').style.color = tab === 'participants' ? '#000' : '#999';
-        document.getElementById('tab-payouts').style.borderBottomColor = tab === 'payouts' ? '#000' : 'transparent';
-        document.getElementById('tab-payouts').style.color = tab === 'payouts' ? '#000' : '#999';
+        document.getElementById('tab-my').style.borderBottomColor = tab === 'my' ? 'var(--ink)' : 'transparent';
+        document.getElementById('tab-my').style.color = tab === 'my' ? 'var(--ink)' : 'var(--faint)';
+        document.getElementById('tab-all').style.borderBottomColor = tab === 'all' ? 'var(--ink)' : 'transparent';
+        document.getElementById('tab-all').style.color = tab === 'all' ? 'var(--ink)' : 'var(--faint)';
+        document.getElementById('tab-participants').style.borderBottomColor = tab === 'participants' ? 'var(--ink)' : 'transparent';
+        document.getElementById('tab-participants').style.color = tab === 'participants' ? 'var(--ink)' : 'var(--faint)';
+        document.getElementById('tab-payouts').style.borderBottomColor = tab === 'payouts' ? 'var(--ink)' : 'transparent';
+        document.getElementById('tab-payouts').style.color = tab === 'payouts' ? 'var(--ink)' : 'var(--faint)';
         var revTab = document.getElementById('tab-review');
-        revTab.style.borderBottomColor = tab === 'review' ? '#000' : 'transparent';
-        revTab.style.color = tab === 'review' ? '#000' : '#999';
+        revTab.style.borderBottomColor = tab === 'review' ? 'var(--ink)' : 'transparent';
+        revTab.style.color = tab === 'review' ? 'var(--ink)' : 'var(--faint)';
         var nudgeTab = document.getElementById('tab-nudges');
-        nudgeTab.style.borderBottomColor = tab === 'nudges' ? '#000' : 'transparent';
-        nudgeTab.style.color = tab === 'nudges' ? '#000' : '#999';
+        nudgeTab.style.borderBottomColor = tab === 'nudges' ? 'var(--ink)' : 'transparent';
+        nudgeTab.style.color = tab === 'nudges' ? 'var(--ink)' : 'var(--faint)';
         var followTab = document.getElementById('tab-followups');
         if (followTab) {
-            followTab.style.borderBottomColor = tab === 'followups' ? '#000' : 'transparent';
-            followTab.style.color = tab === 'followups' ? '#000' : '#999';
+            followTab.style.borderBottomColor = tab === 'followups' ? 'var(--ink)' : 'transparent';
+            followTab.style.color = tab === 'followups' ? 'var(--ink)' : 'var(--faint)';
         }
         var appsTab = document.getElementById('tab-applicants');
         if (appsTab) {
-            appsTab.style.borderBottomColor = tab === 'applicants' ? '#000' : 'transparent';
-            appsTab.style.color = tab === 'applicants' ? '#000' : '#999';
+            appsTab.style.borderBottomColor = tab === 'applicants' ? 'var(--ink)' : 'transparent';
+            appsTab.style.color = tab === 'applicants' ? 'var(--ink)' : 'var(--faint)';
         }
         var partnersTab = document.getElementById('tab-partners');
         if (partnersTab) {
-            partnersTab.style.borderBottomColor = tab === 'partners' ? '#000' : 'transparent';
-            partnersTab.style.color = tab === 'partners' ? '#000' : '#999';
+            partnersTab.style.borderBottomColor = tab === 'partners' ? 'var(--ink)' : 'transparent';
+            partnersTab.style.color = tab === 'partners' ? 'var(--ink)' : 'var(--faint)';
         }
         var fcTab = document.getElementById('tab-forecast');
         if (fcTab) {
-            fcTab.style.borderBottomColor = tab === 'forecast' ? '#000' : 'transparent';
-            fcTab.style.color = tab === 'forecast' ? '#000' : '#999';
+            fcTab.style.borderBottomColor = tab === 'forecast' ? 'var(--ink)' : 'transparent';
+            fcTab.style.color = tab === 'forecast' ? 'var(--ink)' : 'var(--faint)';
         }
         if (tab === 'my') renderMyOverview();
         if (tab === 'participants') renderParticipantsView();
@@ -2396,9 +2396,9 @@
     }
 
     function statusDotColor(status) {
-        if (status === 'red') return '#cf222e';
-        if (status === 'orange') return '#f0a030';
-        return '#2ea043';
+        if (status === 'red') return 'var(--bad)';
+        if (status === 'orange') return 'var(--warn)';
+        return 'var(--ok)';
     }
 
     function renderParticipantsView() {
@@ -2416,9 +2416,9 @@
         var html = '';
 
         /* Onboarding controls (invite by email) */
-        var inviteBtnStyle = 'display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:6px 16px;border:1px solid #000;background:#000;color:#fff;cursor:pointer;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;';
+        var inviteBtnStyle = 'display:inline-block;font-size:13px;font-weight:500;padding:6px 16px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer;border-radius:3px;font-variant-numeric:tabular-nums;';
         html += '<div class="outline-box" style="padding:20px 24px;margin-bottom:20px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">';
-        html += '<span style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#000;margin-right:8px;">Onboarding</span>';
+        html += '<span style="font-size:13px;font-weight:500;color:var(--ink);margin-right:8px;">Onboarding</span>';
         html += '<span class="invite-btn" style="' + inviteBtnStyle + '">Invite by Email</span>';
         html += '</div>';
 
@@ -2482,7 +2482,7 @@
 
                 var select = document.createElement('select');
                 select.id = selectId;
-                select.style.cssText = 'margin-left:12px;font-size:12px;font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;padding:4px 8px;border:1px solid #000;background:#fff;cursor:pointer;';
+                select.style.cssText = 'margin-left:12px;font-size:13px;font-variant-numeric:tabular-nums;padding:4px 8px;border:1px solid var(--rule-strong);background:var(--paper);cursor:pointer;border-radius:3px;';
                 var optDefault = document.createElement('option');
                 optDefault.value = '';
                 optDefault.textContent = '-- select user --';
@@ -2527,14 +2527,14 @@
                 var input = document.createElement('input');
                 input.type = 'email';
                 input.placeholder = 'participant@university.edu';
-                input.style.cssText = 'font-size:12px;font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;padding:6px 12px;border:1px solid #000;background:#fff;width:300px;outline:none;';
+                input.style.cssText = 'font-size:13px;font-variant-numeric:tabular-nums;padding:6px 12px;border:1px solid var(--rule-strong);background:var(--paper);width:300px;outline:none;';
 
                 var sendBtn = document.createElement('span');
                 sendBtn.textContent = 'Generate Link';
-                sendBtn.style.cssText = 'display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:6px 16px;border:1px solid #000;background:#fff;color:#000;cursor:pointer;font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;';
+                sendBtn.style.cssText = 'display:inline-block;font-size:13px;font-weight:500;padding:6px 16px;border:1px solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer;border-radius:3px;font-variant-numeric:tabular-nums;';
 
                 var resultDiv = document.createElement('div');
-                resultDiv.style.cssText = 'margin-top:8px;font-size:12px;font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;';
+                resultDiv.style.cssText = 'margin-top:8px;font-size:13px;font-variant-numeric:tabular-nums;';
 
                 wrap.appendChild(input);
                 wrap.appendChild(sendBtn);
@@ -2564,18 +2564,18 @@
                     }).then(function(resp) { return resp.json(); })
                     .then(function(data) {
                         if (data.error) {
-                            resultDiv.innerHTML = '<span style="color:#cf222e;">' + escapeHtml(data.error) + '</span>';
+                            resultDiv.innerHTML = '<span style="color:var(--bad);">' + escapeHtml(data.error) + '</span>';
                             sendBtn.textContent = 'Generate Link';
                             sendBtn.style.pointerEvents = '';
                             return;
                         }
                         var url = data.invite_url;
-                        var tierLine = data.comp_tier ? '<div style="margin-top:4px;color:#2ea043;font-weight:700;">Tier: ' + escapeHtml(data.comp_tier) + (data.comp_tier === 'top' ? ' (NA $1k / EU \u20ac1k / RoW $500)' : ' ($300)') + '</div>' : '';
-                        resultDiv.innerHTML = '<div style="margin-top:4px;padding:8px 12px;border:1px solid #000;background:#f5f5f5;word-break:break-all;">' +
-                            '<a href="' + escapeHtml(url) + '" target="_blank" style="color:#000;text-decoration:underline;">' + escapeHtml(url) + '</a>' +
-                            '<span class="invite-copy-btn" style="margin-left:12px;color:#0066cc;cursor:pointer;text-decoration:underline;">Copy</span>' +
+                        var tierLine = data.comp_tier ? '<div style="margin-top:4px;color:var(--ok);font-weight:600;">Tier: ' + escapeHtml(data.comp_tier) + (data.comp_tier === 'top' ? ' (NA $1k / EU \u20ac1k / RoW $500)' : ' ($300)') + '</div>' : '';
+                        resultDiv.innerHTML = '<div style="margin-top:4px;padding:8px 12px;border:1px solid var(--rule);border-radius:3px;background:var(--paper-soft);word-break:break-all;">' +
+                            '<a href="' + escapeHtml(url) + '" target="_blank" style="color:var(--ink);text-decoration:underline;">' + escapeHtml(url) + '</a>' +
+                            '<span class="invite-copy-btn" style="margin-left:12px;color:var(--steel-dark);cursor:pointer;text-decoration:underline;">Copy</span>' +
                             '</div>' + tierLine +
-                            (data.note ? '<div style="margin-top:4px;color:#777;">' + escapeHtml(data.note) + '</div>' : '');
+                            (data.note ? '<div style="margin-top:4px;color:var(--muted);">' + escapeHtml(data.note) + '</div>' : '');
                         resultDiv.querySelector('.invite-copy-btn').addEventListener('click', function() {
                             navigator.clipboard.writeText(url).then(function() {
                                 resultDiv.querySelector('.invite-copy-btn').textContent = 'Copied!';
@@ -2587,7 +2587,7 @@
                         input.value = '';
                     }).catch(function(err) {
                         console.error('Invite failed:', err);
-                        resultDiv.innerHTML = '<span style="color:#cf222e;">Failed to generate invite. Try again.</span>';
+                        resultDiv.innerHTML = '<span style="color:var(--bad);">Failed to generate invite. Try again.</span>';
                         sendBtn.textContent = 'Generate Link';
                         sendBtn.style.pointerEvents = '';
                     });
@@ -2625,18 +2625,18 @@
         html += '<div style="overflow-x:auto;">';
         html += '<table style="width:100%;border-collapse:collapse;">';
         html += '<thead><tr>';
-        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;white-space:nowrap;">Status</th>';
-        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;white-space:nowrap;">Name</th>';
-        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;white-space:nowrap;">Email</th>';
-        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:right;padding:8px 12px;border-bottom:2px solid #000;white-space:nowrap;">Last 7d</th>';
-        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:right;padding:8px 12px;border-bottom:2px solid #000;white-space:nowrap;">Prior 7d</th>';
-        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;white-space:nowrap;">Last Active</th>';
-        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;white-space:nowrap;">Actions</th>';
+        html += '<th style="font-size:13px;font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);white-space:nowrap;">Status</th>';
+        html += '<th style="font-size:13px;font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);white-space:nowrap;">Name</th>';
+        html += '<th style="font-size:13px;font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);white-space:nowrap;">Email</th>';
+        html += '<th style="font-size:13px;font-weight:500;text-align:right;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);white-space:nowrap;">Last 7d</th>';
+        html += '<th style="font-size:13px;font-weight:500;text-align:right;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);white-space:nowrap;">Prior 7d</th>';
+        html += '<th style="font-size:13px;font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);white-space:nowrap;">Last Active</th>';
+        html += '<th style="font-size:13px;font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);white-space:nowrap;">Actions</th>';
         html += '</tr></thead>';
         html += '<tbody>';
 
         if (users.length === 0) {
-            html += '<tr><td colspan="7" style="padding:12px;font-size:13px;color:#999;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;">No users in this group.</td></tr>';
+            html += '<tr><td colspan="7" style="padding:12px;font-size:13px;color:var(--faint);font-variant-numeric:tabular-nums;">No users in this group.</td></tr>';
         }
 
         for (var i = 0; i < users.length; i++) {
@@ -2646,13 +2646,13 @@
             var dotColor = statusDotColor(stats.status);
 
             html += '<tr class="participant-row" data-email="' + escapeHtml(email) + '" style="cursor:pointer;">';
-            html += '<td style="padding:7px 12px;font-size:13px;border-bottom:1px solid #eee;"><span class="status-dot" style="background:' + dotColor + ';"></span></td>';
-            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;border-bottom:1px solid #eee;">' + escapeHtml(name) + '</td>';
-            html += '<td style="padding:7px 12px;font-size:12px;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;color:#777;border-bottom:1px solid #eee;">' + escapeHtml(email) + '</td>';
-            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;text-align:right;border-bottom:1px solid #eee;">' + fmtDec(stats.last7dHours, 1) + 'h</td>';
-            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;text-align:right;border-bottom:1px solid #eee;">' + fmtDec(stats.prior7dHours, 1) + 'h</td>';
-            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;border-bottom:1px solid #eee;">' + escapeHtml(stats.lastActive) + '</td>';
-            html += '<td style="padding:7px 12px;font-size:13px;border-bottom:1px solid #eee;"><a href="#" class="participant-remove-btn" data-email="' + escapeHtml(email) + '" style="color:#cf222e;font-size:12px;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;text-decoration:none;border-bottom:1px solid #cf222e;">Remove</a></td>';
+            html += '<td style="padding:7px 12px;font-size:13px;border-bottom:1px solid var(--rule);"><span class="status-dot" style="background:' + dotColor + ';"></span></td>';
+            html += '<td style="padding:7px 12px;font-size:13px;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--rule);">' + escapeHtml(name) + '</td>';
+            html += '<td style="padding:7px 12px;font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted);border-bottom:1px solid var(--rule);">' + escapeHtml(email) + '</td>';
+            html += '<td style="padding:7px 12px;font-size:13px;font-variant-numeric:tabular-nums;text-align:right;border-bottom:1px solid var(--rule);">' + fmtDec(stats.last7dHours, 1) + 'h</td>';
+            html += '<td style="padding:7px 12px;font-size:13px;font-variant-numeric:tabular-nums;text-align:right;border-bottom:1px solid var(--rule);">' + fmtDec(stats.prior7dHours, 1) + 'h</td>';
+            html += '<td style="padding:7px 12px;font-size:13px;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--rule);">' + escapeHtml(stats.lastActive) + '</td>';
+            html += '<td style="padding:7px 12px;font-size:13px;border-bottom:1px solid var(--rule);"><a href="#" class="participant-remove-btn" data-email="' + escapeHtml(email) + '" style="color:var(--bad);font-size:13px;font-variant-numeric:tabular-nums;text-decoration:none;border-bottom:1px solid var(--bad);">Remove</a></td>';
             html += '</tr>';
         }
 
@@ -2661,9 +2661,9 @@
         /* Add button */
         var btnLabel = role === 'admin' ? 'Add Admin' : 'Add Participant';
         html += '<div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">';
-        html += '<span class="participant-add-btn" data-role="' + escapeHtml(role) + '" style="display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:6px 16px;border:1px solid #000;background:#fff;color:#000;cursor:pointer;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;">' + escapeHtml(btnLabel) + '</span>';
+        html += '<span class="participant-add-btn" data-role="' + escapeHtml(role) + '" style="display:inline-block;font-size:13px;font-weight:500;padding:6px 16px;border:1px solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer;border-radius:3px;font-variant-numeric:tabular-nums;">' + escapeHtml(btnLabel) + '</span>';
         if (role === 'participant') {
-            html += '<span class="invite-btn" style="display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:6px 16px;border:1px solid #000;background:#000;color:#fff;cursor:pointer;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;">Invite by Email</span>';
+            html += '<span class="invite-btn" style="display:inline-block;font-size:13px;font-weight:500;padding:6px 16px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer;border-radius:3px;font-variant-numeric:tabular-nums;">Invite by Email</span>';
         }
         html += '</div>';
 
@@ -2707,12 +2707,12 @@
 
         container.innerHTML = '<div class="outline-box" style="padding:24px;">' +
             '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">' +
-                '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#000;">Payouts</div>' +
-                '<select id="payout-month" style="font-size:12px;font-family:\'SF Mono\',monospace;padding:4px 8px;border:1px solid #ccc;background:#fff;">' +
+                '<div style="font-size:13px;font-weight:500;color:var(--ink);">Payouts</div>' +
+                '<select id="payout-month" style="font-size:13px;font-variant-numeric:tabular-nums;padding:4px 8px;border:1px solid var(--rule-strong);background:var(--paper);">' +
                     buildMonthOptions(year, month) +
                 '</select>' +
             '</div>' +
-            '<div id="payouts-loading" style="padding:12px;font-size:13px;color:#999;font-family:\'SF Mono\',monospace;">Loading payouts...</div>' +
+            '<div id="payouts-loading" style="padding:12px;font-size:13px;color:var(--faint);font-variant-numeric:tabular-nums;">Loading payouts...</div>' +
             '<div id="payouts-table"></div>' +
             '<div id="payouts-summary" style="margin-top:16px;"></div>' +
         '</div>';
@@ -2754,7 +2754,7 @@
         .then(function(resp) { return resp.json(); })
         .then(function(data) {
             if (loadingEl) loadingEl.style.display = 'none';
-            if (data.error) { if (tableEl) tableEl.innerHTML = '<div style="padding:12px;font-size:13px;color:#cf222e;font-family:\'SF Mono\',monospace;">' + escapeHtml(data.error) + '</div>'; return; }
+            if (data.error) { if (tableEl) tableEl.innerHTML = '<div style="padding:12px;font-size:13px;color:var(--bad);font-variant-numeric:tabular-nums;">' + escapeHtml(data.error) + '</div>'; return; }
             _payoutsData = data.payouts || [];
             _payoutsParticipants = data.participants || {};
             _payoutsHeld = data.terms_held || [];
@@ -2771,7 +2771,7 @@
         var tableDiv = document.getElementById('payouts-table');
         var summaryDiv = document.getElementById('payouts-summary');
         if ((!_payoutsData || _payoutsData.length === 0) && !_payoutsHeld.length) {
-            tableDiv.innerHTML = '<div style="padding:12px;font-size:13px;color:#999;font-family:\'SF Mono\',monospace;">No payouts for this period.</div>';
+            tableDiv.innerHTML = '<div style="padding:12px;font-size:13px;color:var(--faint);font-variant-numeric:tabular-nums;">No payouts for this period.</div>';
             summaryDiv.innerHTML = '';
             return;
         }
@@ -2791,15 +2791,15 @@
 
         var html = '<table style="width:100%;border-collapse:collapse;">';
         html += '<thead><tr>';
-        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;"><input type="checkbox" id="select-all-payouts"></th>';
-        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Participant</th>';
-        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Period</th>';
-        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Type</th>';
-        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:right;padding:8px 12px;border-bottom:2px solid #000;">Days</th>';
-        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Recorded in period</th>';
-        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:right;padding:8px 12px;border-bottom:2px solid #000;">Amount</th>';
-        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Status</th>';
-        html += '<th style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;">Note to participant</th>';
+        html += '<th style="font-size:13px;font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);"><input type="checkbox" id="select-all-payouts"></th>';
+        html += '<th style="font-size:13px;font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);">Participant</th>';
+        html += '<th style="font-size:13px;font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);">Period</th>';
+        html += '<th style="font-size:13px;font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);">Type</th>';
+        html += '<th style="font-size:13px;font-weight:500;text-align:right;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);">Days</th>';
+        html += '<th style="font-size:13px;font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);">Recorded in period</th>';
+        html += '<th style="font-size:13px;font-weight:500;text-align:right;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);">Amount</th>';
+        html += '<th style="font-size:13px;font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);">Status</th>';
+        html += '<th style="font-size:13px;font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);">Note to participant</th>';
         html += '</tr></thead><tbody>';
 
         var pendingCount = 0;
@@ -2817,71 +2817,71 @@
             var isDueSoon = isPending && dueDate && (dueDate.getTime() - now.getTime()) <= sevenDaysMs;
             var isOverdue = isPending && dueDate && dueDate < now;
 
-            var statusColor = p.status === 'approved' ? '#2ea043' : p.status === 'paid' ? '#0066cc' : p.status === 'rejected' ? '#cf222e' : (p.status === 'merged' || p.status === 'closed') ? '#777' : '#b08800';
+            var statusColor = p.status === 'approved' ? 'var(--ok)' : p.status === 'paid' ? 'var(--steel-dark)' : p.status === 'rejected' ? 'var(--bad)' : (p.status === 'merged' || p.status === 'closed') ? 'var(--muted)' : 'var(--warn)';
             var typeLabel = p.merged_from ? 'Merged' : p.payout_type === 'referral_premium' ? ('Premium T' + (p.tranche || '?')) : p.payout_type === 'trial' ? 'Trial' : p.payout_type === 'partial' ? 'Partial' : 'Full';
-            var rowBg = isOverdue ? '#fff0f0' : isDueSoon ? '#fffbe6' : '';
+            var rowBg = isOverdue ? 'var(--bad-bg)' : isDueSoon ? 'var(--warn-bg)' : '';
             // Re-accept gate: greyed out, and ticking the box asks for "pay anyway".
             var isGated = !!p.terms_gated;
-            if (isGated) rowBg = '#f4f4f4';
+            if (isGated) rowBg = 'var(--paper-soft)';
 
-            html += '<tr style="background:' + rowBg + ';' + (isGated ? 'color:#999;' : '') + '">';
-            html += '<td style="padding:7px 12px;border-bottom:1px solid #eee;">';
+            html += '<tr style="background:' + rowBg + ';' + (isGated ? 'color:var(--faint);' : '') + '">';
+            html += '<td style="padding:7px 12px;border-bottom:1px solid var(--rule);">';
             if (canApprove) html += '<input type="checkbox" class="payout-checkbox" data-id="' + escapeHtml(p.payout_id) + '"' + (isGated ? ' data-gated="1"' : '') + '>';
             html += '</td>';
             var isPremium = p.payout_type === 'referral_premium';
             var displayName = isPremium ? (p.recipient_name || p.partner_slug || p.participant_id) : (part.name || p.participant_id);
-            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">' + escapeHtml(displayName) + (isPremium ? ' <span style="background:#6f42c1;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;letter-spacing:0.5px;vertical-align:1px;">REFERRER</span>' : '') + '</td>';
-            html += '<td style="padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;color:#777;border-bottom:1px solid #eee;">' + escapeHtml(p.period_start) + ' to ' + escapeHtml(p.period_end) + '</td>';
-            html += '<td style="padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">' + typeLabel + '</td>';
-            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;text-align:right;border-bottom:1px solid #eee;">' + (isPremium ? '\u2014' : p.days) + '</td>';
-            html += '<td style="padding:7px 12px;border-bottom:1px solid #eee;min-width:190px;">' + evidenceCell(p, isPremium) + '</td>';
+            html += '<td style="padding:7px 12px;font-size:13px;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--rule);">' + escapeHtml(displayName) + (isPremium ? ' <span style="background:var(--steel);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;vertical-align:1px;">REFERRER</span>' : '') + '</td>';
+            html += '<td style="padding:7px 12px;font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted);border-bottom:1px solid var(--rule);">' + escapeHtml(p.period_start) + ' to ' + escapeHtml(p.period_end) + '</td>';
+            html += '<td style="padding:7px 12px;font-size:13px;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--rule);">' + typeLabel + '</td>';
+            html += '<td style="padding:7px 12px;font-size:13px;font-variant-numeric:tabular-nums;text-align:right;border-bottom:1px solid var(--rule);">' + (isPremium ? '\u2014' : p.days) + '</td>';
+            html += '<td style="padding:7px 12px;border-bottom:1px solid var(--rule);min-width:190px;">' + evidenceCell(p, isPremium) + '</td>';
             var _cur = (p.currency || 'USD').toUpperCase();
             var _amt = (p.amount != null ? p.amount : p.amount_usd);
             var _sym = _cur === 'EUR' ? '€' : _cur === 'GBP' ? '£' : '$';
-            html += '<td style="padding:7px 12px;font-size:13px;font-family:\'SF Mono\',monospace;text-align:right;border-bottom:1px solid #eee;font-weight:700;">';
+            html += '<td style="padding:7px 12px;font-size:13px;font-variant-numeric:tabular-nums;text-align:right;border-bottom:1px solid var(--rule);font-weight:600;">';
             // Amount is a button while the payout is still approvable: adjusting it
             // writes the new figure plus Mihir's internal reason onto the row.
             if (canApprove && !isPremium) {
-                html += '<span class="payout-amount" data-id="' + escapeHtml(p.payout_id) + '" title="Click to adjust" style="cursor:pointer;border-bottom:1px dashed #999;">' + _sym + Number(_amt).toFixed(2) + '</span>';
+                html += '<span class="payout-amount" data-id="' + escapeHtml(p.payout_id) + '" title="Click to adjust" style="cursor:pointer;border-bottom:1px dashed var(--faint);">' + _sym + Number(_amt).toFixed(2) + '</span>';
             } else {
                 html += _sym + Number(_amt).toFixed(2);
             }
             if (p.original_amount != null && Number(p.original_amount) !== Number(_amt)) {
-                html += '<br><span style="font-size:10px;font-weight:400;color:#b08800;">adj. from ' + _sym + Number(p.original_amount).toFixed(2) + '</span>';
+                html += '<br><span style="font-size:11.5px;font-weight:400;color:var(--warn);">adj. from ' + _sym + Number(p.original_amount).toFixed(2) + '</span>';
             }
             if (p.hold_until && p.hold_until > new Date().toISOString() && p.status === 'pending') {
-                html += '<br><span title="' + escapeHtml(p.hold_reason || '') + '" style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#fff;background:#b08800;padding:1px 4px;">Held till ' + escapeHtml(p.hold_until.slice(0, 10)) + '</span>';
+                html += '<br><span title="' + escapeHtml(p.hold_reason || '') + '" style="font-size:13px;font-weight:500;color:var(--paper);background:var(--warn);padding:1px 4px;">Held till ' + escapeHtml(p.hold_until.slice(0, 10)) + '</span>';
             }
             if (p.adjustment_note) {
-                html += '<br><span title="' + escapeHtml(p.adjustment_note) + '" style="font-size:10px;font-weight:400;color:#777;">' + escapeHtml(p.adjustment_note.length > 34 ? p.adjustment_note.slice(0, 34) + '\u2026' : p.adjustment_note) + '</span>';
+                html += '<br><span title="' + escapeHtml(p.adjustment_note) + '" style="font-size:11.5px;font-weight:400;color:var(--muted);">' + escapeHtml(p.adjustment_note.length > 34 ? p.adjustment_note.slice(0, 34) + '\u2026' : p.adjustment_note) + '</span>';
             }
             html += '</td>';
-            html += '<td style="padding:7px 12px;font-size:11px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;">';
-            html += '<span style="color:' + statusColor + ';font-weight:700;text-transform:uppercase;">' + escapeHtml(p.status) + '</span>';
-            if (isOverdue) html += ' <span style="background:#cf222e;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;letter-spacing:0.5px;">OVERDUE</span>';
-            else if (isDueSoon) html += ' <span style="background:#b08800;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;letter-spacing:0.5px;">DUE SOON</span>';
-            if (isScaRetry) html += ' <span style="background:#b08800;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;letter-spacing:0.5px;">AWAITING SCA</span>';
-            if (isGated) html += ' <span style="background:#888;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;letter-spacing:0.5px;">RE-ACCEPT PENDING</span><br><span style="color:#999;font-size:10px;text-transform:none;">' + termsStatusLabel(part) + '</span>';
-            if (p.terms_override_by) html += '<br><span style="color:#999;font-size:10px;text-transform:none;">paid without re-accept, by ' + escapeHtml(p.terms_override_by) + '</span>';
-            if (p.approved_by) html += '<br><span style="color:#999;font-size:10px;">by ' + escapeHtml(p.approved_by) + '</span>';
-            if (p.merged_into) html += '<br><span style="color:#999;font-size:10px;">into ' + escapeHtml(p.merged_into) + '</span>';
-            else if (p.merged_from) html += '<br><span style="color:#999;font-size:10px;">incl. ' + escapeHtml(p.merged_from) + '</span>';
-            if (p.payment_error && p.status !== 'paid') html += '<br><span style="color:#cf222e;font-size:10px;font-weight:400;text-transform:none;">' + escapeHtml(p.payment_error) + '</span>';
+            html += '<td style="padding:7px 12px;font-size:12.5px;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--rule);">';
+            html += '<span style="color:' + statusColor + ';font-weight:500;">' + escapeHtml(p.status) + '</span>';
+            if (isOverdue) html += ' <span style="background:var(--bad);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;">OVERDUE</span>';
+            else if (isDueSoon) html += ' <span style="background:var(--warn);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;">DUE SOON</span>';
+            if (isScaRetry) html += ' <span style="background:var(--warn);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;">AWAITING SCA</span>';
+            if (isGated) html += ' <span style="background:var(--faint);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;">RE-ACCEPT PENDING</span><br><span style="color:var(--faint);font-size:11.5px;text-transform:none;">' + termsStatusLabel(part) + '</span>';
+            if (p.terms_override_by) html += '<br><span style="color:var(--faint);font-size:11.5px;text-transform:none;">paid without re-accept, by ' + escapeHtml(p.terms_override_by) + '</span>';
+            if (p.approved_by) html += '<br><span style="color:var(--faint);font-size:11.5px;">by ' + escapeHtml(p.approved_by) + '</span>';
+            if (p.merged_into) html += '<br><span style="color:var(--faint);font-size:11.5px;">into ' + escapeHtml(p.merged_into) + '</span>';
+            else if (p.merged_from) html += '<br><span style="color:var(--faint);font-size:11.5px;">incl. ' + escapeHtml(p.merged_from) + '</span>';
+            if (p.payment_error && p.status !== 'paid') html += '<br><span style="color:var(--bad);font-size:11.5px;font-weight:400;text-transform:none;">' + escapeHtml(p.payment_error) + '</span>';
             html += '</td>';
             // Note to participant: editable while the statement email is still unsent,
             // read-only afterwards so a sent note stays visible but can't be rewritten.
-            html += '<td style="padding:7px 12px;border-bottom:1px solid #eee;min-width:240px;">';
+            html += '<td style="padding:7px 12px;border-bottom:1px solid var(--rule);min-width:240px;">';
             if (isPremium) {
-                html += '<div style="font-size:11px;font-family:\'SF Mono\',monospace;color:#999;">referral #' + escapeHtml(String(p.referral_no || '?')) + ' \u00b7 ' + escapeHtml(p.partner_slug || '') + '</div>';
+                html += '<div style="font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--faint);">referral #' + escapeHtml(String(p.referral_no || '?')) + ' \u00b7 ' + escapeHtml(p.partner_slug || '') + '</div>';
             } else if (canApprove) {
                 // Empty notes are prefilled with a suggestion built from the row's
                 // evidence. It is NOT saved until approve (or an edit), and the
                 // confirm modal lists every note that will be emailed.
                 var suggestion = p.participant_note ? '' : suggestPayoutNote(p);
-                html += '<input type="text" class="payout-note" data-id="' + escapeHtml(p.payout_id) + '"' + (suggestion ? ' data-suggested="1"' : '') + ' maxlength="1000" value="' + escapeHtml(p.participant_note || suggestion) + '" placeholder="Optional, emailed with the statement" style="width:100%;box-sizing:border-box;font-size:12px;font-family:\'SF Mono\',monospace;padding:5px 8px;border:1px solid ' + (suggestion ? '#e0c060' : '#ccc') + ';background:' + (suggestion ? '#fffbea' : '#fff') + ';outline:none;">';
-                html += '<div class="payout-note-status" data-id="' + escapeHtml(p.payout_id) + '" style="font-size:10px;font-family:\'SF Mono\',monospace;color:' + (suggestion ? '#b08800' : '#999') + ';margin-top:3px;min-height:12px;">' + (suggestion ? 'suggested, edit or clear before approving' : '') + '</div>';
+                html += '<input type="text" class="payout-note" data-id="' + escapeHtml(p.payout_id) + '"' + (suggestion ? ' data-suggested="1"' : '') + ' maxlength="1000" value="' + escapeHtml(p.participant_note || suggestion) + '" placeholder="Optional, emailed with the statement" style="width:100%;box-sizing:border-box;font-size:13px;font-variant-numeric:tabular-nums;padding:5px 8px;border:1px solid ' + (suggestion ? 'var(--warn)' : 'var(--rule-strong)') + ';background:' + (suggestion ? 'var(--warn-bg)' : 'var(--paper)') + ';outline:none;">';
+                html += '<div class="payout-note-status" data-id="' + escapeHtml(p.payout_id) + '" style="font-size:11.5px;font-variant-numeric:tabular-nums;color:' + (suggestion ? 'var(--warn)' : 'var(--faint)') + ';margin-top:3px;min-height:12px;">' + (suggestion ? 'suggested, edit or clear before approving' : '') + '</div>';
             } else if (p.participant_note) {
-                html += '<div style="font-size:11px;font-family:\'SF Mono\',monospace;color:#777;line-height:1.4;">' + escapeHtml(p.participant_note) + '</div>';
+                html += '<div style="font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--muted);line-height:1.4;">' + escapeHtml(p.participant_note) + '</div>';
             }
             html += '</td>';
             html += '</tr>';
@@ -2894,8 +2894,8 @@
             var hcur = (hp.currency || 'USD').toUpperCase();
             var hsym = hcur === 'EUR' ? '€' : hcur === 'GBP' ? '£' : '$';
             var htype = hp.payout_type === 'trial' ? 'Trial' : hp.payout_type === 'partial' ? 'Partial' : 'Full';
-            var tdH = 'padding:7px 12px;font-size:12px;font-family:\'SF Mono\',monospace;border-bottom:1px solid #eee;color:#aaa;';
-            html += '<tr style="background:#f4f4f4;">';
+            var tdH = 'padding:7px 12px;font-size:13px;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--rule);color:var(--faint);';
+            html += '<tr style="background:var(--paper-soft);">';
             html += '<td style="' + tdH + '"></td>';
             html += '<td style="' + tdH + 'font-size:13px;">' + escapeHtml(hp.name || hp.participant_id) + '</td>';
             html += '<td style="' + tdH + '">' + escapeHtml(hp.period_start) + ' to ' + escapeHtml(hp.period_end) + '</td>';
@@ -2903,7 +2903,7 @@
             html += '<td style="' + tdH + 'text-align:right;font-size:13px;">' + hp.days + '</td>';
             html += '<td style="' + tdH + '"></td>';
             html += '<td style="' + tdH + 'text-align:right;font-size:13px;">' + hsym + Number(hp.amount).toFixed(2) + '</td>';
-            html += '<td style="' + tdH + 'font-size:11px;"><span style="font-weight:700;text-transform:uppercase;">held</span> <span style="background:#888;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;letter-spacing:0.5px;">RE-ACCEPT PENDING</span><br><span style="font-size:10px;">' + termsStatusLabel(hpart) + '. Created once they accept.</span></td>';
+            html += '<td style="' + tdH + 'font-size:12.5px;"><span style="font-weight:500;">held</span> <span style="background:var(--faint);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;">RE-ACCEPT PENDING</span><br><span style="font-size:11.5px;">' + termsStatusLabel(hpart) + '. Created once they accept.</span></td>';
             html += '<td style="' + tdH + '"></td>';
             html += '</tr>';
         }
@@ -2966,11 +2966,11 @@
             summaryHint += (summaryHint ? ' \u00b7 ' : '') + (gatedCount + _payoutsHeld.length) + ' waiting on re-accept of the new terms';
         }
         if (pendingCount > 0) {
-            summaryDiv.innerHTML = (summaryHint ? '<div style="font-size:12px;font-family:\'SF Mono\',monospace;padding:8px 0;color:#b08800;">' + (overdueCount > 0 ? '<span style="color:#cf222e;">' + summaryHint + '</span>' : summaryHint) + '</div>' : '') +
+            summaryDiv.innerHTML = (summaryHint ? '<div style="font-size:13px;font-variant-numeric:tabular-nums;padding:8px 0;color:var(--warn);">' + (overdueCount > 0 ? '<span style="color:var(--bad);">' + summaryHint + '</span>' : summaryHint) + '</div>' : '') +
             '<div style="display:flex;gap:12px;align-items:center;padding:12px 0;">' +
-                '<div id="payout-summary-text" style="font-size:13px;font-family:\'SF Mono\',monospace;color:#777;">Select payouts to approve</div>' +
-                '<span id="confirm-payouts-btn" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #2ea043;background:#2ea043;color:#fff;cursor:pointer;font-family:\'SF Mono\',monospace;">Confirm and Send</span>' +
-                '<span id="reject-payouts-btn" style="display:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #cf222e;background:#fff;color:#cf222e;cursor:pointer;font-family:\'SF Mono\',monospace;">Reject</span>' +
+                '<div id="payout-summary-text" style="font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted);">Select payouts to approve</div>' +
+                '<span id="confirm-payouts-btn" style="display:none;font-size:13px;font-weight:500;padding:8px 20px;border:1px solid var(--ok);background:var(--ok);color:var(--paper);cursor:pointer;border-radius:3px;font-variant-numeric:tabular-nums;">Confirm and Send</span>' +
+                '<span id="reject-payouts-btn" style="display:none;font-size:13px;font-weight:500;padding:8px 20px;border:1px solid var(--bad);background:var(--paper);color:var(--bad);cursor:pointer;border-radius:3px;font-variant-numeric:tabular-nums;">Reject</span>' +
             '</div>';
 
             document.getElementById('confirm-payouts-btn').addEventListener('click', function() {
@@ -3055,61 +3055,61 @@
     }
 
     function evidenceCell(p, isPremium) {
-        if (isPremium) return '<span style="font-size:12px;font-family:\'SF Mono\',monospace;color:#999;">—</span>';
+        if (isPremium) return '<span style="font-size:13px;font-variant-numeric:tabular-nums;color:var(--faint);">—</span>';
         var ev = p.evidence;
-        var mono = 'font-size:12px;font-family:\'SF Mono\',monospace;';
-        if (!ev) return '<span style="' + mono + 'color:#999;">no data</span>';
+        var mono = 'font-size:13px;font-variant-numeric:tabular-nums;';
+        if (!ev) return '<span style="' + mono + 'color:var(--faint);">no data</span>';
         if (!ev.linked) {
-            return '<span title="No recorder account resolves to this participant, so we cannot see their data. This is not the same as them recording nothing: link their recorder email on the Participants tab." style="' + mono + 'color:#999;border-bottom:1px dotted #999;">unlinked</span>';
+            return '<span title="No recorder account resolves to this participant, so we cannot see their data. This is not the same as them recording nothing: link their recorder email on the Participants tab." style="' + mono + 'color:var(--faint);border-bottom:1px dotted var(--faint);">unlinked</span>';
         }
         // A period that has not finished has not earned its hours yet. Judge an
         // in-flight row on the rate SO FAR, never on the total: a September row
         // read on the 15th otherwise looks like half a month of nothing.
         var prog = periodProgress(p);
         if (prog.state === 'future') {
-            return '<span title="This period has not started yet." style="' + mono + 'color:#999;">not started</span>';
+            return '<span title="This period has not started yet." style="' + mono + 'color:var(--faint);">not started</span>';
         }
         var wks = periodWeeks(p) * prog.frac;
         var hpw = wks > 0 ? ev.hours / wks : 0;
         var band = bandFor(hpw);
-        var hoursColor = band.frac === 1 ? '#2ea043' : band.frac === 0 ? '#cf222e' : '#b08800';
-        var out = '<div style="' + mono + 'color:' + hoursColor + ';font-weight:700;">' + Number(ev.hours).toFixed(1) + 'h'
-            + '<span style="font-weight:400;color:#777;"> · ' + ev.active_days + 'd'
+        var hoursColor = band.frac === 1 ? 'var(--ok)' : band.frac === 0 ? 'var(--bad)' : 'var(--warn)';
+        var out = '<div style="' + mono + 'color:' + hoursColor + ';font-weight:600;">' + Number(ev.hours).toFixed(1) + 'h'
+            + '<span style="font-weight:400;color:var(--muted);"> · ' + ev.active_days + 'd'
             + (wks > 1 ? ' · ' + hpw.toFixed(1) + 'h/wk' : '')
             + (prog.state === 'open' ? ' · so far' : '') + '</span></div>';
 
         var bits = [];
         if (ev.visible_fraction != null) {
             var vf = Math.round(ev.visible_fraction * 100);
-            var vfColor = ev.visible_fraction < 0.15 ? '#cf222e' : ev.visible_fraction < 0.5 ? '#b08800' : '#777';
+            var vfColor = ev.visible_fraction < 0.15 ? 'var(--bad)' : ev.visible_fraction < 0.5 ? 'var(--warn)' : 'var(--muted)';
             bits.push('<span title="Share of captured frames that were not blank or black. Low means the recorder was running but capturing nothing usable." style="color:' + vfColor + ';">' + vf + '% visible</span>');
         }
         if (ev.value_relevance) {
             var rel = ev.value_relevance;
-            var relColor = rel === 'high' ? '#2ea043' : rel === 'low' ? '#cf222e' : '#b08800';
+            var relColor = rel === 'high' ? 'var(--ok)' : rel === 'low' ? 'var(--bad)' : 'var(--warn)';
             var drift = ev.value_prev_relevance && ev.value_prev_relevance !== rel;
             bits.push('<span title="Weekly value agent' + (ev.value_scored_at ? ', scored ' + escapeHtml(ev.value_scored_at.slice(0, 10)) : '') + '" style="color:' + relColor + ';">'
                 + (drift ? escapeHtml(ev.value_prev_relevance) + '→' : '') + escapeHtml(rel) + '</span>');
         } else {
-            bits.push('<span style="color:#bbb;">unscored</span>');
+            bits.push('<span style="color:var(--faint);">unscored</span>');
         }
         /* Value-agent flags: recordings vs application, top tier below high, unstable verdict, coursework. */
         if (ev.value_matches_application === 'no' || ev.value_matches_application === 'partly') {
             var maNo = ev.value_matches_application === 'no';
-            bits.push('<span title="' + escapeHtml(ev.value_mismatch_note || '') + '" style="color:' + (maNo ? '#cf222e' : '#b08800') + ';font-weight:700;border-bottom:1px dotted;">'
+            bits.push('<span title="' + escapeHtml(ev.value_mismatch_note || '') + '" style="color:' + (maNo ? 'var(--bad)' : 'var(--warn)') + ';font-weight:600;border-bottom:1px dotted;">'
                 + (maNo ? 'not as applied' : 'partly as applied') + '</span>');
         }
         (ev.value_flags ? ev.value_flags.split(',') : []).forEach(function(f) {
-            if (f.indexOf('top_tier_') === 0) bits.push('<span title="Paid the top rate, but the value agent rates the work ' + escapeHtml(f.slice(9)) + '" style="color:#cf222e;font-weight:700;">top tier, ' + escapeHtml(f.slice(9)) + '</span>');
-            else if (f.indexOf('unstable') === 0) bits.push('<span title="The value agent disagreed with itself (' + escapeHtml(f.split(':')[1] || '') + '); the middle verdict is shown. Worth a look." style="color:#b08800;">unstable</span>');
-            else if (f.indexOf('coursework_heavy') === 0) bits.push('<span title="Share of days whose summary mentions coursework (assignments, exams, lectures, term reports)" style="color:#b08800;">coursework ' + escapeHtml(f.split(':')[1] || '') + '</span>');
+            if (f.indexOf('top_tier_') === 0) bits.push('<span title="Paid the top rate, but the value agent rates the work ' + escapeHtml(f.slice(9)) + '" style="color:var(--bad);font-weight:600;">top tier, ' + escapeHtml(f.slice(9)) + '</span>');
+            else if (f.indexOf('unstable') === 0) bits.push('<span title="The value agent disagreed with itself (' + escapeHtml(f.split(':')[1] || '') + '); the middle verdict is shown. Worth a look." style="color:var(--warn);">unstable</span>');
+            else if (f.indexOf('coursework_heavy') === 0) bits.push('<span title="Share of days whose summary mentions coursework (assignments, exams, lectures, term reports)" style="color:var(--warn);">coursework ' + escapeHtml(f.split(':')[1] || '') + '</span>');
         });
         if (ev.risk_tags) bits.push(riskChips(ev.risk_tags, ev.risk_reasons).trim());
         if (ev.value_recommendation && ev.value_recommendation !== 'keep') {
-            var recColor = ev.value_recommendation === 'wind_down' ? '#cf222e' : '#b08800';
-            bits.push('<span style="color:' + recColor + ';font-weight:700;">' + escapeHtml(ev.value_recommendation) + '</span>');
+            var recColor = ev.value_recommendation === 'wind_down' ? 'var(--bad)' : 'var(--warn)';
+            bits.push('<span style="color:' + recColor + ';font-weight:600;">' + escapeHtml(ev.value_recommendation) + '</span>');
         }
-        out += '<div style="font-size:10px;font-family:\'SF Mono\',monospace;margin-top:2px;">' + bits.join(' · ') + '</div>';
+        out += '<div style="font-size:11.5px;font-variant-numeric:tabular-nums;margin-top:2px;">' + bits.join(' · ') + '</div>';
         return out;
     }
 
@@ -3186,11 +3186,11 @@
     function setPayoutNoteStatus(payoutId, state, detail) {
         var el = document.querySelector('.payout-note-status[data-id="' + payoutId + '"]');
         if (!el) return;
-        if (state === 'unsaved') { el.style.color = '#b08800'; el.textContent = 'unsaved, click away to save'; }
-        else if (state === 'saving') { el.style.color = '#999'; el.textContent = 'saving...'; }
-        else if (state === 'saved') { el.style.color = '#2ea043'; el.textContent = 'saved, goes out with the statement'; }
-        else if (state === 'cleared') { el.style.color = '#999'; el.textContent = 'no note'; }
-        else { el.style.color = '#cf222e'; el.textContent = detail || 'save failed'; }
+        if (state === 'unsaved') { el.style.color = 'var(--warn)'; el.textContent = 'unsaved, click away to save'; }
+        else if (state === 'saving') { el.style.color = 'var(--faint)'; el.textContent = 'saving...'; }
+        else if (state === 'saved') { el.style.color = 'var(--ok)'; el.textContent = 'saved, goes out with the statement'; }
+        else if (state === 'cleared') { el.style.color = 'var(--faint)'; el.textContent = 'no note'; }
+        else { el.style.color = 'var(--bad)'; el.textContent = detail || 'save failed'; }
     }
 
     function savedPayoutNote(payoutId) {
@@ -3242,14 +3242,14 @@
 
     function showConfirmModal(title, message, onConfirm) {
         var overlay = document.createElement('div');
-        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(11,16,21,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;';
         var modal = document.createElement('div');
-        modal.style.cssText = 'background:#fff;border:1px solid #000;padding:32px;max-width:400px;width:90%;font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;';
-        modal.innerHTML = '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;">' + escapeHtml(title) + '</div>' +
+        modal.style.cssText = 'background:var(--paper);border:1px solid var(--rule-strong);border-radius:4px;padding:32px;max-width:400px;width:90%;font-variant-numeric:tabular-nums;';
+        modal.innerHTML = '<div style="font-size:13px;font-weight:500;margin-bottom:16px;">' + escapeHtml(title) + '</div>' +
             '<div style="font-size:13px;margin-bottom:24px;line-height:1.5;white-space:pre-line;">' + escapeHtml(message) + '</div>' +
             '<div style="display:flex;gap:8px;justify-content:flex-end;">' +
-                '<span class="modal-cancel" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #000;cursor:pointer;">Cancel</span>' +
-                '<span class="modal-confirm" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #000;background:#000;color:#fff;cursor:pointer;">Confirm</span>' +
+                '<span class="modal-cancel" style="font-size:13px;font-weight:500;padding:8px 20px;border:1px solid var(--ink);cursor:pointer;border-radius:3px;">Cancel</span>' +
+                '<span class="modal-confirm" style="font-size:13px;font-weight:500;padding:8px 20px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer;border-radius:3px;">Confirm</span>' +
             '</div>';
         overlay.appendChild(modal);
         document.body.appendChild(overlay);
@@ -3260,10 +3260,10 @@
 
     function showPayoutConfirmModal(payoutIds) {
         var overlay = document.createElement('div');
-        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(11,16,21,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;';
 
         var modal = document.createElement('div');
-        modal.style.cssText = 'background:#fff;border:1px solid #000;padding:32px;max-width:480px;width:90%;font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;';
+        modal.style.cssText = 'background:var(--paper);border:1px solid var(--rule-strong);border-radius:4px;padding:32px;max-width:480px;width:90%;font-variant-numeric:tabular-nums;';
 
         // Show the participant notes that are about to be emailed, so a stale or
         // wrong note is caught here rather than in someone's inbox.
@@ -3285,32 +3285,32 @@
             if (evf.risk_tags.split(',').indexOf('SCAM') >= 0) anyScam = true;
             var whoF = (_payoutsParticipants[pf.participant_id] || {}).name || pf.participant_id;
             flagRows += '<div style="margin-bottom:8px;"><strong>' + escapeHtml(whoF) + '</strong>' + riskChips(evf.risk_tags, evf.risk_reasons)
-                + '<div style="color:#555;white-space:pre-line;margin-top:2px;">' + escapeHtml(evf.risk_reasons || '') + '</div></div>';
+                + '<div style="color:var(--muted);white-space:pre-line;margin-top:2px;">' + escapeHtml(evf.risk_reasons || '') + '</div></div>';
         }
         var phrase = anyScam ? 'CONFIRM FLAGGED' : 'CONFIRM';
         var flagBlock = flagRows
-            ? '<div style="border:1px solid #cf222e;background:#fff5f5;padding:10px 12px;margin-bottom:20px;font-size:12px;line-height:1.5;max-height:240px;overflow-y:auto;">' +
-                  '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#cf222e;margin-bottom:8px;">Flagged payees</div>' +
+            ? '<div style="border:1px solid var(--bad);background:var(--bad-bg);padding:10px 12px;margin-bottom:20px;font-size:13px;line-height:1.5;max-height:240px;overflow-y:auto;">' +
+                  '<div style="font-size:13px;font-weight:500;color:var(--bad);margin-bottom:8px;">Flagged payees</div>' +
                   flagRows +
               '</div>'
             : '';
 
         var notesBlock = noteRows
-            ? '<div style="border:1px solid #eee;background:#fafafa;padding:10px 12px;margin-bottom:20px;font-size:12px;line-height:1.5;">' +
-                  '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#777;margin-bottom:8px;">Notes emailed to participants</div>' +
+            ? '<div style="border:1px solid var(--rule);background:var(--paper-soft);padding:10px 12px;margin-bottom:20px;font-size:13px;line-height:1.5;">' +
+                  '<div style="font-size:13px;font-weight:500;color:var(--muted);margin-bottom:8px;">Notes emailed to participants</div>' +
                   noteRows +
               '</div>'
             : '';
 
-        modal.innerHTML = '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;">Confirm Payouts</div>' +
+        modal.innerHTML = '<div style="font-size:13px;font-weight:500;margin-bottom:16px;">Confirm Payouts</div>' +
             '<div style="font-size:14px;margin-bottom:8px;"><strong>' + payoutIds.length + ' payouts</strong> totaling <strong>' + _fmtCurTotals(_payoutCurTotals(payoutIds)) + '</strong></div>' +
-            '<div style="font-size:12px;color:#666;margin-bottom:20px;">This will generate Auszahlungsbelege and email them to participants.</div>' +
+            '<div style="font-size:13px;color:var(--muted);margin-bottom:20px;">This will generate Auszahlungsbelege and email them to participants.</div>' +
             flagBlock + notesBlock +
-            '<div style="font-size:12px;margin-bottom:16px;">Type <strong>' + phrase + '</strong> to proceed' + (anyScam ? ' (a SCAM-tagged payee is selected)' : '') + ':</div>' +
-            '<input type="text" id="confirm-input" style="width:100%;font-size:14px;font-family:\'SF Mono\',monospace;padding:8px 12px;border:1px solid #ccc;margin-bottom:20px;outline:none;" placeholder="' + phrase + '">' +
+            '<div style="font-size:13px;margin-bottom:16px;">Type <strong>' + phrase + '</strong> to proceed' + (anyScam ? ' (a SCAM-tagged payee is selected)' : '') + ':</div>' +
+            '<input type="text" id="confirm-input" style="width:100%;font-size:14px;font-variant-numeric:tabular-nums;padding:8px 12px;border:1px solid var(--rule-strong);margin-bottom:20px;outline:none;" placeholder="' + phrase + '">' +
             '<div style="display:flex;gap:8px;justify-content:flex-end;">' +
-                '<span id="modal-cancel" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #000;cursor:pointer;">Cancel</span>' +
-                '<span id="modal-approve" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #ccc;background:#ccc;color:#999;cursor:not-allowed;">Approve</span>' +
+                '<span id="modal-cancel" style="font-size:13px;font-weight:500;padding:8px 20px;border:1px solid var(--ink);cursor:pointer;border-radius:3px;">Cancel</span>' +
+                '<span id="modal-approve" style="font-size:13px;font-weight:500;padding:8px 20px;border:1px solid var(--rule-strong);background:var(--paper-soft);color:var(--faint);cursor:not-allowed;">Approve</span>' +
             '</div>';
 
         overlay.appendChild(modal);
@@ -3322,9 +3322,9 @@
 
         input.addEventListener('input', function() {
             if (input.value.trim() === phrase) {
-                approveBtn.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #2ea043;background:#2ea043;color:#fff;cursor:pointer;';
+                approveBtn.style.cssText = 'font-size:13px;font-weight:500;padding:8px 20px;border:1px solid var(--ok);background:var(--ok);color:var(--paper);cursor:pointer;border-radius:3px;';
             } else {
-                approveBtn.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #ccc;background:#ccc;color:#999;cursor:not-allowed;';
+                approveBtn.style.cssText = 'font-size:13px;font-weight:500;padding:8px 20px;border:1px solid var(--rule-strong);background:var(--paper-soft);color:var(--faint);cursor:not-allowed;';
             }
         });
 
@@ -3423,7 +3423,7 @@
         var payoutsTab = document.getElementById('tab-payouts');
         if (payoutsTab) {
             payoutsTab.textContent = pendingPayouts > 0 ? 'Payouts (' + pendingPayouts + ')' : 'Payouts';
-            if (pendingPayouts > 0) payoutsTab.style.color = payoutsTab.style.borderBottomColor === 'transparent' ? '#b08800' : payoutsTab.style.color;
+            if (pendingPayouts > 0) payoutsTab.style.color = payoutsTab.style.borderBottomColor === 'transparent' ? 'var(--warn)' : payoutsTab.style.color;
         }
 
         // Participants badge (pending reviews)
@@ -3440,7 +3440,7 @@
             var partTab = document.getElementById('tab-participants');
             if (partTab) {
                 partTab.textContent = pending > 0 ? 'Participants (' + pending + ')' : 'Participants';
-                if (pending > 0) partTab.style.color = partTab.style.borderBottomColor === 'transparent' ? '#b08800' : partTab.style.color;
+                if (pending > 0) partTab.style.color = partTab.style.borderBottomColor === 'transparent' ? 'var(--warn)' : partTab.style.color;
             }
         })
         .catch(function() {});
@@ -3525,13 +3525,13 @@
         var rejectEl = document.getElementById('reject-payouts-btn');
         if (selected.length > 0) {
             textEl.textContent = selected.length + ' payouts selected, total: ' + _fmtCurTotals(_payoutCurTotals(selected));
-            textEl.style.color = '#000';
+            textEl.style.color = 'var(--ink)';
             textEl.style.fontWeight = '700';
             btnEl.style.display = 'inline-block';
             if (rejectEl) rejectEl.style.display = 'inline-block';
         } else {
             textEl.textContent = 'Select payouts to approve';
-            textEl.style.color = '#777';
+            textEl.style.color = 'var(--muted)';
             textEl.style.fontWeight = '400';
             btnEl.style.display = 'none';
             if (rejectEl) rejectEl.style.display = 'none';
@@ -3567,9 +3567,9 @@
             var pendingCount = all.filter(function(p) { return p.status === 'onboarded'; }).length;
 
             var html = '<div class="outline-box" style="padding:24px;">';
-            html += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#000;margin-bottom:14px;">';
+            html += '<div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:14px;">';
             html += 'Onboarded Participants (' + all.length + ')';
-            if (pendingCount > 0) html += ' &middot; <span style="color:#b08800;">' + pendingCount + ' pending review</span>';
+            if (pendingCount > 0) html += ' &middot; <span style="color:var(--warn);">' + pendingCount + ' pending review</span>';
             html += '</div>';
             html += _buildUnifiedOnboardTable(all);
             html += '</div>';
@@ -3800,9 +3800,9 @@
     }
 
     function _buildUnifiedOnboardTable(participants) {
-        var thStyle = 'font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:2px solid #000;white-space:nowrap;';
-        var tdStyle = 'padding:7px 12px;font-size:12px;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;border-bottom:1px solid #eee;';
-        var btnBase = 'display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:3px 10px;cursor:pointer;font-family:\'SF Mono\',monospace;margin-right:4px;';
+        var thStyle = 'font-size:13px;font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule-strong);color:var(--muted);white-space:nowrap;';
+        var tdStyle = 'padding:7px 12px;font-size:13px;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--rule);';
+        var btnBase = 'display:inline-block;font-size:13px;font-weight:500;padding:3px 10px;cursor:pointer;font-variant-numeric:tabular-nums;margin-right:4px;';
 
         /* Emails already claimed by an onboarded participant (primary or linked) */
         var claimed = {};
@@ -3848,7 +3848,7 @@
             /* Status dot color: grey for onboarded/terminated with no data, otherwise use stats */
             var dotColor;
             if ((p.status === 'onboarded' || p.status === 'terminated') && !hasRecordingData) {
-                dotColor = '#ccc';
+                dotColor = 'var(--rule-strong)';
             } else {
                 dotColor = statusDotColor(stats.status);
             }
@@ -3857,13 +3857,13 @@
             var agreementLabel, agreementColor;
             if (p.status === 'onboarded') {
                 agreementLabel = 'PENDING';
-                agreementColor = '#b08800';
+                agreementColor = 'var(--warn)';
             } else if (p.status === 'active' || p.status === 'paused') {
                 agreementLabel = 'SIGNED';
-                agreementColor = '#2ea043';
+                agreementColor = 'var(--ok)';
             } else {
                 agreementLabel = 'ENDED';
-                agreementColor = '#999';
+                agreementColor = 'var(--faint)';
             }
 
             var bank = p.payout_details ? (p.payout_details.iban || p.payout_details.account || '') : '';
@@ -3873,96 +3873,96 @@
 
             /* Main row */
             html += '<tr>';
-            html += '<td style="' + tdStyle + 'text-align:center;cursor:pointer;"><span class="onboard-expand-btn" data-idx="' + i + '" style="font-size:14px;font-weight:700;color:#000;user-select:none;">+</span></td>';
-            html += '<td style="' + tdStyle + '"><span class="status-dot" style="background:' + dotColor + ';"></span><span style="font-size:11px;font-weight:700;text-transform:uppercase;color:' + dotColor + ';">' + escapeHtml(p.status) + '</span></td>';
+            html += '<td style="' + tdStyle + 'text-align:center;cursor:pointer;"><span class="onboard-expand-btn" data-idx="' + i + '" style="font-size:14px;font-weight:600;color:var(--ink);user-select:none;">+</span></td>';
+            html += '<td style="' + tdStyle + '"><span class="status-dot" style="background:' + dotColor + ';"></span><span style="font-size:13px;font-weight:500;color:' + dotColor + ';">' + escapeHtml(p.status) + '</span></td>';
             html += '<td style="' + tdStyle + 'font-size:13px;">' + escapeHtml(p.name || '')
                 + riskChips(p.risk_tags, p.risk_reasons)
-                + (p.holder_mismatch ? ' <span title="The bank account holder name does not match this participant\'s name. Check whose account it is before approving or paying." style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#cf222e;border:1px solid #cf222e;padding:1px 4px;margin-left:4px;white-space:nowrap;">Holder differs</span>' : '')
+                + (p.holder_mismatch ? ' <span title="The bank account holder name does not match this participant\'s name. Check whose account it is before approving or paying." style="font-size:13px;font-weight:500;color:var(--bad);border:1px solid var(--bad);padding:1px 4px;margin-left:4px;white-space:nowrap;">Holder differs</span>' : '')
                 + '</td>';
-            html += '<td style="' + tdStyle + 'color:#777;">' + escapeHtml(p.email || '') + '</td>';
-            html += '<td style="' + tdStyle + 'max-width:320px;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;font-size:12.5px;line-height:1.4;color:' + (p.work_oneliner ? '#333' : '#bbb') + ';">' + escapeHtml(p.work_oneliner || '--') + '</td>';
+            html += '<td style="' + tdStyle + 'color:var(--muted);">' + escapeHtml(p.email || '') + '</td>';
+            html += '<td style="' + tdStyle + 'max-width:320px;font-size:13px;line-height:1.4;color:' + (p.work_oneliner ? 'var(--ink)' : 'var(--faint)') + ';">' + escapeHtml(p.work_oneliner || '--') + '</td>';
             html += '<td style="' + tdStyle + 'text-align:right;">' + fmtDec(stats.last7dHours, 1) + 'h</td>';
             html += '<td style="' + tdStyle + 'text-align:right;">' + fmtDec(stats.prior7dHours, 1) + 'h</td>';
             html += '<td style="' + tdStyle + '">' + escapeHtml(stats.lastActive) + '</td>';
-            html += '<td style="' + tdStyle + '"><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:' + agreementColor + ';">' + agreementLabel + '</span></td>';
+            html += '<td style="' + tdStyle + '"><span style="font-size:13px;font-weight:500;color:' + agreementColor + ';">' + agreementLabel + '</span></td>';
 
             /* Actions */
             html += '<td style="' + tdStyle + '">';
             if (p.status === 'onboarded') {
-                html += '<span class="review-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-action="approve" style="' + btnBase + 'border:1px solid #2ea043;color:#2ea043;">Approve</span>';
-                html += '<span class="review-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-action="reject" style="' + btnBase + 'border:1px solid #cf222e;color:#cf222e;">Reject</span>';
+                html += '<span class="review-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-action="approve" style="' + btnBase + 'border:1px solid var(--ok);color:var(--ok);">Approve</span>';
+                html += '<span class="review-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-action="reject" style="' + btnBase + 'border:1px solid var(--bad);color:var(--bad);">Reject</span>';
             } else if (p.status === 'active') {
-                html += '<span class="status-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-status="paused" style="' + btnBase + 'border:1px solid #b08800;color:#b08800;">Pause</span>';
-                html += '<span class="status-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-status="terminated" style="' + btnBase + 'border:1px solid #cf222e;color:#cf222e;">Terminate</span>';
+                html += '<span class="status-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-status="paused" style="' + btnBase + 'border:1px solid var(--warn);color:var(--warn);">Pause</span>';
+                html += '<span class="status-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-status="terminated" style="' + btnBase + 'border:1px solid var(--bad);color:var(--bad);">Terminate</span>';
             } else if (p.status === 'paused') {
-                html += '<span class="status-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-status="active" style="' + btnBase + 'border:1px solid #2ea043;color:#2ea043;">Resume</span>';
-                html += '<span class="status-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-status="terminated" style="' + btnBase + 'border:1px solid #cf222e;color:#cf222e;">Terminate</span>';
+                html += '<span class="status-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-status="active" style="' + btnBase + 'border:1px solid var(--ok);color:var(--ok);">Resume</span>';
+                html += '<span class="status-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-status="terminated" style="' + btnBase + 'border:1px solid var(--bad);color:var(--bad);">Terminate</span>';
             } else {
-                html += '<span style="font-size:11px;color:#999;font-family:\'SF Mono\',monospace;">terminated</span>';
+                html += '<span style="font-size:12.5px;color:var(--faint);font-variant-numeric:tabular-nums;">terminated</span>';
             }
             html += '</td></tr>';
 
             /* Expandable detail row (hidden by default) */
-            html += '<tr id="onboard-detail-' + i + '" style="display:none;"><td colspan="10" style="padding:0;border-bottom:1px solid #eee;">';
-            html += '<div style="background:#fafaf7;padding:14px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px 24px;">';
-            html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Country</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(p.country || '--') + '</span></div>';
-            html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Holder</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;' + (p.holder_mismatch ? 'color:#cf222e;font-weight:700;' : '') + '">' + escapeHtml(holder || '--') + (p.holder_mismatch ? ' (not their name)' : '') + '</span></div>';
-            html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">IBAN / Account</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(bank || '--') + '</span></div>';
-            html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Currency</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(currency || '--') + '</span></div>';
-            html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Accepted At</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(acceptedAt || '--') + '</span></div>';
-            html += '<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Participant ID</span><br><span style="font-size:12px;font-family:\'SF Mono\',monospace;">' + escapeHtml(p.participant_id || '--') + '</span></div>';
+            html += '<tr id="onboard-detail-' + i + '" style="display:none;"><td colspan="10" style="padding:0;border-bottom:1px solid var(--rule);">';
+            html += '<div style="background:var(--paper-soft);padding:14px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px 24px;">';
+            html += '<div><span style="font-size:13px;font-weight:500;color:var(--faint);">Country</span><br><span style="font-size:13px;font-variant-numeric:tabular-nums;">' + escapeHtml(p.country || '--') + '</span></div>';
+            html += '<div><span style="font-size:13px;font-weight:500;color:var(--faint);">Holder</span><br><span style="font-size:13px;font-variant-numeric:tabular-nums;' + (p.holder_mismatch ? 'color:var(--bad);font-weight:600;' : '') + '">' + escapeHtml(holder || '--') + (p.holder_mismatch ? ' (not their name)' : '') + '</span></div>';
+            html += '<div><span style="font-size:13px;font-weight:500;color:var(--faint);">IBAN / Account</span><br><span style="font-size:13px;font-variant-numeric:tabular-nums;">' + escapeHtml(bank || '--') + '</span></div>';
+            html += '<div><span style="font-size:13px;font-weight:500;color:var(--faint);">Currency</span><br><span style="font-size:13px;font-variant-numeric:tabular-nums;">' + escapeHtml(currency || '--') + '</span></div>';
+            html += '<div><span style="font-size:13px;font-weight:500;color:var(--faint);">Accepted At</span><br><span style="font-size:13px;font-variant-numeric:tabular-nums;">' + escapeHtml(acceptedAt || '--') + '</span></div>';
+            html += '<div><span style="font-size:13px;font-weight:500;color:var(--faint);">Participant ID</span><br><span style="font-size:13px;font-variant-numeric:tabular-nums;">' + escapeHtml(p.participant_id || '--') + '</span></div>';
             html += '</div>';
 
             /* Work profile (weekly, from all daily summaries; vetting Lambda "work-profiles") */
-            html += '<div style="background:#fafaf7;padding:0 20px 14px;"><div style="border-top:1px dashed #ddd;padding-top:12px;">';
+            html += '<div style="background:var(--paper-soft);padding:0 20px 14px;"><div style="border-top:1px dashed var(--rule);padding-top:12px;">';
             html += '<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline;">';
-            html += '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Work profile</span>';
-            if (p.work_profile_at) html += '<span style="font-size:11px;color:#aaa;">generated ' + escapeHtml(p.work_profile_at.slice(0, 10)) + (p.work_profile_days ? ' from ' + p.work_profile_days + ' daily summaries' : '') + ', refreshed weekly</span>';
+            html += '<span style="font-size:13px;font-weight:500;color:var(--faint);">Work profile</span>';
+            if (p.work_profile_at) html += '<span style="font-size:12.5px;color:var(--faint);">generated ' + escapeHtml(p.work_profile_at.slice(0, 10)) + (p.work_profile_days ? ' from ' + p.work_profile_days + ' daily summaries' : '') + ', refreshed weekly</span>';
             html += '</div>';
             html += p.work_profile
                 ? '<div class="work-profile">' + renderProfileMd(p.work_profile) + '</div>'
-                : '<div style="font-size:12px;color:#999;margin-top:6px;">No profile yet (no daily summaries for this participant\'s recorder accounts).</div>';
+                : '<div style="font-size:13px;color:var(--faint);margin-top:6px;">No profile yet (no daily summaries for this participant\'s recorder accounts).</div>';
             html += '</div></div>';
 
             /* Recorder email linking (drives activity stats) */
-            html += '<div style="background:#fafaf7;padding:0 20px 14px;">';
-            html += '<div style="border-top:1px dashed #ddd;padding-top:12px;">';
-            html += '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Linked recorder emails</span>';
-            html += '<span style="font-size:11px;color:#aaa;font-family:\'SF Mono\',monospace;"> — activity stats match onboarding email' + (linkedEmails.length ? ' + these' : '') + '</span><br>';
+            html += '<div style="background:var(--paper-soft);padding:0 20px 14px;">';
+            html += '<div style="border-top:1px dashed var(--rule);padding-top:12px;">';
+            html += '<span style="font-size:13px;font-weight:500;color:var(--faint);">Linked recorder emails</span>';
+            html += '<span style="font-size:12.5px;color:var(--faint);font-variant-numeric:tabular-nums;"> — activity stats match onboarding email' + (linkedEmails.length ? ' + these' : '') + '</span><br>';
             html += '<div style="margin-top:6px;">';
             if (linkedEmails.length === 0) {
-                html += '<span style="font-size:12px;color:#999;font-family:\'SF Mono\',monospace;">None linked</span>';
+                html += '<span style="font-size:13px;color:var(--faint);font-variant-numeric:tabular-nums;">None linked</span>';
             } else {
                 for (var li = 0; li < linkedEmails.length; li++) {
-                    html += '<span style="display:inline-block;font-size:11px;font-family:\'SF Mono\',monospace;background:#eef;border:1px solid #ccd;border-radius:3px;padding:2px 8px;margin:0 6px 6px 0;">' + escapeHtml(linkedEmails[li]) + ' <a href="#" class="recorder-unlink-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-email="' + escapeHtml(linkedEmails[li]) + '" style="color:#cf222e;text-decoration:none;margin-left:4px;font-weight:700;">✕</a></span>';
+                    html += '<span style="display:inline-block;font-size:12.5px;font-variant-numeric:tabular-nums;background:var(--paper-soft);border:1px solid var(--rule-strong);border-radius:3px;padding:2px 8px;margin:0 6px 6px 0;">' + escapeHtml(linkedEmails[li]) + ' <a href="#" class="recorder-unlink-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-email="' + escapeHtml(linkedEmails[li]) + '" style="color:var(--bad);text-decoration:none;margin-left:4px;font-weight:600;">✕</a></span>';
                 }
             }
             html += '</div>';
             if (recorderOptionEmails.length > 0) {
-                html += '<div style="margin-top:6px;"><select class="recorder-link-select" data-id="' + escapeHtml(p.participant_id || '') + '" style="font-size:12px;font-family:\'SF Mono\',monospace;padding:4px 8px;border:1px solid #000;background:#fff;cursor:pointer;max-width:100%;">' + recorderOptionsHtml + '</select></div>';
+                html += '<div style="margin-top:6px;"><select class="recorder-link-select" data-id="' + escapeHtml(p.participant_id || '') + '" style="font-size:13px;font-variant-numeric:tabular-nums;padding:4px 8px;border:1px solid var(--rule-strong);background:var(--paper);cursor:pointer;border-radius:3px;max-width:100%;">' + recorderOptionsHtml + '</select></div>';
             }
             html += '</div></div>';
 
             /* Compensation tier + region-priced DPA re-issue */
             var compTier = p.comp_tier || '';
             var compStatus, compColor;
-            if (!compTier) { compStatus = 'Legacy ($300/mo USD)'; compColor = '#999'; }
-            else if (p.dpa_accepted_at) { compStatus = 'ACTIVE: ' + compTier + ' (region rate)'; compColor = '#2ea043'; }
-            else if (p.reconsent_pending) { compStatus = compTier + ' set, DPA re-issued, awaiting acceptance'; compColor = '#b08800'; }
-            else { compStatus = compTier + ' set, DPA not re-issued yet'; compColor = '#b08800'; }
-            html += '<div style="background:#fafaf7;padding:0 20px 16px;">';
-            html += '<div style="border-top:1px dashed #ddd;padding-top:12px;">';
-            html += '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Compensation tier</span> ';
-            html += '<span style="font-size:11px;font-weight:700;color:' + compColor + ';">' + escapeHtml(compStatus) + '</span>';
+            if (!compTier) { compStatus = 'Legacy ($300/mo USD)'; compColor = 'var(--faint)'; }
+            else if (p.dpa_accepted_at) { compStatus = 'ACTIVE: ' + compTier + ' (region rate)'; compColor = 'var(--ok)'; }
+            else if (p.reconsent_pending) { compStatus = compTier + ' set, DPA re-issued, awaiting acceptance'; compColor = 'var(--warn)'; }
+            else { compStatus = compTier + ' set, DPA not re-issued yet'; compColor = 'var(--warn)'; }
+            html += '<div style="background:var(--paper-soft);padding:0 20px 16px;">';
+            html += '<div style="border-top:1px dashed var(--rule);padding-top:12px;">';
+            html += '<span style="font-size:13px;font-weight:500;color:var(--faint);">Compensation tier</span> ';
+            html += '<span style="font-size:12.5px;font-weight:600;color:' + compColor + ';">' + escapeHtml(compStatus) + '</span>';
             html += '<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">';
-            html += '<select class="comp-tier-select" data-id="' + escapeHtml(p.participant_id || '') + '" style="font-size:12px;padding:4px 8px;border:1px solid #000;background:#fff;cursor:pointer;">';
+            html += '<select class="comp-tier-select" data-id="' + escapeHtml(p.participant_id || '') + '" style="font-size:13px;padding:4px 8px;border:1px solid var(--rule-strong);background:var(--paper);cursor:pointer;border-radius:3px;">';
             html += '<option value="standard"' + (compTier === 'standard' ? ' selected' : '') + '>standard ($300)</option>';
             html += '<option value="top"' + (compTier === 'top' ? ' selected' : '') + '>top (NA $1k / EU €1k / RoW $500)</option>';
             html += '</select>';
-            html += '<span class="comp-set-btn" data-id="' + escapeHtml(p.participant_id || '') + '" style="' + btnBase + 'border:1px solid #0969da;color:#0969da;">Set tier</span>';
-            html += '<span class="comp-reissue-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-name="' + escapeHtml(p.name || '') + '" style="' + btnBase + 'border:1px solid #8250df;color:#8250df;">Re-issue DPA</span>';
+            html += '<span class="comp-set-btn" data-id="' + escapeHtml(p.participant_id || '') + '" style="' + btnBase + 'border:1px solid var(--steel-dark);color:var(--steel-dark);">Set tier</span>';
+            html += '<span class="comp-reissue-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-name="' + escapeHtml(p.name || '') + '" style="' + btnBase + 'border:1px solid var(--steel);color:var(--steel);">Re-issue DPA</span>';
             html += '</div>';
-            html += '<div style="font-size:11px;color:#aaa;margin-top:6px;">Set the tier, then re-issue the DPA. Re-issuing resets acceptance, so they keep their current rate until they accept the new agreement.</div>';
+            html += '<div style="font-size:12.5px;color:var(--faint);margin-top:6px;">Set the tier, then re-issue the DPA. Re-issuing resets acceptance, so they keep their current rate until they accept the new agreement.</div>';
             html += '</div></div>';
 
             /* Legal terms version (separate from the comp tier above: accepting terms never changes pay) */
@@ -3970,17 +3970,17 @@
             var TERMS_CURRENT = 'v2026-10-13', TERMS_MIN = 'v2026-09-28';
             var tv = p.terms_version || p.agreement_version || '';
             var termsStatus, termsColor;
-            if (tv === TERMS_CURRENT) { termsStatus = TERMS_CURRENT + ' accepted' + (p.terms_accepted_at ? ' ' + p.terms_accepted_at.slice(0, 10) : ''); termsColor = '#2ea043'; }
-            else if (tv && tv >= TERMS_MIN && !p.terms_pending) { termsStatus = tv + ' accepted (October paid; November on needs ' + TERMS_CURRENT + ')'; termsColor = '#b08800'; }
-            else if (p.terms_pending) { termsStatus = 'link issued, awaiting acceptance (on ' + (tv || 'v1') + ')'; termsColor = '#b08800'; }
-            else { termsStatus = 'on ' + (tv || 'v1') + ', not issued yet'; termsColor = '#999'; }
-            html += '<div style="background:#fafaf7;padding:0 20px 16px;">';
-            html += '<div style="border-top:1px dashed #ddd;padding-top:12px;">';
-            html += '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;">Legal terms</span> ';
-            html += '<span style="font-size:11px;font-weight:700;color:' + termsColor + ';">' + escapeHtml(termsStatus) + '</span>';
+            if (tv === TERMS_CURRENT) { termsStatus = TERMS_CURRENT + ' accepted' + (p.terms_accepted_at ? ' ' + p.terms_accepted_at.slice(0, 10) : ''); termsColor = 'var(--ok)'; }
+            else if (tv && tv >= TERMS_MIN && !p.terms_pending) { termsStatus = tv + ' accepted (October paid; November on needs ' + TERMS_CURRENT + ')'; termsColor = 'var(--warn)'; }
+            else if (p.terms_pending) { termsStatus = 'link issued, awaiting acceptance (on ' + (tv || 'v1') + ')'; termsColor = 'var(--warn)'; }
+            else { termsStatus = 'on ' + (tv || 'v1') + ', not issued yet'; termsColor = 'var(--faint)'; }
+            html += '<div style="background:var(--paper-soft);padding:0 20px 16px;">';
+            html += '<div style="border-top:1px dashed var(--rule);padding-top:12px;">';
+            html += '<span style="font-size:13px;font-weight:500;color:var(--faint);">Legal terms</span> ';
+            html += '<span style="font-size:12.5px;font-weight:600;color:' + termsColor + ';">' + escapeHtml(termsStatus) + '</span>';
             if (tv !== TERMS_CURRENT) {
-                html += '<div style="margin-top:8px;"><span class="terms-issue-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-name="' + escapeHtml(p.name || '') + '" style="' + btnBase + 'border:1px solid #8250df;color:#8250df;">' + (p.terms_pending ? 'Re-issue terms link' : 'Issue terms link') + '</span></div>';
-                html += '<div style="font-size:11px;color:#aaa;margin-top:6px;">Creates a single-use accept link and shows it to you. Sends nothing. Re-issuing replaces the previous link.</div>';
+                html += '<div style="margin-top:8px;"><span class="terms-issue-btn" data-id="' + escapeHtml(p.participant_id || '') + '" data-name="' + escapeHtml(p.name || '') + '" style="' + btnBase + 'border:1px solid var(--steel);color:var(--steel);">' + (p.terms_pending ? 'Re-issue terms link' : 'Issue terms link') + '</span></div>';
+                html += '<div style="font-size:12.5px;color:var(--faint);margin-top:6px;">Creates a single-use accept link and shows it to you. Sends nothing. Re-issuing replaces the previous link.</div>';
             }
             html += '</div></div>';
 
@@ -4175,7 +4175,7 @@
         var tab = document.getElementById('tab-review');
         if (!tab) return;
         tab.textContent = n > 0 ? 'Review (' + n + ')' : 'Review';
-        if (n > 0 && tab.style.borderBottomColor === 'transparent') tab.style.color = '#b08800';
+        if (n > 0 && tab.style.borderBottomColor === 'transparent') tab.style.color = 'var(--warn)';
     }
 
     /* Lightweight badge fetch (also nudges the server-side finalizer to send any
@@ -4193,7 +4193,7 @@
         if (_reviewLoading) return;
         _reviewLoading = true;
         container.innerHTML = '<div class="review-wrap"><div class="outline-box review-card">' +
-            '<div class="skel-line short"></div><div class="skel-block" style="height:240px;background:#f8f8f8;margin-top:14px;"></div></div></div>';
+            '<div class="skel-line short"></div><div class="skel-block" style="height:240px;background:var(--paper-soft);margin-top:14px;"></div></div></div>';
         fetch(ONBOARD_API + '/applicants/queue', { headers: { 'Authorization': 'Bearer ' + _authToken } })
             .then(function(resp){ if (!resp.ok) throw new Error('HTTP ' + resp.status); return resp.json(); })
             .then(function(data){
@@ -4247,13 +4247,13 @@
 
         var fraudHtml = '';
         if (a.fraud_flags && a.fraud_flags.length) {
-            fraudHtml = '<div class="fraud-banner"><div class="fb-title">&#9888; Fraud flags</div><ul>' +
+            fraudHtml = '<div class="fraud-banner"><div class="fb-title">Fraud flags</div><ul>' +
                 a.fraud_flags.map(function(f){ return '<li>' + escapeHtml(f) + '</li>'; }).join('') + '</ul></div>';
         }
 
         var enrichHtml = '';
         if (a.enrichment && a.enrichment.length) {
-            enrichHtml = '<div class="review-field"><div class="rf-label">Enrichment</div><div class="rf-body" style="font-size:12px;color:#666;">' +
+            enrichHtml = '<div class="review-field"><div class="rf-label">Enrichment</div><div class="rf-body" style="font-size:13px;color:var(--muted);">' +
                 a.enrichment.map(function(e){ return escapeHtml(e); }).join('\n') + '</div></div>';
         }
 
@@ -4264,9 +4264,9 @@
                 undoHtml +
                 '<div class="review-progress">' +
                     '<span class="rp-count">' +
-                        '<button onclick="navReview(-1)"' + (_reviewPos <= 0 ? ' disabled' : '') + ' title="Previous (Shift+Left)" style="font:inherit;font-size:11px;font-weight:600;padding:3px 10px;border:1px solid #d0d7de;border-radius:6px;background:#fff;color:#333;cursor:pointer;' + (_reviewPos <= 0 ? 'opacity:.35;cursor:default;' : '') + '">&lsaquo; Prev</button>' +
+                        '<button onclick="navReview(-1)"' + (_reviewPos <= 0 ? ' disabled' : '') + ' title="Previous (Shift+Left)" style="font:inherit;font-size:12.5px;font-weight:600;padding:3px 10px;border:1px solid var(--rule);border-radius:3px;background:var(--paper);color:var(--ink);cursor:pointer;' + (_reviewPos <= 0 ? 'opacity:.35;cursor:default;' : '') + '">&lsaquo; Prev</button>' +
                         '<span style="margin:0 10px;">' + (_reviewPos + 1) + ' / ' + total + '</span>' +
-                        '<button onclick="navReview(1)"' + (_reviewPos >= total - 1 ? ' disabled' : '') + ' title="Next (Shift+Right)" style="font:inherit;font-size:11px;font-weight:600;padding:3px 10px;border:1px solid #d0d7de;border-radius:6px;background:#fff;color:#333;cursor:pointer;' + (_reviewPos >= total - 1 ? 'opacity:.35;cursor:default;' : '') + '">Next &rsaquo;</button>' +
+                        '<button onclick="navReview(1)"' + (_reviewPos >= total - 1 ? ' disabled' : '') + ' title="Next (Shift+Right)" style="font:inherit;font-size:12.5px;font-weight:600;padding:3px 10px;border:1px solid var(--rule);border-radius:3px;background:var(--paper);color:var(--ink);cursor:pointer;' + (_reviewPos >= total - 1 ? 'opacity:.35;cursor:default;' : '') + '">Next &rsaquo;</button>' +
                     '</span>' +
                     '<span>browse <span class="kbd">&#8679;&larr;</span> <span class="kbd">&#8679;&rarr;</span> &nbsp;&middot;&nbsp; reject <span class="kbd">&larr;</span> ask <span class="kbd">&uarr;</span> accept <span class="kbd">&rarr;</span> undo <span class="kbd">U</span></span>' +
                 '</div>' +
@@ -4281,9 +4281,9 @@
                     (links ? '<div class="review-links">' + links + '</div>' : '') +
                     fraudHtml +
                     (a.work_summary ? '<div class="review-field"><div class="rf-label">What they do</div><div class="rf-body">' + escapeHtml(a.work_summary) + '</div></div>' : '') +
-                    (a.blurb ? '<div class="review-field"><div class="rf-label">Application blurb</div><div class="rf-body" style="color:#555;">' + escapeHtml(a.blurb) + '</div></div>' : '') +
-                    (a.heard_via ? '<div class="review-field"><div class="rf-label">How they heard of us</div><div class="rf-body" style="color:#555;">' + escapeHtml(a.heard_via) + '</div></div>' : '') +
-                    (a.reasoning ? '<div class="review-field"><div class="rf-label">Gate reasoning</div><div class="rf-body" style="color:#444;">' + escapeHtml(a.reasoning) + '</div></div>' : '') +
+                    (a.blurb ? '<div class="review-field"><div class="rf-label">Application blurb</div><div class="rf-body" style="color:var(--muted);">' + escapeHtml(a.blurb) + '</div></div>' : '') +
+                    (a.heard_via ? '<div class="review-field"><div class="rf-label">How they heard of us</div><div class="rf-body" style="color:var(--muted);">' + escapeHtml(a.heard_via) + '</div></div>' : '') +
+                    (a.reasoning ? '<div class="review-field"><div class="rf-label">Gate reasoning</div><div class="rf-body" style="color:var(--muted);">' + escapeHtml(a.reasoning) + '</div></div>' : '') +
                     enrichHtml +
                     buildReviewEmailBox(a) +
                     '<div class="review-actions">' +
@@ -4371,13 +4371,13 @@
         function seg(c, lbl) {
             var on = c === def;
             return '<button type="button" id="rem-seg-' + c + '" onclick="loadReviewEmail(\'' + c + '\')" ' +
-                'style="font:inherit;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:5px 12px;border:1px solid #d0d7de;cursor:pointer;background:' + (on ? '#111' : '#fff') + ';color:' + (on ? '#fff' : '#333') + ';">' + lbl + '</button>';
+                'style="font:inherit;font-size:13px;font-weight:500;padding:5px 12px;border:1px solid var(--rule);cursor:pointer;border-radius:3px;background:' + (on ? 'var(--ink)' : 'var(--paper)') + ';color:' + (on ? 'var(--paper)' : 'var(--ink)') + ';">' + lbl + '</button>';
         }
         return '<div class="review-email-box">' +
-                '<div class="review-email-toggle" onclick="toggleReviewEmail(this)"><span>Drafted email <span style="color:#999;font-weight:400;text-transform:none;letter-spacing:0;">(click to expand / edit)</span></span><span class="rem-caret">+</span></div>' +
+                '<div class="review-email-toggle" onclick="toggleReviewEmail(this)"><span>Drafted email <span style="color:var(--faint);font-weight:400;text-transform:none;letter-spacing:0;">(click to expand / edit)</span></span><span class="rem-caret">+</span></div>' +
                 '<div class="review-email-body" style="display:none;">' +
                     '<div style="display:flex;align-items:center;gap:0;margin-bottom:8px;">' + seg('reject','Reject') + seg('ask','Ask') + seg('accept','Accept') +
-                        '<span style="margin-left:auto;font-size:11px;color:#999;">editing this decision&#8217;s email</span></div>' +
+                        '<span style="margin-left:auto;font-size:12.5px;color:var(--faint);">editing this decision&#8217;s email</span></div>' +
                     '<input class="review-email-subject" id="review-subject" value="' + escapeHtml(reviewEmailSubject(def, a)) + '" readonly>' +
                     '<textarea class="review-email-textarea" id="review-body">' + escapeHtml(bodyText) + '</textarea>' +
                     '<div class="review-email-hint" id="review-email-hint">' + reviewEmailHint(def) + '</div>' +
@@ -4397,7 +4397,7 @@
         var hint = document.getElementById('review-email-hint'); if (hint) hint.innerHTML = reviewEmailHint(choice);
         ['reject','ask','accept'].forEach(function(c){
             var b = document.getElementById('rem-seg-' + c);
-            if (b) { b.style.background = c === choice ? '#111' : '#fff'; b.style.color = c === choice ? '#fff' : '#333'; }
+            if (b) { b.style.background = c === choice ? 'var(--ink)' : 'var(--paper)'; b.style.color = c === choice ? 'var(--paper)' : 'var(--ink)'; }
         });
         var body = document.querySelector('.review-email-box .review-email-body');
         if (body && body.style.display === 'none') { body.style.display = 'block'; var car = document.querySelector('.review-email-box .rem-caret'); if (car) car.textContent = '−'; }
@@ -4410,28 +4410,28 @@
     function showTierChoiceModal(name, isCustom, onChoose, opts) {
         opts = opts || {};
         var overlay = document.createElement('div');
-        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(11,16,21,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;';
         var modal = document.createElement('div');
-        modal.style.cssText = 'background:#fff;border:1px solid #000;padding:32px;max-width:520px;width:92%;font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;';
+        modal.style.cssText = 'background:var(--paper);border:1px solid var(--rule-strong);border-radius:4px;padding:32px;max-width:520px;width:92%;font-variant-numeric:tabular-nums;';
 
         function tierBtn(val, head, sub) {
             return '<button type="button" class="tier-choice" data-tier="' + val + '" ' +
                 'style="display:block;width:100%;text-align:left;font:inherit;padding:14px 16px;margin-bottom:10px;' +
-                'border:1px solid #000;background:#fff;cursor:pointer;">' +
-                '<div style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">' + head + '</div>' +
-                '<div style="font-size:11px;color:#666;margin-top:4px;">' + sub + '</div>' +
+                'border:1px solid var(--ink);background:var(--paper);cursor:pointer;border-radius:3px;">' +
+                '<div style="font-size:13px;font-weight:500;">' + head + '</div>' +
+                '<div style="font-size:12.5px;color:var(--muted);margin-top:4px;">' + sub + '</div>' +
                 '</button>';
         }
 
         modal.innerHTML =
-            '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;">' + escapeHtml(opts.verb || 'Accept') + ' ' + escapeHtml(name) + '</div>' +
-            '<div style="font-size:12px;color:#555;margin-bottom:18px;line-height:1.5;">Pick the tier they onboard on. This figure is printed in the agreement they sign, so changing it later means re-issuing the DPA.' +
+            '<div style="font-size:13px;font-weight:500;margin-bottom:8px;">' + escapeHtml(opts.verb || 'Accept') + ' ' + escapeHtml(name) + '</div>' +
+            '<div style="font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.5;">Pick the tier they onboard on. This figure is printed in the agreement they sign, so changing it later means re-issuing the DPA.' +
                 (isCustom ? '<br><b>Your edited email will be sent.</b>' : '') + '</div>' +
             tierBtn('top', 'Expert &mdash; $1,000 / &euro;1,000 per month', 'PhD-level research, professional engineering. $500 outside NA/Europe.') +
             tierBtn('standard', 'Standard &mdash; $300 / &euro;300 per month', 'Other qualifying long-horizon work. Same in every region.') +
-            '<div style="font-size:11px;color:#999;margin:14px 0 16px 0;line-height:1.5;">' + escapeHtml(opts.footer || 'The onboarding email goes out after the 10-minute undo window.') + '</div>' +
+            '<div style="font-size:12.5px;color:var(--faint);margin:14px 0 16px 0;line-height:1.5;">' + escapeHtml(opts.footer || 'The onboarding email goes out after the 10-minute undo window.') + '</div>' +
             '<div style="display:flex;justify-content:flex-end;">' +
-                '<span class="modal-cancel" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:8px 20px;border:1px solid #000;cursor:pointer;">Cancel</span>' +
+                '<span class="modal-cancel" style="font-size:13px;font-weight:500;padding:8px 20px;border:1px solid var(--ink);cursor:pointer;border-radius:3px;">Cancel</span>' +
             '</div>';
 
         overlay.appendChild(modal);
@@ -4440,8 +4440,8 @@
         modal.querySelector('.modal-cancel').addEventListener('click', close);
         overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
         modal.querySelectorAll('.tier-choice').forEach(function(b) {
-            b.addEventListener('mouseenter', function() { b.style.background = '#111'; b.style.color = '#fff'; b.querySelectorAll('div')[1].style.color = '#bbb'; });
-            b.addEventListener('mouseleave', function() { b.style.background = '#fff'; b.style.color = '#000'; b.querySelectorAll('div')[1].style.color = '#666'; });
+            b.addEventListener('mouseenter', function() { b.style.background = 'var(--ink)'; b.style.color = 'var(--paper)'; b.querySelectorAll('div')[1].style.color = 'var(--faint)'; });
+            b.addEventListener('mouseleave', function() { b.style.background = 'var(--paper)'; b.style.color = 'var(--ink)'; b.querySelectorAll('div')[1].style.color = 'var(--muted)'; });
             b.addEventListener('click', function() { close(); onChoose(b.dataset.tier); });
         });
     }
@@ -4574,7 +4574,7 @@
         var tab = document.getElementById('tab-nudges');
         if (!tab) return;
         tab.textContent = n > 0 ? 'Nudges (' + n + ')' : 'Nudges';
-        if (n > 0 && tab.style.borderBottomColor === 'transparent') tab.style.color = '#b08800';
+        if (n > 0 && tab.style.borderBottomColor === 'transparent') tab.style.color = 'var(--warn)';
     }
 
     /* Lightweight badge fetch so the count shows on load without opening the tab. */
@@ -4595,7 +4595,7 @@
         if (!_isAdmin) return;
         var c = document.getElementById('partners-view');
         if (!c) return;
-        c.innerHTML = '<div class="review-wrap"><div class="outline-box review-card"><div class="skel-line short"></div><div class="skel-block" style="height:200px;background:#f8f8f8;margin-top:14px;"></div></div></div>';
+        c.innerHTML = '<div class="review-wrap"><div class="outline-box review-card"><div class="skel-line short"></div><div class="skel-block" style="height:200px;background:var(--paper-soft);margin-top:14px;"></div></div></div>';
         fetch(ONBOARD_API + '/partners', { headers: { 'Authorization': 'Bearer ' + _authToken } })
             .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
             .then(function(d){ renderPartnersView(d); })
@@ -4613,7 +4613,7 @@
 
         var h = '<div style="max-width:1000px;margin:0 auto;padding:8px 4px 40px;">';
         h += '<h2 style="font-size:18px;margin:0 0 4px;">Referral partners</h2>';
-        h += '<p style="color:#666;font-size:13px;margin:0 0 16px;">Everyone with a referral link: participants and friends who signed themselves up at /refer.html, plus any podcast or newsletter added by hand. Each gets a link and a private stats page. A bounty becomes owed once a referred person passes their trial week.</p>';
+        h += '<p style="color:var(--muted);font-size:13px;margin:0 0 16px;">Everyone with a referral link: participants and friends who signed themselves up at /refer.html, plus any podcast or newsletter added by hand. Each gets a link and a private stats page. A bounty becomes owed once a referred person passes their trial week.</p>';
 
         /* Totals first. Most partners have produced nothing yet, so without a
            summary the table reads as nine rows of zeroes and hides the two
@@ -4627,22 +4627,22 @@
             return s;
         }, { clicks: 0, signups: 0, passed: 0, owed: 0, claimed: 0, paid: 0, producing: 0 });
         var stat = function(n, label, color){
-            return '<div style="flex:1;min-width:96px;padding:10px 12px;border-left:1px solid #eee;">'
-                 + '<div style="font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;' + (color ? 'color:' + color + ';' : '') + '">' + n + '</div>'
-                 + '<div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#999;margin-top:2px;">' + label + '</div></div>';
+            return '<div style="flex:1;min-width:96px;padding:10px 12px;border-left:1px solid var(--rule);">'
+                 + '<div style="font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;' + (color ? 'color:' + color + ';' : '') + '">' + n + '</div>'
+                 + '<div style="font-size:13px;color:var(--faint);margin-top:2px;">' + label + '</div></div>';
         };
         h += '<div class="outline-box" style="display:flex;flex-wrap:wrap;margin-bottom:20px;">'
           + stat(partners.length, 'partners')
-          + stat(tot.producing, 'sent someone', tot.producing ? '#2ea043' : '#ccc')
+          + stat(tot.producing, 'sent someone', tot.producing ? 'var(--ok)' : 'var(--rule-strong)')
           + stat(tot.clicks, 'clicks')
           + stat(tot.signups, 'signups')
           + stat(tot.passed, 'passed trial')
-          + stat('$' + tot.owed, 'owed', tot.owed ? '#c0392b' : '#ccc')
+          + stat('$' + tot.owed, 'owed', tot.owed ? 'var(--bad)' : 'var(--rule-strong)')
           + stat('$' + tot.paid, 'paid out')
           + '</div>';
 
         if (owed.length) {
-            h += '<div class="outline-box" style="padding:12px 14px;margin-bottom:20px;border-color:#c9a227;">'
+            h += '<div class="outline-box" style="padding:12px 14px;margin-bottom:20px;border-color:var(--warn);">'
               + '<b>$' + owedTotal + ' owed</b> across ' + owed.length + ' bounty' + (owed.length === 1 ? '' : 's') + '. The referrer claims via their stats page; the premium then appears in the Payouts tab for one-click payment. "Mark paid" below is only the manual fallback.</div>';
         }
 
@@ -4654,7 +4654,7 @@
         partners.forEach(function(p){ (byName[(p.name || '').trim().toLowerCase()] = byName[(p.name || '').trim().toLowerCase()] || []).push(p); });
         var dupes = Object.keys(byName).filter(function(k){ return k && byName[k].length > 1; });
         if (dupes.length) {
-            h += '<div class="outline-box" style="padding:10px 14px;margin-bottom:20px;border-color:#c9a227;font-size:12.5px;">'
+            h += '<div class="outline-box" style="padding:10px 14px;margin-bottom:20px;border-color:var(--warn);font-size:13px;">'
               + '<b>Same name, different people.</b> ';
             h += dupes.map(function(k){
                 return byName[k].map(function(p){ return esc(p.name) + ' (' + esc(p.slug) + ', ' + esc(p.referrer_email || 'no email') + ')'; }).join(' and ');
@@ -4677,17 +4677,17 @@
         ];
 
         if (!partners.length) {
-            h += '<div class="outline-box" style="padding:14px;color:#999;font-size:13px;">No partners yet. Add one below.</div>';
+            h += '<div class="outline-box" style="padding:14px;color:var(--faint);font-size:13px;">No partners yet. Add one below.</div>';
         }
 
         groups.forEach(function(g){
             var label = g[0], list = g[1], blurb = g[2];
             if (!list.length) return;
-            h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin:22px 0 4px;">'
+            h += '<div style="font-size:13px;font-weight:500;color:var(--faint);margin:22px 0 4px;">'
                + label + ' (' + list.length + ')</div>';
-            h += '<p style="color:#999;font-size:12px;margin:0 0 8px;">' + blurb + '</p>';
+            h += '<p style="color:var(--faint);font-size:13px;margin:0 0 8px;">' + blurb + '</p>';
             h += '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">'
-              + '<thead><tr style="text-align:left;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;">'
+              + '<thead><tr style="text-align:left;color:var(--faint);font-size:13px;">'
               + '<th style="padding:6px 8px;">Who</th>'
               + '<th style="padding:6px 8px;text-align:right;">Clicks</th><th style="padding:6px 8px;text-align:right;">Signups</th>'
               + '<th style="padding:6px 8px;text-align:right;">Passed</th><th style="padding:6px 8px;text-align:right;">Owed</th>'
@@ -4699,31 +4699,31 @@
                    else was added by hand and is a show, a newsletter or a
                    deal. They get paid the same but you read them differently. */
                 var isSelf = p.source === 'self_serve';
-                h += '<tr style="border-top:1px solid #eee;' + (p.active ? '' : 'opacity:0.5;') + '">'
+                h += '<tr style="border-top:1px solid var(--rule);' + (p.active ? '' : 'opacity:0.5;') + '">'
                   + '<td style="padding:8px;"><b>' + esc(p.name) + '</b>'
-                  + (p.active ? '' : ' <span style="font-size:11px;color:#999;">(inactive)</span>')
-                  + ' <span style="font-size:9.5px;text-transform:uppercase;letter-spacing:1px;padding:1px 5px;border:1px solid ' + (isSelf ? '#ddd;color:#999' : '#7a5cc0;color:#7a5cc0') + ';">'
+                  + (p.active ? '' : ' <span style="font-size:12.5px;color:var(--faint);">(inactive)</span>')
+                  + ' <span style="font-size:13px;padding:1px 5px;border:1px solid ' + (isSelf ? 'var(--rule);color:var(--faint)' : 'var(--steel);color:var(--steel)') + ';">'
                   + (isSelf ? 'self' : 'added') + '</span>'
-                  + '<div style="color:#999;font-size:11px;">' + esc(p.referrer_email || p.payout_contact || '') + '</div>'
-                  + '<div style="color:#bbb;font-size:10.5px;font-family:monospace;">' + esc(p.slug)
+                  + '<div style="color:var(--faint);font-size:12.5px;">' + esc(p.referrer_email || p.payout_contact || '') + '</div>'
+                  + '<div style="color:var(--faint);font-size:12px;font-variant-numeric:tabular-nums;">' + esc(p.slug)
                   + (p.last_click_at ? ' &middot; last click ' + esc(String(p.last_click_at).slice(0, 10)) : '') + '</div></td>'
-                  + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;' + (p.clicks ? '' : 'color:#ccc;') + '">' + (p.clicks || 0) + '</td>'
-                  + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;' + (p.signups ? 'font-weight:700;' : 'color:#ccc;') + '">' + (p.signups || 0) + '</td>'
-                  + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;' + (p.passed_trial ? '' : 'color:#ccc;') + '">' + (p.passed_trial || 0) + '</td>'
-                  + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;' + (p.owed_usd ? 'color:#c0392b;font-weight:700;' : 'color:#ccc;') + '">$' + (p.owed_usd || 0) + '</td>'
-                  + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;' + (p.paid_usd ? 'color:#888;' : 'color:#ccc;') + '">$' + (p.paid_usd || 0) + '</td>'
+                  + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;' + (p.clicks ? '' : 'color:var(--faint);') + '">' + (p.clicks || 0) + '</td>'
+                  + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;' + (p.signups ? 'font-weight:600;' : 'color:var(--faint);') + '">' + (p.signups || 0) + '</td>'
+                  + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;' + (p.passed_trial ? '' : 'color:var(--faint);') + '">' + (p.passed_trial || 0) + '</td>'
+                  + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;' + (p.owed_usd ? 'color:var(--bad);font-weight:600;' : 'color:var(--faint);') + '">$' + (p.owed_usd || 0) + '</td>'
+                  + '<td style="padding:8px;text-align:right;font-variant-numeric:tabular-nums;' + (p.paid_usd ? 'color:var(--faint);' : 'color:var(--faint);') + '">$' + (p.paid_usd || 0) + '</td>'
                   + '<td style="padding:8px;white-space:nowrap;">'
-                  + '<span onclick="ccCopy(\'' + esc(refUrl) + '\',this)" style="cursor:pointer;color:#888;font-size:11px;">ref link</span>'
-                  + ' &middot; <span onclick="ccCopy(\'' + esc(statsUrl) + '\',this)" style="cursor:pointer;color:#888;font-size:11px;">stats</span>'
+                  + '<span onclick="ccCopy(\'' + esc(refUrl) + '\',this)" style="cursor:pointer;color:var(--faint);font-size:12.5px;">ref link</span>'
+                  + ' &middot; <span onclick="ccCopy(\'' + esc(statsUrl) + '\',this)" style="cursor:pointer;color:var(--faint);font-size:12.5px;">stats</span>'
                   + '</td></tr>';
             });
             h += '</tbody></table></div>';
         });
 
-        h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin:28px 0 10px;">Bounties</div>';
-        h += '<p style="color:#666;font-size:12.5px;margin:0 0 10px;">Each referral pays in two tranches: $' + trancheTrial + ' at trial-week pass, $' + trancheHours + ' at ' + trancheGate + ' recorded hours. Self-serve referrers claim from their stats page and you pay from the Payouts tab; "Mark paid" here is the manual fallback for when the money already left Qonto another way.</p>';
+        h += '<div style="font-size:13px;font-weight:500;color:var(--faint);margin:28px 0 10px;">Bounties</div>';
+        h += '<p style="color:var(--muted);font-size:13px;margin:0 0 10px;">Each referral pays in two tranches: $' + trancheTrial + ' at trial-week pass, $' + trancheHours + ' at ' + trancheGate + ' recorded hours. Self-serve referrers claim from their stats page and you pay from the Payouts tab; "Mark paid" here is the manual fallback for when the money already left Qonto another way.</p>';
         if (!bounties.length) {
-            h += '<p style="color:#999;font-size:13px;">None yet. A bounty appears once a referred applicant passes their trial week.</p>';
+            h += '<p style="color:var(--faint);font-size:13px;">None yet. A bounty appears once a referred applicant passes their trial week.</p>';
         } else {
             function trancheRow(b, key, label) {
                 var t = b[key]; if (!t) return '';
@@ -4733,12 +4733,12 @@
                 if (t.paid_at) meta += ' &middot; paid ' + esc(String(t.paid_at).slice(0, 10));
                 var right = '';
                 if (st === 'owed' && t.claimed) {
-                    right = '<span style="font-size:11.5px;color:#888;white-space:nowrap;">claimed &middot; pay in Payouts tab</span>';
+                    right = '<span style="font-size:12.5px;color:var(--faint);white-space:nowrap;">claimed &middot; pay in Payouts tab</span>';
                 } else if (st === 'owed') {
-                    right = '<span data-mark-paid="' + esc(b.referred_email) + '" data-tranche="' + key + '" data-amount="' + (t.amount || 0) + '" class="review-btn rb-accept" style="padding:5px 12px;cursor:pointer;white-space:nowrap;font-size:12px;">Mark paid</span>';
+                    right = '<span data-mark-paid="' + esc(b.referred_email) + '" data-tranche="' + key + '" data-amount="' + (t.amount || 0) + '" class="review-btn rb-accept" style="padding:5px 12px;cursor:pointer;white-space:nowrap;font-size:13px;">Mark paid</span>';
                 }
-                return '<div style="display:flex;align-items:center;gap:10px;margin-top:6px;padding-top:6px;border-top:1px solid #f2f2f2;">'
-                  + '<div style="flex:1;min-width:0;font-size:12.5px;">' + esc(label) + ' &middot; <b>$' + (t.amount || 0) + '</b> <span style="color:#777;">' + meta + '</span></div>'
+                return '<div style="display:flex;align-items:center;gap:10px;margin-top:6px;padding-top:6px;border-top:1px solid var(--paper-soft);">'
+                  + '<div style="flex:1;min-width:0;font-size:13px;">' + esc(label) + ' &middot; <b>$' + (t.amount || 0) + '</b> <span style="color:var(--muted);">' + meta + '</span></div>'
                   + right + '</div>';
             }
             h += '<div style="display:flex;flex-direction:column;gap:8px;">';
@@ -4746,8 +4746,8 @@
                 var anyOwed = (b.t1 && b.t1.status === 'owed') || (b.t2 && b.t2.status === 'owed');
                 h += '<div class="outline-box" style="padding:10px 14px;' + (anyOwed ? '' : 'opacity:0.7;') + '">'
                   + '<div style="font-weight:600;font-size:13.5px;">' + esc(b.partner_slug)
-                  + ' <span style="color:#999;font-weight:400;">' + esc(b.participant_id || b.referred_email) + '</span>'
-                  + (b.trial_passed_at ? ' <span style="color:#999;font-weight:400;font-size:11.5px;">&middot; trial passed ' + esc(String(b.trial_passed_at).slice(0, 10)) + '</span>' : '')
+                  + ' <span style="color:var(--faint);font-weight:400;">' + esc(b.participant_id || b.referred_email) + '</span>'
+                  + (b.trial_passed_at ? ' <span style="color:var(--faint);font-weight:400;font-size:12.5px;">&middot; trial passed ' + esc(String(b.trial_passed_at).slice(0, 10)) + '</span>' : '')
                   + '</div>'
                   + trancheRow(b, 't1', 'Trial week')
                   + trancheRow(b, 't2', '100 hours')
@@ -4756,18 +4756,18 @@
             h += '</div>';
         }
 
-        h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin:28px 0 6px;">Mentioned something, not attributed</div>'
-          + '<p style="color:#666;font-size:12.5px;margin:0 0 10px;">People who answered "how did you hear about us" but carry no partner credit, e.g. they cleared the prefilled answer and typed the show\'s name. Credit the right partner here and the bounty follows automatically.</p>'
-          + '<div id="unattributed-list" style="color:#999;font-size:13px;">Loading…</div>';
+        h += '<div style="font-size:13px;font-weight:500;color:var(--faint);margin:28px 0 6px;">Mentioned something, not attributed</div>'
+          + '<p style="color:var(--muted);font-size:13px;margin:0 0 10px;">People who answered "how did you hear about us" but carry no partner credit, e.g. they cleared the prefilled answer and typed the show\'s name. Credit the right partner here and the bounty follows automatically.</p>'
+          + '<div id="unattributed-list" style="color:var(--faint);font-size:13px;">Loading…</div>';
 
-        h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin:28px 0 6px;">Add or edit a partner</div>'
-          + '<p style="color:#666;font-size:12.5px;margin:0 0 10px;">For a show, newsletter or anyone you are setting up yourself. Individuals do not need this: they get a link instantly at <a href="https://pdoom.org/refer.html" target="_blank" rel="noopener" style="color:#0066cc;">pdoom.org/refer.html</a>, which is where every partner in the list above came from.</p>'
+        h += '<div style="font-size:13px;font-weight:500;color:var(--faint);margin:28px 0 6px;">Add or edit a partner</div>'
+          + '<p style="color:var(--muted);font-size:13px;margin:0 0 10px;">For a show, newsletter or anyone you are setting up yourself. Individuals do not need this: they get a link instantly at <a href="https://pdoom.org/refer.html" target="_blank" rel="noopener" style="color:var(--steel-dark);">pdoom.org/refer.html</a>, which is where every partner in the list above came from.</p>'
           + '<div class="outline-box" style="padding:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">'
-          + '<label style="font-size:12px;color:#666;">Name<br><input id="pt-name" placeholder="Dwarkesh Podcast" style="padding:6px 8px;border:1px solid #ddd;font-size:13px;width:190px;"></label>'
-          + '<label style="font-size:12px;color:#666;">Slug<br><input id="pt-slug" placeholder="dwarkesh" style="padding:6px 8px;border:1px solid #ddd;font-size:13px;width:150px;font-family:monospace;"></label>'
-          + '<label style="font-size:12px;color:#666;">Payout contact<br><input id="pt-contact" placeholder="email / invoice ref" style="padding:6px 8px;border:1px solid #ddd;font-size:13px;width:190px;"></label>'
+          + '<label style="font-size:13px;color:var(--muted);">Name<br><input id="pt-name" placeholder="Dwarkesh Podcast" style="padding:6px 8px;border:1px solid var(--rule);font-size:13px;width:190px;"></label>'
+          + '<label style="font-size:13px;color:var(--muted);">Slug<br><input id="pt-slug" placeholder="dwarkesh" style="padding:6px 8px;border:1px solid var(--rule);font-size:13px;width:150px;font-variant-numeric:tabular-nums;"></label>'
+          + '<label style="font-size:13px;color:var(--muted);">Payout contact<br><input id="pt-contact" placeholder="email / invoice ref" style="padding:6px 8px;border:1px solid var(--rule);font-size:13px;width:190px;"></label>'
           + '<span onclick="savePartner()" class="review-btn rb-accept" style="padding:8px 18px;cursor:pointer;">Save partner</span>'
-          + '<div style="width:100%;color:#999;font-size:11.5px;">Slug: 2-39 chars, a-z 0-9 _ - only. Editing an existing slug updates it and keeps its stats link. The referral premium is fixed at $' + trancheTrial + ' + $' + trancheHours + ' (trial + ' + trancheGate + 'h) for every partner.</div>'
+          + '<div style="width:100%;color:var(--faint);font-size:12.5px;">Slug: 2-39 chars, a-z 0-9 _ - only. Editing an existing slug updates it and keeps its stats link. The referral premium is fixed at $' + trancheTrial + ' + $' + trancheHours + ' (trial + ' + trancheGate + 'h) for every partner.</div>'
           + '</div>';
         h += '</div>';
         c.innerHTML = h;
@@ -4782,7 +4782,7 @@
             .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
             .then(function(d){
                 var rows = d.unattributed || [];
-                if (!rows.length) { box.innerHTML = '<span style="color:#999;">Nothing waiting. Everyone who mentioned a source is credited.</span>'; return; }
+                if (!rows.length) { box.innerHTML = '<span style="color:var(--faint);">Nothing waiting. Everyone who mentioned a source is credited.</span>'; return; }
                 var opts = '<option value="">credit to…</option>' + partners.map(function(p){
                     return '<option value="' + esc(p.slug) + '">' + esc(p.name) + '</option>';
                 }).join('');
@@ -4790,11 +4790,11 @@
                     return '<div class="outline-box" style="padding:9px 12px;display:flex;align-items:center;gap:10px;">'
                       + '<div style="flex:1;min-width:0;">'
                       + '<div style="font-size:13px;font-weight:600;">' + esc(r.name || r.email)
-                      + ' <span style="color:#999;font-weight:400;font-size:11.5px;">' + esc(r.status) + '</span></div>'
-                      + '<div style="color:#666;font-size:12px;margin-top:2px;">&ldquo;' + esc(r.heard_via) + '&rdquo;</div>'
+                      + ' <span style="color:var(--faint);font-weight:400;font-size:12.5px;">' + esc(r.status) + '</span></div>'
+                      + '<div style="color:var(--muted);font-size:13px;margin-top:2px;">&ldquo;' + esc(r.heard_via) + '&rdquo;</div>'
                       + '</div>'
-                      + '<select id="attr-sel-' + i + '" style="font-size:12px;padding:4px 6px;border:1px solid #ddd;">' + opts + '</select>'
-                      + '<span data-credit="' + esc(r.email) + '" data-credit-sel="attr-sel-' + i + '" style="cursor:pointer;color:#888;font-size:12px;border:1px solid #ddd;border-radius:4px;padding:4px 10px;white-space:nowrap;">credit</span>'
+                      + '<select id="attr-sel-' + i + '" style="font-size:13px;padding:4px 6px;border:1px solid var(--rule);">' + opts + '</select>'
+                      + '<span data-credit="' + esc(r.email) + '" data-credit-sel="attr-sel-' + i + '" style="cursor:pointer;color:var(--faint);font-size:13px;border:1px solid var(--rule);border-radius:4px;padding:4px 10px;white-space:nowrap;">credit</span>'
                       + '</div>';
                 }).join('') + '</div>';
             })
@@ -4880,7 +4880,7 @@
         var c = document.getElementById('forecast-view');
         c.innerHTML = '<div style="max-width:980px;margin:0 auto;padding:8px 4px 40px;">'
             + '<div class="skel-line short"></div>'
-            + '<div class="skel-block" style="height:280px;background:#f8f8f8;margin-top:14px;"></div></div>';
+            + '<div class="skel-block" style="height:280px;background:var(--paper-soft);margin-top:14px;"></div></div>';
         var qs = [];
         ['target_hours','budget_eur','deadline'].forEach(function(k){
             if (_fcOv[k] !== undefined && _fcOv[k] !== '') qs.push(k + '=' + encodeURIComponent(_fcOv[k]));
@@ -4988,35 +4988,35 @@
 
     function fcSlider(key, label, min, max, step, val, fmt, hint) {
         return '<div style="margin-bottom:16px;">'
-          + '<div style="display:flex;justify-content:space-between;align-items:baseline;font-size:12px;margin-bottom:3px;">'
+          + '<div style="display:flex;justify-content:space-between;align-items:baseline;font-size:13px;margin-bottom:3px;">'
           + '<span style="font-weight:600;">' + label + '</span>'
-          + '<span style="font-variant-numeric:tabular-nums;font-weight:700;">' + fmt(val) + '</span></div>'
+          + '<span style="font-variant-numeric:tabular-nums;font-weight:600;">' + fmt(val) + '</span></div>'
           + '<input type="range" min="' + min + '" max="' + max + '" step="' + step + '" value="' + val + '"'
-          + ' oninput="fcSet(\'' + key + '\', this.value)" style="width:100%;accent-color:#000;">'
-          + (hint ? '<div style="font-size:11px;color:#999;margin-top:2px;">' + hint + '</div>' : '')
+          + ' oninput="fcSet(\'' + key + '\', this.value)" style="width:100%;accent-color:var(--ink);">'
+          + (hint ? '<div style="font-size:12.5px;color:var(--faint);margin-top:2px;">' + hint + '</div>' : '')
           + '</div>';
     }
 
     function renderForecastView() {
         var d = _fcData, p = fcProject(d), m = d.measured;
         var esc = function(x){ return escapeHtml(String(x || '')); };
-        var RED = '#b0242a', GRN = '#1c7a3e', AMB = '#9a6b00';
+        var RED = 'var(--bad)', GRN = 'var(--ok)', AMB = 'var(--warn)';
         var col = p.state === 'clear' ? GRN : p.state === 'marginal' ? AMB : RED;
         var num = 'font-variant-numeric:tabular-nums;';
 
         var h = '<div style="max-width:820px;margin:0 auto;padding:28px 4px 60px;">';
 
-        h += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#999;margin-bottom:22px;">'
+        h += '<div style="font-size:13px;font-weight:500;color:var(--faint);margin-bottom:22px;">'
           + fcNum(d.targets.hours) + ' hours and &euro;' + fcNum(d.targets.budget_eur) + ' by ' + fcDate(d.deadline)
           + ' &nbsp;&middot;&nbsp; ' + d.days_to_deadline + ' days left</div>';
 
         /* ---------- the price, which is the whole question ---------- */
         h += '<div style="display:flex;align-items:flex-end;gap:38px;flex-wrap:wrap;margin-bottom:16px;">';
-        h += '<div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:6px;">An hour costs us</div>'
-          + '<div style="font-size:52px;font-weight:800;line-height:1;letter-spacing:-1px;' + num + 'color:' + col + ';">&euro;' + p.eurPerHour.toFixed(2) + '</div></div>';
-        h += '<div style="width:1px;align-self:stretch;background:#e5e5e5;margin:4px 0 8px;"></div>';
-        h += '<div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:6px;">We can afford</div>'
-          + '<div style="font-size:52px;font-weight:800;line-height:1;letter-spacing:-1px;' + num + '">&euro;' + p.eurPerHourNeeded.toFixed(2) + '</div></div>';
+        h += '<div><div style="font-size:13px;font-weight:500;color:var(--faint);margin-bottom:6px;">An hour costs us</div>'
+          + '<div style="font-size:52px;font-weight:600;line-height:1;' + num + 'color:' + col + ';">&euro;' + p.eurPerHour.toFixed(2) + '</div></div>';
+        h += '<div style="width:1px;align-self:stretch;background:var(--paper-soft);margin:4px 0 8px;"></div>';
+        h += '<div><div style="font-size:13px;font-weight:500;color:var(--faint);margin-bottom:6px;">We can afford</div>'
+          + '<div style="font-size:52px;font-weight:600;line-height:1;' + num + '">&euro;' + p.eurPerHourNeeded.toFixed(2) + '</div></div>';
         h += '</div>';
 
         if (p.state === 'marginal') {
@@ -5034,7 +5034,7 @@
               + 'Too expensive by <b>' + Math.abs(p.margin * 100).toFixed(0) + '%</b>. Spend every euro and we land <b>'
               + fcNum(p.hoursIfSpent) + ' hours</b>, ' + fcNum(p.short) + ' short.</p>';
         }
-        h += '<p style="font-size:13px;line-height:1.5;color:#666;margin:0 0 30px;max-width:640px;">'
+        h += '<p style="font-size:13px;line-height:1.5;color:var(--muted);margin:0 0 30px;max-width:640px;">'
           + 'Hiring more people does not move this. Each one costs &euro;' + fcVal('eur_per_participant_day').toFixed(2)
           + ' a day and makes ' + p.yld.toFixed(2) + ' h, so it moves the hours and the spend together. '
           + 'Only the hours per person change the price.</p>';
@@ -5042,13 +5042,13 @@
         h += fcTimeline(d, p);
 
         /* ---------- what actually decides it ---------- */
-        h += '<div style="border-top:2px solid #000;padding-top:20px;margin-bottom:30px;">';
-        h += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;">'
+        h += '<div style="border-top:1px solid var(--rule-strong);padding-top:20px;margin-bottom:30px;">';
+        h += '<div style="font-size:13px;font-weight:500;margin-bottom:14px;">'
           + (p.state === 'short' ? 'To close the gap' : 'What decides it') + '</div>';
 
         if (p.state === 'short') {
-            h += '<p style="font-size:13px;color:#666;margin:0 0 14px;">Every paying participant goes from ' + p.yld.toFixed(2)
-              + ' to <b style="color:#000;">' + p.yieldBoth.toFixed(2) + ' h a day</b>, up ' + p.yieldLift.toFixed(0) + '%. Either route on its own is enough.</p>';
+            h += '<p style="font-size:13px;color:var(--muted);margin:0 0 14px;">Every paying participant goes from ' + p.yld.toFixed(2)
+              + ' to <b style="color:var(--ink);">' + p.yieldBoth.toFixed(2) + ' h a day</b>, up ' + p.yieldLift.toFixed(0) + '%. Either route on its own is enough.</p>';
             h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">';
             h += fcRoute('More of them record', (fcVal('participation')*100).toFixed(0) + '%', (p.partNeeded*100).toFixed(0) + '%',
                          'of paying participants on a normal day');
@@ -5064,21 +5064,21 @@
             h += fcRisk('The review queue', q.waiting + ' waiting',
                   'Median ' + q.median_age_days + ' days, oldest ' + q.oldest_age_days + '. They cost nothing and record nothing, '
                   + 'so every day they wait is ' + q.hours_per_day_while_they_wait + ' h we never get. '
-                  + fcNum(q.hours_forgone_so_far) + ' h forgone so far.', q.waiting > 10 ? RED : '#111');
+                  + fcNum(q.hours_forgone_so_far) + ' h forgone so far.', q.waiting > 10 ? RED : 'var(--ink)');
             h += fcRisk('What new joins cost',
                   last && first ? '&euro;' + first.eur_per_hour.toFixed(2) + ' &rarr; &euro;' + last.eur_per_hour.toFixed(2) : 'rising',
                   'An hour got dearer every month as the cohort moved off cheap trials onto full monthly rates. '
                   + 'New joiners are landing on the $500 and $1,000 tiers, not $300.', AMB);
             h += fcRisk('September review', '&euro;' + fcNum(m.pending_eur) + ' pending',
                   'Not yet reviewed, so it is an upper bound. In August the review cut six rows by 43%. '
-                  + 'Cutting under-recorders lowers the price directly.', '#111');
+                  + 'Cutting under-recorders lowers the price directly.', 'var(--ink)');
             h += '</div>';
         }
         h += '</div>';
 
         /* ---------- controls ---------- */
-        h += '<div style="border-top:1px solid #e5e5e5;padding-top:22px;">';
-        h += '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#999;margin-bottom:16px;">Change an assumption</div>';
+        h += '<div style="border-top:1px solid var(--rule);padding-top:22px;">';
+        h += '<div style="font-size:13px;font-weight:500;color:var(--faint);margin-bottom:16px;">Change an assumption</div>';
         h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 34px;">';
         h += fcSlider('participation', 'Share recording on a day', 0.1, 1, 0.01, fcVal('participation'),
               function(v){ return (v*100).toFixed(0) + '%'; }, 'measured ' + (m.participation_28d*100).toFixed(0) + '%');
@@ -5093,19 +5093,19 @@
         h += fcSlider('buffer_pct', 'Aim past the target', 0, 30, 1, fcVal('buffer_pct'),
               function(v){ return '+' + Number(v).toFixed(0) + '%'; }, 'chasing ' + fcNum(p.target) + ' h');
         var tbox = function(lab, input) {
-            return '<div><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#aaa;margin-bottom:3px;">' + lab + '</div>' + input + '</div>';
+            return '<div><div style="font-size:13px;color:var(--faint);margin-bottom:3px;">' + lab + '</div>' + input + '</div>';
         };
-        var ib = 'padding:5px 7px;border:1px solid #ddd;font-size:12px;' + num;
+        var ib = 'padding:5px 7px;border:1px solid var(--rule);font-size:13px;' + num;
         h += '<div style="display:flex;align-items:flex-end;gap:10px;padding-bottom:16px;">'
           + tbox('Hours', '<input type="number" value="' + d.targets.hours + '" step="1000" onchange="fcSetServer(\'target_hours\', this.value)" style="width:74px;' + ib + '">')
           + tbox('Budget &euro;', '<input type="number" value="' + d.targets.budget_eur + '" step="10000" onchange="fcSetServer(\'budget_eur\', this.value)" style="width:84px;' + ib + '">')
           + tbox('By', '<input type="date" value="' + d.deadline + '" onchange="fcSetServer(\'deadline\', this.value)" style="' + ib + '">')
-          + '<span onclick="fcReset()" style="cursor:pointer;font-size:12px;color:#888;text-decoration:underline;white-space:nowrap;padding-bottom:6px;">reset</span>'
+          + '<span onclick="fcReset()" style="cursor:pointer;font-size:13px;color:var(--faint);text-decoration:underline;white-space:nowrap;padding-bottom:6px;">reset</span>'
           + '</div>';
         h += '</div></div>';
 
         h += '<div style="margin-top:30px;">'
-          + '<span onclick="fcToggleDetail()" style="cursor:pointer;font-size:12px;color:#888;border-bottom:1px dotted #bbb;">'
+          + '<span onclick="fcToggleDetail()" style="cursor:pointer;font-size:13px;color:var(--faint);border-bottom:1px dotted var(--faint);">'
           + (_fcDetail ? 'Hide the working' : 'Show the working') + '</span>'
           + (_fcDetail ? fcDetail(d, p) : '') + '</div>';
 
@@ -5115,9 +5115,9 @@
 
     function fcRisk(label, figure, note, colour) {
         return '<div class="outline-box" style="padding:14px 16px;">'
-          + '<div style="font-size:12px;font-weight:700;margin-bottom:6px;">' + label + '</div>'
-          + '<div style="font-size:22px;font-weight:800;letter-spacing:-.5px;color:' + colour + ';font-variant-numeric:tabular-nums;">' + figure + '</div>'
-          + '<div style="font-size:11px;color:#888;margin-top:5px;line-height:1.45;">' + note + '</div></div>';
+          + '<div style="font-size:13px;font-weight:600;margin-bottom:6px;">' + label + '</div>'
+          + '<div style="font-size:22px;font-weight:600;color:' + colour + ';font-variant-numeric:tabular-nums;">' + figure + '</div>'
+          + '<div style="font-size:12.5px;color:var(--faint);margin-top:5px;line-height:1.45;">' + note + '</div></div>';
     }
 
     /* Today to the deadline on one line, with the two walls on it. Two dates in
@@ -5127,20 +5127,20 @@
         var T = d.model.T, cov = Date.parse(d.already_paid_through + 'T00:00:00Z');
         var at = function(s){ return s ? (Date.parse(s + 'T00:00:00Z') - cov) / 86400000 / T * 100 : null; };
         var marks = [];
-        if (p.budgetDate !== null) marks.push({ pct: at(p.budgetDate), colour: '#b0242a',
+        if (p.budgetDate !== null) marks.push({ pct: at(p.budgetDate), colour: 'var(--bad)',
             lab: 'Money gone ' + fcDate(p.budgetDate), sub: fcNum(p.hoursAtWall) + ' hours banked by then' });
-        if (p.hoursDate !== null) marks.push({ pct: at(p.hoursDate), colour: '#111',
+        if (p.hoursDate !== null) marks.push({ pct: at(p.hoursDate), colour: 'var(--ink)',
             lab: fcNum(p.target) + ' hours on ' + fcDate(p.hoursDate), sub: 'only if the money lasts that long' });
-        if (!marks.length) marks.push({ pct: 100, colour: '#b0242a',
+        if (!marks.length) marks.push({ pct: 100, colour: 'var(--bad)',
             lab: 'Neither target', sub: 'lands by the deadline on these settings' });
         marks.sort(function(a, b){ return a.pct - b.pct; });
 
         var h = '<div style="position:relative;margin:0 0 30px;">';
-        h += '<div style="display:flex;justify-content:space-between;font-size:11px;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">'
+        h += '<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--faint);margin-bottom:6px;">'
           + '<span>today</span><span>' + fcDate(d.deadline) + '</span></div>';
-        h += '<div style="position:relative;height:10px;background:#f0f0f0;">';
-        var funded = marks[0].colour === '#b0242a' ? marks[0].pct : 100;
-        h += '<div style="position:absolute;left:0;top:0;bottom:0;width:' + funded + '%;background:#111;"></div>';
+        h += '<div style="position:relative;height:10px;background:var(--paper-soft);">';
+        var funded = marks[0].colour === 'var(--bad)' ? marks[0].pct : 100;
+        h += '<div style="position:absolute;left:0;top:0;bottom:0;width:' + funded + '%;background:var(--ink);"></div>';
         marks.forEach(function(mk){
             h += '<div style="position:absolute;top:-5px;bottom:-5px;left:' + mk.pct + '%;width:2px;background:' + mk.colour + ';"></div>';
         });
@@ -5155,8 +5155,8 @@
             var pos = right ? 'right:' + Math.max(0, 100 - mk.pct) + '%;text-align:right;' : 'left:' + mk.pct + '%;';
             h += '<div style="position:relative;height:38px;">'
               + '<div style="position:absolute;top:0;' + pos + 'white-space:nowrap;">'
-              + '<div style="font-size:15px;font-weight:800;color:' + mk.colour + ';">' + mk.lab + '</div>'
-              + '<div style="font-size:12px;color:#888;margin-top:1px;">' + mk.sub + '</div></div></div>';
+              + '<div style="font-size:15px;font-weight:600;color:' + mk.colour + ';">' + mk.lab + '</div>'
+              + '<div style="font-size:13px;color:var(--faint);margin-top:1px;">' + mk.sub + '</div></div></div>';
         });
         h += '</div></div>';
         return h;
@@ -5164,12 +5164,12 @@
 
     function fcRoute(label, from, to, note) {
         return '<div class="outline-box" style="padding:14px 16px;">'
-          + '<div style="font-size:12px;font-weight:700;margin-bottom:8px;">' + label + '</div>'
+          + '<div style="font-size:13px;font-weight:600;margin-bottom:8px;">' + label + '</div>'
           + '<div style="display:flex;align-items:baseline;gap:9px;font-variant-numeric:tabular-nums;">'
-          + '<span style="font-size:19px;color:#aaa;">' + from + '</span>'
-          + '<span style="color:#ccc;">&rarr;</span>'
-          + '<span style="font-size:26px;font-weight:800;letter-spacing:-.5px;">' + to + '</span></div>'
-          + '<div style="font-size:11px;color:#999;margin-top:4px;line-height:1.4;">' + note + '</div></div>';
+          + '<span style="font-size:19px;color:var(--faint);">' + from + '</span>'
+          + '<span style="color:var(--faint);">&rarr;</span>'
+          + '<span style="font-size:26px;font-weight:600;">' + to + '</span></div>'
+          + '<div style="font-size:12.5px;color:var(--faint);margin-top:4px;line-height:1.4;">' + note + '</div></div>';
     }
 
     var _fcDetail = false;
@@ -5178,7 +5178,7 @@
     /* Everything a sceptic needs, and nothing a reader has to walk past. */
     function fcDetail(d, p) {
         var m = d.measured, q = d.review_queue, esc = function(x){ return escapeHtml(String(x || '')); };
-        var h = '<div style="margin-top:18px;font-size:12px;color:#555;line-height:1.6;">';
+        var h = '<div style="margin-top:18px;font-size:13px;color:var(--muted);line-height:1.6;">';
 
         h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;">';
         [['Recorded so far', fcNum(m.total_hours) + ' h', fcNum(m.external_hours) + ' h from participants'],
@@ -5186,9 +5186,9 @@
          ['Hours per head', m.yield_28d.toFixed(2) + ' h/day', '7d ' + m.yield_7d.toFixed(2) + ' &middot; 14d ' + m.yield_14d.toFixed(2)],
          ['Cost per head', '&euro;' + m.eur_per_participant_day.toFixed(2) + '/day', '&euro;' + fcNum(m.spent_eur) + ' paid, &euro;' + fcNum(m.pending_eur) + ' pending']
         ].forEach(function(r){
-            h += '<div><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#aaa;">' + r[0] + '</div>'
-              + '<div style="font-size:18px;font-weight:700;color:#000;font-variant-numeric:tabular-nums;margin:2px 0 1px;">' + r[1] + '</div>'
-              + '<div style="font-size:11px;color:#999;">' + r[2] + '</div></div>';
+            h += '<div><div style="font-size:13px;color:var(--faint);">' + r[0] + '</div>'
+              + '<div style="font-size:18px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;margin:2px 0 1px;">' + r[1] + '</div>'
+              + '<div style="font-size:12.5px;color:var(--faint);">' + r[2] + '</div></div>';
         });
         h += '</div>';
 
@@ -5231,7 +5231,7 @@
               ? 'India is not used as the basis: only ' + d.india.linked + ' are linked, under the ' + d.india.min_linked_required + ' needed, and it is the newest cohort so its average is still depressed by ramp-up.'
               : '') + '</p>';
 
-        h += '<p style="margin:0;color:#999;">Spend counts participant payouts only (&euro;' + fcNum(m.premium_eur)
+        h += '<p style="margin:0;color:var(--faint);">Spend counts participant payouts only (&euro;' + fcNum(m.premium_eur)
           + ' of that is referral premiums), and each row is spread over the days it covers so a trailing window prices exactly. '
           + 'If part of the &euro;' + fcNum(d.targets.budget_eur)
           + ' is meant for anything else, lower the budget box. Payouts already cover us to ' + fcDate(d.already_paid_through)
@@ -5244,7 +5244,7 @@
     function renderFollowupsTab() {
         if (!_isAdmin) return;
         var container = document.getElementById('followups-view');
-        container.innerHTML = '<div class="review-wrap"><div class="outline-box review-card"><div class="skel-line short"></div><div class="skel-block" style="height:200px;background:#f8f8f8;margin-top:14px;"></div></div></div>';
+        container.innerHTML = '<div class="review-wrap"><div class="outline-box review-card"><div class="skel-line short"></div><div class="skel-block" style="height:200px;background:var(--paper-soft);margin-top:14px;"></div></div></div>';
         fetch(ONBOARD_API + '/applicants/followups', { headers: { 'Authorization': 'Bearer ' + _authToken } })
             .then(function(resp){ if (!resp.ok) throw new Error('HTTP ' + resp.status); return resp.json(); })
             .then(function(data){ renderFollowupsView(data); })
@@ -5293,7 +5293,7 @@
     }
 
     function fuSnoozeBtns(email) {
-        var mk = function(d, lab){ return '<span onclick="snoozeApplicant(\'' + email + '\',' + d + ')" style="cursor:pointer;color:#888;font-size:11px;border:1px solid #ddd;border-radius:4px;padding:2px 7px;white-space:nowrap;" title="Pause nudges for ' + lab + ' (e.g. vacation)">zz ' + lab + '</span>'; };
+        var mk = function(d, lab){ return '<span onclick="snoozeApplicant(\'' + email + '\',' + d + ')" style="cursor:pointer;color:var(--faint);font-size:12.5px;border:1px solid var(--rule);border-radius:4px;padding:2px 7px;white-space:nowrap;" title="Pause nudges for ' + lab + ' (e.g. vacation)">zz ' + lab + '</span>'; };
         return '<span style="display:inline-flex;gap:4px;">' + mk(7,'1w') + mk(14,'2w') + mk(30,'1m') + '</span>';
     }
 
@@ -5305,26 +5305,26 @@
 
         var h = '<div style="max-width:860px;margin:0 auto;padding:8px 4px 40px;">';
         h += '<h2 style="font-size:18px;margin:0 0 4px;">Applicant follow-ups</h2>';
-        h += '<p style="color:#666;font-size:13px;margin:0 0 22px;">People we asked or invited who haven\'t resolved. <b>Waiting on you</b> replied and need a human answer; <b>nudged</b> are on the auto-nudge track (2 nudges, then they lapse); <b>no reply yet</b> have heard nothing back from us since. Everyone here is asked or invited, so for decided, rejected or lapsed applicants use the <b>Applicants</b> tab.</p>';
+        h += '<p style="color:var(--muted);font-size:13px;margin:0 0 22px;">People we asked or invited who haven\'t resolved. <b>Waiting on you</b> replied and need a human answer; <b>nudged</b> are on the auto-nudge track (2 nudges, then they lapse); <b>no reply yet</b> have heard nothing back from us since. Everyone here is asked or invited, so for decided, rejected or lapsed applicants use the <b>Applicants</b> tab.</p>';
 
-        if (_fuLast) h += '<div class="outline-box" style="padding:10px 14px;margin-bottom:16px;font-size:13px;">' + esc(_fuLast.verb) + ': ' + esc(_fuLast.email) + '. Sends in 10 minutes. <span onclick="fuUndo()" style="cursor:pointer;text-decoration:underline;font-weight:700;">Undo</span></div>';
-        h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#c0392b;margin:0 0 10px;">Waiting on you (' + wy.length + ')</div>';
+        if (_fuLast) h += '<div class="outline-box" style="padding:10px 14px;margin-bottom:16px;font-size:13px;">' + esc(_fuLast.verb) + ': ' + esc(_fuLast.email) + '. Sends in 10 minutes. <span onclick="fuUndo()" style="cursor:pointer;text-decoration:underline;font-weight:600;">Undo</span></div>';
+        h += '<div style="font-size:13px;font-weight:500;color:var(--bad);margin:0 0 10px;">Waiting on you (' + wy.length + ')</div>';
         if (!wy.length) {
-            h += '<p style="color:#999;font-size:13px;margin:0 0 26px;">Nobody waiting. Nice.</p>';
+            h += '<p style="color:var(--faint);font-size:13px;margin:0 0 26px;">Nobody waiting. Nice.</p>';
         } else {
             h += '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:28px;">';
             wy.forEach(function(r){
                 h += '<div class="outline-box" style="padding:12px 14px;display:flex;align-items:center;gap:12px;">'
                   + '<div style="flex:1;min-width:0;">'
-                  + '<div style="font-weight:650;">' + esc(r.name || r.email) + ' <span style="color:#999;font-weight:400;font-size:12px;">' + esc(r.email) + '</span></div>'
-                  + '<div style="color:#666;font-size:12px;margin-top:2px;">' + esc(r.status) + (r.tier ? ' &middot; ' + esc(r.tier) : '') + ' &middot; replied ' + fuDays(r.last_inbound_at) + '</div>'
-                  + (r.blurb ? '<div style="color:#888;font-size:12px;margin-top:4px;">' + esc(r.blurb) + '</div>' : '')
+                  + '<div style="font-weight:650;">' + esc(r.name || r.email) + ' <span style="color:var(--faint);font-weight:400;font-size:13px;">' + esc(r.email) + '</span></div>'
+                  + '<div style="color:var(--muted);font-size:13px;margin-top:2px;">' + esc(r.status) + (r.tier ? ' &middot; ' + esc(r.tier) : '') + ' &middot; replied ' + fuDays(r.last_inbound_at) + '</div>'
+                  + (r.blurb ? '<div style="color:var(--faint);font-size:13px;margin-top:4px;">' + esc(r.blurb) + '</div>' : '')
                   + '</div>'
                   + fuSnoozeBtns(r.email)
                   + (r.status === 'asked'
                       ? '<span onclick="fuDecide(\'' + esc(r.email) + '\',\'accept\',\'standard\')" class="review-btn rb-accept" style="cursor:pointer;padding:8px 12px;white-space:nowrap;" title="Accept at the standard tier; the onboarding link goes out after the 10-minute undo window">Accept</span>'
                         + '<span onclick="fuDecide(\'' + esc(r.email) + '\',\'accept\',\'top\')" class="review-btn rb-accept" style="cursor:pointer;padding:8px 12px;white-space:nowrap;" title="Accept at the top tier (PhD and above)">Accept top</span>'
-                        + '<span onclick="fuDecide(\'' + esc(r.email) + '\',\'reject\')" class="review-btn" style="cursor:pointer;padding:8px 12px;white-space:nowrap;border:1px solid #c0392b;color:#c0392b;" title="Standard decline email, sent after the 10-minute undo window">Reject</span>'
+                        + '<span onclick="fuDecide(\'' + esc(r.email) + '\',\'reject\')" class="review-btn" style="cursor:pointer;border-radius:3px;padding:8px 12px;white-space:nowrap;border:1px solid var(--bad);color:var(--bad);" title="Standard decline email, sent after the 10-minute undo window">Reject</span>'
                       : '')
                   + '<a href="' + mailto(r, 'Re: your crowd-cast application') + '" class="review-btn rb-accept" style="text-decoration:none;padding:8px 16px;white-space:nowrap;">Reply</a>'
                   + '</div>';
@@ -5332,57 +5332,57 @@
             h += '</div>';
         }
 
-        h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#e67e22;margin:0 0 10px;">Nudged, awaiting them (' + nu.length + ')</div>';
+        h += '<div style="font-size:13px;font-weight:500;color:var(--warn);margin:0 0 10px;">Nudged, awaiting them (' + nu.length + ')</div>';
         if (!nu.length) {
-            h += '<p style="color:#999;font-size:13px;margin:0 0 26px;">None on the nudge track yet.</p>';
+            h += '<p style="color:var(--faint);font-size:13px;margin:0 0 26px;">None on the nudge track yet.</p>';
         } else {
             h += '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:28px;">';
             nu.forEach(function(r){
                 var lapsing = r.nudges_sent >= 2;
-                h += '<div class="outline-box" style="padding:10px 14px;display:flex;align-items:center;gap:12px;' + (lapsing ? 'border-color:#e0b0b0;' : '') + '">'
+                h += '<div class="outline-box" style="padding:10px 14px;display:flex;align-items:center;gap:12px;' + (lapsing ? 'border-color:rgba(183,54,30,0.35);' : '') + '">'
                   + '<div style="flex:1;min-width:0;">'
-                  + '<div style="font-weight:600;font-size:14px;">' + esc(r.name || r.email) + ' <span style="color:#999;font-weight:400;font-size:12px;">' + esc(r.email) + '</span></div>'
-                  + '<div style="color:#666;font-size:12px;margin-top:2px;">' + esc(r.status) + ' &middot; nudge ' + r.nudges_sent + ' sent ' + fuDays(r.last_nudge_at) + (lapsing ? ' &middot; <span style="color:#c0392b;">lapsing soon</span>' : '') + '</div>'
+                  + '<div style="font-weight:600;font-size:14px;">' + esc(r.name || r.email) + ' <span style="color:var(--faint);font-weight:400;font-size:13px;">' + esc(r.email) + '</span></div>'
+                  + '<div style="color:var(--muted);font-size:13px;margin-top:2px;">' + esc(r.status) + ' &middot; nudge ' + r.nudges_sent + ' sent ' + fuDays(r.last_nudge_at) + (lapsing ? ' &middot; <span style="color:var(--bad);">lapsing soon</span>' : '') + '</div>'
                   + '</div>'
                   + fuSnoozeBtns(r.email)
-                  + '<a href="' + mailto(r, 'Re: your crowd-cast application') + '" style="text-decoration:none;color:#888;font-size:12px;white-space:nowrap;">email &rarr;</a>'
+                  + '<a href="' + mailto(r, 'Re: your crowd-cast application') + '" style="text-decoration:none;color:var(--faint);font-size:13px;white-space:nowrap;">email &rarr;</a>'
                   + '</div>';
             });
             h += '</div>';
         }
 
-        h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#b08800;margin:0 0 10px;">No reply yet (' + qt.length + ')</div>';
+        h += '<div style="font-size:13px;font-weight:500;color:var(--warn);margin:0 0 10px;">No reply yet (' + qt.length + ')</div>';
         if (!qt.length) {
-            h += '<p style="color:#999;font-size:13px;margin:0 0 26px;">Nobody sitting silent.</p>';
+            h += '<p style="color:var(--faint);font-size:13px;margin:0 0 26px;">Nobody sitting silent.</p>';
         } else {
-            h += '<p style="color:#666;font-size:12px;margin:0 0 10px;">Asked or invited, no answer, and no nudge has gone out. These used to appear nowhere at all. Auto-nudging is still switched off, so this list only shrinks when you email them.</p>';
+            h += '<p style="color:var(--muted);font-size:13px;margin:0 0 10px;">Asked or invited, no answer, and no nudge has gone out. These used to appear nowhere at all. Auto-nudging is still switched off, so this list only shrinks when you email them.</p>';
             h += '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:28px;">';
             qt.forEach(function(r){
                 h += '<div class="outline-box" style="padding:10px 14px;display:flex;align-items:center;gap:12px;">'
                   + '<div style="flex:1;min-width:0;">'
-                  + '<div style="font-weight:600;font-size:14px;">' + esc(r.name || r.email) + ' <span style="color:#999;font-weight:400;font-size:12px;">' + esc(r.email) + '</span></div>'
-                  + '<div style="color:#666;font-size:12px;margin-top:2px;">' + esc(r.status) + (r.tier ? ' &middot; ' + esc(r.tier) : '') + ' &middot; we wrote ' + fuDays(r.executed_at || r.decided_at) + '</div>'
+                  + '<div style="font-weight:600;font-size:14px;">' + esc(r.name || r.email) + ' <span style="color:var(--faint);font-weight:400;font-size:13px;">' + esc(r.email) + '</span></div>'
+                  + '<div style="color:var(--muted);font-size:13px;margin-top:2px;">' + esc(r.status) + (r.tier ? ' &middot; ' + esc(r.tier) : '') + ' &middot; we wrote ' + fuDays(r.executed_at || r.decided_at) + '</div>'
                   + '</div>'
                   + fuSnoozeBtns(r.email)
-                  + '<a href="' + mailto(r, 'Re: your crowd-cast application') + '" style="text-decoration:none;color:#888;font-size:12px;white-space:nowrap;">email &rarr;</a>'
+                  + '<a href="' + mailto(r, 'Re: your crowd-cast application') + '" style="text-decoration:none;color:var(--faint);font-size:13px;white-space:nowrap;">email &rarr;</a>'
                   + '</div>';
             });
             h += '</div>';
         }
 
-        h += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin:0 0 10px;">Snoozed (' + sz.length + ')</div>';
+        h += '<div style="font-size:13px;font-weight:500;color:var(--faint);margin:0 0 10px;">Snoozed (' + sz.length + ')</div>';
         if (!sz.length) {
-            h += '<p style="color:#999;font-size:13px;margin:0 0 26px;">Nobody snoozed. Use the zz buttons when someone says they\'re away (vacation etc.), no nudges until they wake.</p>';
+            h += '<p style="color:var(--faint);font-size:13px;margin:0 0 26px;">Nobody snoozed. Use the zz buttons when someone says they\'re away (vacation etc.), no nudges until they wake.</p>';
         } else {
             h += '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:28px;">';
             sz.forEach(function(r){
                 var until = r.snooze_until ? new Date(r.snooze_until).toLocaleDateString() : '?';
                 h += '<div class="outline-box" style="padding:10px 14px;display:flex;align-items:center;gap:12px;opacity:0.7;">'
                   + '<div style="flex:1;min-width:0;">'
-                  + '<div style="font-weight:600;font-size:14px;">' + esc(r.name || r.email) + ' <span style="color:#999;font-weight:400;font-size:12px;">' + esc(r.email) + '</span></div>'
-                  + '<div style="color:#666;font-size:12px;margin-top:2px;">' + esc(r.status) + ' &middot; sleeping until ' + until + '</div>'
+                  + '<div style="font-weight:600;font-size:14px;">' + esc(r.name || r.email) + ' <span style="color:var(--faint);font-weight:400;font-size:13px;">' + esc(r.email) + '</span></div>'
+                  + '<div style="color:var(--muted);font-size:13px;margin-top:2px;">' + esc(r.status) + ' &middot; sleeping until ' + until + '</div>'
                   + '</div>'
-                  + '<span onclick="snoozeApplicant(\'' + r.email + '\',0)" style="cursor:pointer;color:#888;font-size:12px;border:1px solid #ddd;border-radius:4px;padding:3px 10px;white-space:nowrap;">wake now</span>'
+                  + '<span onclick="snoozeApplicant(\'' + r.email + '\',0)" style="cursor:pointer;color:var(--faint);font-size:13px;border:1px solid var(--rule);border-radius:4px;padding:3px 10px;white-space:nowrap;">wake now</span>'
                   + '</div>';
             });
             h += '</div>';
@@ -5413,21 +5413,21 @@
        "All". already_actioned is the big one (the pre-automation applicants
        reconcile_queue.py backfilled) and would have been invisible here. */
     var APP_STATUSES = [
-        ['new',              'New',          '#b08800'],
-        ['needs_review',     'Needs review', '#b08800'],
-        ['decided',          'Decided',      '#7a5cc0'],
-        ['invited',          'Invited',      '#2ea043'],
-        ['asked',            'Asked',        '#0066cc'],
-        ['rejected',         'Rejected',     '#cf222e'],
-        ['lapsed',           'Lapsed',       '#999999'],
-        ['already_actioned', 'Pre-automation', '#777777'],
-        ['(none)',           'No status',    '#bbbbbb']
+        ['new',              'New',          'var(--warn)'],
+        ['needs_review',     'Needs review', 'var(--warn)'],
+        ['decided',          'Decided',      'var(--steel)'],
+        ['invited',          'Invited',      'var(--ok)'],
+        ['asked',            'Asked',        'var(--steel-dark)'],
+        ['rejected',         'Rejected',     'var(--bad)'],
+        ['lapsed',           'Lapsed',       'var(--faint)'],
+        ['already_actioned', 'Pre-automation', 'var(--muted)'],
+        ['(none)',           'No status',    'var(--faint)']
     ];
 
     function appStatusMeta(s) {
         var key = s || '(none)';
         for (var i = 0; i < APP_STATUSES.length; i++) if (APP_STATUSES[i][0] === key) return APP_STATUSES[i];
-        return [key, key, '#666'];
+        return [key, key, 'var(--muted)'];
     }
     function appStatusColor(s) { return appStatusMeta(s)[2]; }
     function appStatusLabel(s) { return appStatusMeta(s)[1]; }
@@ -5443,7 +5443,7 @@
         if (!c) return;
         c.innerHTML = '<div style="max-width:1100px;margin:0 auto;padding:8px 4px 40px;">' +
             '<div class="outline-box" style="padding:20px;"><div class="skel-line short"></div>' +
-            '<div class="skel-block" style="height:320px;background:#f8f8f8;margin-top:14px;"></div></div></div>';
+            '<div class="skel-block" style="height:320px;background:var(--paper-soft);margin-top:14px;"></div></div></div>';
         fetch(ONBOARD_API + '/applicants/all', { headers: { 'Authorization': 'Bearer ' + _authToken } })
             .then(function(resp){ if (!resp.ok) throw new Error('HTTP ' + resp.status); return resp.json(); })
             .then(function(data){
@@ -5509,9 +5509,9 @@
 
         var h = '<div style="max-width:1100px;margin:0 auto;padding:8px 4px 40px;">';
         h += '<h2 style="font-size:18px;margin:0 0 4px;">Applicants</h2>';
-        h += '<p style="color:#666;font-size:13px;margin:0 0 16px;">Everyone who ever applied, whatever happened to them. Read-only: decisions still happen on the <b>Review</b> tab, where the drafted email and the 10-minute undo live.</p>';
+        h += '<p style="color:var(--muted);font-size:13px;margin:0 0 16px;">Everyone who ever applied, whatever happened to them. Read-only: decisions still happen on the <b>Review</b> tab, where the drafted email and the 10-minute undo live.</p>';
         if (_appsTrimmed) {
-            h += '<div style="border:1px solid #b08800;color:#8a6a00;padding:8px 10px;margin-bottom:14px;font-size:12px;">'
+            h += '<div style="border:1px solid var(--warn);color:var(--warn);padding:8px 10px;margin-bottom:14px;font-size:13px;">'
                + 'The list outgrew the response limit, so summaries and reasoning are cut to 240 characters here. Nothing is lost in the database.</div>';
         }
 
@@ -5523,12 +5523,12 @@
         var chip = function(key, label, color){
             var on = _appsFilter === key;
             var n = counts[key] || 0;
-            return '<span onclick="setAppsFilter(\'' + key + '\')" style="cursor:pointer;font-size:11px;font-weight:700;'
-                 + 'text-transform:uppercase;letter-spacing:1px;padding:5px 11px;border:1px solid '
-                 + (on ? '#000' : '#ddd') + ';background:' + (on ? '#000' : '#fff') + ';color:'
-                 + (on ? '#fff' : color) + ';">' + label + ' ' + n + '</span>';
+            return '<span onclick="setAppsFilter(\'' + key + '\')" style="cursor:pointer;font-size:12.5px;font-weight:600;'
+                 + 'padding:5px 11px;border:1px solid '
+                 + (on ? 'var(--ink)' : 'var(--rule)') + ';background:' + (on ? 'var(--ink)' : 'var(--paper)') + ';color:'
+                 + (on ? 'var(--paper)' : color) + ';">' + label + ' ' + n + '</span>';
         };
-        h += chip('all', 'All', '#000');
+        h += chip('all', 'All', 'var(--ink)');
         /* Known statuses first, in lifecycle order, then anything unexpected,
            so a status the code has never heard of still gets a chip. Only
            statuses actually present are shown: a row of zeroes is noise. */
@@ -5537,22 +5537,22 @@
             if (counts[s[0]]) { seen[s[0]] = 1; h += chip(s[0], s[1], s[2]); }
         });
         Object.keys(counts).sort().forEach(function(k){
-            if (k !== 'all' && !seen[k]) h += chip(k, k, '#666');
+            if (k !== 'all' && !seen[k]) h += chip(k, k, 'var(--muted)');
         });
         h += '</div>';
 
         h += '<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">';
         h += '<input id="apps-search" type="text" value="' + esc(_appsQuery) + '" oninput="onAppsSearch(this.value)" '
            + 'placeholder="search name, email, what they work on..." '
-           + 'style="flex:1;min-width:240px;padding:8px 10px;border:1px solid #ddd;font-size:13px;font-family:inherit;">';
-        h += '<span onclick="downloadApplicantsCsv()" style="cursor:pointer;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:8px 14px;border:1px solid #000;white-space:nowrap;">Download CSV</span>';
+           + 'style="flex:1;min-width:240px;padding:8px 10px;border:1px solid var(--rule);font-size:13px;font-family:inherit;">';
+        h += '<span onclick="downloadApplicantsCsv()" style="cursor:pointer;border-radius:3px;font-size:13px;font-weight:500;padding:8px 14px;border:1px solid var(--ink);white-space:nowrap;">Download CSV</span>';
         h += '</div>';
 
-        h += '<div style="font-size:12px;color:#999;margin-bottom:8px;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;">'
+        h += '<div style="font-size:13px;color:var(--faint);margin-bottom:8px;font-variant-numeric:tabular-nums;">'
            + rows.length + ' of ' + _appsAll.length + ' shown</div>';
 
         if (!rows.length) {
-            h += '<div class="outline-box" style="padding:40px;text-align:center;color:#999;font-size:13px;">Nothing matches.</div></div>';
+            h += '<div class="outline-box" style="padding:40px;text-align:center;color:var(--faint);font-size:13px;">Nothing matches.</div></div>';
             c.innerHTML = h;
             return;
         }
@@ -5560,38 +5560,38 @@
         /* The table scrolls inside its own box so the page never scrolls sideways. */
         h += '<div class="outline-box" style="overflow-x:auto;">';
         h += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
-        h += '<thead><tr style="border-bottom:1px solid #000;text-align:left;">'
-           + '<th style="padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Name</th>'
-           + '<th style="padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Status</th>'
-           + '<th style="padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Verdict</th>'
-           + '<th style="padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Applied</th>'
-           + '<th style="padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Decided</th>'
-           + '<th style="padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Heard via</th>'
+        h += '<thead><tr style="border-bottom:1px solid var(--ink);text-align:left;">'
+           + '<th style="padding:9px 12px;font-size:13px;">Name</th>'
+           + '<th style="padding:9px 12px;font-size:13px;">Status</th>'
+           + '<th style="padding:9px 12px;font-size:13px;">Verdict</th>'
+           + '<th style="padding:9px 12px;font-size:13px;">Applied</th>'
+           + '<th style="padding:9px 12px;font-size:13px;">Decided</th>'
+           + '<th style="padding:9px 12px;font-size:13px;">Heard via</th>'
            + '</tr></thead><tbody>';
 
         rows.forEach(function(a){
             var open = !!_appsOpen[a.email];
             var flagged = (a.fraud_flags || []).length > 0;
-            h += '<tr onclick="toggleAppRow(' + a._idx + ')" style="cursor:pointer;border-bottom:1px solid #eee;' + (open ? 'background:#fafafa;' : '') + '">'
+            h += '<tr onclick="toggleAppRow(' + a._idx + ')" style="cursor:pointer;border-bottom:1px solid var(--rule);' + (open ? 'background:var(--paper-soft);' : '') + '">'
                + '<td style="padding:9px 12px;">'
-                 + '<span style="color:#999;margin-right:6px;">' + (open ? '&#9662;' : '&#9656;') + '</span>'
+                 + '<span style="color:var(--faint);margin-right:6px;">' + (open ? '&#9662;' : '&#9656;') + '</span>'
                  + '<b>' + esc(appName(a) || '(no name)') + '</b>'
-                 + (flagged ? ' <span title="fraud flags" style="color:#cf222e;">&#9873;</span>' : '')
-                 + '<div style="color:#999;font-size:12px;margin-left:18px;">' + esc(a.email) + '</div>'
+                 + (flagged ? ' <span title="fraud flags" style="color:var(--bad);">&#9873;</span>' : '')
+                 + '<div style="color:var(--faint);font-size:13px;margin-left:18px;">' + esc(a.email) + '</div>'
                + '</td>'
                + '<td style="padding:9px 12px;white-space:nowrap;color:' + appStatusColor(a.status) + ';font-weight:650;">' + esc(appStatusLabel(a.status))
-                 + (a.awaiting === 'you' ? '<div style="color:#c0392b;font-size:11px;font-weight:400;">replied</div>' : '')
-                 + (a.nudges_sent ? '<div style="color:#999;font-size:11px;font-weight:400;">' + a.nudges_sent + ' nudge(s)</div>' : '')
+                 + (a.awaiting === 'you' ? '<div style="color:var(--bad);font-size:12.5px;font-weight:400;">replied</div>' : '')
+                 + (a.nudges_sent ? '<div style="color:var(--faint);font-size:12.5px;font-weight:400;">' + a.nudges_sent + ' nudge(s)</div>' : '')
                  /* For the pre-automation rows this is the only record of what
                     happened, so it belongs in the collapsed row, not buried. */
-                 + (a.skip_reason ? '<div style="color:#888;font-size:11px;font-weight:400;white-space:normal;max-width:190px;">' + esc(a.skip_reason) + '</div>' : '')
+                 + (a.skip_reason ? '<div style="color:var(--faint);font-size:12.5px;font-weight:400;white-space:normal;max-width:190px;">' + esc(a.skip_reason) + '</div>' : '')
                + '</td>'
-               + '<td style="padding:9px 12px;white-space:nowrap;color:#666;">' + esc(a.tier || '')
-                 + (a.identity_confidence ? '<div style="color:#999;font-size:11px;">id: ' + esc(a.identity_confidence) + '</div>' : '')
+               + '<td style="padding:9px 12px;white-space:nowrap;color:var(--muted);">' + esc(a.tier || '')
+                 + (a.identity_confidence ? '<div style="color:var(--faint);font-size:12.5px;">id: ' + esc(a.identity_confidence) + '</div>' : '')
                + '</td>'
-               + '<td style="padding:9px 12px;white-space:nowrap;color:#666;">' + esc(appDate(a.timestamp)) + '</td>'
-               + '<td style="padding:9px 12px;white-space:nowrap;color:#666;">' + esc(appDate(a.executed_at || a.decided_at)) + '</td>'
-               + '<td style="padding:9px 12px;color:#666;">' + esc((a.heard_via || '').slice(0, 40)) + '</td>'
+               + '<td style="padding:9px 12px;white-space:nowrap;color:var(--muted);">' + esc(appDate(a.timestamp)) + '</td>'
+               + '<td style="padding:9px 12px;white-space:nowrap;color:var(--muted);">' + esc(appDate(a.executed_at || a.decided_at)) + '</td>'
+               + '<td style="padding:9px 12px;color:var(--muted);">' + esc((a.heard_via || '').slice(0, 40)) + '</td>'
                + '</tr>';
 
             if (!open) return;
@@ -5600,20 +5600,20 @@
                way it did months later. */
             var d = '';
             if ((a.fraud_flags || []).length) {
-                d += '<div style="border:1px solid #cf222e;color:#cf222e;padding:8px 10px;margin-bottom:12px;font-size:12px;">'
+                d += '<div style="border:1px solid var(--bad);color:var(--bad);padding:8px 10px;margin-bottom:12px;font-size:13px;">'
                    + '<b>Fraud flags:</b> ' + esc((a.fraud_flags || []).join(' | ')) + '</div>';
             }
             if ((a.links || []).length) {
                 d += '<div style="margin-bottom:12px;display:flex;flex-wrap:wrap;gap:6px 14px;">';
                 (a.links || []).forEach(function(l){
-                    d += '<a href="' + esc(l) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:12px;color:#0066cc;">' + esc(l.replace(/^https?:\/\//, '').slice(0, 60)) + '</a>';
+                    d += '<a href="' + esc(l) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:13px;color:var(--steel-dark);">' + esc(l.replace(/^https?:\/\//, '').slice(0, 60)) + '</a>';
                 });
                 d += '</div>';
             }
             var field = function(label, val){
                 if (!val) return '';
-                return '<div style="margin-bottom:10px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:3px;">'
-                     + label + '</div><div style="font-size:13px;line-height:1.55;color:#222;white-space:pre-wrap;">' + esc(val) + '</div></div>';
+                return '<div style="margin-bottom:10px;"><div style="font-size:13px;font-weight:500;color:var(--faint);margin-bottom:3px;">'
+                     + label + '</div><div style="font-size:13px;line-height:1.55;color:var(--ink);white-space:pre-wrap;">' + esc(val) + '</div></div>';
             };
             d += field('What they work on', a.work_summary || a.blurb);
             d += field('Why the agent said ' + (a.tier || 'that'), a.reasoning);
@@ -5632,13 +5632,13 @@
             if (a.lapsed_at) meta.push('lapsed ' + a.lapsed_at.slice(0, 10) + (a.prev_status ? ' (was ' + a.prev_status + ')' : ''));
             if (a.partner_slug) meta.push('partner: ' + a.partner_slug);
             if (meta.length) {
-                d += '<div style="font-size:11px;color:#999;font-family:\'SF Mono\',SFMono-Regular,Menlo,Consolas,monospace;margin-top:12px;">'
+                d += '<div style="font-size:12.5px;color:var(--faint);font-variant-numeric:tabular-nums;margin-top:12px;">'
                    + esc(meta.join('  ·  ')) + '</div>';
             }
             d += '<div style="margin-top:12px;"><a href="mailto:' + encodeURIComponent(a.email) + '?subject=' + encodeURIComponent('Re: your crowd-cast application')
-               + '" onclick="event.stopPropagation()" style="font-size:12px;color:#0066cc;">email them &rarr;</a></div>';
+               + '" onclick="event.stopPropagation()" style="font-size:13px;color:var(--steel-dark);">email them &rarr;</a></div>';
 
-            h += '<tr style="background:#fafafa;border-bottom:1px solid #eee;"><td colspan="6" style="padding:6px 12px 18px 30px;">' + d + '</td></tr>';
+            h += '<tr style="background:var(--paper-soft);border-bottom:1px solid var(--rule);"><td colspan="6" style="padding:6px 12px 18px 30px;">' + d + '</td></tr>';
         });
 
         h += '</tbody></table></div></div>';
@@ -5680,7 +5680,7 @@
         if (_nudgeLoading) return;
         _nudgeLoading = true;
         container.innerHTML = '<div class="review-wrap"><div class="outline-box review-card">' +
-            '<div class="skel-line short"></div><div class="skel-block" style="height:240px;background:#f8f8f8;margin-top:14px;"></div></div></div>';
+            '<div class="skel-line short"></div><div class="skel-block" style="height:240px;background:var(--paper-soft);margin-top:14px;"></div></div></div>';
         fetch(ONBOARD_API + '/participants/nudges', { headers: { 'Authorization': 'Bearer ' + _authToken } })
             .then(function(resp){ if (!resp.ok) throw new Error('HTTP ' + resp.status); return resp.json(); })
             .then(function(data){
@@ -5780,7 +5780,7 @@
         var bodyText = n.email_body || '';
         var label = '(click to expand / edit)';
         return '<div class="review-email-box">' +
-                '<div class="review-email-toggle" onclick="toggleReviewEmail(this)"><span>Drafted nudge <span style="color:#999;font-weight:400;text-transform:none;letter-spacing:0;">' + label + '</span></span><span class="rem-caret">+</span></div>' +
+                '<div class="review-email-toggle" onclick="toggleReviewEmail(this)"><span>Drafted nudge <span style="color:var(--faint);font-weight:400;text-transform:none;letter-spacing:0;">' + label + '</span></span><span class="rem-caret">+</span></div>' +
                 '<div class="review-email-body" style="display:none;">' +
                     '<input class="review-email-subject" value="' + escapeHtml(subj) + '" readonly>' +
                     '<textarea class="review-email-textarea" id="nudge-body">' + escapeHtml(bodyText) + '</textarea>' +
