@@ -761,6 +761,45 @@
         }
 
         tr.guest-rest td { font-weight: 500; border-top: 1px solid var(--rule-strong); border-bottom: 0; }
+
+        /* =================================================================
+           Signed-in views. Everything below is scoped to body:not(.is-guest)
+           or to elements that only exist/show when signed in, so the public
+           (signed-out) page is untouched.
+           ================================================================= */
+        body.is-guest .signed-in-only { display: none !important; }
+
+        /* A small grey tag after a label, like "128 active this week". */
+        .tag:not(:empty) {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 10px;
+            padding: 0 6px;
+            border-radius: 4px;
+            background: var(--paper-soft);
+            color: var(--ink);
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .tag:empty { display: none; }
+
+        /* Head row (signed in): title, run status and update time on the left. */
+        .dash-head { justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px 24px; }
+        .dash-status { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 16px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+        .dash-status .dash-title { font-size: 28px; font-weight: 500; line-height: 1.1; color: var(--ink); margin: 0; }
+        #header-status { color: var(--ink); }
+
+        /* Pipeline run status dot */
+        .status-ok { background: var(--ok); }
+        .status-error { background: var(--bad); }
+        .status-unknown { background: var(--faint); }
+
+        .dash-foot { margin-top: 32px; font-size: 13px; color: var(--muted); }
+        .dash-foot a { color: var(--ink); border-bottom: 1px solid var(--rule-strong); text-decoration: none; }
+        .dash-foot a:hover { color: var(--signal); border-color: currentColor; }
+
+        /* Long category/app lists scroll inside their pane. */
+        body:not(.is-guest) #action-bars { max-height: 420px; overflow-y: auto; padding-right: 4px; }
     </style>
 </head>
 <body>
@@ -784,6 +823,12 @@
 
             <!-- Header -->
             <div class="dash-head">
+                <!-- Signed in only (the whole row is hidden for guests): page title, pipeline run status, exact update time -->
+                <div class="dash-status">
+                    <h1 class="dash-title">crowd-cast</h1>
+                    <span id="header-status"></span>
+                    <span id="header-updated-exact"></span>
+                </div>
                 <div class="header-meta">
                     <span id="auth-area">
                         <a class="header-docs" href="/docs/crowd-cast/">Documentation</a>
@@ -862,11 +907,11 @@
                 <div class="hero-stats outline-box">
                     <div class="card stat-row hero-total">
                         <div class="card-value" id="card-hours">--</div>
-                        <div class="stat-meta"><span class="card-label">Hours recorded</span><span class="card-sub" id="card-minutes-sub"></span></div>
+                        <div class="stat-meta"><span class="card-label">Hours recorded</span><span class="card-sub" id="card-minutes-sub"></span><span class="tag signed-in-only" id="card-minutes-total"></span></div>
                     </div>
                     <div class="card stat-row">
                         <div class="card-value" id="card-sessions">--</div>
-                        <div class="stat-meta"><span class="card-label">Sessions</span></div>
+                        <div class="stat-meta"><span class="card-label">Sessions</span><span class="tag signed-in-only" id="card-segments-sub"></span></div>
                     </div>
                     <div class="card stat-row">
                         <div class="card-value" id="card-users">--</div>
@@ -874,7 +919,7 @@
                     </div>
                     <div class="card stat-row">
                         <div class="card-value" id="card-actions">--</div>
-                        <div class="stat-meta"><span class="card-label">Action steps</span></div>
+                        <div class="stat-meta"><span class="card-label">Action steps</span><span class="tag signed-in-only" id="card-actions-sub"></span></div>
                     </div>
                     <p id="header-updated"></p>
                 </div>
@@ -983,6 +1028,9 @@
 
             <!-- Partner referrals (admin only): podcasts/newsletters + bounty ledger -->
             <div id="partners-view" style="display:none;"></div>
+
+            <!-- Signed in only: the crowd-cast tagline that used to close the page -->
+            <p class="dash-foot signed-in-only"><a href="https://pdoom.org/docs/crowd-cast/" target="_blank" rel="noopener">crowd-cast</a>: Crowd-Sourcing Action-Annotated Long-Horizon Digital Labour.</p>
 
         </div>
     </div>
@@ -1132,12 +1180,23 @@
         const updatedEl = document.getElementById('header-updated');
         updatedEl.textContent = meta.generated_at ? 'Updated ' + fmtUpdated(meta.generated_at) : '';
         updatedEl.title = meta.generated_at ? new Date(meta.generated_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : '';
+        /* Signed in (the row is hidden for guests): pipeline run status and the exact update time. */
+        const statusOk = j.last_run_status === 'ok';
+        const dotClass = j.last_run_status ? (statusOk ? 'status-ok' : 'status-error') : 'status-unknown';
+        document.getElementById('header-status').innerHTML =
+            '<span class="status-dot ' + dotClass + '"></span>' +
+            (j.last_run_status ? escapeHtml(j.last_run_status.toUpperCase()) : 'UNKNOWN');
+        document.getElementById('header-updated-exact').textContent =
+            meta.generated_at ? 'Updated ' + meta.generated_at : '';
 
         /* -- Summary cards -- */
         document.getElementById('card-hours').textContent = fmtDec(t.estimated_hours, 1);
         document.getElementById('card-minutes-sub').textContent = fmt(Math.round(t.estimated_minutes || 0)) + ' minutes';
+        /* Signed in only (hidden for guests): the details the headline numbers used to carry. */
+        document.getElementById('card-minutes-total').textContent = fmt(Math.round(t.estimated_minutes || 0)) + ' minutes';
 
         document.getElementById('card-sessions').textContent = fmt(t.sessions);
+        document.getElementById('card-segments-sub').textContent = fmt(t.recording_segments) + ' segments';
 
         /* Deduplicate users: merge UUIDs that share an email (from auth data). */
         const _seenEmails = new Set();
@@ -1164,6 +1223,7 @@
         subEl.title = activeRecent.n + ' of ' + activeRecent.total + ' recorded at least once in the last 7 days';
 
         document.getElementById('card-actions').textContent = fmt(t.action_steps_total);
+        document.getElementById('card-actions-sub').textContent = fmt(t.events_total) + ' raw events';
 
         /* -- Daily trend chart -- */
         renderTrend(perUserDaily);
@@ -1326,7 +1386,15 @@
         if (delta === null) hoursSub.appendChild(document.createTextNode('+' + fmt(Math.round(last7)) + ' h in the last 7 days'));
         hoursSub.title = '+' + fmt(Math.round(last7)) + ' h in the last 7 days' +
             (prev7 !== null ? ', ' + fmt(Math.round(prev7)) + ' h in the 7 days before' : '');
-        document.getElementById('trend-note').textContent = '';
+        /* Signed in: the full note under the chart (hours, peak headcount, change). */
+        var noteText = '';
+        if (!_isGuest) {
+            var peak = 0;
+            for (var pi = Math.max(0, n - 7); pi < n; pi++) peak = Math.max(peak, people[pi] || 0);
+            noteText = 'Last 7 days: ' + (Math.round(last7 * 10) / 10) + ' h from up to ' + peak + ' people' +
+                (delta === null ? '' : ', ' + (delta >= 0 ? '+' : '') + delta + '% vs the 7 days before');
+        }
+        document.getElementById('trend-note').textContent = noteText;
     }
 
     /* ---- Action donut (with drill-down) ---- */
@@ -1508,6 +1576,7 @@
                 '<span class="bar-value"></span>';
             row.querySelector('.bar-label').textContent = it.label;
             row.querySelector('.bar-value').textContent = it.valueText;
+            if (it.title) row.title = it.title;
             el.appendChild(row);
         });
     }
@@ -1548,13 +1617,15 @@
         document.getElementById('action-detail-table').style.display = 'none';
 
         showActionBars(true);
+        /* Signed in: every category (0% ones too) with its hours on hover, as the doughnut had. */
         renderBarList(document.getElementById('action-bars'), sorted.map(function(e) {
             return {
                 label: e[0], value: e[1],
                 valueText: Math.round(e[1] / total * 100) + '%',
+                title: _isGuest ? '' : e[0] + ': ' + (e[1] / 3600).toFixed(1) + 'h',
                 onClick: function() { _drillIntoCategory(e[0]); },
             };
-        }).filter(function(it) { return it.valueText !== '0%'; }));
+        }).filter(function(it) { return !_isGuest || it.valueText !== '0%'; }));
     }
 
     var _cachedCatApps = {};
@@ -1570,8 +1641,10 @@
         document.getElementById('action-back-btn').onclick = function(e) { e.preventDefault(); _drawCategoryDonut(); };
 
         showActionBars(true);
-        renderBarList(document.getElementById('action-bars'), sorted.slice(0, 10).map(function(e) {
-            return { label: e[0], value: e[1], valueText: Math.round(e[1] / total * 100) + '%' };
+        /* Signed in: every app in the category, with its hours on hover. */
+        renderBarList(document.getElementById('action-bars'), (_isGuest ? sorted.slice(0, 10) : sorted).map(function(e) {
+            return { label: e[0], value: e[1], valueText: Math.round(e[1] / total * 100) + '%',
+                     title: _isGuest ? '' : e[0] + ': ' + (e[1] / 3600).toFixed(1) + 'h' };
         }));
     }
 
