@@ -789,6 +789,44 @@
         .dash-status .dash-title { font-size: 28px; font-weight: 500; line-height: 1.1; color: var(--ink); margin: 0; }
         #header-status { color: var(--ink); }
 
+        /* Right side: Documentation and Sign out as the same white outline buttons,
+           the signed-in name as plain muted text between them. */
+        .dash-head #auth-area { gap: 12px; flex-wrap: wrap; }
+        .dash-head #auth-user:not([style*="none"]) { display: inline-flex !important; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .dash-head #auth-user-name { font-size: 14px; color: var(--muted); }
+        .dash-head .sign-out {
+            display: inline-flex;
+            align-items: center;
+            height: 40px;
+            padding: 0 16px;
+            margin: 0;
+            font-size: 14px;
+            color: var(--ink);
+            background: #fff;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+        }
+        .dash-head .sign-out:hover { color: var(--ink); border-color: var(--ink); }
+
+        /* Numbers (signed in): no headline beside them, so they span the page
+           in one pane, four across; the relative update time sits above. */
+        body:not(.is-guest) .hero { display: block; margin: 0 0 16px; }
+        body:not(.is-guest) .hero-main { display: none; }
+        body:not(.is-guest) .hero-stats.outline-box {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px 32px;
+            padding: 22px 28px 26px;
+        }
+        body:not(.is-guest) #header-updated { position: static; grid-column: 1 / -1; order: -1; margin: 0; }
+        body:not(.is-guest) .stat-meta { gap: 6px 0; }
+        @media (max-width: 1100px) {
+            body:not(.is-guest) .hero-stats.outline-box { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 560px) {
+            body:not(.is-guest) .hero-stats.outline-box { grid-template-columns: 1fr; gap: 16px; padding: 20px; }
+        }
+
         /* Pipeline run status dot */
         .status-ok { background: var(--ok); }
         .status-error { background: var(--bad); }
