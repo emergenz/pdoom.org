@@ -827,6 +827,13 @@
             body:not(.is-guest) .hero-stats.outline-box { grid-template-columns: 1fr; gap: 16px; padding: 20px; }
         }
 
+        /* Tabs: on phones they wrap onto a second line instead of running off
+           the edge half-cut (every tab and its count stays visible). */
+        @media (max-width: 760px) {
+            #dashboard-tabs { white-space: normal; overflow: visible; }
+            #dashboard-tabs .tab-btn { margin-right: 18px; padding: 8px 0; white-space: nowrap; }
+        }
+
         /* Pipeline run status dot */
         .status-ok { background: var(--ok); }
         .status-error { background: var(--bad); }
@@ -2452,38 +2459,38 @@
             allEl.style.overflow = 'hidden';
         }
         document.getElementById('tab-my').style.borderBottomColor = tab === 'my' ? 'var(--ink)' : 'transparent';
-        document.getElementById('tab-my').style.color = tab === 'my' ? 'var(--ink)' : 'var(--faint)';
+        document.getElementById('tab-my').style.color = tab === 'my' ? 'var(--ink)' : 'var(--muted)';
         document.getElementById('tab-all').style.borderBottomColor = tab === 'all' ? 'var(--ink)' : 'transparent';
-        document.getElementById('tab-all').style.color = tab === 'all' ? 'var(--ink)' : 'var(--faint)';
+        document.getElementById('tab-all').style.color = tab === 'all' ? 'var(--ink)' : 'var(--muted)';
         document.getElementById('tab-participants').style.borderBottomColor = tab === 'participants' ? 'var(--ink)' : 'transparent';
-        document.getElementById('tab-participants').style.color = tab === 'participants' ? 'var(--ink)' : 'var(--faint)';
+        document.getElementById('tab-participants').style.color = tab === 'participants' ? 'var(--ink)' : 'var(--muted)';
         document.getElementById('tab-payouts').style.borderBottomColor = tab === 'payouts' ? 'var(--ink)' : 'transparent';
-        document.getElementById('tab-payouts').style.color = tab === 'payouts' ? 'var(--ink)' : 'var(--faint)';
+        document.getElementById('tab-payouts').style.color = tab === 'payouts' ? 'var(--ink)' : 'var(--muted)';
         var revTab = document.getElementById('tab-review');
         revTab.style.borderBottomColor = tab === 'review' ? 'var(--ink)' : 'transparent';
-        revTab.style.color = tab === 'review' ? 'var(--ink)' : 'var(--faint)';
+        revTab.style.color = tab === 'review' ? 'var(--ink)' : 'var(--muted)';
         var nudgeTab = document.getElementById('tab-nudges');
         nudgeTab.style.borderBottomColor = tab === 'nudges' ? 'var(--ink)' : 'transparent';
-        nudgeTab.style.color = tab === 'nudges' ? 'var(--ink)' : 'var(--faint)';
+        nudgeTab.style.color = tab === 'nudges' ? 'var(--ink)' : 'var(--muted)';
         var followTab = document.getElementById('tab-followups');
         if (followTab) {
             followTab.style.borderBottomColor = tab === 'followups' ? 'var(--ink)' : 'transparent';
-            followTab.style.color = tab === 'followups' ? 'var(--ink)' : 'var(--faint)';
+            followTab.style.color = tab === 'followups' ? 'var(--ink)' : 'var(--muted)';
         }
         var appsTab = document.getElementById('tab-applicants');
         if (appsTab) {
             appsTab.style.borderBottomColor = tab === 'applicants' ? 'var(--ink)' : 'transparent';
-            appsTab.style.color = tab === 'applicants' ? 'var(--ink)' : 'var(--faint)';
+            appsTab.style.color = tab === 'applicants' ? 'var(--ink)' : 'var(--muted)';
         }
         var partnersTab = document.getElementById('tab-partners');
         if (partnersTab) {
             partnersTab.style.borderBottomColor = tab === 'partners' ? 'var(--ink)' : 'transparent';
-            partnersTab.style.color = tab === 'partners' ? 'var(--ink)' : 'var(--faint)';
+            partnersTab.style.color = tab === 'partners' ? 'var(--ink)' : 'var(--muted)';
         }
         var fcTab = document.getElementById('tab-forecast');
         if (fcTab) {
             fcTab.style.borderBottomColor = tab === 'forecast' ? 'var(--ink)' : 'transparent';
-            fcTab.style.color = tab === 'forecast' ? 'var(--ink)' : 'var(--faint)';
+            fcTab.style.color = tab === 'forecast' ? 'var(--ink)' : 'var(--muted)';
         }
         if (tab === 'my') renderMyOverview();
         if (tab === 'participants') renderParticipantsView();
