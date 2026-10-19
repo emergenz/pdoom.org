@@ -819,7 +819,10 @@
             padding: 22px 28px 26px;
         }
         body:not(.is-guest) #header-updated { position: static; grid-column: 1 / -1; order: -1; margin: 0; }
-        body:not(.is-guest) .stat-meta { gap: 6px 0; }
+        /* Tags after a label wrap flush left: spacing comes from the gap, not margins. */
+        body:not(.is-guest) .stat-meta { gap: 6px 10px; }
+        body:not(.is-guest) .stat-meta > *,
+        body:not(.is-guest) .stat-meta .delta { margin-left: 0 !important; }
         @media (max-width: 1100px) {
             body:not(.is-guest) .hero-stats.outline-box { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
@@ -831,7 +834,7 @@
            the edge half-cut (every tab and its count stays visible). */
         @media (max-width: 760px) {
             #dashboard-tabs { white-space: normal; overflow: visible; }
-            #dashboard-tabs .tab-btn { margin-right: 18px; padding: 8px 0; white-space: nowrap; }
+            #dashboard-tabs .tab-btn { margin-right: 18px; padding: 7px 0; line-height: 1.4; white-space: nowrap; }
         }
 
         /* My overview: four numbers in one pane, like the numbers pane. */
