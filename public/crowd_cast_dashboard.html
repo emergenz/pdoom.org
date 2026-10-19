@@ -2752,7 +2752,7 @@
         /* Unified onboarded participants (rendered async by fetchPendingReview) */
         html += '<div id="pending-review" style="margin-bottom:28px;"></div>';
 
-        html += _buildParticipantSection('ADMINS', admins, 'admin');
+        html += _buildParticipantSection('Admins', admins, 'admin');
         container.innerHTML = html;
 
         /* Fetch pending onboarded participants */
@@ -3157,7 +3157,7 @@
             html += '</td>';
             var isPremium = p.payout_type === 'referral_premium';
             var displayName = isPremium ? (p.recipient_name || p.partner_slug || p.participant_id) : (part.name || p.participant_id);
-            html += '<td style="padding:7px 12px;font-size:13px;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--rule);">' + escapeHtml(displayName) + (isPremium ? ' <span style="background:var(--steel);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;vertical-align:1px;">REFERRER</span>' : '') + '</td>';
+            html += '<td style="padding:7px 12px;font-size:13px;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--rule);">' + escapeHtml(displayName) + (isPremium ? ' <span style="background:var(--steel);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;vertical-align:1px;">Referrer</span>' : '') + '</td>';
             html += '<td style="padding:7px 12px;font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted);border-bottom:1px solid var(--rule);">' + escapeHtml(p.period_start) + ' to ' + escapeHtml(p.period_end) + '</td>';
             html += '<td style="padding:7px 12px;font-size:13px;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--rule);">' + typeLabel + '</td>';
             html += '<td style="padding:7px 12px;font-size:13px;font-variant-numeric:tabular-nums;text-align:right;border-bottom:1px solid var(--rule);">' + (isPremium ? '\u2014' : p.days) + '</td>';
@@ -3185,10 +3185,10 @@
             html += '</td>';
             html += '<td style="padding:7px 12px;font-size:12.5px;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--rule);">';
             html += '<span style="color:' + statusColor + ';font-weight:500;">' + escapeHtml(p.status) + '</span>';
-            if (isOverdue) html += ' <span style="background:var(--bad);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;">OVERDUE</span>';
-            else if (isDueSoon) html += ' <span style="background:var(--warn);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;">DUE SOON</span>';
-            if (isScaRetry) html += ' <span style="background:var(--warn);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;">AWAITING SCA</span>';
-            if (isGated) html += ' <span style="background:var(--faint);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;">RE-ACCEPT PENDING</span><br><span style="color:var(--faint);font-size:11.5px;text-transform:none;">' + termsStatusLabel(part) + '</span>';
+            if (isOverdue) html += ' <span style="background:var(--bad);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;">Overdue</span>';
+            else if (isDueSoon) html += ' <span style="background:var(--warn);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;">Due soon</span>';
+            if (isScaRetry) html += ' <span style="background:var(--warn);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;">Awaiting SCA</span>';
+            if (isGated) html += ' <span style="background:var(--faint);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;">Re-accept pending</span><br><span style="color:var(--faint);font-size:11.5px;text-transform:none;">' + termsStatusLabel(part) + '</span>';
             if (p.terms_override_by) html += '<br><span style="color:var(--faint);font-size:11.5px;text-transform:none;">paid without re-accept, by ' + escapeHtml(p.terms_override_by) + '</span>';
             if (p.approved_by) html += '<br><span style="color:var(--faint);font-size:11.5px;">by ' + escapeHtml(p.approved_by) + '</span>';
             if (p.merged_into) html += '<br><span style="color:var(--faint);font-size:11.5px;">into ' + escapeHtml(p.merged_into) + '</span>';
@@ -3230,7 +3230,7 @@
             html += '<td style="' + tdH + 'text-align:right;font-size:13px;">' + hp.days + '</td>';
             html += '<td style="' + tdH + '"></td>';
             html += '<td style="' + tdH + 'text-align:right;font-size:13px;">' + hsym + Number(hp.amount).toFixed(2) + '</td>';
-            html += '<td style="' + tdH + 'font-size:12.5px;"><span style="font-weight:500;">held</span> <span style="background:var(--faint);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;">RE-ACCEPT PENDING</span><br><span style="font-size:11.5px;">' + termsStatusLabel(hpart) + '. Created once they accept.</span></td>';
+            html += '<td style="' + tdH + 'font-size:12.5px;"><span style="font-weight:500;">held</span> <span style="background:var(--faint);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;">Re-accept pending</span><br><span style="font-size:11.5px;">' + termsStatusLabel(hpart) + '. Created once they accept.</span></td>';
             html += '<td style="' + tdH + '"></td>';
             html += '</tr>';
         }
@@ -3296,7 +3296,7 @@
             summaryDiv.innerHTML = (summaryHint ? '<div style="font-size:13px;font-variant-numeric:tabular-nums;padding:8px 0;color:var(--warn);">' + (overdueCount > 0 ? '<span style="color:var(--bad);">' + summaryHint + '</span>' : summaryHint) + '</div>' : '') +
             '<div style="display:flex;gap:12px;align-items:center;padding:12px 0;">' +
                 '<div id="payout-summary-text" style="font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted);">Select payouts to approve</div>' +
-                '<span id="confirm-payouts-btn" style="display:none;font-size:13px;font-weight:500;padding:8px 20px;border:1px solid var(--ok);background:var(--ok);color:var(--paper);cursor:pointer;border-radius:3px;font-variant-numeric:tabular-nums;">Confirm and Send</span>' +
+                '<span id="confirm-payouts-btn" style="display:none;font-size:13px;font-weight:500;padding:8px 20px;border:1px solid var(--ok);background:var(--ok);color:var(--paper);cursor:pointer;border-radius:3px;font-variant-numeric:tabular-nums;">Confirm and send</span>' +
                 '<span id="reject-payouts-btn" style="display:none;font-size:13px;font-weight:500;padding:8px 20px;border:1px solid var(--bad);background:var(--paper);color:var(--bad);cursor:pointer;border-radius:3px;font-variant-numeric:tabular-nums;">Reject</span>' +
             '</div>';
 
@@ -3895,7 +3895,7 @@
 
             var html = '<div class="outline-box" style="padding:24px;">';
             html += '<div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:14px;">';
-            html += 'Onboarded Participants (' + all.length + ')';
+            html += 'Onboarded participants (' + all.length + ')';
             if (pendingCount > 0) html += ' &middot; <span style="color:var(--warn);">' + pendingCount + ' pending review</span>';
             html += '</div>';
             html += _buildUnifiedOnboardTable(all);
@@ -3960,7 +3960,7 @@
                     var pid = btn.dataset.id;
                     var action = btn.dataset.action;
                     var actionLabel = action.charAt(0).toUpperCase() + action.slice(1);
-                    showConfirmModal(actionLabel + ' Participant', actionLabel + ' participant ' + pid + '?', function() {
+                    showConfirmModal(actionLabel + ' participant', actionLabel + ' participant ' + pid + '?', function() {
                         btn.textContent = '...';
                         btn.style.pointerEvents = 'none';
                         fetch(ONBOARD_API + '/review', {
@@ -4002,7 +4002,7 @@
                         .catch(function(err) { console.error('Status update failed:', err); btn.textContent = label; btn.style.pointerEvents = ''; });
                     };
                     if (newStatus === 'active') {
-                        showConfirmModal(label + ' Participant', label + ' participant ' + pid + '?', function() { apply({ participant_id: pid, status: newStatus }); });
+                        showConfirmModal(label + ' participant', label + ' participant ' + pid + '?', function() { apply({ participant_id: pid, status: newStatus }); });
                         return;
                     }
                     // Pause/end: ask for the last paid day, preview the pending-row cuts, then confirm.
@@ -4018,7 +4018,7 @@
                         });
                         var msg = label + ' ' + pid + ', paid through ' + prev.last_paid_day + '.\n\n' +
                             (lines.length ? 'Pending payouts cut:\n' + lines.join('\n') : 'No pending payouts to cut.');
-                        showConfirmModal(label + ' Participant', msg, function() { apply(body); });
+                        showConfirmModal(label + ' participant', msg, function() { apply(body); });
                     }).catch(function(err) { alert('Preview failed: ' + err); });
                 });
             });
@@ -4183,13 +4183,13 @@
             /* Agreement status label */
             var agreementLabel, agreementColor;
             if (p.status === 'onboarded') {
-                agreementLabel = 'PENDING';
+                agreementLabel = 'Pending';
                 agreementColor = 'var(--warn)';
             } else if (p.status === 'active' || p.status === 'paused') {
-                agreementLabel = 'SIGNED';
+                agreementLabel = 'Signed';
                 agreementColor = 'var(--ok)';
             } else {
-                agreementLabel = 'ENDED';
+                agreementLabel = 'Ended';
                 agreementColor = 'var(--faint)';
             }
 
@@ -4274,7 +4274,7 @@
             var compTier = p.comp_tier || '';
             var compStatus, compColor;
             if (!compTier) { compStatus = 'Legacy ($300/mo USD)'; compColor = 'var(--faint)'; }
-            else if (p.dpa_accepted_at) { compStatus = 'ACTIVE: ' + compTier + ' (region rate)'; compColor = 'var(--ok)'; }
+            else if (p.dpa_accepted_at) { compStatus = 'Active: ' + compTier + ' (region rate)'; compColor = 'var(--ok)'; }
             else if (p.reconsent_pending) { compStatus = compTier + ' set, DPA re-issued, awaiting acceptance'; compColor = 'var(--warn)'; }
             else { compStatus = compTier + ' set, DPA not re-issued yet'; compColor = 'var(--warn)'; }
             html += '<div style="background:var(--paper-soft);padding:0 20px 16px;">';
