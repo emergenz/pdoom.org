@@ -37,15 +37,10 @@ const shouldRenderSearch =
 </div>
 
 <script>
-  const storageKey = 'pdoom-paid-data-announcement-dismissed';
+  // Not persisted: a reload brings the announcement back.
   const dismissButton = document.querySelector('[data-dismiss-paid-announcement]');
 
   dismissButton?.addEventListener('click', () => {
-    try {
-      localStorage.setItem(storageKey, '1');
-    } catch {
-      // Dismissal still applies for the current page.
-    }
     document.documentElement.classList.add('paid-announcement-dismissed');
   });
 </script>

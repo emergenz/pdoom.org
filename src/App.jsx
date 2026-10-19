@@ -95,7 +95,8 @@ const readyCards = [
     tags: ['Human work', 'Month-long horizons', 'Passive recordings'],
     body: 'Capture months-long human computer work as aligned streams of video and human inputs.',
     links: [
-      { label: 'crowd-cast', href: '/research/crowd-cast/' },
+      { label: 'Contribute recordings', href: '/careers/paid-data-collection/' },
+      { label: 'Dashboard', href: '/crowd_cast_dashboard.html' },
       { label: 'AGI-CAST', href: '/research/agi-cast/' },
     ],
     cta: 'Read the project',
@@ -303,12 +304,8 @@ function AnnouncementBar() {
     () => !document.documentElement.classList.contains('paid-announcement-dismissed'),
   )
 
+  // Not persisted: a reload brings the announcement back.
   const dismiss = () => {
-    try {
-      localStorage.setItem('pdoom-paid-data-announcement-dismissed', '1')
-    } catch {
-      // Dismissal still applies for the current page when storage is unavailable.
-    }
     document.documentElement.classList.add('paid-announcement-dismissed')
     setVisible(false)
   }
@@ -738,7 +735,7 @@ function ReadySection() {
                   </div>
                   <div className="ready-card-actions">
                     <div className="ready-links">
-                      {card.links.map((link) => <a href={link.href} key={link.label}><ArrowRight size={14} />{link.label}</a>)}
+                      {card.links.map((link) => <a href={link.href} key={link.label}>{link.label}</a>)}
                     </div>
                     <a className="button button--primary" href={card.ctaHref}>{card.cta}<ArrowRight size={16} /></a>
                   </div>

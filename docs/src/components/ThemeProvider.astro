@@ -3,14 +3,6 @@ import { Icon } from '@astrojs/starlight/components';
 ---
 
 <script is:inline>
-  try {
-    if (localStorage.getItem('pdoom-paid-data-announcement-dismissed') === '1') {
-      document.documentElement.classList.add('paid-announcement-dismissed');
-    }
-  } catch {
-    // The announcement remains available when storage is blocked.
-  }
-
   window.StarlightThemeProvider = (() => {
     const storedTheme =
       typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
