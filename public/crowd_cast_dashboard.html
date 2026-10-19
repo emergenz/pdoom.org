@@ -859,6 +859,37 @@
         .user-detail-stat-label { font-size: 14px; color: var(--muted); margin-top: 4px; }
         #user-work-profile .outline-box { margin-bottom: 0; }
 
+        /* Admin views: page headings as panel-title size, regular weight. */
+        #followups-view h2, #applicants-view h2, #partners-view h2 { font-size: 20px !important; font-weight: 400; }
+
+        /* Payouts: the wide table scrolls inside its pane instead of the page. */
+        #payouts-table { overflow-x: auto; }
+        #payouts-table table { min-width: 980px; }
+
+        /* Participants: the invite field never pushes past the pane. */
+        #invite-input-wrap { flex-wrap: wrap; }
+        #invite-input-wrap input { max-width: 100%; box-sizing: border-box; }
+
+        /* Dialogs (built by the JS): panel corners, tighter padding on phones. */
+        body > div[style*="z-index:9999"] > div { border-radius: 10px !important; }
+
+        @media (max-width: 640px) {
+            /* Rows with a text block and buttons side by side: the text gets
+               the full width and the buttons wrap under it. */
+            #followups-view .outline-box[style*="display:flex"],
+            #partners-view .outline-box[style*="display:flex"],
+            #partners-view div[style*="display:flex;align-items:center;gap:10px"] { flex-wrap: wrap; }
+            #followups-view .outline-box[style*="display:flex"] > div:first-child,
+            #partners-view .outline-box[style*="display:flex"] > div:first-child { flex: 1 1 100% !important; }
+            #unattributed-list select { flex: 1 1 auto; min-width: 0; }
+
+            /* Forecast: side-by-side cards and sliders stack. */
+            #forecast-view div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+            #forecast-view div[style*="align-items:flex-end;gap:10px"] { flex-wrap: wrap; }
+
+            body > div[style*="z-index:9999"] > div { padding: 22px !important; }
+        }
+
         /* Pipeline run status dot */
         .status-ok { background: var(--ok); }
         .status-error { background: var(--bad); }
