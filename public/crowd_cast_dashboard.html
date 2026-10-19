@@ -834,6 +834,31 @@
             #dashboard-tabs .tab-btn { margin-right: 18px; padding: 8px 0; white-space: nowrap; }
         }
 
+        /* My overview: four numbers in one pane, like the numbers pane. */
+        .my-stats.outline-box {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px 32px;
+            padding: 24px 28px;
+            margin-bottom: 16px;
+        }
+        .my-stats .card { padding: 0; margin: 0; }
+        @media (max-width: 900px) { .my-stats.outline-box { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 560px) { .my-stats.outline-box { gap: 16px 20px; padding: 20px; } .my-stats .stat-row .card-value { font-size: 26px; } }
+        .stat-meta .tag:not(:empty) { font-size: inherit; }
+
+        /* Panels and their titles, everywhere signed in. */
+        body:not(.is-guest) .outline-box { background: rgba(255, 255, 255, 0.55); border-radius: 10px; }
+        body:not(.is-guest) .outline-box .outline-box { background: transparent; }
+        body:not(.is-guest) .section-title { font-size: 20px; font-weight: 400; }
+        .weekly-summary { margin: -4px 0 14px; }
+
+        /* Per-person drill-down: number first, label under it. */
+        .user-detail-stat { flex-direction: column-reverse; justify-content: flex-end; }
+        .user-detail-stat-value { font-size: 30px; line-height: 1.15; }
+        .user-detail-stat-label { font-size: 14px; color: var(--muted); margin-top: 4px; }
+        #user-work-profile .outline-box { margin-bottom: 0; }
+
         /* Pipeline run status dot */
         .status-ok { background: var(--ok); }
         .status-error { background: var(--bad); }
@@ -904,31 +929,28 @@
 
             <!-- My overview (only visible when logged in) -->
             <div id="my-overview" style="display:none;">
-                <div class="cards">
-                    <div class="card outline-box">
-                        <div class="card-label">Your hours</div>
+                <!-- Same shape as the numbers pane: big number, then one muted line (label + grey tag). -->
+                <div class="my-stats outline-box">
+                    <div class="card stat-row">
                         <div class="card-value" id="my-hours">--</div>
-                        <div class="card-sub" id="my-hours-sub"></div>
+                        <div class="stat-meta"><span class="card-label">Your hours</span><span class="tag" id="my-hours-sub"></span></div>
                     </div>
-                    <div class="card outline-box">
-                        <div class="card-label">Visible</div>
+                    <div class="card stat-row">
                         <div class="card-value" id="my-visible">--</div>
-                        <div class="card-sub" id="my-visible-sub"></div>
+                        <div class="stat-meta"><span class="card-label">Visible</span><span class="tag" id="my-visible-sub"></span></div>
                     </div>
-                    <div class="card outline-box">
-                        <div class="card-label">Days active</div>
+                    <div class="card stat-row">
                         <div class="card-value" id="my-days-active">--</div>
-                        <div class="card-sub" id="my-days-active-sub"></div>
+                        <div class="stat-meta"><span class="card-label">Days active</span><span class="tag" id="my-days-active-sub"></span></div>
                     </div>
-                    <div class="card outline-box">
-                        <div class="card-label">Your rank</div>
+                    <div class="card stat-row">
                         <div class="card-value" id="my-rank">--</div>
-                        <div class="card-sub" id="my-rank-sub"></div>
+                        <div class="stat-meta"><span class="card-label">Your rank</span><span class="tag" id="my-rank-sub"></span></div>
                     </div>
                 </div>
-                <div id="my-weekly-summary" class="weekly-summary"></div>
                 <div class="outline-box" style="padding:22px;">
                     <span class="section-title">Contribution history</span>
+                    <div id="my-weekly-summary" class="weekly-summary"></div>
                     <div id="my-heatmap"></div>
                 </div>
                 <div class="outline-box" style="padding:22px;">
@@ -2383,9 +2405,14 @@
             '<span>More</span>' +
             '</div>';
 
-        container.innerHTML = monthHtml +
-            '<div class="heatmap-scroll" style="display:flex;">' + dayLabelsHtml + gridHtml + '</div>' +
+        /* Month labels scroll with the grid (on phones they used to stick out past
+           the pane), and a long history opens on its most recent weeks. */
+        container.innerHTML =
+            '<div class="heatmap-scroll">' + monthHtml +
+            '<div style="display:flex;">' + dayLabelsHtml + gridHtml + '</div></div>' +
             legendHtml;
+        var hmScroll = container.querySelector('.heatmap-scroll');
+        if (hmScroll) hmScroll.scrollLeft = hmScroll.scrollWidth;
     }
 
     /* ---- Health panel ---- */
