@@ -5642,12 +5642,18 @@
     function caseOutcomeMail(c, choice) {
         var hi = caseFirst(c) ? 'Hi ' + caseFirst(c) + ',' : 'Hey,';
         var noReply = c.status !== 'answered';
-        if (choice === 'keep') return noReply ? '' : hi + '\n\nthanks for explaining, that makes sense. Carry on as you are.\n\nMihir';
+        // A kept reapplication was never about the recordings; a kept off-topic case was.
+        if (choice === 'keep') return noReply ? '' : hi + '\n\nthanks for explaining, that makes sense. ' +
+            (c.type === 'reapplied' ? 'Carry on as you are.' : 'From here on, please keep the recordings to your own research or project work.') + '\n\nMihir';
         var silent = c.status === 'expired';
         if (choice === 'end_nopay') return hi + '\n\n' + (silent ? 'since I didn\'t hear back, ' : '') +
-            'we\'re ending your crowd-cast participation as of today. Your application didn\'t mention the earlier one, so there\'s no payment, and we\'ll delete your recordings. You can uninstall the recorder.\n\nMihir';
+            'we\'re ending your crowd-cast participation as of today. ' +
+            (c.type === 'reapplied' ? 'Your two applications described different work, and the recordings don\'t match what you applied with. '
+                                    : 'The recordings don\'t match the work you applied with. ') +
+            'So there\'s no payment, and we\'ll delete your recordings. You can uninstall the recorder.\n\nMihir';
+        // No promise of a quality adjustment here: automatic banding is off (REVIEW_BANDS).
         return hi + '\n\n' + (silent ? 'since I didn\'t hear back, ' : c.status === 'answered' ? 'thanks for getting back to me. ' : '') +
-            'we\'re ending your crowd-cast participation as of today, since the recordings aren\'t the kind of work we can use for the dataset. You\'ll be paid for the days up to today, adjusted for how much of it was usable research work, with the next payout run. You can uninstall the recorder.\n\nThanks for taking part.\n\nMihir';
+            'we\'re ending your crowd-cast participation as of today, since the recordings aren\'t the kind of work we can use for the dataset. You\'ll be paid for the days up to today with the next payout run. You can uninstall the recorder.\n\nThanks for taking part.\n\nMihir';
     }
     function renderCasesTab() {
         if (!_isAdmin) return;
