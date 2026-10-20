@@ -3643,7 +3643,8 @@
             var evf = pf.evidence || {};
             if (payoutIds.indexOf(pf.payout_id) < 0 || !evf.risk_tags || seenPid[pf.participant_id]) continue;
             seenPid[pf.participant_id] = true;
-            if (evf.risk_tags.split(',').indexOf('SCAM') >= 0) anyScam = true;
+            // Tags the server refuses without CONFIRM FLAGGED (applyIntegrityGate in the onboard Lambda).
+            if (evf.risk_tags.split(',').some(function(t) { return ['SCAM', 'OTHER PLATFORM', 'AUTOMATION', 'BOT?'].indexOf(t) >= 0; })) anyScam = true;
             var whoF = (_payoutsParticipants[pf.participant_id] || {}).name || pf.participant_id;
             flagRows += '<div style="margin-bottom:8px;"><strong>' + escapeHtml(whoF) + '</strong>' + riskChips(evf.risk_tags, evf.risk_reasons)
                 + '<div style="color:var(--muted);white-space:pre-line;margin-top:2px;">' + escapeHtml(evf.risk_reasons || '') + '</div></div>';
@@ -3667,7 +3668,7 @@
             '<div style="font-size:14px;margin-bottom:8px;"><strong>' + payoutIds.length + ' payouts</strong> totaling <strong>' + _fmtCurTotals(_payoutCurTotals(payoutIds)) + '</strong></div>' +
             '<div style="font-size:13px;color:var(--muted);margin-bottom:20px;">This will generate Auszahlungsbelege and email them to participants.</div>' +
             flagBlock + notesBlock +
-            '<div style="font-size:13px;margin-bottom:16px;">Type <strong>' + phrase + '</strong> to proceed' + (anyScam ? ' (a SCAM-tagged payee is selected)' : '') + ':</div>' +
+            '<div style="font-size:13px;margin-bottom:16px;">Type <strong>' + phrase + '</strong> to proceed' + (anyScam ? ' (a payee tagged SCAM, OTHER PLATFORM, AUTOMATION or BOT? is selected)' : '') + ':</div>' +
             '<input type="text" id="confirm-input" style="width:100%;font-size:14px;font-variant-numeric:tabular-nums;padding:8px 12px;border:1px solid var(--rule-strong);margin-bottom:20px;outline:none;" placeholder="' + phrase + '">' +
             '<div style="display:flex;gap:8px;justify-content:flex-end;">' +
                 '<span id="modal-cancel" style="font-size:13px;font-weight:500;padding:8px 20px;border:1px solid var(--ink);cursor:pointer;border-radius:3px;">Cancel</span>' +
@@ -3708,7 +3709,7 @@
                 body: JSON.stringify({ payout_ids: payoutIds, terms_override_ids: payoutIds.filter(function(id) {
                     var cb = document.querySelector('.payout-checkbox[data-id="' + id + '"]');
                     return cb && cb.dataset.override === '1';
-                }) })
+                }), integrity_override_ids: phrase === 'CONFIRM FLAGGED' ? payoutIds : [] })
             })
             .then(function(resp) { return resp.json(); })
             .then(function(data) {
@@ -3718,6 +3719,8 @@
                 if (held.length) alert(held.length + ' payout(s) not paid: waiting on re-accept of the new terms.');
                 var onHold = (data.results || []).filter(function(r) { return r.held; });
                 if (onHold.length) alert(onHold.length + ' payout(s) not paid, on hold:\n' + onHold.map(function(r) { return r.payout_id + ': ' + r.error; }).join('\n'));
+                var gatedI = (data.results || []).filter(function(r) { return r.integrity_gated; });
+                if (gatedI.length) alert(gatedI.length + ' payout(s) not paid by the integrity gate:\n' + gatedI.map(function(r) { return r.payout_id + ': ' + r.error; }).join('\n'));
                 refreshPayoutsAfterApprove();
             })
             .catch(function(err) {
