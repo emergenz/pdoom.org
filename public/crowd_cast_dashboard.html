@@ -4563,7 +4563,7 @@
     function fetchReviewBadge() {
         fetch(ONBOARD_API + '/applicants/queue', { headers: { 'Authorization': 'Bearer ' + _authToken } })
             .then(function(resp){ return resp.json(); })
-            .then(function(data){ updateReviewBadge((data.applicants || []).length); })
+            .then(function(data){ updateReviewBadge((data.applicants || []).filter(function(a){ return !a.bulk_reject_at; }).length); })
             .catch(function(){});
     }
 
@@ -4578,7 +4578,10 @@
             .then(function(resp){ if (!resp.ok) throw new Error('HTTP ' + resp.status); return resp.json(); })
             .then(function(data){
                 _reviewLoading = false;
-                _reviewQueue = data.applicants || [];
+                // Applicants already in a "Reject all" drip leave the swipe queue;
+                // the banner shows how many are still waiting to go out.
+                _reviewBulkQueued = (data.applicants || []).filter(function(a){ return a.bulk_reject_at; }).length;
+                _reviewQueue = (data.applicants || []).filter(function(a){ return !a.bulk_reject_at; });
                 _reviewPos = 0;
                 _lastDecision = null;
                 renderReviewCard();
@@ -4588,6 +4591,39 @@
                 _reviewLoading = false;
                 container.innerHTML = '<div class="review-wrap"><div class="outline-box review-card"><p class="error-text">Failed to load review queue: ' + escapeHtml(String(err.message || err)) + '</p></div></div>';
             });
+    }
+
+    var _reviewBulkQueued = 0;
+
+    /* "Reject all remaining": marks every applicant still in the queue; the server
+       drips them out as ordinary rejections (36 an hour, each with the 10-minute
+       undo), so it keeps going without this tab open. Stop clears the rest. */
+    function bulkReject(action) {
+        var msg = action === 'start'
+            ? 'Reject everyone still waiting here (everyone you have not accepted, asked or rejected)? The standard rejection mail goes out to each, about 36 an hour.'
+            : 'Stop the rejection drip? Applicants not yet rejected go back into the queue.';
+        if (!confirm(msg)) return;
+        fetch(ONBOARD_API + '/applicants/bulk-reject', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: action })
+        }).then(function(resp){ if (!resp.ok) throw new Error('HTTP ' + resp.status); return resp.json(); })
+          .then(function(d){ if (action === 'start') alert(d.count + ' applicants queued for rejection.'); renderReviewTab(); })
+          .catch(function(err){ alert('Failed: ' + (err.message || err)); });
+    }
+
+    function reviewBulkHtml(remaining) {
+        var parts = [];
+        if (_reviewBulkQueued) {
+            parts.push('<div class="undo-bar"><div class="ub-text"><b>' + _reviewBulkQueued + ' queued for rejection</b>, going out at about 36 an hour.</div>' +
+                '<button class="undo-btn" onclick="bulkReject(\'stop\')">Stop</button></div>');
+        }
+        if (remaining) {
+            parts.push('<div style="text-align:right;margin:0 0 10px;"><button onclick="bulkReject(\'start\')" ' +
+                'style="font:inherit;font-size:12.5px;font-weight:600;padding:4px 12px;border:1px solid var(--rule);border-radius:3px;background:var(--paper);color:var(--ink);cursor:pointer;">' +
+                'Reject all remaining</button></div>');
+        }
+        return parts.join('');
     }
 
     function renderReviewCard() {
@@ -4607,7 +4643,7 @@
 
         if (_reviewPos >= total) {
             container.innerHTML =
-                '<div class="review-wrap">' + undoHtml +
+                '<div class="review-wrap">' + undoHtml + reviewBulkHtml(0) +
                     '<div class="outline-box review-empty">' +
                         '<div class="re-big">All caught up</div>' +
                         '<div class="re-sub">' + (total ? total + ' reviewed this session. ' : '') + 'No applicants waiting.</div>' +
@@ -4642,6 +4678,7 @@
         container.innerHTML =
             '<div class="review-wrap">' +
                 undoHtml +
+                reviewBulkHtml(total - _reviewPos) +
                 '<div class="review-progress">' +
                     '<span class="rp-count">' +
                         '<button onclick="navReview(-1)"' + (_reviewPos <= 0 ? ' disabled' : '') + ' title="Previous (Shift+Left)" style="font:inherit;font-size:12.5px;font-weight:600;padding:3px 10px;border:1px solid var(--rule);border-radius:3px;background:var(--paper);color:var(--ink);cursor:pointer;' + (_reviewPos <= 0 ? 'opacity:.35;cursor:default;' : '') + '">&lsaquo; Prev</button>' +
