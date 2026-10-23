@@ -1472,7 +1472,9 @@
             for (var i = from; i < to; i++) h += arr[i] || 0;
             return h;
         }
+        // Today is still uploading, so the 7-day windows end with yesterday
         var n = keys.length;
+        if (n && keys[n - 1] === new Date().toISOString().slice(0, 10)) n--;
         var last7 = roll(hours, Math.max(0, n - 7), n);
         var prev7 = n >= 14 ? roll(hours, Math.max(0, n - 14), n - 7) : null;
         var delta = prev7 ? Math.round((last7 - prev7) / prev7 * 100) : null;
@@ -1484,15 +1486,15 @@
             deltaEl.textContent = (delta >= 0 ? '↑ ' : '↓ ') + Math.abs(delta) + '% vs. last week';
             hoursSub.appendChild(deltaEl);
         }
-        if (delta === null) hoursSub.appendChild(document.createTextNode('+' + fmt(Math.round(last7)) + ' h in the last 7 days'));
-        hoursSub.title = '+' + fmt(Math.round(last7)) + ' h in the last 7 days' +
+        if (delta === null) hoursSub.appendChild(document.createTextNode('+' + fmt(Math.round(last7)) + ' h in the last 7 full days'));
+        hoursSub.title = '+' + fmt(Math.round(last7)) + ' h in the last 7 full days (today excluded)' +
             (prev7 !== null ? ', ' + fmt(Math.round(prev7)) + ' h in the 7 days before' : '');
         /* Signed in: the full note under the chart (hours, peak headcount, change). */
         var noteText = '';
         if (!_isGuest) {
             var peak = 0;
             for (var pi = Math.max(0, n - 7); pi < n; pi++) peak = Math.max(peak, people[pi] || 0);
-            noteText = 'Last 7 days: ' + (Math.round(last7 * 10) / 10) + ' h from up to ' + peak + ' people' +
+            noteText = 'Last 7 full days: ' + (Math.round(last7 * 10) / 10) + ' h from up to ' + peak + ' people' +
                 (delta === null ? '' : ', ' + (delta >= 0 ? '+' : '') + delta + '% vs the 7 days before');
         }
         document.getElementById('trend-note').textContent = noteText;
