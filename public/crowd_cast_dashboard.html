@@ -4596,11 +4596,12 @@
     var _reviewBulkQueued = 0;
 
     /* "Reject all remaining": marks every applicant still in the queue; the server
-       drips them out as ordinary rejections (36 an hour, each with the 10-minute
-       undo), so it keeps going without this tab open. Stop clears the rest. */
+       drips them out as ordinary rejections (each with the 10-minute undo), so it
+       keeps going without this tab open. Fraud-flagged ones go at once without a
+       mail; mailed ones stop at 40 a day and the rest carry over. Stop clears the rest. */
     function bulkReject(action) {
         var msg = action === 'start'
-            ? 'Reject everyone still waiting here (everyone you have not accepted, asked or rejected)? The standard rejection mail goes out to each, about 36 an hour.'
+            ? 'Reject everyone still waiting here (everyone you have not accepted, asked or rejected)? Fraud-flagged applicants are rejected without a mail; the others get the standard rejection mail, at most 40 a day (the rest carry over to the next day).'
             : 'Stop the rejection drip? Applicants not yet rejected go back into the queue.';
         if (!confirm(msg)) return;
         fetch(ONBOARD_API + '/applicants/bulk-reject', {
@@ -4615,7 +4616,7 @@
     function reviewBulkHtml(remaining) {
         var parts = [];
         if (_reviewBulkQueued) {
-            parts.push('<div class="undo-bar"><div class="ub-text"><b>' + _reviewBulkQueued + ' queued for rejection</b>, going out at about 36 an hour.</div>' +
+            parts.push('<div class="undo-bar"><div class="ub-text"><b>' + _reviewBulkQueued + ' queued for rejection</b>: flagged ones go without a mail, the rest at most 40 mails a day.</div>' +
                 '<button class="undo-btn" onclick="bulkReject(\'stop\')">Stop</button></div>');
         }
         if (remaining) {
