@@ -2055,6 +2055,38 @@
         /* Work profile (admins only), then activity summaries */
         renderUserWorkProfile(uuids);
         renderActivitySummaries(uuids);
+
+        /* Summaries for other people are fetched when their page is opened
+           (the dashboard API only sends your own up front). Re-render the two
+           parts that use them once they arrive, if this person is still open. */
+        var token = uuids.join(',');
+        _detailSummaryToken = token;
+        ensureSummaries(uuids).then(function(changed){
+            if (!changed || _detailSummaryToken !== token) return;
+            renderWeeklySummary(uuids, userDaily);
+            renderActivitySummaries(uuids);
+        });
+    }
+
+    var _detailSummaryToken = '';
+    var _summariesRequested = {};
+    /* Resolves true if it fetched anything new. */
+    function ensureSummaries(uuids) {
+        var missing = uuids.filter(function(u){ return !_cachedSummaries[u] && !_summariesRequested[u]; });
+        if (!missing.length || !_authToken) return Promise.resolve(false);
+        missing.forEach(function(u){ _summariesRequested[u] = true; });
+        return fetch(DASHBOARD_API + '?summaries_for=' + encodeURIComponent(missing.join(',')),
+                     { headers: { 'Authorization': 'Bearer ' + _authToken } })
+            .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then(function(d){
+                var got = d.summaries || {};
+                Object.keys(got).forEach(function(u){ _cachedSummaries[u] = got[u]; });
+                return true;
+            })
+            .catch(function(){
+                missing.forEach(function(u){ delete _summariesRequested[u]; });
+                return false;
+            });
     }
 
     /* Participants list (with work profiles) for the per-person view; fetched once. */
@@ -4420,7 +4452,7 @@
         _authUser = null;
         _isAdmin = false;
         _cachedUserNames = {};
-        _cachedSummaries = {};
+        _cachedSummaries = {}; _summariesRequested = {};
         _monitoredUsers = [];
         localStorage.removeItem('cc_auth_token');
         document.getElementById('auth-signin').style.display = '';
@@ -4515,6 +4547,7 @@
 
             /* Populate summaries */
             _cachedSummaries = data.summaries || {};
+            _summariesRequested = {};
 
             /* Populate monitored users (admin-only field) */
             _monitoredUsers = data.monitored_users || [];
