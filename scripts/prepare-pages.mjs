@@ -107,7 +107,7 @@ function researchMetadata(item) {
 const careerTitles = {
   'fixed-size-state': 'Member of Technical Staff, Fixed-size state | p(doom)',
   'long-horizon-data': 'Member of Technical Staff, Long-horizon data | p(doom)',
-  'mid-training': 'Member of Technical Staff, Mid-training | p(doom)',
+  'off-policy-learning': 'Member of Technical Staff, Off-policy learning | p(doom)',
   'reinforcement-learning': 'Member of Technical Staff, RL | p(doom)',
   residency: 'p(doom) Residency',
 }
@@ -215,7 +215,7 @@ const careerLegacyRoutes = {
   '04_crowd_cast': '/careers/paid-data-collection/',
   '05_residency': '/careers/residency/',
   '06_rl': '/careers/reinforcement-learning/',
-  '07_midtrain': '/careers/mid-training/',
+  '07_midtrain': '/careers/',
 }
 
 const legacyRoutes = {
@@ -227,6 +227,7 @@ const legacyRoutes = {
   // Short link: pdoom.org/dashboard (and /dashboard/) -> the crowd-cast dashboard.
   'dashboard.html': '/crowd_cast_dashboard.html',
   'dashboard/index.html': '/crowd_cast_dashboard.html',
+  'careers/mid-training/index.html': '/careers/',
   'imprint.html': '/imprint/',
   'open_calls.html': '/careers/',
   'participate.html': '/careers/paid-data-collection/',
