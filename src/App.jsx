@@ -169,34 +169,34 @@ const announcements = [
 
 const footerGroups = [
   ['Research', [
-    { label: 'RESEARCH AGENDA', href: '/#console' },
-    { label: 'ALL RESEARCH', href: '/research/' },
+    { label: 'Research agenda', href: '/#console' },
+    { label: 'All research', href: '/research/' },
   ]],
   ['Releases', [
-    { label: 'CROWD-CAST', href: '/research/crowd-cast/' },
-    { label: 'INVERSE DYNAMICS MODEL', href: '/research/inverse-dynamics-model/' },
+    { label: 'crowd-cast', href: '/research/crowd-cast/' },
+    { label: 'Inverse dynamics model', href: '/research/inverse-dynamics-model/' },
     { label: 'AGI-CAST', href: '/research/agi-cast/' },
-    { label: 'CROWD-CODE', href: '/research/crowd-code/' },
-    { label: 'JASMINE', href: '/research/jasmine/' },
+    { label: 'crowd-code', href: '/research/crowd-code/' },
+    { label: 'Jasmine', href: '/research/jasmine/' },
   ]],
   ['Resources', [
-    { label: 'DOCUMENTATION', href: '/docs/crowd-cast/' },
-    { label: 'GITHUB', href: 'https://github.com/p-doom' },
-    { label: 'HUGGING FACE', href: 'https://huggingface.co/p-doom' },
+    { label: 'Documentation', href: '/docs/crowd-cast/' },
+    { label: 'GitHub', href: 'https://github.com/p-doom' },
+    { label: 'Hugging Face', href: 'https://huggingface.co/p-doom' },
   ]],
   ['Opportunities', [
-    { label: 'CAREERS', href: '/careers/' },
-    { label: 'PAID DATA COLLECTION', href: '/careers/paid-data-collection/' },
-    { label: 'RESEARCH RESIDENCY', href: '/careers/residency/' },
+    { label: 'Careers', href: '/careers/' },
+    { label: 'Paid data collection', href: '/careers/paid-data-collection/' },
+    { label: 'Research residency', href: '/careers/residency/' },
   ]],
   ['Lab', [
-    { label: 'ABOUT', href: '/about/' },
-    { label: 'MERCH', href: '/merch/' },
+    { label: 'About', href: '/about/' },
+    { label: 'Merch', href: '/merch/' },
   ]],
   ['Connect', [
-    { label: 'DISCORD', href: 'https://discord.gg/G4JNuPX2VR' },
+    { label: 'Discord', href: 'https://discord.gg/G4JNuPX2VR' },
     { label: 'X', href: 'https://x.com/prob_doom' },
-    { label: 'LINKEDIN', href: 'https://www.linkedin.com/company/p-doom' },
+    { label: 'LinkedIn', href: 'https://www.linkedin.com/company/p-doom' },
   ]],
 ]
 
@@ -834,9 +834,9 @@ function Footer() {
         <div className="footer-legal">
           <h3>Legal</h3>
           <div>
-            <a href="/imprint/">IMPRINT</a>
-            <a href="/docs/crowd-cast-data-purchase-agreement.pdf">DATA PURCHASE AGREEMENT</a>
-            <a href="/docs/crowd-cast-privacy-consent.pdf">PRIVACY CONSENT</a>
+            <a href="/imprint/">Imprint</a>
+            <a href="/docs/crowd-cast-data-purchase-agreement.pdf">Data purchase agreement</a>
+            <a href="/docs/crowd-cast-privacy-consent.pdf">Privacy consent</a>
           </div>
         </div>
         <div className="footer-backing">
@@ -846,14 +846,12 @@ function Footer() {
         </div>
       </nav>
       <div className="footer-bottom">
-        <span>©2026 P(DOOM).</span>
         <div className="social-links">
           <a href="https://x.com/prob_doom" aria-label="X"><span aria-hidden="true">X</span></a>
-          <a href="https://github.com/p-doom" aria-label="GH: GitHub"><span aria-hidden="true">GH</span></a>
-          <a href="https://huggingface.co/p-doom" aria-label="HF: Hugging Face"><span aria-hidden="true">HF</span></a>
-          <a href="https://www.linkedin.com/company/p-doom" aria-label="in: LinkedIn"><span aria-hidden="true">in</span></a>
+          <a href="https://github.com/p-doom" aria-label="GitHub"><span aria-hidden="true">GitHub</span></a>
+          <a href="https://huggingface.co/p-doom" aria-label="Hugging Face"><span aria-hidden="true">Hugging Face</span></a>
+          <a href="https://www.linkedin.com/company/p-doom" aria-label="LinkedIn"><span aria-hidden="true">LinkedIn</span></a>
         </div>
-        <span>ALL RIGHTS RESERVED.</span>
       </div>
     </footer>
   )
