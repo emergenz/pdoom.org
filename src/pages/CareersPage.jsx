@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { decorateFormLinks } from '../referral.js'
 import './careers.css'
 
