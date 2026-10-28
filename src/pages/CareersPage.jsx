@@ -5,7 +5,7 @@ import './careers.css'
 
 const signUpHref = '/apply.html'
 const emailApplicationLabel = 'franz@pdoom.org'
-const emailApplicationNote = 'To apply, send five bullet points demonstrating exceptional ability.'
+const emailApplicationNote = 'To apply, send five bullet points demonstrating exceptional ability'
 
 const opportunities = [
   {
@@ -14,17 +14,17 @@ const opportunities = [
     number: '01',
     category: 'Participation',
     title: 'Get paid to record your work',
-    summary: 'Join the crowd-cast data collection. We pay up to $1,000 per month for the long-horizon work we need most.',
+    summary: 'Join the crowd-cast data collection. We pay up to $1,000 per month for the months-long work we need most.',
     meta: ['Remote', 'up to $1,000 / month'],
     facts: [
       ['Mode', 'Remote'],
       ['Pay', 'up to $1,000 / month'],
     ],
     intro: [
-      <>p(doom) is working towards enabling models to perform complex tasks over weeks and months. Training on work at that horizon requires data at that horizon.</>,
-      <>crowd-cast is a privacy-preserving desktop application built to capture the largest long-horizon dataset of digital work. Together with early participants around the world, we have already recorded more than 5,000 hours of complex theorem proving, spacecraft prototyping, model training across hundreds of GPUs, building design, and much more.</>,
+      <>p(doom) is working towards enabling models to perform complex tasks over months. Training on work at that horizon requires data at that horizon.</>,
+      <>crowd-cast is a privacy-preserving desktop application built to capture the largest dataset of months-long digital work. Together with early participants around the world, we have already recorded over 13,000 hours of complex theorem proving, spacecraft prototyping, model training across hundreds of GPUs, building design, and much more.</>,
       <>The program is now open to the public. We pay top participants <strong>up to $1,000 per month</strong> to passively record their work. PhD-level research, professional engineering, and other complex months-long projects qualify for the top tier.</>,
-      <>Other qualifying long-horizon work (Bachelor's and Master's projects, design, editing, personal builds) is compensated at <strong>around $300 per month</strong>. Submit the form and the team will follow up within a few days.</>,
+      <>Other qualifying months-long work (Bachelor's and Master's projects, design, editing, personal builds) is compensated at <strong>around $300 per month</strong>. Submit the form and the team will follow up within a few days.</>,
       <>Know someone who would be a great fit? You can refer them and earn up to $300 when they join. <a href="/refer.html">Get your referral link</a>.</>,
     ],
     sections: [
@@ -32,8 +32,8 @@ const opportunities = [
         title: 'How it works',
         ordered: true,
         items: [
-          <>Apply through the <a href={signUpHref}>signup form</a>.</>,
-          <>If accepted, install <a href="/docs/crowd-cast/">crowd-cast</a> on macOS, Windows, or Linux.</>,
+          <>Apply through the <a href={signUpHref}>signup form</a></>,
+          <>If accepted, install <a href="/docs/crowd-cast/">crowd-cast</a> on macOS, Windows, or Linux</>,
           <>On first launch, choose which applications can be recorded. Everything outside that list is automatically excluded.</>,
           <>The recorder captures five-minute segments and uploads them to a private S3 bucket. At the end of each segment, its local copy is deleted.</>,
         ],
@@ -56,7 +56,7 @@ const opportunities = [
     number: '02',
     category: 'Research',
     title: 'Member of Technical Staff, Fixed-size state',
-    summary: 'Develop and test fixed-size state architectures for learning across trajectories that span weeks or months.',
+    summary: 'Develop and test fixed-size state architectures for learning across trajectories that span months.',
     meta: [],
     facts: [
       ['Location', 'Munich'],
@@ -64,17 +64,25 @@ const opportunities = [
       ['Mode', 'In-person'],
     ],
     intro: [
-      <>We train on trajectories that can span weeks or months. Dense attention makes those horizons infeasible, and context compression is not enough for reliable memory.</>,
-      <>This role develops fixed-size state architectures for models trained on long-horizon computer-use trajectories.</>,
+      <>We train on trajectories that span months. Dense attention makes those horizons infeasible, and context compaction is not the long-term answer.</>,
+      <>This role develops fixed-size state architectures to enable trillion-token rollouts.</>,
     ],
     sections: [
       {
-        title: "What you'll do",
+        title: 'In this role, you will:',
         items: [
-          'Run architecture ablations.',
-          'Test scaling behavior.',
-          'Study failure modes such as state collapse and loss of long-range dependencies.',
-          'Publish the results.',
+          'Come up with new fixed-size state architectures that support learning and deployment over months-long horizons',
+          'Compare rigorously against the strongest versions of existing baselines',
+          'Characterize failure modes such as state collapse and loss of long-range dependencies, and measure how they change with sequence length and scale',
+          'Take the strongest candidates to trillion-token scale',
+        ],
+      },
+      {
+        title: 'You might thrive in this role if you:',
+        items: [
+          'Love being at the frontier of architecture research',
+          'Have strong intuitions for how architectures behave at scale',
+          'Are high-agency and own problems from start to finish',
         ],
       },
     ],
@@ -88,7 +96,7 @@ const opportunities = [
     number: '03',
     category: 'Engineering and research',
     title: 'Member of Technical Staff, Long-horizon data',
-    summary: 'Build the data pipeline for long-horizon computer-use traces, from capture and redaction to enrichment and release.',
+    summary: 'Build the data pipeline for months-long screencasts, from capture and redaction to annotation and release.',
     meta: [],
     facts: [
       ['Location', 'Munich'],
@@ -96,17 +104,25 @@ const opportunities = [
       ['Mode', 'In-person'],
     ],
     intro: [
-      <>p(doom) collects long-horizon computer-use data through <a href="/docs/crowd-cast/">crowd-cast</a>. The dataset includes more than 2,600 hours from over 35 rights-cleared contributors.</>,
-      <>You will work across the native desktop app, backend, enrichment models, and privacy-preserving workflows. The work requires production engineering and research taste.</>,
+      <>p(doom) collects months-long screencasts through <a href="/docs/crowd-cast/">crowd-cast</a>. The dataset includes over 13,000 hours from over 200 rights-cleared contributors, with task horizons of literal months, far beyond what current models can do.</>,
+      <>The screencasts contain precisely what models cannot yet do. As models improve, the distribution of the dataset shifts with them.</>,
+      <>You will work across the native desktop app, the backend, the recording-processing pipeline, and PII and redaction workflows. The work requires product and research taste.</>,
     ],
     sections: [
       {
-        title: "What you'll do",
+        title: 'In this role, you will:',
         items: [
-          'Desktop capture and storage.',
-          'Automated PII and credential redaction.',
-          'Action annotation.',
-          'Model-based hindsight goals and synthetic thinking traces.',
+          'Build the capture and storage stack, from the native desktop app to the backend',
+          'Develop automated PII and credential redaction',
+          'Annotate screencasts at scale',
+        ],
+      },
+      {
+        title: 'You might thrive in this role if you:',
+        items: [
+          'Can ship products fast and still have research taste',
+          'Care about getting PII and redaction right',
+          'Are comfortable owning a system end to end, from desktop client to backend',
         ],
       },
     ],
@@ -115,12 +131,11 @@ const opportunities = [
     applyNote: emailApplicationNote,
   },
   {
-    id: 'mid-training',
-    legacyId: '07_midtrain',
+    id: 'off-policy-learning',
     number: '04',
     category: 'Research',
-    title: 'Member of Technical Staff, Mid-training',
-    summary: 'Adapt instruction-tuned models to human computer-use trajectories and produce initializations for downstream RL.',
+    title: 'Member of Technical Staff, Off-policy learning',
+    summary: 'Develop off-policy learning methods that extract more signal from months-long human screencasts than RL environments can.',
     meta: [],
     facts: [
       ['Location', 'Munich'],
@@ -128,22 +143,30 @@ const opportunities = [
       ['Mode', 'In-person'],
     ],
     intro: [
-      <>Instruction-tuned models are not directly suited to raw computer-use trajectories. Mid-training adapts the base model to our data before downstream RL.</>,
-      <>You will design the SFT corpus, maintain the training recipe, build the eval loop, and decide when an initialization is ready for downstream training.</>,
+      <>We extract RL environments from our dataset of months-long screencasts, but this captures only part of its signal: it is limited to tasks with verifiable outcomes.</>,
+      <>Learning off-policy directly from the recordings can use far more of that signal, but people work on hundreds of things at the same time, which makes it hard. You will design novel training regimes that tackle these challenges, build evals for failure modes, run experiments, and publish the results.</>,
     ],
     sections: [
       {
-        title: "What you'll do",
+        title: 'In this role, you will:',
         items: [
-          'Domain adaptation to human screencasts.',
-          'Supervised fine-tuning on hindsight-enriched trajectories.',
-          'Catastrophic-forgetting mitigation.',
-          'Optimizer choices and data mixtures.',
+          'Come up with off-policy methods for learning from months-long human screencasts',
+          'Prototype and evaluate them, including approaches that transform or rewrite the data',
+          'Build evals for failure modes',
+          'Show that these methods extract more signal than RL environments do',
+        ],
+      },
+      {
+        title: 'You might thrive in this role if you:',
+        items: [
+          'Love being at the frontier of machine learning research',
+          'Think carefully about what signal a dataset contains and how to extract it',
+          'Can navigate vast search spaces and take a contrarian research direction from 0 to 1',
         ],
       },
     ],
     applyLabel: emailApplicationLabel,
-    applyHref: 'mailto:franz@pdoom.org?subject=Mid-training',
+    applyHref: 'mailto:franz@pdoom.org?subject=Off-policy%20learning',
     applyNote: emailApplicationNote,
   },
   {
@@ -152,7 +175,7 @@ const opportunities = [
     number: '05',
     category: 'Research',
     title: 'Member of Technical Staff, RL',
-    summary: 'Build the RL training stack for long-horizon computer-use tasks, including environments, algorithms, evals, and stability.',
+    summary: 'Scalably extract RL environments from months-long screencasts, build the training stack, and show that training on them improves capabilities.',
     meta: [],
     facts: [
       ['Location', 'Munich'],
@@ -160,17 +183,24 @@ const opportunities = [
       ['Mode', 'In-person'],
     ],
     intro: [
-      <>We use RL on computer-use tasks to train models for long-horizon work. The interface is streaming visual observation and low-level actions. Rewards come from task completion or rubric-based generative reward models.</>,
-      <>You will design training procedures, build evals for failure modes, run experiments, and publish the results.</>,
+      <>We extract RL environments from months-long screencasts of human work, for both verifiable and non-verifiable tasks.</>,
+      <>You will build the pipeline that does this at scale, write the training infrastructure and algorithms, and show that training on these environments improves model capabilities.</>,
     ],
     sections: [
       {
-        title: "What you'll do",
+        title: 'In this role, you will:',
         items: [
-          'Training infrastructure.',
-          'Environment selection.',
-          'Algorithms and capability retention.',
-          'Evals and stability at long horizons.',
+          'Build pipelines that scalably extract RL environments from months-long screencasts',
+          'Write the training infrastructure and algorithms',
+          'Run experiments showing that training on these environments improves capabilities',
+        ],
+      },
+      {
+        title: 'You might thrive in this role if you:',
+        items: [
+          'Love being at the frontier of RL research',
+          'Are comfortable building on large-scale RL infrastructure that is still immature in open source and changes almost daily',
+          'Have the creativity and taste to extract useful environments, grounded in a deep understanding of how models fail',
         ],
       },
     ],
@@ -193,7 +223,7 @@ const opportunities = [
     ],
     intro: [
       <>The p(doom) Residency is a six-month research program for early-career researchers and engineers.</>,
-      <>Residents work with members of technical staff on a focused research or engineering project. Projects may cover data, mid-training, reinforcement learning, fixed-size state, or a proposal you bring.</>,
+      <>Residents work with members of technical staff on a focused research or engineering project. Projects may cover data, off-policy learning, reinforcement learning, fixed-size state, or a proposal you bring.</>,
       <>No academic pedigree is required. We evaluate technical depth, research taste, and evidence that you can make progress on hard problems.</>,
     ],
     sections: [
@@ -203,15 +233,15 @@ const opportunities = [
         items: [
           'Work with a member of technical staff on a defined project. Suggested projects and independent proposals are both welcome.',
           'Receive compute, mentorship, and publication freedom by default. Codebases are open-sourced and datasets released under CC0 where possible.',
-          'Residents may be considered for full-time Member of Technical Staff roles.',
+          'Residents may be considered for full-time Member of Technical Staff roles',
         ],
       },
       {
         title: 'What we offer',
         items: [
-          'Access to millions of GPU hours for approved projects.',
-          'Direct mentorship from the team.',
-          'Publication freedom by default.',
+          'Access to millions of GPU hours for approved projects',
+          'Direct mentorship from the team',
+          'Publication freedom by default',
         ],
       },
     ],
@@ -224,7 +254,7 @@ const opportunities = [
 const overviewGroups = [
   {
     label: 'Research and engineering',
-    ids: ['fixed-size-state', 'long-horizon-data', 'mid-training', 'reinforcement-learning'],
+    ids: ['fixed-size-state', 'long-horizon-data', 'off-policy-learning', 'reinforcement-learning'],
   },
   {
     label: 'Programs and participation',
@@ -232,7 +262,7 @@ const overviewGroups = [
   },
 ]
 
-const legacyAliases = Object.fromEntries(opportunities.map((item) => [item.legacyId, item.id]))
+const legacyAliases = Object.fromEntries(opportunities.filter((item) => item.legacyId).map((item) => [item.legacyId, item.id]))
 
 function currentOpportunityId() {
   const parts = window.location.pathname.split('/').filter(Boolean)
@@ -259,7 +289,7 @@ function CareersOverview() {
       <header className="careers-intro">
         <div className="careers-shell careers-intro-grid">
           <h1>Work on what compute cannot solve.</h1>
-          <p>Join p(doom) to address the fundamental bottlenecks toward AGI: new data, long horizons, fixed-size state, and continual learning.</p>
+          <p>Join p(doom) to address the fundamental bottlenecks toward AGI: new data, months-long horizons, fixed-size state, and continual learning.</p>
         </div>
       </header>
 
@@ -336,40 +366,29 @@ function CareerDetail({ opportunity }) {
               </div>
             ))}
           </dl>
-          {opportunity.id === 'paid-data-collection' && (
-            <a
-              className="button button--primary career-facts-apply"
-              href={opportunity.applyHref}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {opportunity.applyLabel}
-              <ArrowRight size={16} strokeWidth={1.8} aria-hidden="true" />
-            </a>
+          <a
+            className="button button--primary career-facts-apply"
+            href={opportunity.applyHref}
+            {...(opportunity.id === 'paid-data-collection' ? { target: '_blank', rel: 'noreferrer' } : {})}
+          >
+            {opportunity.id === 'paid-data-collection' ? opportunity.applyLabel : 'Apply'}
+            <ArrowRight size={16} strokeWidth={1.8} aria-hidden="true" />
+          </a>
+          {opportunity.id !== 'paid-data-collection' && (
+            <p className="career-facts-note">
+              {opportunity.applyNote} to <a href={opportunity.applyHref}>{opportunity.applyLabel}</a>.
+            </p>
           )}
         </aside>
 
         <div className="career-detail-content">
-          <div className="career-detail-prose">
+          <div className={`career-detail-prose ${opportunity.id === 'paid-data-collection' ? '' : 'career-detail-prose--lead'}`}>
             {opportunity.intro.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
           </div>
           {opportunity.sections.map((section) => (
             <DetailSection section={section} key={section.title} />
           ))}
 
-          {opportunity.id !== 'paid-data-collection' && (
-            <div className="career-inline-apply" id="application">
-              <p>{opportunity.applyNote}</p>
-              <a
-                className="career-apply-link"
-                href={opportunity.applyHref}
-                {...(opportunity.externalApply ? { target: '_blank', rel: 'noreferrer' } : {})}
-              >
-                {opportunity.applyLabel}
-                <ArrowUpRight size={20} strokeWidth={1.6} aria-hidden="true" />
-              </a>
-            </div>
-          )}
         </div>
       </article>
     </main>
