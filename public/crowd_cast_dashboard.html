@@ -3106,6 +3106,10 @@
                 '<select id="payout-month" style="font-size:13px;font-variant-numeric:tabular-nums;padding:4px 8px;border:1px solid var(--rule-strong);background:var(--paper);">' +
                     buildMonthOptions(year, month) +
                 '</select>' +
+                '<div id="payouts-view-toggle" style="margin-left:auto;display:flex;border:1px solid var(--rule-strong);border-radius:3px;overflow:hidden;">' +
+                    '<span data-view="table" style="font-size:13px;font-weight:500;padding:5px 14px;cursor:pointer;">Table</span>' +
+                    '<span data-view="batch" style="font-size:13px;font-weight:500;padding:5px 14px;cursor:pointer;border-left:1px solid var(--rule-strong);">Pay in batches</span>' +
+                '</div>' +
             '</div>' +
             '<div id="payouts-loading" style="padding:12px;font-size:13px;color:var(--faint);font-variant-numeric:tabular-nums;">Loading payouts...</div>' +
             '<div id="payouts-table"></div>' +
@@ -3116,6 +3120,10 @@
             var sel = this.value.split('-');
             loadPayouts(parseInt(sel[0]), parseInt(sel[1]));
         });
+        document.querySelectorAll('#payouts-view-toggle span').forEach(function(el) {
+            el.addEventListener('click', function() { setPayoutsView(el.dataset.view); });
+        });
+        paintPayoutsToggle();
 
         // Auto-load current month
         loadPayouts(year, month);
@@ -3163,6 +3171,8 @@
     }
 
     function renderPayoutsTable() {
+        paintPayoutsToggle();
+        if (_payoutsView === 'batch') { renderPayoutsBatch(); return; }
         var tableDiv = document.getElementById('payouts-table');
         var summaryDiv = document.getElementById('payouts-summary');
         if ((!_payoutsData || _payoutsData.length === 0) && !_payoutsHeld.length) {
@@ -3404,6 +3414,351 @@
         } else {
             summaryDiv.innerHTML = '';
         }
+    }
+
+    /* --- Pay in batches ---
+       The same rows as the table, grouped per person, so a month can be paid two
+       people at a time. One click approves every row of the pair; the approve
+       path already coalesces a person's rows into one transfer. Holds and the
+       re-accept gate are never batched automatically, EUR 0 rows are closed in
+       their own step (that sends the no-payment mail, no money moves), and a
+       payment waiting on phone approval (SCA) is retried from its own list.
+       The view choice is remembered so the post-approve re-polls stay here. */
+    var _payoutsView = 'table';
+    try { if (localStorage.getItem('cc_payouts_view') === 'batch') _payoutsView = 'batch'; } catch (e) {}
+    var _batchPair = [];      // group keys in the current pair, in order
+    var _batchSkipped = {};   // group keys taken out of a pair: moved to the end of the queue
+    var _batchOverride = {};  // payout_id -> true once Mihir chose to pay it without re-accept
+    var _batchStatus = null;  // participant_id -> status, for the silent-close list
+
+    function setPayoutsView(v) {
+        _payoutsView = v === 'batch' ? 'batch' : 'table';
+        try { localStorage.setItem('cc_payouts_view', _payoutsView); } catch (e) {}
+        renderPayoutsTable();
+    }
+
+    function paintPayoutsToggle() {
+        document.querySelectorAll('#payouts-view-toggle span').forEach(function(el) {
+            var on = el.dataset.view === _payoutsView;
+            el.style.background = on ? 'var(--ink)' : 'var(--paper)';
+            el.style.color = on ? 'var(--paper)' : 'var(--muted)';
+        });
+    }
+
+    function _rowAmount(p) { return p.amount != null ? Number(p.amount) : Number(p.amount_usd); }
+    function _rowSym(p) { var c = (p.currency || 'USD').toUpperCase(); return c === 'EUR' ? '€' : c === 'GBP' ? '£' : '$'; }
+    function _rowTypeLabel(p) {
+        return p.merged_from ? 'Merged' : p.payout_type === 'referral_premium' ? ('Premium T' + (p.tranche || '?')) : p.payout_type === 'trial' ? 'Trial' : p.payout_type === 'partial' ? 'Partial' : 'Full';
+    }
+
+    /* One group per person (premiums per referrer), rows sorted into what can be
+       batched now and what can't. */
+    function buildPayoutGroups() {
+        var groups = {}, order = [];
+        var nowIso = new Date().toISOString();
+        (_payoutsData || []).forEach(function(p) {
+            var isPremium = p.payout_type === 'referral_premium';
+            var key = isPremium ? 'ref:' + (p.partner_slug || p.payout_id) : (p.participant_id || p.payout_id);
+            if (!groups[key]) {
+                var part = _payoutsParticipants[p.participant_id] || {};
+                groups[key] = { key: key, premium: isPremium,
+                    name: isPremium ? (p.recipient_name || p.partner_slug || p.participant_id) : (part.name || p.participant_id),
+                    pay: [], zero: [], sca: [], held: [], gated: [], processing: [], paid: [], usd: 0, risk: '', reasons: '' };
+                order.push(key);
+            }
+            var g = groups[key];
+            var ev = p.evidence || {};
+            if (ev.risk_tags && !g.risk) { g.risk = ev.risk_tags; g.reasons = ev.risk_reasons || ''; }
+            if (p.status === 'paid') { if (_rowAmount(p) > 0) g.paid.push(p); return; }
+            if (p.status === 'approved') { (p.requires_sca ? g.sca : g.processing).push(p); return; }
+            if (p.status !== 'pending') return;
+            if (p.hold_until && p.hold_until > nowIso) { g.held.push(p); return; }
+            if (!(_rowAmount(p) > 0)) { g.zero.push(p); return; }
+            if (p.terms_gated) { g.gated.push(p); return; }
+            g.pay.push(p);
+            g.usd += Number(p.amount_usd) || 0;
+        });
+        return order.map(function(k) { return groups[k]; });
+    }
+
+    function _ids(rows) { return rows.map(function(p) { return p.payout_id; }); }
+
+    /* The band the review job wrote, read back from its internal note
+       ("Band: 5.7 usable h/week of 7.8 recorded -> one third"). A full band
+       writes no note, so those rows fall back to the evidence hours. */
+    function _bandFromNote(p) {
+        var m = /^Band: ([\d.]+) usable h\/week of ([\d.]+) recorded -> ([a-z ]+)/.exec(p.adjustment_note || '');
+        return m ? { usable: m[1], recorded: m[2], label: m[3].trim() } : null;
+    }
+
+    function _batchRowHtml(p) {
+        var sym = _rowSym(p);
+        var mono = 'font-size:13px;font-variant-numeric:tabular-nums;';
+        var html = '<div style="display:flex;gap:12px;align-items:baseline;padding:6px 0;border-top:1px solid var(--rule);">';
+        html += '<div style="' + mono + 'color:var(--muted);min-width:170px;">' + escapeHtml(p.period_start) + ' to ' + escapeHtml(p.period_end) + ' · ' + _rowTypeLabel(p) + '</div>';
+        html += '<div style="flex:1;min-width:0;">';
+        var band = _bandFromNote(p);
+        if (band) {
+            var bc = band.label === 'nothing' ? 'var(--bad)' : 'var(--warn)';
+            html += '<div style="' + mono + '"><span style="color:' + bc + ';font-weight:600;">' + escapeHtml(band.label) + '</span>'
+                + '<span style="color:var(--muted);"> · ' + escapeHtml(band.usable) + ' usable of ' + escapeHtml(band.recorded) + ' recorded h/wk</span></div>';
+        } else if (p.payout_type !== 'referral_premium') {
+            html += evidenceCell(p, false);
+        }
+        html += '<div style="font-size:12.5px;line-height:1.4;margin-top:3px;' + (p.participant_note ? 'color:var(--ink);' : 'color:var(--faint);') + '">'
+            + (p.participant_note ? '<span style="color:var(--muted);">Mailed note: </span>' + escapeHtml(p.participant_note) : 'No note in the mail') + '</div>';
+        if (p.payment_error) html += '<div style="font-size:11.5px;color:var(--bad);margin-top:2px;">' + escapeHtml(p.payment_error) + '</div>';
+        html += '</div>';
+        html += '<div style="' + mono + 'text-align:right;font-weight:600;white-space:nowrap;">' + sym + _rowAmount(p).toFixed(2);
+        if (p.original_amount != null && Number(p.original_amount) !== _rowAmount(p)) {
+            html += '<br><span style="font-size:11.5px;font-weight:400;color:var(--warn);">adj. from ' + sym + Number(p.original_amount).toFixed(2) + '</span>';
+        }
+        if (p.hold_until) html += '<br><span title="' + escapeHtml(p.hold_reason || '') + '" style="font-size:11.5px;font-weight:500;color:var(--paper);background:var(--warn);padding:1px 4px;">Held till ' + escapeHtml(p.hold_until.slice(0, 10)) + '</span>';
+        html += '</div></div>';
+        return html;
+    }
+
+    function _batchCardHtml(g, rows, action) {
+        var html = '<div style="border:1px solid var(--rule);background:var(--paper);padding:10px 14px;">';
+        html += '<div style="display:flex;gap:10px;align-items:baseline;margin-bottom:4px;">';
+        html += '<div style="font-size:13px;font-weight:600;color:var(--ink);">' + escapeHtml(g.name)
+            + (g.premium ? ' <span style="background:var(--steel);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;vertical-align:1px;">Referrer</span>' : '')
+            + riskChips(g.risk, g.reasons) + '</div>';
+        html += '<div style="margin-left:auto;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;">' + _fmtCurTotals(_payoutCurTotals(_ids(rows))) + '</div>';
+        if (action) html += action;
+        html += '</div>';
+        rows.forEach(function(p) { html += _batchRowHtml(p); });
+        html += '</div>';
+        return html;
+    }
+
+    function _batchBtn(cls, key, label, tone) {
+        var s = tone === 'ok' ? 'border:1px solid var(--ok);background:var(--ok);color:var(--paper);'
+            : tone === 'ink' ? 'border:1px solid var(--ink);background:var(--paper);color:var(--ink);'
+            : 'border:1px solid var(--rule-strong);background:var(--paper);color:var(--muted);';
+        return '<span class="' + cls + '" data-key="' + escapeHtml(key) + '" style="font-size:12.5px;font-weight:500;padding:3px 10px;cursor:pointer;border-radius:3px;white-space:nowrap;' + s + '">' + label + '</span>';
+    }
+
+    function _batchSection(title, hint, body) {
+        return '<div style="margin-top:26px;">'
+            + '<div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:2px;">' + title + '</div>'
+            + (hint ? '<div style="font-size:12.5px;color:var(--muted);margin-bottom:10px;">' + hint + '</div>' : '')
+            + '<div style="display:flex;flex-direction:column;gap:8px;">' + body + '</div></div>';
+    }
+
+    function renderPayoutsBatch() {
+        var tableDiv = document.getElementById('payouts-table');
+        var summaryDiv = document.getElementById('payouts-summary');
+        if (!tableDiv) return;
+        if (summaryDiv) summaryDiv.innerHTML = '';
+        var groups = buildPayoutGroups();
+        var byKey = {};
+        groups.forEach(function(g) { byKey[g.key] = g; });
+
+        // Queue: people before referrers, unflagged before flagged, biggest first.
+        // Anyone taken out of a pair goes to the back.
+        var queue = groups.filter(function(g) { return g.pay.length; });
+        queue.sort(function(a, b) {
+            if (a.premium !== b.premium) return a.premium ? 1 : -1;
+            var sa = _batchSkipped[a.key] ? 1 : 0, sb = _batchSkipped[b.key] ? 1 : 0;
+            if (sa !== sb) return sa - sb;
+            var fa = a.risk ? 1 : 0, fb = b.risk ? 1 : 0;
+            if (fa !== fb) return fa - fb;
+            return b.usd - a.usd;
+        });
+        _batchPair = _batchPair.filter(function(k) { return byKey[k] && byKey[k].pay.length; });
+        for (var q = 0; q < queue.length && _batchPair.length < 2; q++) {
+            if (_batchPair.indexOf(queue[q].key) < 0) _batchPair.push(queue[q].key);
+        }
+
+        // Progress: money that left vs money still to send this month.
+        var paidRows = [], leftRows = [], paidPeople = 0, allPeople = 0, heldN = 0, gatedN = 0;
+        groups.forEach(function(g) {
+            var left = g.pay.concat(g.sca, g.processing);
+            paidRows = paidRows.concat(g.paid);
+            leftRows = leftRows.concat(left);
+            if (g.paid.length || left.length || g.held.length || g.gated.length) allPeople++;
+            if (g.paid.length && !left.length && !g.held.length && !g.gated.length) paidPeople++;
+            if (g.held.length) heldN++;
+            if (g.gated.length) gatedN++;
+        });
+        var html = '<div style="display:flex;flex-wrap:wrap;gap:22px;align-items:baseline;padding:10px 14px;border:1px solid var(--rule);background:var(--paper-soft);font-size:13px;font-variant-numeric:tabular-nums;">'
+            + '<div><span style="font-weight:600;color:var(--ink);">' + paidPeople + ' of ' + allPeople + '</span> <span style="color:var(--muted);">people paid</span></div>'
+            + '<div><span style="color:var(--muted);">Sent </span><span style="font-weight:600;color:var(--ok);">' + (paidRows.length ? _fmtCurTotals(_payoutCurTotals(_ids(paidRows))) : '0') + '</span></div>'
+            + '<div><span style="color:var(--muted);">Still to send </span><span style="font-weight:600;color:var(--ink);">' + (leftRows.length ? _fmtCurTotals(_payoutCurTotals(_ids(leftRows))) : '0') + '</span></div>'
+            + ((heldN || gatedN) ? '<div style="color:var(--muted);">Not in batches: ' + [heldN ? heldN + ' held' : '', gatedN ? gatedN + ' waiting on re-accept' : ''].filter(Boolean).join(', ') + '</div>' : '')
+            + '</div>';
+
+        // The pair.
+        var pairIds = [];
+        var pairBody = '';
+        _batchPair.forEach(function(k) {
+            pairIds = pairIds.concat(_ids(byKey[k].pay));
+            pairBody += _batchCardHtml(byKey[k], byKey[k].pay, _batchBtn('batch-out', k, 'Take out', ''));
+        });
+        if (_batchPair.length) {
+            html += '<div style="margin-top:18px;border:1px solid var(--rule-strong);padding:14px;">'
+                + '<div style="display:flex;gap:12px;align-items:center;margin-bottom:10px;">'
+                + '<div style="font-size:13px;font-weight:500;color:var(--ink);">Next ' + _batchPair.length + (_batchPair.length === 1 ? ' person' : ' people') + '</div>'
+                + '<div style="font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted);">' + _fmtCurTotals(_payoutCurTotals(pairIds)) + '</div>'
+                + '<span id="batch-pay-btn" style="margin-left:auto;font-size:13px;font-weight:500;padding:8px 20px;border:1px solid var(--ok);background:var(--ok);color:var(--paper);cursor:pointer;border-radius:3px;">Pay these ' + _batchPair.length + '</span>'
+                + '</div><div style="display:flex;flex-direction:column;gap:8px;">' + pairBody + '</div></div>';
+        } else {
+            html += '<div style="margin-top:18px;padding:14px;border:1px solid var(--rule);font-size:13px;color:var(--muted);">Nobody left to pay in this month.</div>';
+        }
+
+        // Everyone else in the queue.
+        var rest = queue.filter(function(g) { return _batchPair.indexOf(g.key) < 0; });
+        if (rest.length) {
+            html += _batchSection('Up next (' + rest.length + ')', 'Swap in replaces the second person of the pair.',
+                rest.map(function(g) { return _batchCardHtml(g, g.pay, _batchBtn('batch-in', g.key, 'Swap in', 'ink')); }).join(''));
+        }
+
+        // Approved but waiting for the Qonto approval on the phone.
+        var scaGroups = groups.filter(function(g) { return g.sca.length; });
+        if (scaGroups.length) {
+            html += _batchSection('Waiting on your phone (SCA)', 'Approve the transfer in the Qonto app, then retry.',
+                scaGroups.map(function(g) { return _batchCardHtml(g, g.sca, _batchBtn('batch-sca', g.key, 'Retry', 'ok')); }).join(''));
+        }
+        var procGroups = groups.filter(function(g) { return g.processing.length; });
+        if (procGroups.length) {
+            html += _batchSection('Sending', 'Approved, payment and statement still running. This list refreshes on its own.',
+                procGroups.map(function(g) { return _batchCardHtml(g, g.processing, ''); }).join(''));
+        }
+
+        // EUR 0 rows: their own steps, no money moves. A row the band took to 0
+        // is closed through approve, which mails the reason (the DPA wants it).
+        // Every other 0 row (ended, paused, second trial) was already told by
+        // hand, so it is closed through reject, which sends nothing.
+        // /payouts/generate does not return quality_band; the band job's
+        // adjusted_by marks its rows.
+        var bandZero = [], otherZero = [];
+        groups.forEach(function(g) { g.zero.forEach(function(p) { (p.adjusted_by === 'review-bot' ? bandZero : otherZero).push({ g: g, p: p }); }); });
+        if (otherZero.length && !_batchStatus) {
+            _batchStatus = {};
+            loadProfileParticipants().then(function(list) {
+                list.forEach(function(x) { _batchStatus[x.participant_id] = x.status; });
+                if (_payoutsView === 'batch') renderPayoutsBatch();
+            }).catch(function() {});
+        }
+        var zeroLine = function(z, cls, withStatus) {
+            var st = withStatus && _batchStatus ? _batchStatus[z.p.participant_id] : '';
+            return '<label style="display:flex;gap:10px;align-items:baseline;padding:6px 0;border-top:1px solid var(--rule);cursor:pointer;">'
+                + '<input type="checkbox" class="' + cls + '" data-id="' + escapeHtml(z.p.payout_id) + '" checked>'
+                + '<span style="font-size:13px;font-weight:600;min-width:170px;">' + escapeHtml(z.g.name) + riskChips(z.g.risk, z.g.reasons)
+                + (st ? ' <span style="font-weight:400;color:var(--muted);">' + escapeHtml(st) + '</span>' : '') + '</span>'
+                + '<span style="font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted);min-width:170px;">' + escapeHtml(z.p.period_start) + ' to ' + escapeHtml(z.p.period_end) + ' · ' + _rowTypeLabel(z.p) + '</span>'
+                + '<span style="font-size:12.5px;line-height:1.4;' + (z.p.participant_note ? '' : 'color:var(--faint);') + '">' + (z.p.participant_note ? escapeHtml(z.p.participant_note) : 'No note') + '</span>'
+                + '</label>';
+        };
+        var zeroBlock = function(rows, cls, withStatus, btnId, btnLabel) {
+            return '<div style="border:1px solid var(--rule);padding:4px 14px 10px;">'
+                + rows.map(function(z) { return zeroLine(z, cls, withStatus); }).join('')
+                + '<div style="margin-top:10px;"><span id="' + btnId + '" data-label="' + escapeHtml(btnLabel) + '" style="font-size:13px;font-weight:500;padding:6px 16px;border:1px solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer;border-radius:3px;">' + escapeHtml(btnLabel) + ' (' + rows.length + ')</span></div></div>';
+        };
+        if (bandZero.length) {
+            html += _batchSection('€0 after the band: sends the no-payment mail with the reason', 'The note below is what the mail says. Untick anyone who should not get it.',
+                zeroBlock(bandZero, 'batch-zero-cb', false, 'batch-zero-btn', 'Close and mail'));
+        }
+        if (otherZero.length) {
+            html += _batchSection('Other €0 rows (ended, paused, second trial; they were already told): close without a mail', 'Closed as rejected with the reason "closed at 0, already told". Nothing is sent.',
+                zeroBlock(otherZero, 'batch-silent-cb', true, 'batch-silent-btn', 'Close silently'));
+        }
+
+        // Never batched: holds, and rows waiting on the re-accept of the new terms.
+        var gatedGroups = groups.filter(function(g) { return g.gated.length; });
+        if (gatedGroups.length || _payoutsHeld.length) {
+            var gb = gatedGroups.map(function(g) { return _batchCardHtml(g, g.gated, _batchBtn('batch-gated', g.key, 'Pay without re-accept', '')); }).join('');
+            if (_payoutsHeld.length) gb += '<div style="font-size:12.5px;color:var(--faint);">' + _payoutsHeld.length + ' more not created yet: they appear once the person accepts.</div>';
+            html += _batchSection('Waiting on re-accept of the new terms', '', gb);
+        }
+        var heldGroups = groups.filter(function(g) { return g.held.length; });
+        if (heldGroups.length) {
+            html += _batchSection('On hold', 'Approve refuses these until the date.',
+                heldGroups.map(function(g) { return _batchCardHtml(g, g.held, ''); }).join(''));
+        }
+
+        // showPayoutConfirmModal reads the terms override off .payout-checkbox[data-id].
+        html += '<div style="display:none;">' + Object.keys(_batchOverride).map(function(id) {
+            return '<input type="checkbox" class="payout-checkbox" data-id="' + escapeHtml(id) + '" data-override="1" checked>';
+        }).join('') + '</div>';
+
+        tableDiv.innerHTML = html;
+
+        var payBtn = document.getElementById('batch-pay-btn');
+        if (payBtn) payBtn.addEventListener('click', function() {
+            flushPayoutNotes(pairIds).then(function() { showPayoutConfirmModal(pairIds); });
+        });
+        tableDiv.querySelectorAll('.batch-out').forEach(function(el) {
+            el.addEventListener('click', function() {
+                _batchSkipped[el.dataset.key] = true;
+                _batchPair = _batchPair.filter(function(k) { return k !== el.dataset.key; });
+                renderPayoutsBatch();
+            });
+        });
+        tableDiv.querySelectorAll('.batch-in').forEach(function(el) {
+            el.addEventListener('click', function() {
+                delete _batchSkipped[el.dataset.key];
+                if (_batchPair.length >= 2) _batchPair[1] = el.dataset.key;
+                else _batchPair.push(el.dataset.key);
+                renderPayoutsBatch();
+            });
+        });
+        tableDiv.querySelectorAll('.batch-sca').forEach(function(el) {
+            el.addEventListener('click', function() { showPayoutConfirmModal(_ids(byKey[el.dataset.key].sca)); });
+        });
+        tableDiv.querySelectorAll('.batch-gated').forEach(function(el) {
+            el.addEventListener('click', function() {
+                var g = byKey[el.dataset.key];
+                showConfirmModal('Pay without re-accept?',
+                    g.name + ' has not accepted the new terms yet. Pay this anyway? This applies to these payouts only; next month is not generated until they accept.',
+                    function() {
+                        var ids = _ids(g.gated);
+                        ids.forEach(function(id) { _batchOverride[id] = true; });
+                        renderPayoutsBatch();
+                        showPayoutConfirmModal(ids);
+                    });
+            });
+        });
+        // Both EUR 0 buttons count only the ticked rows.
+        var wireZero = function(btnId, cls, act) {
+            var btn = document.getElementById(btnId);
+            if (!btn) return;
+            var ticked = function() {
+                var ids = [];
+                tableDiv.querySelectorAll('.' + cls + ':checked').forEach(function(cb) { ids.push(cb.dataset.id); });
+                return ids;
+            };
+            tableDiv.querySelectorAll('.' + cls).forEach(function(cb) {
+                cb.addEventListener('change', function() {
+                    var n = ticked().length;
+                    btn.textContent = btn.dataset.label + ' (' + n + ')';
+                    btn.style.opacity = n ? '1' : '0.4';
+                });
+            });
+            btn.addEventListener('click', function() { var ids = ticked(); if (ids.length) act(ids); });
+        };
+        wireZero('batch-zero-btn', 'batch-zero-cb', function(ids) { showPayoutConfirmModal(ids); });
+        wireZero('batch-silent-btn', 'batch-silent-cb', function(ids) {
+            showConfirmModal('Close ' + ids.length + ' row(s) without a mail?',
+                'They are marked rejected with the reason "closed at 0, already told". No mail goes out and no money moves.',
+                function() {
+                    fetch(ONBOARD_API + '/payouts/reject', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + _authToken, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ payout_ids: ids, reason: 'closed at 0, already told' })
+                    })
+                    .then(function(resp) { return resp.json(); })
+                    .then(function(data) {
+                        if (data.error) alert(data.error);
+                        refreshPayoutsAfterApprove();
+                    })
+                    .catch(function(err) {
+                        console.error('Silent close failed:', err);
+                        refreshPayoutsAfterApprove();
+                    });
+                });
+        });
     }
 
     /* --- Recording evidence on a payout row ---
