@@ -2077,7 +2077,14 @@
         missing.forEach(function(u){ _summariesRequested[u] = true; });
         return fetch(DASHBOARD_API + '?summaries_for=' + encodeURIComponent(missing.join(',')),
                      { headers: { 'Authorization': 'Bearer ' + _authToken } })
-            .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then(function(r){
+                /* Google sign-ins last an hour. Since summaries are fetched per person,
+                   an expired one left the page silently empty ("No activity summaries"),
+                   so treat it like an expired sign-in at page load: sign out. */
+                if (r.status === 401) { signOut(); throw new Error('sign-in expired'); }
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
             .then(function(d){
                 var got = d.summaries || {};
                 Object.keys(got).forEach(function(u){ _cachedSummaries[u] = got[u]; });
