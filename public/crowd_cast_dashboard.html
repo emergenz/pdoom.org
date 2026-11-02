@@ -1092,11 +1092,11 @@
                         <span class="section-title">Contribution history</span>
                         <div id="user-heatmap"></div>
                     </div>
-                    <div id="user-work-profile" style="display:none;margin-top:20px;"></div>
                     <div class="activity-summaries" style="margin-top:20px;">
                         <span class="section-title">Activity summaries</span>
                         <div id="user-activity-summaries"></div>
                     </div>
+                    <div id="user-work-profile" style="display:none;margin-top:20px;"></div>
                 </div>
             </div>
 
@@ -2064,7 +2064,7 @@
         ensureSummaries(uuids).then(function(changed){
             if (!changed || _detailSummaryToken !== token) return;
             renderWeeklySummary(uuids, userDaily);
-            renderActivitySummaries(uuids);
+            renderActivitySummaries(uuids, undefined, true);   // keep a day pinned while they loaded
         });
     }
 
@@ -2138,14 +2138,34 @@
                 return (x.recorder_emails || []).some(function(e) { return emails[String(e).toLowerCase()]; });
             });
             if (!p) return;
+            /* Collapsed to one line (one-liner + risk chips) so it doesn't push the
+               day summary away from the heatmap; the full text opens on click. */
             var html = '<span class="section-title">Work profile</span>';
-            if (p.risk_tags && p.risk_tags.length) html += '<div style="margin:-2px 0 8px;">' + riskChips(p.risk_tags, p.risk_reasons)
-                + '<div style="font-size:12.5px;color:var(--bad);margin-top:4px;line-height:1.5;white-space:pre-line;">' + escapeHtml(p.risk_reasons.join('\n')) + '</div></div>';
             if (p.work_profile_at) html += '<div style="font-size:12.5px;color:var(--faint);margin:-4px 0 6px;">' + escapeHtml(p.participant_id || '') + ' · generated ' + escapeHtml(p.work_profile_at.slice(0, 10)) + (p.work_profile_days ? ' from ' + p.work_profile_days + ' daily summaries' : '') + ', refreshed weekly</div>';
-            html += p.work_profile
-                ? '<div class="work-profile">' + renderProfileMd(p.work_profile) + '</div>'
-                : '<div style="font-size:13px;color:var(--faint);">No profile yet.</div>';
+            html += '<div style="font-size:14px;line-height:1.5;">' + (p.risk_tags && p.risk_tags.length ? riskChips(p.risk_tags, p.risk_reasons) + ' ' : '')
+                + (p.work_oneliner ? escapeHtml(p.work_oneliner) : (p.work_profile ? '' : '<span style="color:var(--faint);">No profile yet.</span>'))
+                + (p.work_profile || (p.risk_reasons && p.risk_reasons.length) ? ' <a href="#" class="text-link" data-wp-toggle style="margin-left:6px;white-space:nowrap;">Read full profile</a>' : '')
+                + '</div>';
+            var full = '';
+            if (p.risk_reasons && p.risk_reasons.length) full += '<div style="font-size:12.5px;color:var(--bad);margin-top:10px;line-height:1.5;white-space:pre-line;">' + escapeHtml(p.risk_reasons.join('\n')) + '</div>';
+            if (p.work_profile) full += '<div class="work-profile">' + renderProfileMd(p.work_profile) + '</div>';
+            if (full) html += '<div data-wp-full style="display:none;margin-top:6px;">' + full + '</div>';
             box.innerHTML = '<div class="outline-box" style="padding:18px 22px;">' + html + '</div>';
+            var toggle = box.querySelector('[data-wp-toggle]'), fullEl = box.querySelector('[data-wp-full]');
+            var setOpen = function(open) {
+                if (!toggle || !fullEl) return;
+                fullEl.style.display = open ? 'block' : 'none';
+                toggle.textContent = open ? 'Hide full profile' : 'Read full profile';
+            };
+            var wasOpen = false;
+            try { wasOpen = localStorage.getItem('cc_work_profile_open') === '1'; } catch (e) {}
+            setOpen(wasOpen);
+            if (toggle) toggle.addEventListener('click', function(ev) {
+                ev.preventDefault();
+                var open = fullEl.style.display === 'none';
+                setOpen(open);
+                try { localStorage.setItem('cc_work_profile_open', open ? '1' : '0'); } catch (e) {}
+            });
             box.style.display = 'block';
         }).catch(function(e) { console.warn('work profile load failed', e); });
         box.dataset.for = want;
@@ -2164,10 +2184,10 @@
 
     let _summaryContainerId = 'user-activity-summaries';
 
-    function renderActivitySummaries(uuids, containerId) {
+    function renderActivitySummaries(uuids, containerId, keepPin) {
         _summaryContainerId = containerId || 'user-activity-summaries';
         const container = document.getElementById(_summaryContainerId);
-        _pinnedDate = null;
+        if (!keepPin) _pinnedDate = null;
 
         /* Merge summaries from all UUIDs for this user, combining stats across devices */
         _summaryByDate = {};
@@ -2203,7 +2223,9 @@
         }
 
         const hasSummaries = Object.keys(_summaryByDate).length > 0;
-        if (!hasSummaries) {
+        if (_pinnedDate) {
+            _showSummary(_pinnedDate, true);
+        } else if (!hasSummaries) {
             container.innerHTML = '<span class="activity-summary-none">No activity summaries available yet. Hover over a day in the heatmap to see summaries as they become available.</span>';
         } else {
             /* Show most recent by default */
@@ -2214,6 +2236,10 @@
         /* Wire up heatmap cells (scoped to the associated heatmap container) */
         var heatmapEl = document.getElementById(_heatmapContainerId);
         (heatmapEl || document).querySelectorAll('.heatmap-cell[data-date]').forEach(function(cell) {
+            /* A person's page renders twice (again once their summaries arrive), and
+               two click handlers on one cell pinned and unpinned in the same click. */
+            if (cell.dataset.wired) return;
+            cell.dataset.wired = '1';
             cell.addEventListener('mouseenter', function() {
                 if (!_pinnedDate) {
                     _showSummary(cell.dataset.date, false);
