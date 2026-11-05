@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07130e">
+<title>Update your details · crowd-cast</title>
+<link rel="icon" type="image/png" sizes="128x128" href="/favicon.png">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<link rel="preload" href="/fonts/instrument-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-mono.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/lora-pdoom-italic-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/pdoom-form.css">
+<style>
+  /* pdoom-form.css styles text inputs only; match them for the selects here. */
+  .field select {
+    width: 100%; padding: 12px 0; font-size: 17px; color: var(--ink);
+    background: transparent; border: 0; border-bottom: 1px solid var(--rule-strong); border-radius: 0;
+  }
+  .field select:focus { outline: none; border-bottom-color: var(--signal); }
+  .field .error, .field input.error, .field select.error { border-bottom-color: var(--signal); }
+  .bank-block { display: flex; flex-direction: column; gap: 30px; }
+  .bank-block > .hint { font-size: 14px; color: var(--muted); margin: 0; max-width: 58ch; }
+
+  details.doc { border: 1px solid rgba(0,0,0,.18); margin: 0 0 14px; max-width: 72ch; background: rgba(255,255,255,.5); }
+  details.doc > summary { cursor: pointer; padding: 12px 16px; font-weight: 700; }
+  details.doc .doc-body { max-height: 420px; overflow: auto; padding: 4px 18px 16px; font-size: 14px; line-height: 1.55; border-top: 1px solid rgba(0,0,0,.1); }
+  details.doc .doc-body h2 { font-size: 15px; margin: 18px 0 6px; }
+  details.doc .doc-body ul { padding-left: 20px; }
+  .terms-check { display: flex; gap: 12px; align-items: flex-start; font-size: 15px; max-width: 62ch; cursor: pointer; margin: 10px 0; }
+  .terms-check input { margin-top: 4px; flex: 0 0 auto; accent-color: var(--signal); }
+  .rate-line { font-size: 15px; max-width: 62ch; margin: 0; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <a class="header-brand" href="/" aria-label="p(doom) home">
+    <span class="pdoom-brand">
+      <img src="/assets/pdoom-mark.webp" srcset="/assets/pdoom-mark-128.webp 128w, /assets/pdoom-mark-256.webp 256w, /assets/pdoom-mark.webp 512w" sizes="38px" alt="" aria-hidden="true" width="512" height="512" decoding="async">
+      <span>p(doom)</span>
+    </span>
+  </a>
+  <nav class="desktop-nav" aria-label="Primary navigation"></nav>
+  <div class="header-actions">
+    <button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="mobile-navigation" aria-expanded="false"></button>
+  </div>
+</header>
+<main class="shell">
+  <div id="root">
+    <p class="kicker">crowd-cast</p>
+    <h1 id="title">Update your details</h1>
+    <div class="prose"><p class="sub" id="sub">Loading&hellip;</p></div>
+    <div class="err" id="err"></div>
+
+    <form id="form" novalidate style="display:none;">
+      <div class="field" id="f-email-w">
+        <label for="d_email">Your email</label>
+        <p class="hint">The address you signed up with. We check it matches, so this link alone can't be used by anyone else.</p>
+        <input type="email" id="d_email" autocomplete="email" placeholder="you@example.com">
+      </div>
+      <div class="field" id="w-address">
+        <label for="address">Your address</label>
+        <p class="hint">Where you live now: street and number, postal code, city.</p>
+        <input type="text" id="address" autocomplete="street-address" placeholder="Rue Example 1, 4000 Liège">
+      </div>
+      <div class="field" id="w-country">
+        <label for="f-country">Country of residence</label>
+        <p class="hint">Where you live now. This sets your monthly amount and which bank details we need below.</p>
+        <select id="f-country" autocomplete="country-name">
+          <option value="">Select country...</option>
+          <option value="Germany">Germany</option>
+          <option value="United Kingdom">United Kingdom</option>
+          <option value="Switzerland">Switzerland</option>
+          <option value="Austria">Austria</option>
+          <option value="Netherlands">Netherlands</option>
+          <option value="France">France</option>
+          <option value="Sweden">Sweden</option>
+          <option value="Denmark">Denmark</option>
+          <option value="Norway">Norway</option>
+          <option value="Finland">Finland</option>
+          <option value="Belgium">Belgium</option>
+          <option value="Italy">Italy</option>
+          <option value="Spain">Spain</option>
+          <option value="Portugal">Portugal</option>
+          <option value="Poland">Poland</option>
+          <option value="Czech Republic">Czech Republic</option>
+          <option value="Hungary">Hungary</option>
+          <option value="Romania">Romania</option>
+          <option value="Ireland">Ireland</option>
+          <option value="Greece">Greece</option>
+          <option value="India">India</option>
+          <option value="Japan">Japan</option>
+          <option value="United States">United States</option>
+          <option value="Canada">Canada</option>
+          <option value="Australia">Australia</option>
+          <option value="Israel">Israel</option>
+          <option value="Turkey">Turkey</option>
+          <option value="Singapore">Singapore</option>
+          <option value="Hong Kong">Hong Kong</option>
+          <option value="Brazil">Brazil</option>
+          <option value="Mexico">Mexico</option>
+          <option value="Armenia">Armenia</option>
+          <option value="Nepal">Nepal</option>
+          <option value="Ethiopia">Ethiopia</option>
+          <option value="Kenya">Kenya</option>
+          <option value="Nigeria">Nigeria</option>
+          
+        </select>
+      </div>
+
+      <!-- Bank details: same fields, ids and rules as onboard.html (logic in
+           /bank_fields.js), so the payout_details we send has the shape the
+           payment code expects for every country, not just IBAN ones. -->
+      <div id="w-bankdetails" class="bank-block">
+        <div class="field">
+          <label for="f-holder">Account holder name *</label>
+          <p class="hint">Bank details for the payout via bank transfer.</p>
+          <input type="text" id="f-holder" autocomplete="name" placeholder="As shown on your bank account">
+        </div>
+        <div class="field">
+          <label id="l-iban" for="f-iban">IBAN or account number *</label>
+          <input type="text" id="f-iban" autocomplete="off" placeholder="DE89 3704 0044 0532 0130 00">
+        </div>
+        <div class="field" id="w-routing" style="display:none;">
+          <label for="f-routing">ACH routing number *</label>
+          <input type="text" id="f-routing" autocomplete="off" placeholder="9 digits, e.g. 026009593" inputmode="numeric">
+        </div>
+        <div class="field" id="w-institution" style="display:none;">
+          <label for="f-institution">Institution number *</label>
+          <input type="text" id="f-institution" autocomplete="off" placeholder="3 digits, e.g. 004" inputmode="numeric">
+        </div>
+        <div class="field" id="w-transit" style="display:none;">
+          <label for="f-transit">Transit number *</label>
+          <input type="text" id="f-transit" autocomplete="off" placeholder="5 digits" inputmode="numeric">
+        </div>
+        <div class="field" id="w-bsb" style="display:none;">
+          <label for="f-bsb">BSB code *</label>
+          <input type="text" id="f-bsb" autocomplete="off" placeholder="6 digits, e.g. 062000" inputmode="numeric">
+        </div>
+        <div class="field" id="w-bankcode" style="display:none;">
+          <label id="l-bankcode" for="f-bankcode">Bank code *</label>
+          <input type="text" id="f-bankcode" autocomplete="off" placeholder="e.g. 7171" inputmode="numeric">
+        </div>
+        <div class="field" id="w-branchcode" style="display:none;">
+          <label for="f-branchcode">Branch code *</label>
+          <input type="text" id="f-branchcode" autocomplete="off" placeholder="3 digits" inputmode="numeric">
+        </div>
+        <div class="field" id="w-account-type" style="display:none;">
+          <label for="f-account-type">Account type *</label>
+          <select id="f-account-type" autocomplete="off">
+            <option value="">Select...</option>
+            <option value="checking">Checking</option>
+            <option value="savings">Savings</option>
+          </select>
+        </div>
+        <div class="field" id="w-bic">
+          <label id="l-bic" for="f-bic">BIC/SWIFT</label>
+          <input type="text" id="f-bic" autocomplete="off" placeholder="COBADEFFXXX">
+        </div>
+        <div class="field">
+          <label for="f-bank">Bank name and country *</label>
+          <input type="text" id="f-bank" autocomplete="off" placeholder="Commerzbank, Germany">
+        </div>
+        <!-- SWIFT-rail countries (Armenia, Nepal, Ethiopia, Kenya, Nigeria) need the holder's
+             address as separate fields; hidden everywhere else. -->
+        <div id="w-benaddr" class="bank-block" style="display:none">
+          <div class="field">
+            <label for="f-benaddr-line">Your street address *</label>
+            <input type="text" id="f-benaddr-line" autocomplete="address-line1" placeholder="Jangal-panauti Rd">
+          </div>
+          <div class="field">
+            <label for="f-benaddr-city">Your city *</label>
+            <input type="text" id="f-benaddr-city" autocomplete="address-level2" placeholder="Banepa">
+          </div>
+          <div class="field">
+            <label for="f-benaddr-post">Your postal code *</label>
+            <input type="text" id="f-benaddr-post" autocomplete="postal-code" placeholder="45210">
+          </div>
+        </div>
+        <p class="hint">Payouts are paid to your account in its local currency. The payment record shows the exact conversion.</p>
+      </div>
+
+      <p class="rate-line" id="rate-line" style="display:none;"></p>
+
+      <details class="doc"><summary>Data Purchase and Participation Agreement</summary><div class="doc-body" id="doc-dpa"></div></details>
+      <label class="terms-check"><input type="checkbox" id="agree-purchase"><span id="label-purchase"></span></label>
+
+      <button type="submit" id="submit" class="button button--primary">
+        <span id="submit-label">Save and sign</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </form>
+
+    <div class="done" id="done" style="display:none;"><h2 id="done-title">Saved.</h2><p id="done-msg"></p></div>
+    <p class="fine" id="fine" style="display:none;">Your bank details are stored encrypted and only used to pay you. We email you a signed copy of the agreement, and a notice that your details changed.</p>
+  </div>
+</main>
+<script src="/bank_fields.js"></script>
+<script>
+(function () {
+  var API = 'https://ob3iugfiy2.execute-api.us-east-1.amazonaws.com/v1/details';
+  function esc(s) { return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  var pid='', token='';
+  try { var q=new URLSearchParams(window.location.search); pid=q.get('pid')||''; token=q.get('token')||''; } catch(e) {}
+  var sub=document.getElementById('sub'), err=document.getElementById('err'), form=document.getElementById('form');
+  var bank = window.pdoomBankFields, info = null, dpaHtml = '';
+  function val(id) { var el = document.getElementById(id); return el && el.value ? String(el.value) : ''; }
+  function fail(m) { err.style.display='block'; err.textContent=m; }
+  function showDone(t,m) { form.style.display='none'; document.getElementById('fine').style.display='none'; document.getElementById('done').style.display=''; document.getElementById('done-title').textContent=t; document.getElementById('done-msg').textContent=m; }
+  if (!pid || !token) { sub.textContent=''; fail('This page needs your personal link. Please use the link we emailed you.'); return; }
+
+  // The figure for the selected country, with the same region lists the server uses.
+  function compFor(country) {
+    if (!info) return null;
+    if (!info.comp) return info.legacy ? { display: '$' + info.legacy.amount } : null;
+    var c = String(country||'').trim().toLowerCase().replace(/\.$/, '');
+    var r = info.comp.na_countries.indexOf(c) >= 0 ? 'NA' : (info.comp.eu_countries.indexOf(c) >= 0 ? 'EU' : 'RoW');
+    return info.comp.regions[r];
+  }
+  function renderDoc() {
+    var ctry = val('f-country'), c = compFor(ctry), line = document.getElementById('rate-line');
+    var holder = document.getElementById('doc-dpa');
+    holder.innerHTML = dpaHtml;
+    var fig = holder.querySelector('#comp-figure'), cur = holder.querySelector('#comp-currency');
+    if (c && fig) fig.textContent = c.display;
+    if (c && cur && c.currency) cur.textContent = c.currency;
+    if (ctry && c) { line.style.display=''; line.innerHTML = 'Monthly amount for residents of ' + esc(ctry) + ': <b>' + esc(c.display) + '</b>, from the day you sign.'; }
+    else line.style.display='none';
+  }
+  document.getElementById('f-country').addEventListener('change', function () { bank.updateBankFields(); renderDoc(); });
+  bank.updateBankFields();
+
+  var docsP = fetch('/onboard.html', { cache: 'no-store' }).then(function(r) { if (!r.ok) throw new Error('docs'); return r.text(); })
+    .then(function(h) { return new DOMParser().parseFromString(h, 'text/html'); });
+  var infoP = fetch(API + '?pid=' + encodeURIComponent(pid) + '&token=' + encodeURIComponent(token))
+    .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'Could not load this page. Please try again shortly.'); return d; }); });
+  Promise.all([infoP, docsP]).then(function(res) {
+    info = res[0]; var doc = res[1];
+    var dpa = doc.getElementById('agreement-1'), lp = doc.querySelector('label[for="f-agree-purchase"]');
+    if (!dpa || !lp) throw new Error('docs');
+    dpaHtml = dpa.innerHTML;
+    document.getElementById('label-purchase').textContent = lp.textContent.trim();
+    sub.innerHTML = 'For <b>' + esc(info.name) + '</b>: enter where you live now and the bank account you want to be paid to. This replaces the details we have on file and re-signs your Data Purchase Agreement with the amount for your country of residence.';
+    renderDoc();
+    form.style.display=''; document.getElementById('fine').style.display='';
+  }).catch(function(e) { sub.textContent=''; fail(e.message==='docs' ? 'Could not load the agreement. Please try again shortly.' : (e.message||String(e))); });
+
+  form.addEventListener('submit', function(ev) {
+    ev.preventDefault(); err.style.display='none';
+    var email = document.getElementById('d_email').value.trim();
+    var addr = document.getElementById('address').value.trim();
+    var ctry = val('f-country').trim();
+    if (!email) return fail('Please enter the email address you signed up with.');
+    if (!addr || !ctry) return fail('Please enter your address and country of residence.');
+    bank.FIELD_IDS.forEach(function (id) { var el = document.getElementById(id); if (el) el.classList.remove('error'); });
+    var bankErrors = bank.validateBank(val);
+    if (bankErrors.length) {
+      bankErrors.forEach(function (e) { var el = document.getElementById(e.id); if (el) el.classList.add('error'); });
+      return fail(bankErrors.map(function (e) { return e.msg; }).join(' '));
+    }
+    if (!document.getElementById('agree-purchase').checked) return fail('Please accept the agreement to continue.');
+    var btn = document.getElementById('submit'); btn.disabled = true;
+    var body = { pid: pid, token: token, email: email, address: addr, country: ctry,
+                 payout_details: bank.buildPayoutDetails(val), agree_purchase: true, user_agent: navigator.userAgent };
+    fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
+      .then(function(r) { return r.json().then(function(d) { return {ok:r.ok, d:d}; }); })
+      .then(function(res) {
+        btn.disabled = false;
+        if (!res.ok) return fail(res.d.error || 'Something went wrong.');
+        var c = res.d.compensation, amt = c ? (c.currency === 'EUR' ? '€' : '$') + c.amount : '';
+        showDone('Saved. Thank you.', 'Your new details are on record' + (res.d.rate_changed && amt ? ', and from today your monthly amount is ' + amt : '') + '. A signed copy of the agreement is on its way to your inbox. Keep recording as usual.');
+      })
+      .catch(function() { btn.disabled = false; fail('Network error. Please try again.'); });
+  });
+})();
+</script>
+<div class="footer-canvas">
+<footer class="site-footer" data-nav-theme="light">
+  <img class="footer-backdrop" src="/assets/footer-delta-compressed.webp" alt="" aria-hidden="true" decoding="async" height="941" loading="lazy" width="1672">
+  <div class="footer-wordmark">
+    <span class="pdoom-brand pdoom-brand--large">
+      <img src="/assets/pdoom-mark.webp" srcset="/assets/pdoom-mark-128.webp 128w, /assets/pdoom-mark-256.webp 256w, /assets/pdoom-mark.webp 512w" sizes="(max-width: 680px) 76px, 180px" alt="" aria-hidden="true" width="512" height="512" loading="lazy" decoding="async">
+      <span>p(doom)</span>
+    </span>
+  </div>
+  <h2 class="sr-only" id="footer-navigation-title">Footer navigation</h2>
+  <nav class="footer-groups" aria-labelledby="footer-navigation-title">
+    <div class="footer-group">
+      <h3>Research</h3>
+      <a href="/#console">RESEARCH AGENDA</a>
+      <a href="/research/">ALL RESEARCH</a>
+    </div>
+    <div class="footer-group">
+      <h3>Releases</h3>
+      <a href="/research/crowd-cast/">CROWD-CAST</a>
+      <a href="/research/inverse-dynamics-model/">INVERSE DYNAMICS MODEL</a>
+      <a href="/research/agi-cast/">AGI-CAST</a>
+      <a href="/research/crowd-code/">CROWD-CODE</a>
+      <a href="/research/jasmine/">JASMINE</a>
+    </div>
+    <div class="footer-group">
+      <h3>Resources</h3>
+      <a href="/docs/crowd-cast/">DOCUMENTATION</a>
+      <a href="https://github.com/p-doom">GITHUB</a>
+      <a href="https://huggingface.co/p-doom">HUGGING FACE</a>
+    </div>
+    <div class="footer-group">
+      <h3>Opportunities</h3>
+      <a href="/careers/">CAREERS</a>
+      <a href="/careers/paid-data-collection/">PAID DATA COLLECTION</a>
+      <a href="/careers/residency/">RESEARCH RESIDENCY</a>
+    </div>
+    <div class="footer-group">
+      <h3>Lab</h3>
+      <a href="/about/">ABOUT</a>
+      <a href="/merch/">MERCH</a>
+    </div>
+    <div class="footer-group">
+      <h3>Connect</h3>
+      <a href="https://discord.gg/G4JNuPX2VR">DISCORD</a>
+      <a href="https://x.com/prob_doom">X</a>
+      <a href="https://www.linkedin.com/company/p-doom">LINKEDIN</a>
+    </div>
+    <div class="footer-legal">
+      <h3>Legal</h3>
+      <div>
+        <a href="/imprint/">IMPRINT</a>
+        <a href="/docs/crowd-cast-data-purchase-agreement.pdf">DATA PURCHASE AGREEMENT</a>
+        <a href="/docs/crowd-cast-privacy-consent.pdf">PRIVACY CONSENT</a>
+      </div>
+    </div>
+    <div class="footer-backing">
+      <a class="footer-sprind" href="https://www.sprind.org/" target="_blank" rel="noreferrer" aria-label="Visit SPRIND">
+        <img src="/assets/sprind.svg" alt="SPRIN-D" height="19" loading="lazy" width="136">
+      </a>
+    </div>
+  </nav>
+  <div class="footer-bottom">
+    <span>&copy;2026 P(DOOM).</span>
+    <div class="social-links">
+      <a href="https://x.com/prob_doom" aria-label="X"><span aria-hidden="true">X</span></a>
+      <a href="https://github.com/p-doom" aria-label="GH: GitHub"><span aria-hidden="true">GH</span></a>
+      <a href="https://huggingface.co/p-doom" aria-label="HF: Hugging Face"><span aria-hidden="true">HF</span></a>
+      <a href="https://www.linkedin.com/company/p-doom" aria-label="in: LinkedIn"><span aria-hidden="true">in</span></a>
+    </div>
+    <span>ALL RIGHTS RESERVED.</span>
+  </div>
+</footer>
+</div>
+<script src="/pdoom-header.js" defer></script>
+<script src="/pdoom-footer.js" defer></script>
+</body>
+</html>
