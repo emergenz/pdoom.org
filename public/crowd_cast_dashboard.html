@@ -3251,7 +3251,7 @@
             var canApprove = isPending || isScaRetry;
             if (canApprove) { pendingCount++; pendingTotal += p.amount_usd; }
 
-            var dueDate = p.period_end ? new Date(p.period_end + 'T23:59:59') : null;
+            var dueDate = _payoutDueAt(p);
             var isDueSoon = isPending && dueDate && (dueDate.getTime() - now.getTime()) <= sevenDaysMs;
             var isOverdue = isPending && dueDate && dueDate < now;
 
@@ -3391,7 +3391,7 @@
         for (var k = 0; k < _payoutsData.length; k++) {
             var pk = _payoutsData[k];
             if (pk.status !== 'pending') continue;
-            var dueK = pk.period_end ? new Date(pk.period_end + 'T23:59:59') : null;
+            var dueK = _payoutDueAt(pk);
             if (dueK && dueK < now) overdueCount++;
             else if (dueK && (dueK.getTime() - now.getTime()) <= sevenDaysMs) dueSoonCount++;
         }
@@ -3484,11 +3484,54 @@
         return p.merged_from ? 'Merged' : p.payout_type === 'referral_premium' ? ('Premium T' + (p.tranche || '?')) : p.payout_type === 'trial' ? 'Trial' : p.payout_type === 'partial' ? 'Partial' : 'Full';
     }
 
+    /* When a row becomes payable. A trial's period_end is exclusive (the
+       partial starts that same day), so a trial is due from the start of that
+       day; every other row's period_end is its last paid day, so it is due once
+       that day is over. The table and the batch view both use this. */
+    var _DAY_MS = 24 * 60 * 60 * 1000;
+    var _MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    function _payoutDueAt(p) {
+        if (!p.period_end) return null;
+        return new Date(p.period_end + (p.payout_type === 'trial' ? 'T00:00:00' : 'T23:59:59'));
+    }
+    function _fmtDay(iso) {
+        var d = String(iso || '').split('-');
+        return d.length === 3 ? _MONTHS[parseInt(d[1], 10) - 1] + ' ' + parseInt(d[2], 10) : String(iso || '');
+    }
+    /* overdue: the period is over, pay it now (days = how long it has waited).
+       soon: it ends within 7 days. later: further out, usually month end.
+       A referral premium is owed from the moment it is claimed; its period
+       dates are the referral's milestone, so it waits from created_at (not in
+       the /payouts/generate response today: then it just says "Due now"). */
+    function _dueState(p, now) {
+        if (p.payout_type === 'referral_premium') {
+            return { state: 'overdue', days: p.created_at ? Math.max(0, Math.floor((now.getTime() - new Date(p.created_at).getTime()) / _DAY_MS)) : null };
+        }
+        var due = _payoutDueAt(p);
+        if (!due) return { state: 'overdue', days: 0 };
+        var ms = due.getTime() - now.getTime();
+        if (ms < 0) return { state: 'overdue', days: Math.floor(-ms / _DAY_MS) };
+        return { state: ms <= 7 * _DAY_MS ? 'soon' : 'later', days: Math.ceil(ms / _DAY_MS) };
+    }
+    var _DUE_RANK = { overdue: 0, soon: 1, later: 2 };
+    function _dueChip(p, d) {
+        var s = 'font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;white-space:nowrap;';
+        if (d.state === 'overdue') {
+            return '<span style="' + s + 'background:var(--bad);color:var(--paper);">'
+                + (d.days == null ? 'Due now' : d.days >= 1 ? 'Overdue · ' + d.days + (d.days === 1 ? ' day' : ' days') : 'Due today') + '</span>';
+        }
+        if (d.state === 'soon') return '<span style="' + s + 'background:var(--warn);color:var(--paper);">Due ' + escapeHtml(_fmtDay(p.period_end)) + '</span>';
+        return '<span style="' + s + 'font-weight:500;padding:0 5px;border:1px solid var(--rule-strong);color:var(--muted);">Due ' + escapeHtml(_fmtDay(p.period_end)) + '</span>';
+    }
+
     /* One group per person (premiums per referrer), rows sorted into what can be
-       batched now and what can't. */
+       batched now and what can't. Only rows whose period is over go into pay;
+       a row still running (a month-end row, a trial ending later) waits in
+       later, so a pair never pays days that haven't happened yet. */
     function buildPayoutGroups() {
         var groups = {}, order = [];
-        var nowIso = new Date().toISOString();
+        var now = new Date();
+        var nowIso = now.toISOString();
         (_payoutsData || []).forEach(function(p) {
             var isPremium = p.payout_type === 'referral_premium';
             var key = isPremium ? 'ref:' + (p.partner_slug || p.payout_id) : (p.participant_id || p.payout_id);
@@ -3496,7 +3539,8 @@
                 var part = _payoutsParticipants[p.participant_id] || {};
                 groups[key] = { key: key, premium: isPremium,
                     name: isPremium ? (p.recipient_name || p.partner_slug || p.participant_id) : (part.name || p.participant_id),
-                    pay: [], zero: [], sca: [], held: [], gated: [], processing: [], paid: [], usd: 0, risk: '', reasons: '' };
+                    pay: [], later: [], zero: [], sca: [], held: [], gated: [], processing: [], paid: [], usd: 0, risk: '', reasons: '',
+                    oldestDue: null, nextDue: null };
                 order.push(key);
             }
             var g = groups[key];
@@ -3505,13 +3549,32 @@
             if (p.status === 'paid') { if (_rowAmount(p) > 0) g.paid.push(p); return; }
             if (p.status === 'approved') { (p.requires_sca ? g.sca : g.processing).push(p); return; }
             if (p.status !== 'pending') return;
+            p._due = _dueState(p, now);
             if (p.hold_until && p.hold_until > nowIso) { g.held.push(p); return; }
             if (!(_rowAmount(p) > 0)) { g.zero.push(p); return; }
             if (p.terms_gated) { g.gated.push(p); return; }
-            g.pay.push(p);
-            g.usd += Number(p.amount_usd) || 0;
+            var at = _payoutDueAt(p);
+            if (p._due.state === 'overdue') {
+                g.pay.push(p);
+                g.usd += Number(p.amount_usd) || 0;
+                if (at && (!g.oldestDue || at < g.oldestDue)) g.oldestDue = at;
+            } else {
+                g.later.push(p);
+                if (at && (!g.nextDue || at < g.nextDue)) g.nextDue = at;
+            }
         });
+        var byPeriod = function(a, b) { return (a.period_start || '') < (b.period_start || '') ? -1 : (a.period_start || '') > (b.period_start || '') ? 1 : 0; };
+        order.forEach(function(k) { groups[k].pay.sort(byPeriod); groups[k].later.sort(byPeriod); });
         return order.map(function(k) { return groups[k]; });
+    }
+
+    /* The most urgent due state among a card's rows, for the card's tint. */
+    function _worstDue(rows) {
+        var best = null;
+        rows.forEach(function(p) {
+            if (p._due && (!best || _DUE_RANK[p._due.state] < _DUE_RANK[best])) best = p._due.state;
+        });
+        return best;
     }
 
     function _ids(rows) { return rows.map(function(p) { return p.payout_id; }); }
@@ -3528,7 +3591,8 @@
         var sym = _rowSym(p);
         var mono = 'font-size:13px;font-variant-numeric:tabular-nums;';
         var html = '<div style="display:flex;gap:12px;align-items:baseline;padding:6px 0;border-top:1px solid var(--rule);">';
-        html += '<div style="' + mono + 'color:var(--muted);min-width:170px;">' + escapeHtml(p.period_start) + ' to ' + escapeHtml(p.period_end) + ' · ' + _rowTypeLabel(p) + '</div>';
+        html += '<div style="' + mono + 'color:var(--muted);min-width:170px;">' + escapeHtml(p.period_start) + ' to ' + escapeHtml(p.period_end) + ' · ' + _rowTypeLabel(p)
+            + (p.status === 'pending' && p._due ? '<div style="margin-top:4px;">' + _dueChip(p, p._due) + '</div>' : '') + '</div>';
         html += '<div style="flex:1;min-width:0;">';
         var band = _bandFromNote(p);
         if (band) {
@@ -3551,8 +3615,13 @@
         return html;
     }
 
-    function _batchCardHtml(g, rows, action) {
-        var html = '<div style="border:1px solid var(--rule);background:var(--paper);padding:10px 14px;">';
+    /* tint: colour the card by its most urgent row (red: period over, amber:
+       ends within 7 days), the same colours as the table. Off for lists that
+       can't be paid from here (held, re-accept, SCA, sending). */
+    function _batchCardHtml(g, rows, action, tint) {
+        var worst = tint ? _worstDue(rows) : null;
+        var bg = worst === 'overdue' ? 'var(--bad-bg)' : worst === 'soon' ? 'var(--warn-bg)' : 'var(--paper)';
+        var html = '<div style="border:1px solid var(--rule);background:' + bg + ';padding:10px 14px;">';
         html += '<div style="display:flex;gap:10px;align-items:baseline;margin-bottom:4px;">';
         html += '<div style="font-size:13px;font-weight:600;color:var(--ink);">' + escapeHtml(g.name)
             + (g.premium ? ' <span style="background:var(--steel);color:var(--paper);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:2px;vertical-align:1px;">Referrer</span>' : '')
@@ -3588,7 +3657,8 @@
         var byKey = {};
         groups.forEach(function(g) { byKey[g.key] = g; });
 
-        // Queue: people before referrers, unflagged before flagged, biggest first.
+        // Queue: only rows whose period is over. People before referrers,
+        // unflagged before flagged, longest waiting first, then biggest.
         // Anyone taken out of a pair goes to the back.
         var queue = groups.filter(function(g) { return g.pay.length; });
         queue.sort(function(a, b) {
@@ -3597,6 +3667,8 @@
             if (sa !== sb) return sa - sb;
             var fa = a.risk ? 1 : 0, fb = b.risk ? 1 : 0;
             if (fa !== fb) return fa - fb;
+            var da = a.oldestDue ? a.oldestDue.getTime() : 0, db = b.oldestDue ? b.oldestDue.getTime() : 0;
+            if (da !== db) return da - db;
             return b.usd - a.usd;
         });
         _batchPair = _batchPair.filter(function(k) { return byKey[k] && byKey[k].pay.length; });
@@ -3606,20 +3678,35 @@
 
         // Progress: money that left vs money still to send this month.
         var paidRows = [], leftRows = [], paidPeople = 0, allPeople = 0, heldN = 0, gatedN = 0;
+        var dueN = { overdue: 0, soon: 0, later: 0 }, dueRows = [], laterRows = [];
         groups.forEach(function(g) {
-            var left = g.pay.concat(g.sca, g.processing);
+            var left = g.pay.concat(g.later, g.sca, g.processing);
             paidRows = paidRows.concat(g.paid);
             leftRows = leftRows.concat(left);
+            dueRows = dueRows.concat(g.pay);
+            laterRows = laterRows.concat(g.later);
+            g.pay.concat(g.later).forEach(function(p) { dueN[p._due.state]++; });
             if (g.paid.length || left.length || g.held.length || g.gated.length) allPeople++;
             if (g.paid.length && !left.length && !g.held.length && !g.gated.length) paidPeople++;
             if (g.held.length) heldN++;
             if (g.gated.length) gatedN++;
         });
+        // Due line: what is payable now vs what is still running, same colours as the cards.
+        var dueBits = [];
+        if (dueN.overdue) dueBits.push('<span style="font-weight:600;color:var(--bad);">' + dueN.overdue + ' due now</span> <span style="color:var(--muted);">(' + _fmtCurTotals(_payoutCurTotals(_ids(dueRows))) + ')</span>');
+        if (dueN.soon) dueBits.push('<span style="font-weight:600;color:var(--warn);">' + dueN.soon + ' due within 7 days</span>');
+        if (dueN.later) {
+            var laterEnds = {};
+            laterRows.forEach(function(p) { if (p._due.state === 'later') laterEnds[p.period_end] = 1; });
+            var ends = Object.keys(laterEnds).sort();
+            dueBits.push('<span style="color:var(--muted);">' + dueN.later + ' due ' + (ends.length === 1 ? '' : 'by ') + escapeHtml(_fmtDay(ends[ends.length - 1])) + '</span>');
+        }
         var html = '<div style="display:flex;flex-wrap:wrap;gap:22px;align-items:baseline;padding:10px 14px;border:1px solid var(--rule);background:var(--paper-soft);font-size:13px;font-variant-numeric:tabular-nums;">'
             + '<div><span style="font-weight:600;color:var(--ink);">' + paidPeople + ' of ' + allPeople + '</span> <span style="color:var(--muted);">people paid</span></div>'
             + '<div><span style="color:var(--muted);">Sent </span><span style="font-weight:600;color:var(--ok);">' + (paidRows.length ? _fmtCurTotals(_payoutCurTotals(_ids(paidRows))) : '0') + '</span></div>'
             + '<div><span style="color:var(--muted);">Still to send </span><span style="font-weight:600;color:var(--ink);">' + (leftRows.length ? _fmtCurTotals(_payoutCurTotals(_ids(leftRows))) : '0') + '</span></div>'
             + ((heldN || gatedN) ? '<div style="color:var(--muted);">Not in batches: ' + [heldN ? heldN + ' held' : '', gatedN ? gatedN + ' waiting on re-accept' : ''].filter(Boolean).join(', ') + '</div>' : '')
+            + (dueBits.length ? '<div style="flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px 18px;">' + dueBits.join('') + '</div>' : '')
             + '</div>';
 
         // The pair.
@@ -3627,7 +3714,7 @@
         var pairBody = '';
         _batchPair.forEach(function(k) {
             pairIds = pairIds.concat(_ids(byKey[k].pay));
-            pairBody += _batchCardHtml(byKey[k], byKey[k].pay, _batchBtn('batch-out', k, 'Take out', ''));
+            pairBody += _batchCardHtml(byKey[k], byKey[k].pay, _batchBtn('batch-out', k, 'Take out', ''), true);
         });
         if (_batchPair.length) {
             html += '<div style="margin-top:18px;border:1px solid var(--rule-strong);padding:14px;">'
@@ -3637,14 +3724,28 @@
                 + '<span id="batch-pay-btn" style="margin-left:auto;font-size:13px;font-weight:500;padding:8px 20px;border:1px solid var(--ok);background:var(--ok);color:var(--paper);cursor:pointer;border-radius:3px;">Pay these ' + _batchPair.length + '</span>'
                 + '</div><div style="display:flex;flex-direction:column;gap:8px;">' + pairBody + '</div></div>';
         } else {
-            html += '<div style="margin-top:18px;padding:14px;border:1px solid var(--rule);font-size:13px;color:var(--muted);">Nobody left to pay in this month.</div>';
+            html += '<div style="margin-top:18px;padding:14px;border:1px solid var(--rule);font-size:13px;color:var(--muted);">'
+                + (laterRows.length ? 'Nobody is due right now. The rest of this month is under Not due yet.' : 'Nobody left to pay in this month.') + '</div>';
         }
 
         // Everyone else in the queue.
         var rest = queue.filter(function(g) { return _batchPair.indexOf(g.key) < 0; });
         if (rest.length) {
             html += _batchSection('Up next (' + rest.length + ')', 'Swap in replaces the second person of the pair.',
-                rest.map(function(g) { return _batchCardHtml(g, g.pay, _batchBtn('batch-in', g.key, 'Swap in', 'ink')); }).join(''));
+                rest.map(function(g) { return _batchCardHtml(g, g.pay, _batchBtn('batch-in', g.key, 'Swap in', 'ink'), true); }).join(''));
+        }
+
+        // Rows whose period is still running: kept out of the pairs. Pay now
+        // is for paying a month early on purpose (it asks first).
+        var laterGroups = groups.filter(function(g) { return g.later.length; });
+        laterGroups.sort(function(a, b) {
+            var da = a.nextDue ? a.nextDue.getTime() : 0, db = b.nextDue ? b.nextDue.getTime() : 0;
+            if (da !== db) return da - db;
+            return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+        });
+        if (laterGroups.length) {
+            html += _batchSection('Not due yet (' + laterGroups.length + ')', 'Their period is still running, so they stay out of the pairs. Pay now pays one person early.',
+                laterGroups.map(function(g) { return _batchCardHtml(g, g.later, _batchBtn('batch-early', g.key, 'Pay now', ''), true); }).join(''));
         }
 
         // Approved but waiting for the Qonto approval on the phone.
@@ -3735,6 +3836,18 @@
                 if (_batchPair.length >= 2) _batchPair[1] = el.dataset.key;
                 else _batchPair.push(el.dataset.key);
                 renderPayoutsBatch();
+            });
+        });
+        tableDiv.querySelectorAll('.batch-early').forEach(function(el) {
+            el.addEventListener('click', function() {
+                var g = byKey[el.dataset.key];
+                var ends = g.later.map(function(p) { return _fmtDay(p.period_end); }).filter(function(v, i, a) { return a.indexOf(v) === i; });
+                showConfirmModal('Pay before the period ends?',
+                    g.name + "'s period runs until " + ends.join(' and ') + '. Pay ' + _fmtCurTotals(_payoutCurTotals(_ids(g.later))) + ' now anyway?',
+                    function() {
+                        var ids = _ids(g.later);
+                        flushPayoutNotes(ids).then(function() { showPayoutConfirmModal(ids); });
+                    });
             });
         });
         tableDiv.querySelectorAll('.batch-sca').forEach(function(el) {
