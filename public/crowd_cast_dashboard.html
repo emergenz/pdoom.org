@@ -991,7 +991,6 @@
                     <span class="section-title">Activity summaries</span>
                     <div id="my-activity-summaries"></div>
                 </div>
-                <div id="my-current-work" style="display:none;"></div>
             </div>
 
             <!-- All users view -->
@@ -1097,7 +1096,6 @@
                         <span class="section-title">Activity summaries</span>
                         <div id="user-activity-summaries"></div>
                     </div>
-                    <div id="user-current-work" style="display:none;margin-top:20px;"></div>
                     <div id="user-work-profile" style="display:none;margin-top:20px;"></div>
                 </div>
             </div>
@@ -2060,7 +2058,6 @@
         /* Work profile (admins only), then activity summaries */
         renderUserWorkProfile(uuids);
         renderActivitySummaries(uuids);
-        renderCurrentWork(uuids, 'user-current-work');
 
         /* Summaries for other people are fetched when their page is opened
            (the dashboard API only sends your own up front). Re-render the two
@@ -2071,7 +2068,6 @@
             if (!changed || _detailSummaryToken !== token) return;
             renderWeeklySummary(uuids, userDaily);
             renderActivitySummaries(uuids, undefined, true);   // keep a day pinned while they loaded
-            renderCurrentWork(uuids, 'user-current-work');
         });
     }
 
@@ -2241,7 +2237,7 @@
                     _summaryByDate[date] = { date: date, segment_count: null, total_hours: null, visible_fraction: null, _vis_segments: 0, _devices: [] };
                 }
                 const m = _summaryByDate[date];
-                (m._s0 = m._s0 || []).push(d);
+                (m._s0 = m._s0 || []).push(Object.assign({ _uid: uid, _date: date }, d));
             }
         }
 
@@ -2320,6 +2316,7 @@
                 if (d0.view && d0.view.today) bodyHtml += '<div class="activity-summary-text" style="font-weight:500;margin-bottom:6px;">' + renderMd(d0.view.today) + '</div>';
                 bodyHtml += '<div class="activity-summary-text work-profile" style="max-width:none;">' + renderAccountMd(d0.entry) + '</div>';
                 if (_isAdmin && d0.numbers) bodyHtml += '<div style="font-size:12.5px;color:var(--faint);margin-top:4px;font-variant-numeric:tabular-nums;">' + escapeHtml(stage0NumbersLine(d0.numbers)) + '</div>';
+                if (_isAdmin) bodyHtml += '<div style="margin-top:6px;"><a href="#" class="text-link" style="font-size:13px;" data-acct-day="' + escapeHtml(d0._uid + '|' + d0._date) + '">Expand for details</a><div data-acct-body style="display:none;margin-top:8px;"></div></div>';
             }
             var src = 'Detailed entry' + (s0[0].source === 'luna' ? ' (continuation)' : '');
             bodyHtml += '<div style="font-size:12px;color:var(--faint);margin-top:8px;">' + escapeHtml(src);
@@ -2353,6 +2350,46 @@
             sh.style.display = open ? 'block' : 'none';
             tg.textContent = open ? 'Hide short summary' : 'Show short summary';
         });
+        container.querySelectorAll('[data-acct-day]').forEach(function(a) {
+            var body = a.nextElementSibling;
+            a.addEventListener('click', function(ev) {
+                ev.preventDefault();
+                var open = body.style.display === 'none';
+                body.style.display = open ? 'block' : 'none';
+                a.textContent = open ? 'Hide details' : 'Expand for details';
+                if (!open || body.dataset.loaded) return;
+                body.dataset.loaded = '1';
+                var k = a.getAttribute('data-acct-day').split('|');
+                body.innerHTML = '<div style="font-size:12.5px;color:var(--faint);">Loading...</div>';
+                loadDayAccount(k[0], k[1]).then(function(md) {
+                    body.innerHTML = '<div style="font-size:12.5px;color:var(--faint);margin-bottom:6px;">Running account as of ' + escapeHtml(k[1]) + ', the end of this day</div>' +
+                        '<div class="work-profile" style="max-width:none;">' + renderAccountMd(md) + '</div>';
+                }).catch(function(err) {
+                    delete body.dataset.loaded;
+                    body.innerHTML = '<div style="font-size:12.5px;color:var(--faint);">' + (err && err.message === 'none' ? 'No running account was written for this day.' : 'Could not load the running account. Close and expand again to retry.') + '</div>';
+                });
+            });
+        });
+    }
+
+    /* One day's running account (admins only), fetched when that day's details are
+       expanded: all of a person's daily accounts together can reach a few MB. */
+    var _dayAccountCache = {};
+    function loadDayAccount(uid, date) {
+        var key = uid + '|' + date;
+        if (_dayAccountCache[key]) return _dayAccountCache[key];
+        var p = fetch(DASHBOARD_API + '?account_for=' + encodeURIComponent(uid) + '&account_date=' + encodeURIComponent(date),
+                      { headers: { 'Authorization': 'Bearer ' + _authToken } })
+            .then(function(r) {
+                if (r.status === 401) { signOut(); throw new Error('sign-in expired'); }
+                if (r.status === 404) throw new Error('none');
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(function(d) { return d.md || ''; });
+        p.catch(function() { delete _dayAccountCache[key]; });
+        _dayAccountCache[key] = p;
+        return p;
     }
 
     /* Admin-only line under a continuation day: numbers computed in code, not by the model. */
@@ -2387,41 +2424,6 @@
         });
         if (inList) out.push('</ul>');
         return out.join('');
-    }
-
-    /* "What they're working on": the latest running account across a person's devices,
-       its Mission up front, the full account on click. */
-    function renderCurrentWork(uuids, containerId) {
-        var box = document.getElementById(containerId);
-        if (!box) return;
-        var best = null, focus = null;
-        uuids.forEach(function(u) {
-            var s = _cachedStage0[u];
-            var a = s && s.account;
-            if (a && a.md && (!best || a.date > best.date || (a.date === best.date && a.md.length > best.md.length))) best = a;
-            var days = (s && s.days) || {};
-            Object.keys(days).forEach(function(d) {
-                var v = days[d].view;
-                if (v && v.current_focus && (!focus || d > focus.date)) focus = { date: d, text: v.current_focus };
-            });
-        });
-        if (!best) { box.style.display = 'none'; box.innerHTML = ''; return; }
-        var own = containerId === 'my-current-work';
-        var html = '<span class="section-title">' + (own ? 'What you\'re working on' : 'What they\'re working on') + '</span>' +
-            '<div style="font-size:12.5px;color:var(--faint);margin:-4px 0 6px;">Running account as of ' + escapeHtml(best.date) + ', rebuilt from the detailed day entries</div>';
-        if (best.mission) html += '<div class="work-profile" style="max-width:none;">' + renderAccountMd(best.mission) + '</div>';
-        if (focus && focus.date >= best.date) html += '<div class="activity-summary-text" style="margin-top:6px;"><b>Current focus:</b> ' + renderMd(focus.text) + '</div>';
-        html += '<a href="#" class="text-link" data-acct-toggle style="font-size:13px;">Read full account</a>' +
-            '<div data-acct-full style="display:none;margin-top:6px;"><div class="work-profile" style="max-width:none;">' + renderAccountMd(best.md) + '</div></div>';
-        box.innerHTML = '<div class="outline-box" style="padding:18px 22px;">' + html + '</div>';
-        box.style.display = 'block';
-        var tg = box.querySelector('[data-acct-toggle]'), full = box.querySelector('[data-acct-full]');
-        tg.addEventListener('click', function(ev) {
-            ev.preventDefault();
-            var open = full.style.display === 'none';
-            full.style.display = open ? 'block' : 'none';
-            tg.textContent = open ? 'Hide full account' : 'Read full account';
-        });
     }
 
     function _clearSummary() {
@@ -2846,7 +2848,6 @@
 
         /* Render activity summaries */
         renderActivitySummaries(_authUser.uuids, 'my-activity-summaries');
-        renderCurrentWork(_authUser.uuids, 'my-current-work');
     }
 
     /* =================================================================
@@ -5076,7 +5077,7 @@
         _authUser = null;
         _isAdmin = false;
         _cachedUserNames = {};
-        _cachedSummaries = {}; _cachedStage0 = {}; _summariesRequested = {};
+        _cachedSummaries = {}; _cachedStage0 = {}; _summariesRequested = {}; _dayAccountCache = {};
         _monitoredUsers = [];
         localStorage.removeItem('cc_auth_token');
         document.getElementById('auth-signin').style.display = '';
