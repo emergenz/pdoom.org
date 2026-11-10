@@ -37,38 +37,15 @@
     <div class="layout">
       <div>
         <p class="kicker">crowd-cast</p>
-        <h1>Refer someone, earn up to $300.</h1>
+        <h1>The referral programme has ended.</h1>
       </div>
       <div class="prose">
-        <p>We pay participants to record the long-horizon work they already do, and the best people almost always know other good people. So we pay for introductions.</p>
-        <p class="sub">Get your own link below. Anyone who signs up through it is credited to you automatically, so nobody has to remember to mention your name. There is no cap on how many people you can refer, and you do not need to be a participant yourself.</p>
+        <p>Unfortunately we are no longer accepting new referrals.</p>
+        <p class="sub">If you already have a referral link, your existing referrals stay active and are paid out as usual once they are due. Your stats page, the link in your referral email, keeps showing where each one stands. Thank you to everyone who referred people to crowd-cast.</p>
       </div>
     </div>
 
-    <div class="err" id="err"></div>
-
-    <form id="form" novalidate>
-      <div class="field">
-        <label for="name">Your name</label>
-        <p class="hint">This is shown to the people you refer, so use the name they would recognise: your own, your podcast, or your newsletter.</p>
-        <input type="text" id="name" name="name" autocomplete="name" required placeholder="Ada Lovelace">
-      </div>
-      <div class="field">
-        <label for="email">Your email</label>
-        <p class="hint">We send your link here, and this is where we arrange payment.</p>
-        <input type="email" id="email" name="email" autocomplete="email" required placeholder="you@example.com">
-      </div>
-      <div class="hp" aria-hidden="true">
-        <label for="website">Leave this field empty</label>
-        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
-      </div>
-      <button type="submit" id="submit" class="button button--primary">
-        <span id="submit-label">Get my referral link</span>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </button>
-    </form>
-
-    <p class="fine"><strong>How it pays.</strong> You earn <strong>$150</strong> once someone you referred passes their first week of recording, and another <strong>$150</strong> once they reach 100 recorded hours. Everyone goes through the same review as any other applicant, so we cannot promise that everyone you send will be accepted. You cannot refer yourself. Full details: <a href="/refer-terms.html">programme terms</a>.</p>
+    <p class="fine">Anyone doing long-running research or engineering work on their laptop is still welcome to apply directly at <a href="/participate">pdoom.org/participate</a>. Programme terms for existing referrals: <a href="/refer-terms.html">referral terms</a>.</p>
   </div>
 </main>
 
@@ -77,6 +54,7 @@
   var API = 'https://ob3iugfiy2.execute-api.us-east-1.amazonaws.com/v1/referral-signup';
   var started = Date.now();
   var form = document.getElementById('form');
+  if (!form) return;   // programme closed 2026-11-10: no sign-up form on the page
   var errBox = document.getElementById('err');
   var btn = document.getElementById('submit');
   var btnLabel = document.getElementById('submit-label');

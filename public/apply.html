@@ -109,7 +109,9 @@
     return '';
   }
   var ref = referral();
-  if (ref) {
+  // The referral programme closed on 2026-11-10: the server no longer credits
+  // sign-ups, so the page must not promise "we will credit them" any more.
+  if (ref && false) {
     var viaName = ref;
     try {
       var raw2 = window.localStorage.getItem('cc_ref');

@@ -25,7 +25,6 @@ const opportunities = [
       <>crowd-cast is a privacy-preserving desktop application built to capture the largest dataset of months-long digital work. Together with early participants around the world, we have already recorded over 13,000 hours of complex theorem proving, spacecraft prototyping, model training across hundreds of GPUs, building design, and much more.</>,
       <>The program is now open to the public. We pay top participants <strong>up to $1,000 per month</strong> to passively record their work. PhD-level research, professional engineering, and other complex months-long projects qualify for the top tier.</>,
       <>Other qualifying months-long work (Bachelor's and Master's projects, design, editing, personal builds) is compensated at <strong>around $300 per month</strong>. Submit the form and the team will follow up within a few days.</>,
-      <>Know someone who would be a great fit? You can refer them and earn up to $300 when they join. <a href="/refer.html">Get your referral link</a>.</>,
     ],
     sections: [
       {
