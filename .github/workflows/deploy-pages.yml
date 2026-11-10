@@ -58,3 +58,7 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          # The site artifact is ~170 MB (videos, demo images); GitHub's processing
+          # regularly runs past the default 10 minutes (failed 2026-11-03, 11-10).
+          timeout: 1800000
