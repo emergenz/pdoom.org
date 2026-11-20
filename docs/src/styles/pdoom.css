@@ -146,7 +146,6 @@ mobile-starlight-toc summary {
 .sidebar-content a {
   border-inline-start: 1px solid transparent;
   font-size: 0.9rem;
-  transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease;
 }
 
 .sidebar-content a[aria-current='page'] {
@@ -232,15 +231,13 @@ site-search button:hover {
 }
 
 .sl-markdown-content a:not(:where(.not-content, .not-content *)) {
-  color: var(--pd-signal);
+  color: inherit;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
-  transition: color 160ms ease, text-decoration-thickness 160ms ease;
 }
 
 .sl-markdown-content a:not(:where(.not-content, .not-content *)):hover {
-  color: var(--sl-color-accent-high);
-  text-decoration-thickness: 2px;
+  color: var(--pd-signal);
 }
 
 .sl-markdown-content code:not(:where(pre code, .expressive-code *)) {
@@ -267,7 +264,6 @@ site-search button:hover {
   border-radius: 4px !important;
   background: transparent !important;
   box-shadow: none !important;
-  transition: border-color 160ms ease, background-color 160ms ease;
 }
 
 .card:hover,
@@ -347,7 +343,6 @@ site-search button:hover {
   font-weight: 500;
   letter-spacing: 0;
   text-decoration: none;
-  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease;
 }
 
 .sl-link-button.sl-link-button.primary {

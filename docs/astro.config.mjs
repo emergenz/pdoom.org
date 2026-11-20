@@ -11,7 +11,7 @@ export default defineConfig({
     starlight({
       title: 'crowd-cast documentation',
       description:
-        'Install, configure and run crowd-cast, the p(doom) screen and input recording agent.',
+        'Install, configure and run crowd-cast, the p(doom) screen and input recorder.',
       favicon: '/favicon.png',
       customCss: ['./src/styles/pdoom.css'],
       expressiveCode: {
