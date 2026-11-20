@@ -496,93 +496,106 @@ ul {
   transform: rotate(180deg);
 }
 
-.nav-dropdown {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  width: 210px;
-  padding: 7px;
-  color: var(--ink);
-  background: var(--white);
-  border: 1px solid rgba(11, 16, 21, 0.16);
-  border-radius: 6px;
-  box-shadow: 0 16px 36px rgba(11, 16, 21, 0.18);
+.desktop-nav,
+.desktop-nav > div,
+.nav-entry {
+  /* Radix wraps the list in a relatively positioned element; the panel
+     anchors to the header instead. */
+  position: static !important;
 }
 
-.nav-dropdown::before {
-  content: "";
+.nav-dropdown {
   position: absolute;
+  top: 100%;
   right: 0;
-  bottom: 100%;
   left: 0;
-  height: 7px;
+  padding: 40px 0 56px;
+  color: var(--dd-fg);
+  background: var(--dd-bg);
+  border-bottom: 1px solid var(--dd-rule);
+}
+
+.site-header--light .nav-dropdown {
+  --dd-fg: var(--ink);
+  --dd-bg: var(--white);
+  --dd-muted: rgba(11, 16, 21, 0.5);
+  --dd-rule: rgba(11, 16, 21, 0.16);
+}
+
+.site-header--dark .nav-dropdown {
+  --dd-fg: var(--off-white);
+  --dd-bg: var(--black);
+  --dd-muted: rgba(229, 224, 214, 0.46);
+  --dd-rule: rgba(229, 224, 214, 0.16);
+}
+
+/* Fade in only when opening from closed. Moving between menus (Radix sets
+   data-motion) swaps the panel instantly, so there is never a blank frame. */
+.nav-dropdown[data-state="open"]:not([data-motion]) {
+  animation: nav-dropdown-in 100ms ease;
+}
+
+@keyframes nav-dropdown-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.nav-dropdown-inner {
+  width: min(calc(100% - (2 * var(--gutter))), var(--container));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: 0 var(--gutter);
+}
+
+.nav-dropdown h2 {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.nav-dropdown-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 26px 56px;
+  align-items: start;
+}
+
+.nav-dropdown .drawer-nav-group > span {
+  color: var(--dd-muted);
 }
 
 .nav-dropdown a {
+  min-height: 54px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 40px;
-  padding: 0 10px;
-  border-radius: 4px;
-  font-size: 14px;
-  outline: none;
+  gap: 16px;
+  border-bottom: 1px solid var(--dd-rule);
 }
 
-.nav-dropdown a:hover,
+.nav-dropdown .drawer-nav-group a small {
+  color: var(--dd-muted);
+}
+
+.nav-dropdown .drawer-nav-group + .drawer-nav-group {
+  margin-top: 0;
+}
+
+/* Solid header while a menu is open, so it joins the panel without a seam. */
+.site-header--dark:has(.nav-trigger[data-state="open"]) {
+  background: var(--black);
+}
+
+.nav-dropdown a:hover strong,
+.nav-dropdown a:focus-visible strong {
+  opacity: 0.6;
+}
+
 .nav-dropdown a:focus-visible {
-  background: rgba(115, 135, 151, 0.12);
-}
-
-.nav-dropdown--grouped {
-  width: 324px;
-}
-
-.nav-dropdown-group {
-  padding: 4px 3px 5px;
-}
-
-.nav-dropdown-group + .nav-dropdown-group {
-  margin-top: 5px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(11, 16, 21, 0.13);
-}
-
-.nav-dropdown-heading {
-  display: block;
-  padding: 3px 10px 6px;
-  color: rgba(11, 16, 21, 0.55);
-  font-size: 13px;
-}
-
-.nav-dropdown--grouped a {
-  min-height: 46px;
-  display: flex;
-  justify-content: initial;
-  padding: 5px 10px;
-}
-
-.nav-dropdown-copy {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
-  min-width: 0;
-}
-
-.nav-dropdown-copy strong {
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.2;
-}
-
-.nav-dropdown-copy small {
-  overflow: hidden;
-  color: rgba(11, 16, 21, 0.54);
-  font-size: 12px;
-  line-height: 1.25;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  outline: none;
 }
 
 .header-actions {
@@ -679,20 +692,23 @@ ul {
   border-bottom: 1px solid rgba(229, 224, 214, 0.16);
 }
 
-.mobile-drawer nav a > span {
+.mobile-drawer nav a > span,
+.nav-dropdown a > span {
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.mobile-drawer nav a strong {
+.mobile-drawer nav a strong,
+.nav-dropdown a strong {
   font-size: 18px;
   font-weight: 400;
   line-height: 1.2;
 }
 
-.mobile-drawer nav a small {
+.mobile-drawer nav a small,
+.nav-dropdown a small {
   overflow: hidden;
   color: rgba(229, 224, 214, 0.48);
   font-size: 12px;
@@ -701,7 +717,8 @@ ul {
   white-space: nowrap;
 }
 
-.mobile-drawer nav a > svg {
+.mobile-drawer nav a > svg,
+.nav-dropdown a > svg {
   flex: 0 0 auto;
   color: var(--signal);
 }

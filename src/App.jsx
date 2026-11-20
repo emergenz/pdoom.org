@@ -431,26 +431,28 @@ function Header() {
                     <NavigationMenu.Trigger className="nav-trigger">
                       {item.label}<ChevronDown size={13} aria-hidden="true" />
                     </NavigationMenu.Trigger>
-                    <NavigationMenu.Content className="nav-dropdown nav-dropdown--grouped">
-                      {item.groups.map((group) => (
-                        <section className="nav-dropdown-group" aria-label={group.label} key={group.label}>
-                          <span className="nav-dropdown-heading">{group.label}</span>
-                          <ul>
-                            {group.items.map((entry) => (
-                              <li key={entry.label}>
-                                <NavigationMenu.Link asChild>
+                    <NavigationMenu.Content className="nav-dropdown">
+                      <div className="nav-dropdown-inner">
+                        <h2>{item.label}</h2>
+                        <div className="nav-dropdown-groups">
+                          {item.groups.map((group) => (
+                            <section className="drawer-nav-group" aria-label={group.label} key={group.label}>
+                              <span>{group.label}</span>
+                              {group.items.map((entry) => (
+                                <NavigationMenu.Link asChild key={entry.label}>
                                   <a href={entry.href}>
-                                    <span className="nav-dropdown-copy">
+                                    <span>
                                       <strong>{entry.label}</strong>
                                       <small>{entry.description}</small>
                                     </span>
+                                    <ArrowRight size={17} aria-hidden="true" />
                                   </a>
                                 </NavigationMenu.Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </section>
-                      ))}
+                              ))}
+                            </section>
+                          ))}
+                        </div>
+                      </div>
                     </NavigationMenu.Content>
                   </>
                 ) : (
