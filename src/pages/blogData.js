@@ -13,6 +13,10 @@ export const researchReleases = [
     category: 'Models + data',
     kind: 'Release',
     media: { type: 'image', src: '/assets/releases/idm.webp' },
+    links: [
+      { label: 'Model', href: 'https://huggingface.co/p-doom/idm' },
+      { label: 'Dataset', href: 'https://huggingface.co/datasets/p-doom/AGI-CAST-idm-actions' },
+    ],
   },
   {
     slug: 'crowd-cast',
@@ -28,6 +32,11 @@ export const researchReleases = [
     category: 'Data infrastructure',
     kind: 'Release',
     media: { type: 'image', src: '/assets/releases/crowd-cast.webp' },
+    links: [
+      { label: 'Code', href: 'https://github.com/p-doom/crowd-cast' },
+      { label: 'Dataset', href: 'https://huggingface.co/datasets/p-doom/AGI-CAST-0.6k' },
+      { label: 'Documentation', href: '/docs/crowd-cast/' },
+    ],
   },
   {
     slug: 'crowd-code',
@@ -43,6 +52,10 @@ export const researchReleases = [
     category: 'Data infrastructure',
     kind: 'Release',
     media: { type: 'image', src: '/assets/releases/crowd-code.webp' },
+    links: [
+      { label: 'Code', href: 'https://github.com/p-doom/crowd-code' },
+      { label: 'Dataset', href: 'https://huggingface.co/datasets/p-doom/crowd-code-dataset-1.0' },
+    ],
   },
   {
     slug: 'agi-cast',
@@ -58,6 +71,9 @@ export const researchReleases = [
     category: 'Dataset',
     kind: 'Release',
     media: { type: 'image', src: '/assets/releases/agi-cast.webp' },
+    links: [
+      { label: 'Dataset', href: 'https://huggingface.co/datasets/p-doom/AGI-CAST-0.6k' },
+    ],
   },
   {
     slug: 'jasmine',
@@ -73,6 +89,11 @@ export const researchReleases = [
     category: 'Infrastructure',
     kind: 'Release',
     media: { type: 'image', src: '/assets/releases/jasmine.webp' },
+    links: [
+      { label: 'Paper', href: 'https://arxiv.org/abs/2510.27002' },
+      { label: 'Code', href: 'https://github.com/p-doom/jasmine' },
+      { label: 'Dataset', href: 'https://huggingface.co/datasets/p-doom/common-craft' },
+    ],
   },
   {
     slug: 'crowd-code-original',
@@ -88,6 +109,9 @@ export const researchReleases = [
     category: 'Data infrastructure',
     kind: 'Release',
     media: { type: 'image', src: '/assets/releases/crowd-code-original.webp' },
+    links: [
+      { label: 'Code', href: 'https://github.com/p-doom/crowd-code' },
+    ],
   },
 ]
 

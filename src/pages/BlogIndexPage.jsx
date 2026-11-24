@@ -5,6 +5,7 @@ import {
   researchPosts,
   researchReleases,
 } from './blogData'
+import TitleEnd from './TitleEnd.jsx'
 import './blog.css'
 
 function ResearchMedia({ media, title }) {
@@ -36,11 +37,13 @@ function ReleaseCard({ release }) {
         <ResearchMedia media={release.media} title={release.shortTitle} />
       </figure>
       <div className="blog-release-copy">
-        <h2>{release.shortTitle}</h2>
+        <h2>
+          <TitleEnd text={release.shortTitle}>
+            <ArrowRight size={18} strokeWidth={1.7} aria-hidden="true" />
+          </TitleEnd>
+        </h2>
         <p>{release.summary}</p>
-        <span className="blog-card-link">
-          Read release <ArrowRight size={17} strokeWidth={1.7} aria-hidden="true" />
-        </span>
+        <time className="blog-release-date">{release.dateShort}</time>
       </div>
     </a>
   )
@@ -55,15 +58,15 @@ function ArchiveRow({ item, external = false }) {
     >
       <span className="blog-archive-date">{item.dateShort}</span>
       <span className="blog-archive-title">
-        {item.title}
+        <TitleEnd text={item.title}>
+          {external ? (
+            <ArrowUpRight size={17} strokeWidth={1.7} aria-hidden="true" />
+          ) : (
+            <ArrowRight size={17} strokeWidth={1.7} aria-hidden="true" />
+          )}
+        </TitleEnd>
         {external && <small>{item.kind}</small>}
       </span>
-      <span className="blog-archive-category">{item.category}</span>
-      {external ? (
-        <ArrowUpRight size={18} strokeWidth={1.7} aria-hidden="true" />
-      ) : (
-        <ArrowRight size={18} strokeWidth={1.7} aria-hidden="true" />
-      )}
     </a>
   )
 }

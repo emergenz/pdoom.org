@@ -48,14 +48,14 @@ function ImprintPage() {
 
   return (
     <main className="imprint-page" id="main" data-nav-theme="light">
-      <header className="imprint-intro" aria-labelledby="imprint-title">
-        <div className="imprint-shell">
+      <header className="page-header" aria-labelledby="imprint-title">
+        <div className="page-shell">
           <h1 id="imprint-title">Imprint</h1>
         </div>
       </header>
 
       <section className="imprint-details" aria-label="Company information">
-        <div className="imprint-shell">
+        <div className="page-shell">
           <dl className="imprint-fields">
             {imprintFields.map((field) => (
               <div className="imprint-field" key={field.label}>

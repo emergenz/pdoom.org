@@ -40,6 +40,8 @@
   --nav-height: 80px;
   --header-height: calc(var(--announcement-height) + var(--nav-height));
   --container: 1600px;
+  --page-width: 1240px;
+  --page-h1: clamp(40px, 4.4vw, 60px);
   --gutter: 40px;
   color: var(--ink);
   background: var(--white);
@@ -387,6 +389,7 @@ ul {
   backdrop-filter: blur(0);
   -webkit-backdrop-filter: blur(0);
   transition:
+    height 220ms cubic-bezier(.22, 1, .36, 1),
     color 220ms ease,
     background-color 360ms cubic-bezier(.22, 1, .36, 1),
     border-color 360ms ease,
@@ -409,14 +412,32 @@ ul {
 .site-header--light {
   color: var(--ink);
   background: rgba(240, 236, 227, 0.96);
-  border-color: rgba(11, 16, 21, 0.14);
-  box-shadow: 0 7px 18px rgba(11, 16, 21, 0.08);
   backdrop-filter: blur(15px);
+}
+
+/* No border or shadow at the top of the page; they appear once it scrolls. */
+.site-header--light.is-scrolled {
+  box-shadow: 0 2px 10px rgba(11, 16, 21, 0.08);
 }
 
 .header-brand {
   display: inline-flex;
   width: 154px;
+  transform-origin: left center;
+  transition: transform 220ms cubic-bezier(.22, 1, .36, 1);
+}
+
+/* Once the page scrolls, the header gets a little shorter and its logo a little
+   smaller. Only the header itself changes: --nav-height stays as it is, so
+   nothing that is laid out below it moves. */
+@media (min-width: 1101px) {
+  .site-header.is-scrolled {
+    height: calc(var(--nav-height) - 16px);
+  }
+
+  .site-header.is-scrolled .header-brand {
+    transform: scale(0.82);
+  }
 }
 
 .header-brand img {
@@ -1832,6 +1853,46 @@ ul {
   .footer-bottom {
     min-height: 74px;
     padding: 20px;
+  }
+}
+
+.title-end {
+  white-space: nowrap;
+}
+
+/* Shared page header: one container width and one left edge for the title,
+   the intro and the content below it. */
+.page-shell {
+  width: min(calc(100% - (2 * var(--gutter))), var(--page-width));
+  margin-inline: auto;
+}
+
+.page-header {
+  padding-top: calc(var(--header-height) + 64px);
+  padding-bottom: 56px;
+}
+
+.page-header h1 {
+  max-width: 18em;
+  text-wrap: balance;
+  font-size: var(--page-h1);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.08;
+}
+
+.page-header p {
+  max-width: 680px;
+  margin-top: 22px;
+  color: rgba(11, 16, 21, 0.72);
+  font-size: clamp(18px, 1.4vw, 20px);
+  line-height: 1.5;
+}
+
+@media (max-width: 560px) {
+  .page-header {
+    padding-top: calc(var(--header-height) + 40px);
+    padding-bottom: 40px;
   }
 }
 
