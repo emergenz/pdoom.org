@@ -10,15 +10,14 @@ function AboutPage() {
 
   return (
     <main className="about-page" id="main">
-      <section className="about-thesis" data-nav-theme="light" aria-labelledby="about-thesis-title">
-        <div className="about-thesis-grid">
+      <header className="page-header" data-nav-theme="light" aria-labelledby="about-thesis-title">
+        <div className="page-shell">
           <h1 id="about-thesis-title">Scaling advances when new methods remove what blocks it.</h1>
           <p>
             Pretraining unlocked one direction to scale. As did self-play, RLHF and RLVR. We work on the scalable methods of the future: learning from real-world human behavior, continual improvement through deployment, architectures that carry memory forever.
           </p>
         </div>
-      </section>
-
+      </header>
     </main>
   )
 }

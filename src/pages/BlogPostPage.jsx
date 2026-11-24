@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react'
 import {
   allResearch,
   legacyResearchRoutes,
@@ -105,8 +105,20 @@ function prepareLegacyArticle(source, bibtexSource, renderer) {
     marker.removeAttribute('href')
     marker.setAttribute('aria-hidden', 'true')
   }
+  // The announcement block some posts open with (preprint out, install, pay) is a
+  // hand-styled paragraph. Drop its inline styles so it follows the note style.
+  for (const note of article.querySelectorAll('p[style*="border-top"][style*="text-align: center"]')) {
+    note.removeAttribute('style')
+    note.classList.add('blog-callout')
+    for (const link of note.querySelectorAll('a[style]')) link.removeAttribute('style')
+  }
   for (const aside of article.querySelectorAll('aside')) {
-    if (/^\*?\s*equal contribution$/i.test(aside.textContent.trim())) aside.remove()
+    if (/^\*?\s*equal contribution$/i.test(aside.textContent.trim())) {
+      aside.remove()
+    } else if (aside.textContent.trim().length > 400) {
+      // Too long for the margin; keeps the inline note style.
+      aside.classList.add('blog-aside--long')
+    }
   }
   for (const block of article.querySelectorAll('d-code[block]')) {
     const lines = block.textContent.replace(/\r\n/g, '\n').split('\n')
@@ -192,6 +204,56 @@ function prepareLegacyArticle(source, bibtexSource, renderer) {
   }
 }
 
+// Owns the scroll state for the active-section highlight. It lives in its own
+// component so scrolling never re-renders the article, which would rebuild its
+// DOM and throw away the interactive demos the post scripts have added.
+function ArticleRail({ sections, minutes }) {
+  const [activeSection, setActiveSection] = useState('')
+
+  useEffect(() => {
+    if (sections.length < 2) return undefined
+
+    const update = () => {
+      let current = ''
+      for (const section of sections) {
+        const element = document.getElementById(section.id)
+        if (element && element.getBoundingClientRect().top <= 160) current = section.id
+      }
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4
+      if (atBottom) current = sections[sections.length - 1].id
+      setActiveSection(current)
+    }
+
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    return () => window.removeEventListener('scroll', update)
+  }, [sections])
+
+  return (
+    <aside className="blog-document-rail" aria-label="Article details">
+      <div className="blog-document-rail-sticky">
+        {minutes && <p className="blog-reading-time">{minutes} min read</p>}
+
+        {sections.length > 1 && (
+          <nav className="blog-table-of-contents" aria-label="Table of contents">
+            <span>On this page</span>
+            {sections.map((section) => (
+              <a
+                href={`#${section.id}`}
+                key={section.id}
+                className={activeSection === section.id ? 'is-active' : undefined}
+                aria-current={activeSection === section.id ? 'true' : undefined}
+              >
+                {section.title}
+              </a>
+            ))}
+          </nav>
+        )}
+      </div>
+    </aside>
+  )
+}
+
 function ArticleContents({ post }) {
   const articleRef = useRef(null)
   const [documentContent, setDocumentContent] = useState({
@@ -268,6 +330,9 @@ function ArticleContents({ post }) {
     }
   }, [documentContent.embeddedScripts, status])
 
+  const articleMarkup = useMemo(() => ({ __html: documentContent.articleHtml }), [documentContent.articleHtml])
+  const appendixMarkup = useMemo(() => ({ __html: documentContent.appendixHtml }), [documentContent.appendixHtml])
+
   if (status === 'loading') {
     return <p className="blog-document-status">Loading research document...</p>
   }
@@ -282,42 +347,18 @@ function ArticleContents({ post }) {
 
   return (
     <div className="blog-document-grid">
-      <aside className="blog-document-rail" aria-label="Article details">
-        <div className="blog-document-rail-sticky">
-          <dl>
-            <div>
-              <dt>Published</dt>
-              <dd>{post.date}</dd>
-            </div>
-            <div>
-              <dt>Reading time</dt>
-              <dd>{documentContent.minutes} min</dd>
-            </div>
-          </dl>
-
-          {documentContent.sections.length > 1 && (
-            <nav className="blog-table-of-contents" aria-label="Table of contents">
-              <span>In this document</span>
-              {documentContent.sections.map((section) => (
-                <a href={`#${section.id}`} key={section.id}>
-                  {section.title}
-                </a>
-              ))}
-            </nav>
-          )}
-        </div>
-      </aside>
+      <ArticleRail sections={documentContent.sections} minutes={documentContent.minutes} />
 
       <div className="blog-document-main">
         <article
           ref={articleRef}
           className="blog-article-body"
-          dangerouslySetInnerHTML={{ __html: documentContent.articleHtml }}
+          dangerouslySetInnerHTML={articleMarkup}
         />
         {documentContent.appendixHtml && (
           <aside
             className="blog-article-appendix"
-            dangerouslySetInnerHTML={{ __html: documentContent.appendixHtml }}
+            dangerouslySetInnerHTML={appendixMarkup}
           />
         )}
       </div>
@@ -384,30 +425,59 @@ export default function BlogPostPage({ slug: slugProp }) {
   return (
     <main className="blog-page blog-post-page" id="main" data-nav-theme="light">
       <header className="blog-post-hero" data-nav-theme="light">
-        <a className="blog-back-link" href="/research/">
-          <ArrowLeft size={17} strokeWidth={1.8} aria-hidden="true" />
-          All research
-        </a>
+        <div className={`blog-post-hero-inner${post.media?.type === 'image' ? ' blog-post-hero-inner--art' : ''}`}>
+          <a className="blog-back-link" href="/research/">
+            <ArrowLeft size={17} strokeWidth={1.8} aria-hidden="true" />
+            All research
+          </a>
 
-        <div className="blog-post-hero-spacer" aria-hidden="true" />
+          <h1>{post.title}</h1>
 
-        <h1>{post.title}</h1>
+          <p className="blog-post-abstract">{post.description}</p>
 
-        <div className="blog-post-intro">
-          <p>{post.description}</p>
           <div className="blog-post-byline">
-            <strong className="blog-post-authors">
-              {post.authors.map((author, index) => {
-                return (
-                  <span key={author}>
-                    {author}{equalContributionAuthors[index] && <sup>*</sup>}
-                  </span>
-                )
-              })}
-            </strong>
-            {hasEqualContributors && <span className="blog-equal-contribution">* Equal contribution</span>}
+            <p className="blog-post-authors-line">
+              <span className="blog-post-authors">
+                {post.authors.map((author, index) => {
+                  return (
+                    <span key={author}>
+                      {author}{equalContributionAuthors[index] && <sup>*</sup>}
+                    </span>
+                  )
+                })}
+              </span>
+              {hasEqualContributors && <span className="blog-equal-contribution">* Equal contribution</span>}
+            </p>
             <time>{post.date}</time>
           </div>
+
+          <nav className="blog-post-links" aria-label="Links">
+            {(post.links || []).map((link) => {
+              const external = link.href.startsWith('http')
+              return (
+                <a
+                  href={link.href}
+                  key={link.label}
+                  {...(external ? { target: '_blank', rel: 'noreferrer' } : {})}
+                >
+                  {link.label}
+                  {external && <ArrowUpRight size={14} strokeWidth={1.8} aria-hidden="true" />}
+                </a>
+              )
+            })}
+            <a href="#cite-us-as">Cite this article</a>
+          </nav>
+
+          {post.media?.type === 'image' && (
+            <img
+              className="blog-post-hero-art"
+              src={post.media.src}
+              alt=""
+              width="960"
+              height="960"
+              decoding="async"
+            />
+          )}
         </div>
       </header>
 

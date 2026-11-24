@@ -95,19 +95,21 @@
     }
     var groups = item.groups.map(function (group) {
       var links = group.items.map(function (entry) {
-        return '<li><a href="' + esc(entry.href) + '"><span class="nav-dropdown-copy">' +
+        return '<a href="' + esc(entry.href) + '"><span>' +
           '<strong>' + esc(entry.label) + '</strong>' +
           '<small>' + esc(entry.description) + '</small>' +
-          '</span></a></li>';
+          '</span>' + arrowRight(17) + '</a>';
       }).join('');
-      return '<section class="nav-dropdown-group" aria-label="' + esc(group.label) + '">' +
-        '<span class="nav-dropdown-heading">' + esc(group.label) + '</span>' +
-        '<ul>' + links + '</ul></section>';
+      return '<section class="drawer-nav-group" aria-label="' + esc(group.label) + '">' +
+        '<span>' + esc(group.label) + '</span>' + links + '</section>';
     }).join('');
     return '<li class="nav-entry">' +
       '<button class="nav-trigger" type="button" aria-expanded="false" data-state="closed">' +
       esc(item.label) + chevronDown + '</button>' +
-      '<div class="nav-dropdown nav-dropdown--grouped" hidden>' + groups + '</div>' +
+      '<div class="nav-dropdown" hidden><div class="nav-dropdown-inner">' +
+      '<h2>' + esc(item.label) + '</h2>' +
+      '<div class="nav-dropdown-groups">' + groups + '</div>' +
+      '</div></div>' +
       '</li>';
   }).join('') + '</ul>';
 
@@ -117,7 +119,10 @@
     var dropdown = trigger.nextElementSibling;
     trigger.setAttribute('data-state', open ? 'open' : 'closed');
     trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
-    if (dropdown) dropdown.hidden = !open;
+    if (dropdown) {
+      dropdown.hidden = !open;
+      dropdown.setAttribute('data-state', open ? 'open' : 'closed');
+    }
   }
   function closeAll(except) {
     for (var i = 0; i < triggers.length; i += 1) {
@@ -145,6 +150,12 @@
   document.addEventListener('pointerdown', function (event) {
     if (!navHost.contains(event.target)) closeAll();
   });
+
+  /* ---- shadow under the bar once the page has scrolled ---- */
+
+  function onScroll() { header.classList.toggle('is-scrolled', window.scrollY > 12); }
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
 
   /* ---- mobile drawer ---- */
 

@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { decorateFormLinks } from '../referral.js'
+import TitleEnd from './TitleEnd.jsx'
 import './careers.css'
 
 const signUpHref = '/apply.html'
@@ -256,7 +257,7 @@ const overviewGroups = [
     ids: ['fixed-size-state', 'long-horizon-data', 'off-policy-learning', 'reinforcement-learning'],
   },
   {
-    label: 'Programs and participation',
+    label: 'Programs',
     ids: ['paid-data-collection', 'residency'],
   },
 ]
@@ -275,9 +276,12 @@ function currentOpportunityId() {
 function OpportunityRow({ opportunity }) {
   return (
     <a className="career-row" href={`/careers/${opportunity.id}/`}>
-      <strong className="career-row-title">{opportunity.title}</strong>
+      <strong className="career-row-title">
+        <TitleEnd text={opportunity.title}>
+          <ArrowRight size={18} strokeWidth={1.7} aria-hidden="true" />
+        </TitleEnd>
+      </strong>
       <span className="career-row-summary">{opportunity.summary}</span>
-      <ArrowRight className="career-row-arrow" size={22} strokeWidth={1.6} aria-hidden="true" />
     </a>
   )
 }
@@ -285,14 +289,14 @@ function OpportunityRow({ opportunity }) {
 function CareersOverview() {
   return (
     <main className="careers-page" id="main" data-nav-theme="light">
-      <header className="careers-intro">
-        <div className="careers-shell careers-intro-grid">
+      <header className="page-header">
+        <div className="page-shell">
           <h1>Work on what compute cannot solve.</h1>
           <p>Join p(doom) to address the fundamental bottlenecks toward AGI: new data, months-long horizons, fixed-size state, and continual learning.</p>
         </div>
       </header>
 
-      <div className="careers-shell careers-directory">
+      <div className="page-shell careers-directory">
         {overviewGroups.map((group) => (
           <section className="career-group" aria-labelledby={`career-group-${group.label.replaceAll(' ', '-')}`} key={group.label}>
             <header className="career-group-heading">
@@ -306,6 +310,13 @@ function CareersOverview() {
           </section>
         ))}
 
+        <section className="career-apply" aria-labelledby="career-apply-title">
+          <h2 id="career-apply-title">How to apply</h2>
+          <p>
+            To apply for a role or the residency, send five bullet points demonstrating exceptional ability to{' '}
+            <a href="mailto:franz@pdoom.org">franz@pdoom.org</a>.
+          </p>
+        </section>
       </div>
     </main>
   )

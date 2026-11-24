@@ -104,14 +104,14 @@ export default function MerchPage() {
 
   return (
     <main className="merch-page" id="main" data-nav-theme="light">
-      <header className="merch-intro" data-nav-theme="light">
-        <div className="merch-shell">
+      <header className="page-header" data-nav-theme="light">
+        <div className="page-shell">
           <h1>Merch</h1>
         </div>
       </header>
 
       <section className="merch-catalog" data-nav-theme="light" aria-label="Merch catalog">
-        <div className="merch-shell merch-product-grid">
+        <div className="page-shell merch-product-grid">
           {productRows.map((row, rowIndex) => (
             <div className="merch-product-row" key={row.map((product) => product.id).join('-')}>
               {row.map((product, columnIndex) => (
