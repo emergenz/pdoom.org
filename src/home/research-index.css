@@ -245,7 +245,34 @@
     margin-bottom: 32px;
   }
 
+  /* Stacked cards: the route runs down beside them, top to bottom. */
+  .research-route {
+    display: none;
+  }
+
   .research-index-grid {
+    position: relative;
     grid-template-columns: minmax(0, 1fr);
+    padding-left: 22px;
+  }
+
+  .research-index-grid::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 8px;
+    left: 4px;
+    width: 2px;
+    background: linear-gradient(180deg, #9e3b22, #a9652c 34%, #6e6a48 66%, #435b6b);
+  }
+
+  .research-index-grid::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    border-top: 9px solid #435b6b;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
   }
 }
