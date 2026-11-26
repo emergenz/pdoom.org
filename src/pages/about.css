@@ -1,5 +1,60 @@
 .about-page {
   min-height: 60svh;
+  padding-bottom: 140px;
   color: var(--ink);
   background: var(--white);
+}
+
+.about-sections {
+  display: grid;
+  gap: 72px;
+}
+
+.about-section {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(28px, 4vw, 70px);
+  align-items: start;
+}
+
+.about-section h2 {
+  font-size: clamp(24px, 2.2vw, 30px);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.about-section-body {
+  min-width: 0;
+  max-width: 700px;
+}
+
+.about-section-body p {
+  font-size: clamp(17px, 1.2vw, 19px);
+  line-height: 1.65;
+}
+
+.about-section-body p + p {
+  margin-top: 1.2em;
+}
+
+.about-section-body a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.about-section-body a:hover,
+.about-section-body a:focus-visible {
+  color: var(--signal);
+}
+
+@media (max-width: 900px) {
+  .about-section {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .about-sections {
+    gap: 56px;
+  }
 }
