@@ -1,0 +1,137 @@
+/* Shared by the home page sections: text links with an arrow, and the
+   research and releases list. */
+.scaling-more {
+  display: inline-block;
+  margin-top: 24px;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.scaling-more svg {
+  display: inline;
+  margin-left: 8px;
+  vertical-align: -3px;
+  opacity: 0.5;
+  transition: transform 100ms ease-out, opacity 100ms ease-out;
+}
+
+.scaling-more:hover,
+.scaling-more:focus-visible {
+  color: var(--signal);
+}
+
+.scaling-more:hover svg,
+.scaling-more:focus-visible svg {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+.scaling-links {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 32px;
+  margin-top: 24px;
+}
+
+.scaling-links .scaling-more {
+  margin-top: 0;
+}
+
+/* Research and releases: same width, heading and link style as the section above. */
+.home-research {
+  width: min(100%, calc(var(--page-width) + (2 * var(--gutter))));
+  margin-inline: auto;
+  padding: 0 var(--gutter) 96px;
+  color: var(--ink);
+  background: var(--white);
+  box-shadow: 0 0 0 100vmax var(--white);
+  clip-path: inset(0 -100vmax);
+}
+
+.home-research-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.home-research-head h2 {
+  font-size: clamp(30px, 3vw, 44px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.12;
+}
+
+.home-research-head .scaling-more {
+  margin-top: 0;
+}
+
+@media (max-width: 800px) {
+  .home-research {
+    padding-bottom: 72px;
+  }
+
+  .home-research .blog-release-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Give each release image an edge, and align the text to its top, so the
+   renders (shot on a beige close to the page) read as deliberate plates. */
+.home-research .blog-release-card {
+  align-items: start;
+}
+
+.home-research .blog-release-copy {
+  padding-top: 0;
+}
+
+.home-research .blog-release-copy h2 {
+  margin-top: -0.18em;
+}
+
+/* The film on the content column, uncropped at its native 16:9, with the
+   same corners as the cards and the footer. */
+.film-strip {
+  width: min(calc(100% - (2 * var(--gutter))), var(--page-width));
+  margin: 0 auto 96px;
+}
+
+.film-strip-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--black-soft, #111820);
+}
+
+.film-strip-frame > .film-strip-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.film-strip-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 40%, rgba(11, 16, 21, 0.03), rgba(11, 16, 21, 0.42));
+  pointer-events: none;
+}
+
+@media (max-width: 800px) {
+  .film-strip {
+    margin-bottom: 72px;
+  }
+
+}
+
+/* On phones the text runs taller than the thumbnail: centre the picture
+   against it instead of pinning it to the top. */
+@media (max-width: 800px) {
+  .home-research .blog-release-card {
+    align-items: center;
+  }
+}

@@ -30,7 +30,7 @@ function ResearchMedia({ media, title }) {
   return <img src={media.src} alt="" decoding="async" height="960" loading="lazy" width="960" />
 }
 
-function ReleaseCard({ release }) {
+export function ReleaseCard({ release }) {
   return (
     <a className="blog-release-card" href={researchHref(release)}>
       <figure className="blog-release-media">
