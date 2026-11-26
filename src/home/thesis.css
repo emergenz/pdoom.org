@@ -1,0 +1,56 @@
+.thesis {
+  width: min(100%, calc(var(--page-width) + (2 * var(--gutter))));
+  margin-inline: auto;
+  padding: 96px var(--gutter) 72px;
+  color: var(--ink);
+  background: var(--white);
+  box-shadow: 0 0 0 100vmax var(--white);
+  clip-path: inset(0 -100vmax);
+}
+
+/* Text left, the chart that poses the question right. */
+.thesis {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  align-items: start;
+  column-gap: clamp(32px, 5vw, 96px);
+}
+
+/* Read like a claim and its evidence, not an advert: one-tone heading at
+   section size, the numbers inside the prose, and a captioned figure. */
+.thesis-copy > h2 {
+  max-width: 16ch;
+  font-size: clamp(30px, 3vw, 44px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.12;
+}
+
+.thesis-copy > p {
+  max-width: 520px;
+  margin-top: 24px;
+  color: rgba(11, 16, 21, 0.74);
+  font-size: clamp(17px, 1.25vw, 18px);
+  line-height: 1.6;
+}
+
+.thesis-figure {
+  margin: 0;
+}
+
+@media (max-width: 1000px) {
+  .thesis {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 64px;
+  }
+
+  .thesis-figure {
+    max-width: 640px;
+  }
+}
+
+@media (max-width: 800px) {
+  .thesis {
+    padding-block: 72px 56px;
+  }
+}

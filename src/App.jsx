@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import * as NavigationMenu from '@radix-ui/react-navigation-menu'
 import AboutPage from './pages/AboutPage.jsx'
-import BlogIndexPage from './pages/BlogIndexPage.jsx'
+import BlogIndexPage, { ReleaseCard } from './pages/BlogIndexPage.jsx'
 import BlogPostPage from './pages/BlogPostPage.jsx'
 import CareersPage from './pages/CareersPage.jsx'
 import ImprintPage from './pages/ImprintPage.jsx'
 import MerchPage from './pages/MerchPage.jsx'
-import { legacyResearchRoutes } from './pages/blogData.js'
+import Thesis from './home/Thesis.jsx'
+import ResearchIndex from './home/ResearchIndex.jsx'
+import { legacyResearchRoutes, researchReleases } from './pages/blogData.js'
+import TitleEnd from './pages/TitleEnd.jsx'
 import { captureReferral, withReferral } from './referral.js'
 import {
   ArrowRight,
@@ -69,107 +72,9 @@ const navItems = [
   },
 ]
 
-const modalities = [
-  {
-    label: 'Meta-Learning from Humans',
-    description: 'Unlock data troves that existing training paradigms cannot reach. These trajectories capture people as they learn: acting, receiving feedback, adapting, and improving over time.',
-  },
-  {
-    label: 'Month-Long Horizons',
-    description: 'Learn, reason, and act across trajectories that last hours, days, and eventually lifetimes.',
-  },
-  {
-    label: 'Fixed-Size State',
-    description: 'Carry useful state indefinitely while keeping memory and computation bounded as experience accumulates.',
-  },
-  {
-    label: 'Learning from Experience',
-    description: 'Build systems that improve through experience: continual learning, product feedback loops, temporal-difference learning, and credit assignment across long horizons.',
-  },
-]
-
-const readyCards = [
-  {
-    title: 'Capture',
-    image: '/assets/human-work/capture.webp',
-    tags: ['Human work', 'Month-long horizons', 'Passive recordings'],
-    body: 'Capture months-long human computer work as aligned streams of video and human inputs.',
-    links: [
-      { label: 'Contribute recordings', href: '/careers/paid-data-collection/' },
-      { label: 'Dashboard', href: '/crowd_cast_dashboard.html' },
-      { label: 'AGI-CAST', href: '/research/agi-cast/' },
-    ],
-    cta: 'Read the project',
-    ctaHref: '/research/crowd-cast/',
-  },
-  {
-    title: 'Recover',
-    image: '/assets/human-work/recover.webp',
-    tags: ['Low-level actions', 'Goals', 'Thinking traces'],
-    body: 'Turn passive recordings of human work into useful training signal.',
-    links: [
-      { label: 'IDM', href: '/research/inverse-dynamics-model/' },
-      { label: 'Hugging Face', href: 'https://huggingface.co/p-doom' },
-    ],
-    cta: 'Explore the IDM',
-    ctaHref: '/research/inverse-dynamics-model/',
-  },
-  {
-    title: 'Train',
-    image: '/assets/human-work/train.webp',
-    tags: ['Extending task horizons', 'Fixed-size state', 'Billion-token trajectories'],
-    body: 'Train models on months-long human trajectories to extend their task horizons.',
-    links: [
-      { label: 'Research', href: '/research/' },
-      { label: 'omegalax', href: 'https://github.com/p-doom/omegalax' },
-    ],
-    cta: 'Explore the training codebase',
-    ctaHref: 'https://github.com/p-doom/omegalax',
-  },
-  {
-    title: 'Participate',
-    image: '/assets/human-work/participate.webp',
-    tags: ['Careers', 'Collaborate', 'Contribute data'],
-    body: 'Work with us on the broader set of bottlenecks that scaling compute alone cannot solve.',
-    links: [
-      { label: 'Careers', href: '/careers/' },
-      { label: 'Discord', href: 'https://discord.gg/G4JNuPX2VR' },
-    ],
-    cta: 'Get paid to contribute data',
-    ctaHref: '/careers/paid-data-collection/',
-  },
-]
-
-const announcements = [
-  {
-    title: 'Annotating Unlabeled Screencasts with an IDM',
-    subtitle: 'An inverse dynamics model trained to recover raw input events from screen recordings, released alongside 600 hours of action-labeled screencasts.',
-    image: '/assets/releases/idm.webp',
-    href: '/research/inverse-dynamics-model/',
-  },
-  {
-    title: 'Capturing Long-Horizon Human Work',
-    subtitle: 'The largest long-horizon screencast dataset in the world, with open-source infrastructure for action-annotated crowd-sourcing.',
-    image: '/assets/releases/crowd-cast.webp',
-    href: '/research/crowd-cast/',
-  },
-  {
-    title: 'AGI-CAST: 600 Hours of AGI Research',
-    subtitle: 'A continually growing, openly released dataset of long-horizon screen recordings of AGI research.',
-    image: '/assets/releases/agi-cast.webp',
-    href: '/research/agi-cast/',
-  },
-  {
-    title: 'Jasmine: A JAX World-Modeling Codebase',
-    subtitle: 'A production-ready JAX codebase and the largest open dataset of Minecraft Let\'s Plays for world modeling from unlabeled video.',
-    image: '/assets/releases/jasmine.webp',
-    href: '/research/jasmine/',
-  },
-]
-
 const footerGroups = [
   ['Research', [
-    { label: 'Research agenda', href: '/#console' },
+    { label: 'Research agenda', href: '/#research' },
     { label: 'All research', href: '/research/' },
   ]],
   ['Releases', [
@@ -290,13 +195,12 @@ function PdoomBrand({ className = '', defer = false, large = false, markOnly = f
   )
 }
 
-function ArrowLink({ children, className = '', href = '#', external = false }) {
-  return (
-    <a className={`arrow-link ${className}`} href={href} {...(external ? { target: '_blank', rel: 'noreferrer' } : {})}>
-      <ArrowRight size={16} strokeWidth={1.8} aria-hidden="true" />
-      <span>{children}</span>
-    </a>
-  )
+// Every page invites people to record their work, which also says at a glance
+// what we do.
+const announcement = {
+  label: 'Paid data collection',
+  href: '/careers/paid-data-collection/',
+  text: <>We pay $1,000/month to record your screen for AI research <ArrowRight size={15} strokeWidth={1.7} aria-hidden="true" /></>,
 }
 
 function AnnouncementBar() {
@@ -313,9 +217,9 @@ function AnnouncementBar() {
   if (!visible) return null
 
   return (
-    <aside className="site-announcement" aria-label="Paid data collection" data-nosnippet="">
-      <a href="/careers/paid-data-collection/">
-        <span>We pay <strong>$1,000/month</strong> to record your screen for AI research</span>
+    <aside className="site-announcement" aria-label={announcement.label} data-nosnippet="">
+      <a href={announcement.href}>
+        <span>{announcement.text}</span>
       </a>
       <button type="button" aria-label="Dismiss announcement" title="Dismiss announcement" onClick={dismiss}>
         <X size={17} strokeWidth={1.8} aria-hidden="true" />
@@ -644,7 +548,7 @@ function AmbientVideo({
   )
 }
 
-function Hero({ onVideoBuffered }) {
+function Hero() {
   return (
     <section className="hero" id="top" data-nav-theme="dark">
       <AmbientVideo
@@ -652,7 +556,6 @@ function Hero({ onVideoBuffered }) {
         eager
         mediaHeight={941}
         mediaWidth={1672}
-        onFullyBuffered={onVideoBuffered}
         videoClassName="hero-video"
         poster="/assets/hero-explorations/copper-growth-v3.webp"
         posterSizes="100vw"
@@ -673,36 +576,39 @@ function Hero({ onVideoBuffered }) {
   )
 }
 
-function MediaConsole() {
+// What we have shipped, with images and dates: the same four releases as the
+// live front page. The research index above says what we work on.
+const homeReleaseSlugs = ['inverse-dynamics-model', 'crowd-cast', 'agi-cast', 'jasmine']
+const homeReleases = homeReleaseSlugs.map((slug) => researchReleases.find((release) => release.slug === slug))
+
+function ReleasesSection() {
   return (
-    <section className="console-section" id="console" data-nav-theme="light">
-      <div className="console-grid">
-        <div className="console-left">
-          <h2>Unblocking the<br />exponential.</h2>
-        </div>
-        <ol className="research-agenda">
-          {modalities.map((item) => (
-            <li className="research-agenda-item" key={item.label}>
-              <div>
-                <h3>{item.label}</h3>
-                <p>{item.description}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
+    <section className="home-research" aria-labelledby="home-releases-title" data-nav-theme="light">
+      <div className="home-research-head">
+        <h2 id="home-releases-title">Releases</h2>
+        <a className="scaling-more" href="/research/">
+          <TitleEnd text="All releases">
+            <ArrowRight size={17} strokeWidth={1.7} aria-hidden="true" />
+          </TitleEnd>
+        </a>
+      </div>
+      <div className="blog-release-grid">
+        {homeReleases.map((release) => (
+          <ReleaseCard release={release} key={release.slug} />
+        ))}
       </div>
     </section>
   )
 }
 
-function FilmSection({ heroVideoBuffered }) {
+// The learning-from-human-work film, as a short strip on the content column:
+// a pause between what we work on and what we have shipped, not a second hero.
+function FilmStrip() {
   return (
-    <section className="film-section" aria-labelledby="film-title" data-nav-theme="dark">
-      <h2 id="film-title" className="sr-only">Learning from human work</h2>
-      <div className="film-frame">
+    <section className="film-strip" aria-label="Learning from human work" data-nav-theme="dark">
+      <div className="film-strip-frame">
         <AmbientVideo
-          className="film-media"
-          loadSignal={heroVideoBuffered}
+          className="film-strip-media"
           mediaHeight={720}
           mediaWidth={1280}
           poster="/assets/learning-from-human-work-film-poster.webp"
@@ -710,75 +616,7 @@ function FilmSection({ heroVideoBuffered }) {
             { src: '/media/learning-from-human-work-film.webm', type: 'video/webm' },
           ]}
         />
-        <div className="film-vignette" />
-      </div>
-    </section>
-  )
-}
-
-function ReadySection() {
-  return (
-    <section className="ready-section" id="ready" data-nav-theme="dark">
-      <div className="ready-layout">
-        <div className="ready-intro">
-          <h2>Learning from Human Work.</h2>
-          <p>We are building a new data and training regime from real, long-horizon human computer work.</p>
-        </div>
-        <div className="ready-stack">
-          {readyCards.map((card, index) => (
-            <article className="ready-stage" key={card.title} style={{ zIndex: index + 1 }}>
-              <div className="ready-plate">
-                <img src={card.image} alt="" decoding="async" height="1402" loading="lazy" width="1122" />
-                <div className="ready-card">
-                  <h3>{card.title}</h3>
-                  <div className="ready-card-body">
-                    <ul>{card.tags.map((tag) => <li key={tag}>{tag}</li>)}</ul>
-                    <p>{card.body}</p>
-                  </div>
-                  <div className="ready-card-actions">
-                    <div className="ready-links">
-                      {card.links.map((link) => <a href={link.href} key={link.label}>{link.label}</a>)}
-                    </div>
-                    <a className="button button--primary" href={card.ctaHref}>{card.cta}<ArrowRight size={16} /></a>
-                  </div>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-function NewsCard({ item }) {
-  const external = /^https?:\/\//.test(item.href)
-
-  return (
-    <a
-      className="news-card"
-      href={item.href}
-      {...(external ? { target: '_blank', rel: 'noreferrer' } : {})}
-    >
-      <span className="news-media"><img src={item.image} alt="" decoding="async" height="960" loading="lazy" width="960" /></span>
-      <span className="news-content">
-        <strong>{item.title}</strong>
-        {item.subtitle && <span>{item.subtitle}</span>}
-        <span className="read-more">Read release <ArrowRight size={16} /></span>
-      </span>
-    </a>
-  )
-}
-
-function NewsSection() {
-  return (
-    <section className="news-section" id="news" data-nav-theme="light">
-      <div className="section-heading-row">
-        <h2>Research and releases</h2>
-        <ArrowLink href="/research/">Explore all research</ArrowLink>
-      </div>
-      <div className="news-grid">
-        {announcements.map((item) => <NewsCard item={item} key={item.title} />)}
+        <div className="film-strip-vignette" />
       </div>
     </section>
   )
@@ -788,10 +626,10 @@ function ClosingCta() {
   return (
     <section className="closing-cta" data-nav-theme="light">
       <PdoomBrand className="closing-mark" defer markOnly />
-      <h2>Work with us.</h2>
+      <h2>Training frontier models?</h2>
       <div>
-        <a className="button button--primary" href="/careers/">Careers <ArrowRight size={17} /></a>
-        <a className="button button--outline" href="/research/">Read research</a>
+        <a className="button button--primary" href="mailto:franz@pdoom.org">Talk to us <ArrowRight size={17} /></a>
+        <a className="button button--outline" href="/careers/">Careers <ArrowRight size={17} /></a>
       </div>
     </section>
   )
@@ -874,7 +712,6 @@ function ensureReferralCaptured() {
 
 function App() {
   ensureReferralCaptured()
-  const [heroVideoBuffered, setHeroVideoBuffered] = useState(false)
   const path = window.location.pathname.replace(/\/+$/, '') || '/'
   const legacyPath = path.slice(1)
   const researchPostMatch = path.match(/^\/(?:research|blog)\/([^/]+)$/)
@@ -930,13 +767,11 @@ function App() {
       <AnnouncementBar />
       <Header />
       <main id="main">
-        <div className="dark-page">
-          <Hero onVideoBuffered={() => setHeroVideoBuffered(true)} />
-          <MediaConsole />
-          <FilmSection heroVideoBuffered={heroVideoBuffered} />
-          <ReadySection />
-        </div>
-        <NewsSection />
+        <Hero />
+        <Thesis />
+        <ResearchIndex />
+        <FilmStrip />
+        <ReleasesSection />
         <ClosingCta />
         <Footer />
       </main>

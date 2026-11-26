@@ -1,0 +1,251 @@
+/* The agenda as the route in its heading. Four colour cards run from warm to
+   cool, rust and copper (the hero's material) to olive and steel: from human
+   experience to model capability, each with a painted abstract form. */
+.home-research.research-index {
+  padding: 0 var(--gutter) 96px;
+}
+
+.research-index-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+.research-index-head .scaling-more {
+  margin-top: 0;
+}
+
+.research-index-head h2 {
+  max-width: 22ch;
+  font-size: clamp(30px, 3vw, 44px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.12;
+}
+
+/* The route: a line that warms to cools, ending in an arrow. */
+.research-route {
+  position: relative;
+  height: 2px;
+  margin-bottom: 18px;
+}
+
+.research-route::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 6px;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #9e3b22, #a9652c 34%, #6e6a48 66%, #435b6b);
+}
+
+.research-route::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -4px;
+  border-left: 9px solid #435b6b;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+}
+
+.research-index-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.research-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 4px;
+  padding: 24px 24px 24px;
+  color: var(--pure-white);
+}
+
+.research-card > :not(.research-card-figure) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Broad pools of light and shadow give each card one painted form; the
+   generated texture on top adds the surface. */
+.research-card--data {
+  background:
+    radial-gradient(70% 45% at 78% 22%, rgba(255, 214, 186, 0.38), transparent 70%),
+    radial-gradient(90% 60% at 10% 70%, rgba(60, 10, 0, 0.32), transparent 70%),
+    #9e3b22;
+}
+
+.research-card--infrastructure {
+  background:
+    radial-gradient(65% 36% at 30% 14%, rgba(255, 232, 196, 0.42), transparent 70%),
+    radial-gradient(80% 55% at 90% 75%, rgba(80, 36, 0, 0.3), transparent 70%),
+    #a9652c;
+}
+
+.research-card--architecture {
+  background:
+    radial-gradient(70% 45% at 70% 35%, rgba(240, 236, 210, 0.36), transparent 70%),
+    radial-gradient(85% 55% at 15% 80%, rgba(30, 30, 10, 0.3), transparent 70%),
+    #6e6a48;
+}
+
+.research-card--training {
+  background:
+    radial-gradient(70% 42% at 35% 20%, rgba(214, 230, 240, 0.34), transparent 70%),
+    radial-gradient(85% 60% at 85% 70%, rgba(5, 20, 32, 0.34), transparent 70%),
+    #435b6b;
+}
+
+/* The painted surface covers the whole card, behind the text. */
+.research-card-figure {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.research-card-figure svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* The painted form sits in the card colour: lights lift it, shadows sink it. */
+.research-art {
+  mix-blend-mode: soft-light;
+  opacity: 0.7;
+}
+
+/* Deepen the lower card so the white list always has contrast. */
+.research-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.18) 100%);
+  pointer-events: none;
+}
+
+.research-card h3 {
+  font-size: 24px;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.12);
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.research-card ul {
+  display: grid;
+  gap: 8px;
+  margin: 18px -24px 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Linked items are translucent bands running to the card edges, with an
+   arrow, and brighten on hover: raised. Ongoing work has the same band in a
+   dark tint, recessed, with "In progress" where links have their arrow. */
+.research-card li a,
+.research-card-open {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 8px 24px 9px;
+  font-size: 15px;
+  line-height: 1.38;
+}
+
+.research-card li a {
+  background: rgba(255, 255, 255, 0.14);
+  transition: background-color 100ms ease-out;
+}
+
+.research-card li a:hover,
+.research-card li a:focus-visible {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.research-card-open {
+  flex-wrap: wrap;
+  row-gap: 6px;
+  background: rgba(0, 0, 0, 0.14);
+}
+
+/* The label sits to the right when the text still has room beside it, and
+   drops below it in narrow cards. */
+.research-card-open > span {
+  flex: 1 1 12em;
+}
+
+.research-card-open em {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  padding: 1px 8px 2px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  font-size: 13px;
+  font-style: normal;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.research-card li a > span {
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 100ms ease-out;
+}
+
+.research-card li a svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  opacity: 0.5;
+  transition: transform 100ms ease-out, opacity 100ms ease-out;
+}
+
+.research-card li a:hover > span,
+.research-card li a:focus-visible > span {
+  text-decoration-color: currentColor;
+}
+
+.research-card li a:hover svg,
+.research-card li a:focus-visible svg {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+@media (max-width: 1180px) {
+  .research-index-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .research-card {
+    min-height: 0;
+  }
+
+}
+
+@media (max-width: 800px) {
+  .home-research.research-index {
+    padding-block: 0 72px;
+  }
+
+  .research-index-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .research-index-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
